@@ -137,7 +137,8 @@
             <div id="url-preview" class="hidden rounded-xl border border-black/10 bg-white p-4">
               <h4 class="text-[15px] font-semibold">Çekilen Veri — Gözden Geçir & Düzenle</h4>
               <p class="text-[12px] text-[#6e6e73] mt-1 mb-4">Alanları kaydetmeden önce düzenleyebilirsin.</p>
-              <img id="prev-img-preview" class="hidden w-full h-40 object-cover rounded-xl mb-4 border border-black/10" alt="Ürün görseli">
+              <img id="prev-img-preview" class="hidden w-full h-40 object-cover rounded-xl mb-2 border border-black/10" alt="Ürün görseli">
+              <div id="prev-img-strip" class="hidden flex gap-2 overflow-x-auto py-2 mb-3"></div>
               <div class="grid md:grid-cols-2 gap-2 text-[13px]">
                 <div class="md:col-span-2">
                   <label class="block text-[11px] text-[#6e6e73] mb-1">Ürün Adı *</label>
@@ -174,6 +175,10 @@
                 <div class="md:col-span-2">
                   <label class="block text-[11px] text-[#6e6e73] mb-1">Görsel URL</label>
                   <input id="prev-image" class="w-full h-10 rounded-xl border border-black/10 px-3 text-[12px] outline-none focus:border-black/30" placeholder="https://...">
+                </div>
+                <div id="prev-headings-section" class="md:col-span-2 hidden">
+                  <label class="block text-[11px] text-[#6e6e73] mb-1">Sayfada bulunan başlıklar</label>
+                  <div id="prev-headings" class="flex flex-wrap gap-2 mt-1"></div>
                 </div>
                 <div class="md:col-span-2">
                   <label class="block text-[11px] text-[#6e6e73] mb-1">Kaynak URL (PDF linki olarak kaydedilir)</label>
@@ -513,22 +518,36 @@
         const pageImages = [...doc.querySelectorAll("img")]
           .map((img) => {
             let src = img.getAttribute("src") || "";
-            if (!src) return null;
-            if (src.startsWith("//")) return "https:" + src;
-            if (src.startsWith("/")) return origin + src;
-            if (!src.startsWith("http")) return null;
+            if (!src || src.startsWith("data:")) return null;
+            if (src.startsWith("//")) src = "https:" + src;
+            else if (src.startsWith("/")) src = origin + src;
+            else if (!src.startsWith("http")) return null;
+            const w = parseInt(img.getAttribute("width") || "0", 10);
+            const h = parseInt(img.getAttribute("height") || "0", 10);
+            if ((w > 0 && w < 50) || (h > 0 && h < 50)) return null;
             return src;
           })
           .filter((src) => {
             if (!src) return false;
             const lower = src.toLowerCase();
-            return !lower.includes("logo") && !lower.includes("icon") &&
-              !lower.includes("sprite") && !lower.includes("placeholder") &&
-              (lower.endsWith(".jpg") || lower.endsWith(".jpeg") ||
+            if (lower.includes("logo") || lower.includes("icon") ||
+                lower.includes("sprite") || lower.includes("placeholder") ||
+                lower.endsWith(".svg") || lower.includes(".svg?")) return false;
+            return lower.endsWith(".jpg") || lower.endsWith(".jpeg") ||
                lower.endsWith(".png") || lower.endsWith(".webp") ||
-               lower.includes(".jpg?") || lower.includes(".png?") || lower.includes(".webp?") ||
-               lower.includes("wixstatic") || lower.includes("cloudinary") || lower.includes("imgix"));
-          });
+               lower.includes(".jpg?") || lower.includes(".jpeg?") ||
+               lower.includes(".png?") || lower.includes(".webp?") ||
+               lower.includes("wixstatic") || lower.includes("cloudinary") ||
+               lower.includes("imgix") || lower.includes("cdn");
+          })
+          .filter((v, i, a) => a.indexOf(v) === i)
+          .slice(0, 12);
+
+        const pageHeadings = [...doc.querySelectorAll("h2,h3,h4")]
+          .map(el => el.textContent.trim())
+          .filter(t => t.length > 1 && t.length < 40)
+          .filter((v, i, a) => a.indexOf(v) === i)
+          .slice(0, 10);
 
         document.getElementById("prev-name").value = title;
         document.getElementById("prev-desc").value = description;
@@ -542,11 +561,64 @@
         document.getElementById("prev-category").value = "Akustik";
 
         const imgPreview = document.getElementById("prev-img-preview");
+        const imgStrip = document.getElementById("prev-img-strip");
+        const imageUrlInput = document.getElementById("prev-image");
+
         if (pageImages[0]) {
           imgPreview.src = pageImages[0];
           imgPreview.classList.remove("hidden");
         } else {
           imgPreview.classList.add("hidden");
+        }
+
+        imgStrip.innerHTML = "";
+        if (pageImages.length > 1) {
+          imgStrip.classList.remove("hidden");
+          pageImages.forEach((src) => {
+            const thumb = document.createElement("img");
+            thumb.src = src;
+            thumb.className = "w-20 h-20 object-cover rounded-lg cursor-pointer border-2 flex-shrink-0 " +
+              (src === pageImages[0] ? "border-black" : "border-transparent hover:border-black");
+            thumb.title = src;
+            thumb.addEventListener("click", () => {
+              imgStrip.querySelectorAll("img").forEach(t => {
+                t.className = "w-20 h-20 object-cover rounded-lg cursor-pointer border-2 flex-shrink-0 border-transparent hover:border-black";
+              });
+              thumb.className = "w-20 h-20 object-cover rounded-lg cursor-pointer border-2 flex-shrink-0 border-black";
+              imageUrlInput.value = src;
+              imgPreview.src = src;
+              imgPreview.classList.remove("hidden");
+            });
+            thumb.onerror = () => thumb.style.display = "none";
+            imgStrip.appendChild(thumb);
+          });
+        } else {
+          imgStrip.classList.add("hidden");
+        }
+
+        const headingsSection = document.getElementById("prev-headings-section");
+        const headingsContainer = document.getElementById("prev-headings");
+        headingsContainer.innerHTML = "";
+        if (pageHeadings.length > 0) {
+          headingsSection.classList.remove("hidden");
+          const nameInput = document.getElementById("prev-name");
+          const descInput = document.getElementById("prev-desc");
+          pageHeadings.forEach((text) => {
+            const chip = document.createElement("span");
+            chip.textContent = text;
+            chip.className = "px-3 py-1 rounded-full border border-black/15 text-sm cursor-pointer hover:bg-black hover:text-white transition-colors";
+            chip.addEventListener("click", () => {
+              if (!nameInput.value || nameInput.value === title) {
+                nameInput.value = text;
+              } else {
+                const cur = descInput.value;
+                descInput.value = cur ? cur + "\n" + text : text;
+              }
+            });
+            headingsContainer.appendChild(chip);
+          });
+        } else {
+          headingsSection.classList.add("hidden");
         }
 
         previewEl.classList.remove("hidden");
