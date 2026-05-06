@@ -515,9 +515,18 @@
         if (/ISO\s*\d+/i.test(bodyText)) certMatches.push(bodyText.match(/ISO\s*\d+/i)[0]);
 
         const origin = parsedUrl.origin;
-        const pageImages = [...doc.querySelectorAll("img")]
+        const pageImages = [...doc.querySelectorAll("img, [data-src], [data-lazy-src]")]
           .map((img) => {
-            let src = img.getAttribute("src") || "";
+            // Check multiple src attributes (Wix/lazy-load sites use data-src)
+            let src = img.getAttribute("data-src") ||
+                      img.getAttribute("data-lazy-src") ||
+                      img.getAttribute("data-original") ||
+                      img.getAttribute("src") || "";
+            // Also check srcset, take first URL
+            if (!src || src.startsWith("data:")) {
+              const ss = img.getAttribute("srcset") || "";
+              if (ss) src = ss.split(",")[0].trim().split(/\s+/)[0];
+            }
             if (!src || src.startsWith("data:")) return null;
             if (src.startsWith("//")) src = "https:" + src;
             else if (src.startsWith("/")) src = origin + src;
