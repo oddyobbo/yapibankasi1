@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Antigravity | Admin Paneli</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body data-page="admin" class="bg-[#fafafa] text-[#111] font-sans min-h-screen">
+  <div class="min-h-screen">
+    <header class="h-[72px] border-b border-black/10 px-6 lg:px-10 flex items-center justify-between bg-white sticky top-0 z-30">
+      <div class="flex items-center gap-3">
+        <a href="/mvp-taslak-v1.html" class="text-[20px] font-semibold tracking-tight">Antigravity</a>
+        <span class="text-[11px] uppercase tracking-[0.2em] text-[#6e6e73] font-semibold">Admin</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <a href="/mvp-taslak-v1.html" class="text-[13px] hover:underline">Site</a>
+        <button id="logout" class="px-3 py-2 rounded-xl text-[13px] hover:bg-black/5">Çıkış</button>
+      </div>
+    </header>
+
+    <main class="px-6 lg:px-10 py-10 max-w-[1400px] mx-auto">
+      <p class="text-[12px] uppercase tracking-[0.18em] text-[#6e6e73] font-semibold">Genel Bakış</p>
+      <h1 class="text-[34px] font-semibold tracking-tight mt-1">Yönetim Paneli</h1>
+
+      <section class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
+        <div class="rounded-2xl border border-black/10 bg-white p-5">
+          <p class="text-[12px] text-[#6e6e73]">Kayıtlı Marka</p>
+          <p id="stat-brands" class="text-[30px] font-semibold mt-1">0</p>
+        </div>
+        <div class="rounded-2xl border border-black/10 bg-white p-5">
+          <p class="text-[12px] text-[#6e6e73]">Yayındaki Ürün</p>
+          <p id="stat-products" class="text-[30px] font-semibold mt-1">0</p>
+        </div>
+        <div class="rounded-2xl border border-black/10 bg-white p-5">
+          <p class="text-[12px] text-[#6e6e73]">Toplam Ziyaret</p>
+          <p id="stat-visits" class="text-[30px] font-semibold mt-1">0</p>
+        </div>
+        <div class="rounded-2xl border border-black/10 bg-white p-5">
+          <p class="text-[12px] text-[#6e6e73]">Tekil Ziyaretçi</p>
+          <p id="stat-uniq" class="text-[30px] font-semibold mt-1">0</p>
+        </div>
+      </section>
+
+      <section class="mt-10">
+        <div class="flex items-end justify-between gap-3">
+          <div>
+            <p class="text-[12px] uppercase tracking-[0.18em] text-[#6e6e73] font-semibold">Markalar</p>
+            <h2 class="text-[22px] font-semibold tracking-tight">Kayıtlı Markalar</h2>
+          </div>
+          <p id="brands-count" class="text-[12px] text-[#6e6e73]"></p>
+        </div>
+        <div class="mt-4 rounded-2xl border border-black/10 bg-white overflow-hidden">
+          <table class="w-full text-[14px]">
+            <thead class="bg-black/[0.03] text-[#6e6e73]">
+              <tr>
+                <th class="text-left font-medium px-5 py-3">Marka</th>
+                <th class="text-left font-medium px-5 py-3">E-posta</th>
+                <th class="text-left font-medium px-5 py-3">Ürün</th>
+                <th class="text-left font-medium px-5 py-3">Kayıt</th>
+              </tr>
+            </thead>
+            <tbody id="brands-tbody" class="divide-y divide-black/5"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="mt-10">
+        <div class="flex items-end justify-between gap-3">
+          <div>
+            <p class="text-[12px] uppercase tracking-[0.18em] text-[#6e6e73] font-semibold">Trafik</p>
+            <h2 class="text-[22px] font-semibold tracking-tight">Son Ziyaretler</h2>
+          </div>
+          <p class="text-[12px] text-[#6e6e73]">Şehir bilgisi IP üzerinden çözülür.</p>
+        </div>
+        <div class="mt-4 rounded-2xl border border-black/10 bg-white overflow-hidden">
+          <table class="w-full text-[14px]">
+            <thead class="bg-black/[0.03] text-[#6e6e73]">
+              <tr>
+                <th class="text-left font-medium px-5 py-3">Zaman</th>
+                <th class="text-left font-medium px-5 py-3">Sayfa</th>
+                <th class="text-left font-medium px-5 py-3">Şehir</th>
+                <th class="text-left font-medium px-5 py-3">Ülke</th>
+                <th class="text-left font-medium px-5 py-3">Yönlendiren</th>
+                <th class="text-left font-medium px-5 py-3">Ziyaretçi</th>
+              </tr>
+            </thead>
+            <tbody id="visits-tbody" class="divide-y divide-black/5"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="/core.js"></script>
+  <script>
+    (async () => {
+      await AG.ready;
+      const adminOk = await AG.isAdmin();
+      if (!adminOk) { location.href = "/admin-giris.html"; return; }
+
+      document.getElementById("logout").addEventListener("click", async () => {
+        await AG.logoutAdmin();
+        location.href = "/admin-giris.html";
+      });
+
+      const [brands, products, visits] = await Promise.all([
+        AG.getAllBrands(),
+        AG.getAllProducts(),
+        AG.getVisits(),
+      ]);
+
+      const productsByBrand = (id) => products.filter((p) => p.brandId === id).length;
+
+      document.getElementById("stat-brands").textContent   = brands.length;
+      document.getElementById("stat-products").textContent = products.filter((p) => p.status === "published").length;
+      document.getElementById("stat-visits").textContent   = visits.length;
+      document.getElementById("stat-uniq").textContent     = new Set(visits.map((v) => v.visitor_id)).size;
+
+      document.getElementById("brands-count").textContent = `${brands.length} marka`;
+      const brandsTbody = document.getElementById("brands-tbody");
+      brandsTbody.innerHTML = brands.length
+        ? brands.map((b) => `
+            <tr>
+              <td class="px-5 py-3 font-medium">${b.name || "—"}</td>
+              <td class="px-5 py-3 text-[#3a3a3c]">${b.email || "—"}</td>
+              <td class="px-5 py-3">${productsByBrand(b.id)}</td>
+              <td class="px-5 py-3 text-[#6e6e73]">${new Date(b.created_at).toLocaleString("tr-TR")}</td>
+            </tr>`).join("")
+        : `<tr><td colspan="4" class="px-5 py-6 text-[#6e6e73] text-center">Henüz kayıtlı marka yok.</td></tr>`;
+
+      const visitsTbody = document.getElementById("visits-tbody");
+      visitsTbody.innerHTML = visits.length
+        ? visits.slice(0, 100).map((v) => `
+            <tr>
+              <td class="px-5 py-3 text-[#6e6e73]">${v.ts ? new Date(v.ts).toLocaleString("tr-TR") : new Date(v.created_at).toLocaleString("tr-TR")}</td>
+              <td class="px-5 py-3 font-medium">${v.page || "—"}</td>
+              <td class="px-5 py-3">${v.city || "—"}</td>
+              <td class="px-5 py-3">${v.country || "—"}</td>
+              <td class="px-5 py-3 text-[#6e6e73] truncate max-w-[260px]">${v.referrer || "—"}</td>
+              <td class="px-5 py-3 text-[#6e6e73] font-mono text-[12px]">${(v.visitor_id || "").slice(0, 14)}…</td>
+            </tr>`).join("")
+        : `<tr><td colspan="6" class="px-5 py-6 text-[#6e6e73] text-center">Henüz ziyaret yok.</td></tr>`;
+    })();
+  </script>
+</body>
+</html>

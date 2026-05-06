@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Antigravity | İletişim</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body data-page="contact" class="bg-white text-[#0b0b0c] min-h-screen">
+  <div id="site-header"></div>
+
+  <main>
+    <!-- HERO -->
+    <section class="ag-grain text-white">
+      <div class="max-w-[1320px] mx-auto px-6 lg:px-10 pt-24 pb-24 lg:pt-32 lg:pb-28 reveal">
+        <p class="text-[12px] uppercase tracking-[0.2em] text-white/60 font-semibold">İletişim</p>
+        <h1 class="text-[44px] sm:text-[56px] lg:text-[80px] leading-[1.02] font-semibold tracking-tight mt-6 max-w-[18ch]">Konuşalım. 24 saat içinde dönüş.</h1>
+        <p class="text-[17px] lg:text-[19px] text-white/70 mt-7 leading-relaxed">Marka katılımı, ürün yükleme, iş birliği ya da teknik destek — sorunu en doğru ekibe yönlendiriyoruz.</p>
+      </div>
+    </section>
+
+    <!-- DIRECT + FORM -->
+    <section class="border-b border-black/[0.08]">
+      <div class="max-w-[1320px] mx-auto px-6 lg:px-10 py-24 grid lg:grid-cols-[0.9fr_1.1fr] gap-16">
+        <div>
+          <p class="text-[12px] uppercase tracking-[0.2em] text-[#6e6e73] font-semibold">Direkt İletişim</p>
+          <div class="mt-8 space-y-7 text-[18px]">
+            <div>
+              <p class="text-[#6e6e73] text-[13px]">Genel</p>
+              <a href="mailto:hello@antigravity.com" class="font-medium hover:underline">hello@antigravity.com</a>
+            </div>
+            <div>
+              <p class="text-[#6e6e73] text-[13px]">Marka iş birliği</p>
+              <a href="mailto:brands@antigravity.com" class="font-medium hover:underline">brands@antigravity.com</a>
+            </div>
+            <div>
+              <p class="text-[#6e6e73] text-[13px]">Mimar topluluğu</p>
+              <a href="mailto:community@antigravity.com" class="font-medium hover:underline">community@antigravity.com</a>
+            </div>
+            <div>
+              <p class="text-[#6e6e73] text-[13px]">Telefon</p>
+              <p class="font-medium">+90 212 000 00 00</p>
+            </div>
+            <div>
+              <p class="text-[#6e6e73] text-[13px]">Adres</p>
+              <p class="font-medium">İstanbul, Türkiye</p>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <p class="text-[12px] uppercase tracking-[0.2em] text-[#6e6e73] font-semibold">Hızlı Mesaj</p>
+          <form class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2">
+            <label class="md:col-span-2 block">
+              <span class="text-[12px] text-[#6e6e73]">Ad Soyad</span>
+              <input class="w-full h-12 border-b border-black/15 focus:border-black outline-none bg-transparent text-[15px]">
+            </label>
+            <label class="block">
+              <span class="text-[12px] text-[#6e6e73]">E-posta</span>
+              <input type="email" class="w-full h-12 border-b border-black/15 focus:border-black outline-none bg-transparent text-[15px]">
+            </label>
+            <label class="block">
+              <span class="text-[12px] text-[#6e6e73]">Şirket / Ofis</span>
+              <input class="w-full h-12 border-b border-black/15 focus:border-black outline-none bg-transparent text-[15px]">
+            </label>
+            <label class="md:col-span-2 block">
+              <span class="text-[12px] text-[#6e6e73]">Konu</span>
+              <input class="w-full h-12 border-b border-black/15 focus:border-black outline-none bg-transparent text-[15px]">
+            </label>
+            <label class="md:col-span-2 block">
+              <span class="text-[12px] text-[#6e6e73]">Mesajınız</span>
+              <textarea class="w-full h-32 border-b border-black/15 focus:border-black outline-none bg-transparent pt-3 resize-none text-[15px]"></textarea>
+            </label>
+            <button type="button" id="contact-submit" class="md:col-span-2 mt-6 inline-flex justify-center items-center h-12 rounded-full bg-black text-white text-[14px] font-semibold w-full">Gönder →</button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="ag-grain text-white">
+      <div class="max-w-[1320px] mx-auto px-6 lg:px-10 py-24 text-center">
+        <h2 class="text-[36px] lg:text-[56px] font-semibold tracking-tight leading-[1.04]">Acil değil ama önemli mi?<br>Direkt yazın, ekipten dönüş yapalım.</h2>
+        <a href="mailto:hello@antigravity.com" class="inline-flex items-center gap-2 mt-10 px-6 py-3 rounded-full bg-white text-[#0b0b0c] text-[14px] font-semibold">hello@antigravity.com →</a>
+      </div>
+    </section>
+  </main>
+
+  <div id="site-footer"></div>
+  <script src="/core.js"></script>
+  <script src="/layout.js"></script>
+  <script>
+    document.getElementById("contact-submit").addEventListener("click", function () {
+      const form = this.closest("form");
+      const name = form.querySelector('input[type!="email"]')?.value?.trim();
+      const email = form.querySelector('input[type="email"]')?.value?.trim();
+      if (!name || !email) {
+        this.textContent = "Ad ve e-posta alanları zorunlu.";
+        this.classList.replace("bg-black", "bg-red-600");
+        setTimeout(() => {
+          this.textContent = "Gönder →";
+          this.classList.replace("bg-red-600", "bg-black");
+        }, 2500);
+        return;
+      }
+      this.textContent = "Mesajınız alındı — en kısa sürede dönüş yapacağız.";
+      this.disabled = true;
+      this.classList.add("opacity-70");
+    });
+  </script>
+</body>
+</html>

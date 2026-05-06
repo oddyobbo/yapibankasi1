@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Antigravity | Marka Başvuru</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body data-page="apply" class="bg-white text-[#111] font-sans min-h-screen">
+  <div id="site-header"></div>
+  <main class="px-6 lg:px-10 py-12 lg:py-16 max-w-[1100px] mx-auto space-y-10">
+    <section>
+      <p class="text-[12px] uppercase tracking-[0.18em] text-[#6e6e73] font-semibold">Marka Başvurusu</p>
+      <h1 class="text-[38px] lg:text-[52px] leading-[1.06] font-semibold tracking-tight mt-3">Başvuru süreci, adım adım</h1>
+      <p class="text-[16px] text-[#4f4f55] mt-4">Süreç karışık değil: önce başvurunu tamamla, sonra onay ve hesap açılışıyla ürünlerini yönetmeye başla.</p>
+    </section>
+
+    <section class="rounded-2xl border border-black/10 p-6 lg:p-7 grid lg:grid-cols-2 gap-6 items-start">
+      <div>
+        <div class="flex items-center gap-3">
+          <span class="w-8 h-8 rounded-full bg-black text-white text-[13px] font-semibold flex items-center justify-center">1</span>
+          <h2 class="text-[24px] font-semibold tracking-tight">Ön başvuru formunu doldur</h2>
+        </div>
+        <p class="text-[14px] text-[#6e6e73] mt-3">Temel marka ve iletişim bilgilerini paylaş. Ortalama 2-3 dakika sürer.</p>
+      </div>
+      <form id="apply-form" class="grid md:grid-cols-2 gap-3">
+        <input name="brandName" class="w-full h-11 rounded-xl border border-black/10 px-4 md:col-span-2" placeholder="Marka adı *" required>
+        <input name="contactName" class="w-full h-11 rounded-xl border border-black/10 px-4" placeholder="Yetkili kişi *" required>
+        <input name="title" class="w-full h-11 rounded-xl border border-black/10 px-4" placeholder="Görev / Ünvan">
+        <input name="email" type="email" class="w-full h-11 rounded-xl border border-black/10 px-4" placeholder="Kurumsal e-posta *" required>
+        <input name="phone" class="w-full h-11 rounded-xl border border-black/10 px-4" placeholder="Telefon *" required>
+        <input name="website" class="w-full h-11 rounded-xl border border-black/10 px-4 md:col-span-2" placeholder="Web sitesi (örn. https://markaniz.com)">
+        <select name="category" class="w-full h-11 rounded-xl border border-black/10 px-4 bg-white md:col-span-2">
+          <option value="">Birincil ürün kategorisi seç *</option>
+          <option>Akustik</option>
+          <option>Aydınlatma</option>
+          <option>Dış Cephe</option>
+          <option>Zemin</option>
+          <option>Tavan Sistemleri</option>
+          <option>Mobilya</option>
+        </select>
+        <input name="password" type="password" class="w-full h-11 rounded-xl border border-black/10 px-4" placeholder="Şifre * (en az 6 karakter)" required minlength="6">
+        <input name="passwordConfirm" type="password" class="w-full h-11 rounded-xl border border-black/10 px-4" placeholder="Şifre tekrar *" required minlength="6">
+        <p id="apply-error" class="md:col-span-2 text-[13px] text-red-600 hidden"></p>
+        <button type="button" id="apply-submit" class="md:col-span-2 w-full h-11 rounded-xl bg-black text-white text-[14px] font-semibold">Hesap Oluştur ve Başvur</button>
+      </form>
+    </section>
+
+    <section class="rounded-2xl border border-black/10 bg-[#fbfbfd] p-6 lg:p-7 grid lg:grid-cols-2 gap-6 items-start">
+      <div class="flex items-center gap-3">
+        <span class="w-8 h-8 rounded-full bg-black text-white text-[13px] font-semibold flex items-center justify-center">2</span>
+        <h2 class="text-[24px] font-semibold tracking-tight">Değerlendirme ve hesap açılışı</h2>
+      </div>
+      <ol class="space-y-2 text-[14px]">
+        <li class="rounded-xl bg-white border border-black/10 p-3">Başvurun operasyon ekibi tarafından incelenir.</li>
+        <li class="rounded-xl bg-white border border-black/10 p-3">Uygunluk sonrası marka hesabın açılır.</li>
+        <li class="rounded-xl bg-white border border-black/10 p-3">Giriş bilgilerin e-posta ile paylaşılır.</li>
+      </ol>
+    </section>
+
+    <section class="rounded-2xl border border-black/10 p-6 lg:p-7">
+      <div class="flex items-center gap-3">
+        <span class="w-8 h-8 rounded-full bg-black text-white text-[13px] font-semibold flex items-center justify-center">3</span>
+        <h2 class="text-[24px] font-semibold tracking-tight">Ürün ve teknik veri yükleme</h2>
+      </div>
+      <p class="text-[14px] text-[#6e6e73] mt-3">Onaylanan markalar panelde üç farklı yöntemle veri yükler:</p>
+      <div class="mt-4 grid md:grid-cols-3 gap-3 text-[14px]">
+        <div class="rounded-xl bg-[#fbfbfd] border border-black/10 p-4">
+          <p class="font-semibold">Manuel giriş</p>
+          <p class="text-[#6e6e73] mt-1">Hızlı başlangıç için tek tek ürün ekleme.</p>
+        </div>
+        <div class="rounded-xl bg-[#fbfbfd] border border-black/10 p-4">
+          <p class="font-semibold">CSV toplu yükleme</p>
+          <p class="text-[#6e6e73] mt-1">SKU ve teknik alanlarla toplu ürün aktarımı.</p>
+        </div>
+        <div class="rounded-xl bg-[#fbfbfd] border border-black/10 p-4">
+          <p class="font-semibold">API senkronu</p>
+          <p class="text-[#6e6e73] mt-1">PIM/ERP tarafıyla düzenli veri akışı.</p>
+        </div>
+      </div>
+      <div class="mt-4 rounded-xl border border-black/10 p-4 text-[14px]">
+        <p class="font-semibold">Desteklenen formatlar</p>
+        <p class="text-[#6e6e73] mt-1">PDF teknik föy, DWG/DXF çizim, BIM/Revit bağlantıları, görseller (JPG/PNG/WebP), CSV veri setleri.</p>
+      </div>
+      <div class="mt-5 flex flex-wrap gap-2">
+        <a href="/marka-giris.html" class="inline-block px-5 py-2.5 rounded-full bg-black text-white text-[14px] font-semibold">Marka Hesabı Oluştur / Giriş</a>
+        <a href="/marka-paneli.html" class="inline-block px-5 py-2.5 rounded-full border border-black/15 bg-white text-[14px] font-semibold">Marka Paneline Git</a>
+      </div>
+    </section>
+  </main>
+  <div id="site-footer"></div>
+  <script src="/core.js"></script>
+  <script src="/layout.js"></script>
+  <script>lucide.createIcons();</script>
+  <script>
+    document.getElementById("apply-submit").addEventListener("click", async function () {
+      const form = document.getElementById("apply-form");
+      const fd = new FormData(form);
+      const brandName = fd.get("brandName")?.trim();
+      const email = fd.get("email")?.trim();
+      const password = fd.get("password");
+      const passwordConfirm = fd.get("passwordConfirm");
+      const website = fd.get("website")?.trim();
+      const errEl = document.getElementById("apply-error");
+
+      errEl.classList.add("hidden");
+
+      if (!brandName || !email || !password) {
+        errEl.textContent = "Lütfen zorunlu alanları doldurun (*).";
+        errEl.classList.remove("hidden");
+        return;
+      }
+      if (password !== passwordConfirm) {
+        errEl.textContent = "Şifreler eşleşmiyor.";
+        errEl.classList.remove("hidden");
+        return;
+      }
+
+      this.disabled = true;
+      this.textContent = "Hesap oluşturuluyor…";
+
+      const result = await AG.registerBrand({ name: brandName, email, password, website });
+      if (!result.ok) {
+        errEl.textContent = result.message || "Bir hata oluştu. Lütfen tekrar deneyin.";
+        errEl.classList.remove("hidden");
+        this.disabled = false;
+        this.textContent = "Hesap Oluştur ve Başvur";
+        return;
+      }
+      window.location.href = "/marka-paneli.html";
+
+    });
+  </script>
+</body>
+</html>

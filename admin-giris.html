@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Antigravity | Admin Giriş</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body data-page="admin-login" class="bg-white text-[#111] font-sans min-h-screen flex items-center justify-center">
+  <div class="w-[420px] max-w-full p-10">
+    <p class="text-[12px] uppercase tracking-[0.18em] text-[#6e6e73] font-semibold">Admin</p>
+    <h1 class="text-[34px] font-semibold tracking-tight mt-2">Yönetim Girişi</h1>
+    <p class="text-[14px] text-[#6e6e73] mt-2">Bu sayfa sadece Antigravity yöneticileri içindir.</p>
+    <form id="admin-form" class="mt-8 space-y-4">
+      <input id="email" type="email" required placeholder="Admin e-posta" class="w-full h-12 border-b border-black/15 focus:border-black outline-none bg-transparent">
+      <input id="password" type="password" required placeholder="Şifre" class="w-full h-12 border-b border-black/15 focus:border-black outline-none bg-transparent">
+      <p id="msg" class="text-[13px] text-red-600 hidden"></p>
+      <button class="w-full h-12 rounded-full bg-black text-white text-[14px] font-semibold mt-3">Giriş yap</button>
+    </form>
+    <p class="text-[12px] text-[#6e6e73] mt-8">Demo erişim: admin@antigravity.com / admin1234</p>
+  </div>
+  <script src="/core.js"></script>
+  <script>
+    document.getElementById("admin-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email    = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+      const btn = e.currentTarget.querySelector("button");
+      const msg = document.getElementById("msg");
+      btn.disabled = true;
+      btn.textContent = "Giriş yapılıyor…";
+      const result = await AG.loginAdmin({ email, password });
+      if (result.ok) {
+        location.href = "/admin-paneli.html";
+      } else {
+        btn.disabled = false;
+        btn.textContent = "Giriş yap";
+        msg.textContent = result.message;
+        msg.classList.remove("hidden");
+      }
+    });
+  </script>
+</body>
+</html>

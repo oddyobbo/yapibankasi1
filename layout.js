@@ -1,0 +1,151 @@
+(() => {
+  if (!document.querySelector('link[data-ag-css="site"]')) {
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = "/site.css";
+    link.setAttribute("data-ag-css", "site");
+    document.head.appendChild(link);
+  }
+
+  const current = document.body.dataset.page || "";
+
+  const navItems = [
+    { id: "home", href: "/mvp-taslak-v1.html", label: "Anasayfa" },
+    { id: "products", href: "/urunler.html", label: "Ürünler" },
+    { id: "brands", href: "/markalar.html", label: "Markalar" },
+    { id: "projects", href: "/projeler.html", label: "Projeler" },
+    { id: "how", href: "/nasil-calisir.html", label: "Nasıl Çalışır" },
+    { id: "apply", href: "/marka-basvuru.html", label: "Marka Başvuru" },
+  ];
+
+  const headerTarget = document.getElementById("site-header");
+  if (headerTarget) {
+    const nav = navItems
+      .map((item) => {
+        const isActive = item.id === current;
+        return `<a href="${item.href}" class="px-3 py-2 rounded-full text-[13.5px] ${
+          isActive ? "text-black" : "text-[#1f1f22] hover:text-black"
+        }">${item.label}</a>`;
+      })
+      .join("");
+
+    const mobileNav = navItems
+      .map((item) => {
+        const isActive = item.id === current;
+        return `<a href="${item.href}" class="block px-1 py-3 text-[15px] border-b border-black/[0.06] ${
+          isActive ? "text-black font-semibold" : "text-[#1f1f22]"
+        }">${item.label}</a>`;
+      })
+      .join("");
+
+    headerTarget.innerHTML = `
+      <header class="border-b border-black/[0.06] sticky top-0 bg-white/85 backdrop-blur-xl z-30">
+        <div class="h-[72px] px-4 sm:px-6 lg:px-10 flex items-center justify-between">
+          <a href="/mvp-taslak-v1.html" class="text-[22px] font-semibold tracking-tight">Antigravity</a>
+          <nav class="hidden lg:flex items-center gap-1">${nav}</nav>
+          <div class="hidden lg:flex items-center gap-2">
+            <a href="/marka-giris.html" class="inline-flex items-center px-3 py-2 rounded-full text-[13px] hover:bg-black/[0.05]">Giriş</a>
+            <a href="/marka-basvuru.html" class="px-4 py-2 rounded-full bg-black text-white text-[13px] font-semibold hover:bg-black/85 transition">Başla</a>
+          </div>
+          <button id="mobile-menu-btn" class="lg:hidden inline-flex items-center justify-center w-10 h-10 rounded-full border border-black/[0.08] text-[18px]" aria-label="Menü">☰</button>
+        </div>
+        <div id="mobile-menu" class="lg:hidden hidden px-4 sm:px-6 pb-4">
+          <div class="rounded-2xl border border-black/[0.08] bg-white px-4">
+            ${mobileNav}
+            <div class="py-4 flex gap-2">
+              <a href="/marka-giris.html" class="flex-1 h-10 inline-flex items-center justify-center rounded-full border border-black/[0.10] text-[13px]">Giriş</a>
+              <a href="/marka-basvuru.html" class="flex-1 h-10 inline-flex items-center justify-center rounded-full bg-black text-white text-[13px] font-semibold">Başla</a>
+            </div>
+          </div>
+        </div>
+      </header>
+    `;
+
+    const menuBtn = document.getElementById("mobile-menu-btn");
+    const mobileMenu = document.getElementById("mobile-menu");
+    if (menuBtn && mobileMenu) {
+      menuBtn.addEventListener("click", () => {
+        mobileMenu.classList.toggle("hidden");
+      });
+    }
+  }
+
+  const footerTarget = document.getElementById("site-footer");
+  if (footerTarget) {
+    footerTarget.innerHTML = `
+      <footer class="border-t border-black/[0.06] bg-white w-full">
+        <div class="w-full px-6 lg:px-10 pt-16 pb-10 grid md:grid-cols-5 gap-10 text-[14px]">
+          <div class="md:col-span-2">
+            <p class="text-[24px] font-semibold tracking-tight">Antigravity</p>
+            <p class="text-[#6e6e73] mt-3 max-w-[42ch] leading-relaxed">Mimarların doğru ürünü bulduğu, markaların gerçek talebe ulaştığı Türkiye odaklı mimari malzeme platformu.</p>
+            <div class="mt-5 flex gap-2">
+              <a href="/marka-basvuru.html" class="px-4 py-2 rounded-full bg-black text-white text-[13px] font-semibold">Marka Başvur</a>
+              <a href="/urunler.html" class="px-4 py-2 rounded-full border border-black/15 text-[13px] font-semibold">Ürünleri Keşfet</a>
+            </div>
+          </div>
+          <div>
+            <p class="font-semibold">Platform</p>
+            <div class="mt-3 space-y-2 text-[#6e6e73]">
+              <a href="/urunler.html" class="block hover:text-black">Ürünler</a>
+              <a href="/markalar.html" class="block hover:text-black">Markalar</a>
+              <a href="/projeler.html" class="block hover:text-black">Projeler</a>
+              <a href="/nasil-calisir.html" class="block hover:text-black">Nasıl Çalışır</a>
+            </div>
+          </div>
+          <div>
+            <p class="font-semibold">Şirket</p>
+            <div class="mt-3 space-y-2 text-[#6e6e73]">
+              <a href="/hakkimizda.html" class="block hover:text-black">Hakkımızda</a>
+              <a href="/iletisim-v2.html" class="block hover:text-black">İletişim</a>
+              <a href="/faq.html" class="block hover:text-black">SSS</a>
+            </div>
+          </div>
+          <div>
+            <p class="font-semibold">İletişim</p>
+            <div class="mt-3 space-y-2 text-[#6e6e73]">
+              <p>hello@antigravity.com</p>
+              <p>+90 212 000 00 00</p>
+              <a href="/iletisim-v2.html" class="block hover:text-black">Form</a>
+            </div>
+          </div>
+        </div>
+        <div class="w-full px-6 lg:px-10 py-6 border-t border-black/[0.06] flex flex-wrap items-center justify-between gap-3 text-[12px] text-[#6e6e73]">
+          <p>© 2026 Antigravity. Tüm hakları saklıdır.</p>
+          <p>İstanbul, Türkiye</p>
+        </div>
+      </footer>
+    `;
+  }
+
+  // Floating ask pill (site-wide), hide on admin/login pages
+  const noPillPages = new Set(["admin-login", "admin", "brand-login", "brand-panel"]);
+  if (!noPillPages.has(current)) {
+    const pill = document.createElement("a");
+    pill.href = "/urunler.html";
+    pill.setAttribute("aria-label", "Ürün ara");
+    pill.className =
+      "fixed bottom-5 right-5 z-40 flex items-center gap-2 rounded-full bg-black text-white px-4 py-2.5 shadow-[0_10px_30px_rgba(0,0,0,0.18)] hover:scale-[1.02] transition";
+    pill.innerHTML = `
+      <span class="w-6 h-6 rounded-full bg-white text-black text-[12px] font-bold flex items-center justify-center">↑</span>
+      <span class="text-[13px] font-semibold">Ürün ara</span>
+    `;
+    document.body.appendChild(pill);
+  }
+
+  // Site-wide reveal animation (no-op on home which already wires it)
+  const revealEls = document.querySelectorAll(".reveal");
+  if (revealEls.length && "IntersectionObserver" in window) {
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            e.target.classList.add("is-visible");
+            io.unobserve(e.target);
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+    revealEls.forEach((el) => io.observe(el));
+  }
+})();

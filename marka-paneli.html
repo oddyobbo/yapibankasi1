@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Antigravity | Marka Paneli</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body data-page="brand-panel" class="bg-[#f5f5f7] text-[#111] font-sans min-h-screen">
+  <div class="w-full min-h-screen bg-white">
+    <div id="site-header"></div>
+    <main class="p-6 lg:p-8 space-y-6">
+      <section class="grid md:grid-cols-2 xl:grid-cols-4 gap-4">
+        <article class="rounded-2xl border border-black/10 p-5"><p class="text-[12px] text-[#6e6e73]">Yüklü Ürün</p><p id="count-products" class="text-[30px] font-semibold mt-1">0</p></article>
+        <article class="rounded-2xl border border-black/10 p-5"><p class="text-[12px] text-[#6e6e73]">Teknik Dosya</p><p id="count-files" class="text-[30px] font-semibold mt-1">0</p></article>
+        <article class="rounded-2xl border border-black/10 p-5"><p class="text-[12px] text-[#6e6e73]">Taslak Ürün</p><p id="count-drafts" class="text-[30px] font-semibold mt-1">0</p></article>
+        <article class="rounded-2xl border border-black/10 p-5"><p class="text-[12px] text-[#6e6e73]">Toplam Görüntülenme</p><p id="count-views" class="text-[30px] font-semibold mt-1">0</p></article>
+      </section>
+
+      <section class="rounded-2xl border border-black/10 bg-[#fbfbfd] p-5">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 class="text-[22px] font-semibold tracking-tight">Ürün Yükleme Merkezi</h2>
+            <p class="text-[14px] text-[#6e6e73] mt-1">Diğer global platformlardaki gibi 3 giriş akışı: manuel, CSV, API.</p>
+          </div>
+          <div id="mode-tabs" class="flex gap-2 flex-wrap">
+            <button data-mode="manual" class="mode-tab px-4 py-2 rounded-full text-[13px] border border-black/10 bg-black text-white">Manuel</button>
+            <button data-mode="csv" class="mode-tab px-4 py-2 rounded-full text-[13px] border border-black/10 bg-white">CSV</button>
+            <button data-mode="api" class="mode-tab px-4 py-2 rounded-full text-[13px] border border-black/10 bg-white">API</button>
+            <button data-mode="url" class="mode-tab px-4 py-2 rounded-full text-[13px] border border-black/10 bg-white">Web'den Aktar</button>
+          </div>
+        </div>
+
+        <div id="mode-manual" class="mode-panel mt-5">
+          <form id="product-form" class="grid md:grid-cols-2 gap-3 text-[14px]">
+            <input required name="name" class="h-11 rounded-xl border border-black/10 px-4" placeholder="Ürün adı *">
+            <input required name="sku" class="h-11 rounded-xl border border-black/10 px-4" placeholder="SKU / Ürün kodu *">
+            <input required name="category" class="h-11 rounded-xl border border-black/10 px-4" placeholder="Kategori *">
+            <input required name="brand" class="h-11 rounded-xl border border-black/10 px-4" placeholder="Marka adı *">
+            <input required name="description" class="h-11 rounded-xl border border-black/10 px-4 md:col-span-2" placeholder="Kısa ürün açıklaması *">
+
+            <h3 class="md:col-span-2 text-[15px] font-semibold mt-2">Teknik Bilgi Başlıkları</h3>
+            <input name="fireClass" class="h-11 rounded-xl border border-black/10 px-4" placeholder="Yangın sınıfı (örn. B-s1,d0)">
+            <input name="acoustic" class="h-11 rounded-xl border border-black/10 px-4" placeholder="Akustik değer (örn. NRC 0.85)">
+            <input name="dimensions" class="h-11 rounded-xl border border-black/10 px-4" placeholder="Ölçü (örn. 60x120 cm)">
+            <input name="thickness" class="h-11 rounded-xl border border-black/10 px-4" placeholder="Kalınlık (örn. 12 mm)">
+            <input name="certificates" class="h-11 rounded-xl border border-black/10 px-4 md:col-span-2" placeholder="Sertifikalar (EPD, CE, ISO...)">
+
+            <h3 class="md:col-span-2 text-[15px] font-semibold mt-2">Dosya ve Medya</h3>
+            <input name="image" class="h-11 rounded-xl border border-black/10 px-4 md:col-span-2" placeholder="Görsel URL (opsiyonel)">
+            <input type="url" name="pdfUrl" class="h-11 rounded-xl border border-black/10 px-4" placeholder="Teknik PDF URL">
+            <input type="url" name="cadUrl" class="h-11 rounded-xl border border-black/10 px-4" placeholder="DWG/CAD URL">
+            <input type="url" name="bimUrl" class="h-11 rounded-xl border border-black/10 px-4 md:col-span-2" placeholder="BIM/Revit URL">
+            <button class="md:col-span-2 h-11 rounded-xl bg-black text-white font-semibold">Ürünü Kaydet (Taslak)</button>
+          </form>
+        </div>
+
+        <div id="mode-csv" class="mode-panel mt-5 hidden">
+          <div class="grid lg:grid-cols-[1fr_1.2fr] gap-5">
+            <article class="rounded-xl border border-black/10 bg-white p-4">
+              <h3 class="text-[16px] font-semibold">CSV ile Toplu Yükleme</h3>
+              <p class="text-[13px] text-[#6e6e73] mt-2">Önce şablonu indir, doldur, sonra tek seferde yükle.</p>
+              <button id="download-template" class="mt-4 px-4 py-2 rounded-full bg-black text-white text-[13px]">CSV Şablonu İndir</button>
+              <div class="mt-4">
+                <input id="csv-file" type="file" accept=".csv" class="w-full h-11 rounded-xl border border-black/10 px-4 bg-white">
+                <button id="import-csv" class="mt-3 w-full h-11 rounded-xl border border-black/15 text-[13px] font-semibold">CSV'yi İçeri Aktar</button>
+              </div>
+              <p id="csv-msg" class="text-[12px] text-[#6e6e73] mt-3"></p>
+            </article>
+            <article class="rounded-xl border border-black/10 bg-white p-4">
+              <h4 class="text-[15px] font-semibold">Beklenen başlıklar</h4>
+              <p class="text-[13px] text-[#6e6e73] mt-2">name, sku, category, description, fireClass, acoustic, dimensions, thickness, certificates, image, pdfUrl, cadUrl, bimUrl</p>
+              <div class="mt-4 rounded-lg bg-[#fbfbfd] border border-black/10 p-3 text-[12px] text-[#3a3a3c]">
+                <p class="font-semibold">Not:</p>
+                <p>- İlk 4 alan (name, sku, category, description) zorunlu.</p>
+                <p>- Import edilen ürünler taslak olarak açılır.</p>
+                <p>- Panelden yayına alırsın.</p>
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <div id="mode-api" class="mode-panel mt-5 hidden">
+          <article class="rounded-xl border border-black/10 bg-white p-4">
+            <h3 class="text-[16px] font-semibold">API Senkronu (Hazırlık Modu)</h3>
+            <p class="text-[13px] text-[#6e6e73] mt-2">Canlı backend'e geçtiğimizde markaya özel endpoint ve API key verilecek.</p>
+            <div class="mt-4 grid md:grid-cols-2 gap-3 text-[13px]">
+              <input class="h-11 rounded-xl border border-black/10 px-4 bg-[#fafafa]" value="POST /api/v1/brand/products/sync" readonly>
+              <input class="h-11 rounded-xl border border-black/10 px-4 bg-[#fafafa]" value="Authorization: Bearer {API_KEY}" readonly>
+            </div>
+            <pre class="mt-4 p-3 rounded-lg bg-[#0b0b0c] text-white text-[12px] overflow-x-auto">{
+  "name": "Unica Baffle Tavan Paneli",
+  "sku": "UNI-BAF-1200",
+  "category": "Akustik",
+  "description": "Yüksek akustik performanslı tavan paneli",
+  "technical": {
+    "fireClass": "B-s1,d0",
+    "acoustic": "NRC 0.85",
+    "dimensions": "40x1200 mm",
+    "thickness": "40 mm",
+    "certificates": ["EPD", "CE"]
+  },
+  "files": {
+    "pdfUrl": "https://.../datasheet.pdf",
+    "cadUrl": "https://.../detail.dwg",
+    "bimUrl": "https://.../revit.rfa"
+  }
+}</pre>
+          </article>
+        </div>
+
+        <div id="mode-url" class="mode-panel mt-5 hidden">
+          <div class="grid lg:grid-cols-[1fr_1.4fr] gap-5 items-start">
+            <article class="rounded-xl border border-black/10 bg-white p-4">
+              <h3 class="text-[16px] font-semibold">Web'den İçe Aktar</h3>
+              <p class="text-[13px] text-[#6e6e73] mt-2">Ürün sayfasının URL'sini gir, sistem başlığı, açıklamayı ve teknik verileri otomatik çeker.</p>
+              <div class="mt-4 space-y-3">
+                <label class="block text-[12px] text-[#6e6e73]">Ürün sayfası URL'si</label>
+                <input id="url-input" type="url" class="w-full h-11 rounded-xl border border-black/10 px-4 text-[14px] outline-none focus:border-black/30" placeholder="https://markaniz.com/urun-adi">
+                <button id="btn-fetch-url" class="w-full h-11 rounded-xl bg-black text-white text-[13px] font-semibold hover:bg-[#222] transition-colors">Veri Çek</button>
+              </div>
+              <div id="url-loading" class="hidden mt-4 flex items-center gap-2 text-[13px] text-[#6e6e73]">
+                <svg class="animate-spin w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg>
+                <span>Sayfa analiz ediliyor…</span>
+              </div>
+              <p id="url-error" class="hidden mt-3 text-[12px] text-red-500 leading-relaxed"></p>
+              <p id="url-save-msg" class="hidden mt-3 text-[12px] text-green-600 font-semibold"></p>
+              <div class="mt-5 rounded-lg bg-[#fbfbfd] border border-black/10 p-3 text-[12px] text-[#3a3a3c]">
+                <p class="font-semibold mb-1">Nasıl çalışır?</p>
+                <p>Sayfa başlığı → ürün adı</p>
+                <p>Meta açıklama → ürün açıklaması</p>
+                <p>NRC, yangın sınıfı, kalınlık → teknik bilgi</p>
+                <p>Görseller → ürün fotoğrafı</p>
+              </div>
+            </article>
+
+            <div id="url-preview" class="hidden rounded-xl border border-black/10 bg-white p-4">
+              <h4 class="text-[15px] font-semibold">Çekilen Veri — Gözden Geçir & Düzenle</h4>
+              <p class="text-[12px] text-[#6e6e73] mt-1 mb-4">Alanları kaydetmeden önce düzenleyebilirsin.</p>
+              <img id="prev-img-preview" class="hidden w-full h-40 object-cover rounded-xl mb-4 border border-black/10" alt="Ürün görseli">
+              <div class="grid md:grid-cols-2 gap-2 text-[13px]">
+                <div class="md:col-span-2">
+                  <label class="block text-[11px] text-[#6e6e73] mb-1">Ürün Adı *</label>
+                  <input id="prev-name" class="w-full h-10 rounded-xl border border-black/10 px-3 outline-none focus:border-black/30" placeholder="Ürün adı">
+                </div>
+                <div>
+                  <label class="block text-[11px] text-[#6e6e73] mb-1">Kategori</label>
+                  <input id="prev-category" class="w-full h-10 rounded-xl border border-black/10 px-3 outline-none focus:border-black/30" placeholder="Akustik" list="category-list">
+                </div>
+                <div>
+                  <label class="block text-[11px] text-[#6e6e73] mb-1">Akustik Değer</label>
+                  <input id="prev-acoustic" class="w-full h-10 rounded-xl border border-black/10 px-3 outline-none focus:border-black/30" placeholder="NRC 0.85">
+                </div>
+                <div>
+                  <label class="block text-[11px] text-[#6e6e73] mb-1">Yangın Sınıfı</label>
+                  <input id="prev-fire" class="w-full h-10 rounded-xl border border-black/10 px-3 outline-none focus:border-black/30" placeholder="B-s1,d0">
+                </div>
+                <div>
+                  <label class="block text-[11px] text-[#6e6e73] mb-1">Kalınlık</label>
+                  <input id="prev-thickness" class="w-full h-10 rounded-xl border border-black/10 px-3 outline-none focus:border-black/30" placeholder="24 mm">
+                </div>
+                <div class="md:col-span-2">
+                  <label class="block text-[11px] text-[#6e6e73] mb-1">Ölçüler</label>
+                  <input id="prev-dimensions" class="w-full h-10 rounded-xl border border-black/10 px-3 outline-none focus:border-black/30" placeholder="60x120 cm">
+                </div>
+                <div class="md:col-span-2">
+                  <label class="block text-[11px] text-[#6e6e73] mb-1">Sertifikalar</label>
+                  <input id="prev-certs" class="w-full h-10 rounded-xl border border-black/10 px-3 outline-none focus:border-black/30" placeholder="OEKO-TEX, EPD, CE">
+                </div>
+                <div class="md:col-span-2">
+                  <label class="block text-[11px] text-[#6e6e73] mb-1">Ürün Açıklaması *</label>
+                  <textarea id="prev-desc" class="w-full rounded-xl border border-black/10 px-3 py-2 text-[13px] resize-none outline-none focus:border-black/30" rows="3" placeholder="Ürün açıklaması"></textarea>
+                </div>
+                <div class="md:col-span-2">
+                  <label class="block text-[11px] text-[#6e6e73] mb-1">Görsel URL</label>
+                  <input id="prev-image" class="w-full h-10 rounded-xl border border-black/10 px-3 text-[12px] outline-none focus:border-black/30" placeholder="https://...">
+                </div>
+                <div class="md:col-span-2">
+                  <label class="block text-[11px] text-[#6e6e73] mb-1">Kaynak URL (PDF linki olarak kaydedilir)</label>
+                  <input id="prev-source-url" class="w-full h-10 rounded-xl border border-black/10 px-3 text-[12px] text-[#6e6e73] bg-[#fafafa]" readonly>
+                </div>
+              </div>
+              <button id="btn-save-url-product" class="mt-4 w-full h-11 rounded-xl bg-black text-white text-[13px] font-semibold hover:bg-[#222] transition-colors">Ürünü Kaydet (Taslak)</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="rounded-2xl border border-black/10 p-5">
+        <div class="flex items-center justify-between">
+          <h3 class="text-[20px] font-semibold">Paneldeki Ürünlerim</h3>
+          <button id="clear-products" class="px-4 py-2 rounded-full border border-black/15 text-[13px]">Hepsini Temizle</button>
+        </div>
+        <div id="brand-products" class="mt-4 grid md:grid-cols-2 xl:grid-cols-3 gap-4"></div>
+      </section>
+    </main>
+    <div id="site-footer"></div>
+  </div>
+
+  <script src="/core.js"></script>
+  <script src="/layout.js"></script>
+  <script>
+    const productsWrap = document.getElementById("brand-products");
+    const countProducts = document.getElementById("count-products");
+    const countFiles    = document.getElementById("count-files");
+    const countDrafts   = document.getElementById("count-drafts");
+    const countViews    = document.getElementById("count-views");
+
+    let session = null;
+
+    async function init() {
+      await AG.ready;
+      session = await AG.getSessionBrand();
+
+      if (!session) {
+        document.querySelector("main").innerHTML = `
+          <section class="rounded-2xl border border-black/10 p-6 max-w-2xl">
+            <h1 class="text-[28px] font-semibold">Marka paneline erişim için giriş yapmalısın.</h1>
+            <p class="text-[14px] text-[#6e6e73] mt-2">Marka hesabınla giriş yaparak ürünleri yönetebilir, yayınlayabilir ve performansı görebilirsin.</p>
+            <a href="/marka-giris.html" class="inline-block mt-4 px-5 py-2.5 rounded-full bg-black text-white text-[14px] font-semibold">Marka Giriş Sayfasına Git</a>
+          </section>`;
+        return;
+      }
+
+      const categoryInput = document.querySelector('input[name="category"]');
+      if (categoryInput) {
+        const list = document.createElement("datalist");
+        list.id = "category-list";
+        list.innerHTML = AG.CATEGORIES.map((c) => `<option value="${c}"></option>`).join("");
+        document.body.appendChild(list);
+        categoryInput.setAttribute("list", "category-list");
+      }
+
+      const logoutBtn = document.createElement("button");
+      logoutBtn.className = "px-4 py-2 rounded-full border border-black/15 text-[13px]";
+      logoutBtn.textContent = `${session.name || session.email} · Çıkış`;
+      logoutBtn.onclick = async () => {
+        await AG.logoutBrand();
+        window.location.href = "/marka-giris.html";
+      };
+      document.querySelector("main > section").appendChild(logoutBtn);
+
+      attachHandlers();
+      await render();
+    }
+
+    function buildSpec(technical) {
+      const parts = [];
+      if (technical.acoustic)     parts.push(technical.acoustic);
+      if (technical.fireClass)    parts.push(technical.fireClass);
+      if (technical.certificates) parts.push(technical.certificates);
+      return parts.join(" · ");
+    }
+
+    function createProductFromForm(fd) {
+      const technical = {
+        fireClass:    fd.get("fireClass")?.trim()    || "",
+        acoustic:     fd.get("acoustic")?.trim()     || "",
+        dimensions:   fd.get("dimensions")?.trim()   || "",
+        thickness:    fd.get("thickness")?.trim()    || "",
+        certificates: fd.get("certificates")?.trim() || "",
+      };
+      return {
+        brandId:     session.id,
+        brandName:   session.name || session.email,
+        name:        fd.get("name")?.trim(),
+        sku:         fd.get("sku")?.trim(),
+        category:    fd.get("category")?.trim(),
+        description: fd.get("description")?.trim(),
+        technical,
+        spec:  buildSpec(technical),
+        image: fd.get("image")?.trim(),
+        files: {
+          pdfUrl: fd.get("pdfUrl")?.trim() || "",
+          cadUrl: fd.get("cadUrl")?.trim() || "",
+          bimUrl: fd.get("bimUrl")?.trim() || "",
+        },
+        hasPdf: Boolean(fd.get("pdfUrl")?.trim()),
+        hasCad: Boolean(fd.get("cadUrl")?.trim()),
+        status: "draft",
+      };
+    }
+
+    async function render() {
+      productsWrap.innerHTML = `<p class="text-[14px] text-[#6e6e73]">Ürünler yükleniyor…</p>`;
+      const items = await AG.getProducts({ brandId: session.id });
+      countProducts.textContent = String(items.length);
+      countFiles.textContent    = String(items.reduce((n, i) => n + (i.hasPdf ? 1 : 0) + (i.hasCad ? 1 : 0) + (i.files?.bimUrl ? 1 : 0), 0));
+      countDrafts.textContent   = String(items.filter((p) => p.status !== "published").length);
+      countViews.textContent    = String(items.reduce((n, i) => n + (i.views || 0), 0));
+
+      productsWrap.innerHTML = items.length
+        ? items.map((p) => `
+          <article class="rounded-2xl overflow-hidden border border-black/10 bg-white">
+            <img src="${p.image || "https://images.unsplash.com/photo-1600607686527-6fb886090705?q=80&w=1974&auto=format&fit=crop"}" class="w-full h-36 object-cover" alt="${p.name}">
+            <div class="p-4">
+              <p class="text-[11px] text-[#6e6e73]">${p.category || "—"}</p>
+              <h4 class="font-semibold mt-1">${p.name}</h4>
+              <p class="text-[12px] text-[#6e6e73] mt-1">${p.spec || "Teknik bilgi bekleniyor"}</p>
+              <p class="text-[12px] text-[#6e6e73] mt-1">Durum: ${p.status === "published" ? "Yayında" : "Taslak"} · Görüntülenme: ${p.views || 0}</p>
+              <div class="mt-2 text-[11px] text-[#6e6e73]">
+                ${p.files?.pdfUrl ? "<span>PDF</span>" : ""}
+                ${p.files?.cadUrl ? " · <span>DWG</span>" : ""}
+                ${p.files?.bimUrl ? " · <span>BIM</span>" : ""}
+              </div>
+              <div class="mt-3 flex gap-2">
+                <button data-publish="${p.id}" data-status="${p.status}" class="px-3 py-1.5 rounded-full border border-black/15 text-[12px]">${p.status === "published" ? "Taslağa Al" : "Yayınla"}</button>
+                <button data-delete="${p.id}" class="px-3 py-1.5 rounded-full border border-black/15 text-[12px]">Sil</button>
+              </div>
+            </div>
+          </article>`).join("")
+        : `<p class="text-[14px] text-[#6e6e73]">Henüz ürün eklenmedi.</p>`;
+
+      productsWrap.querySelectorAll("[data-publish]").forEach((btn) => {
+        btn.onclick = async () => {
+          const id     = btn.getAttribute("data-publish");
+          const status = btn.getAttribute("data-status");
+          btn.disabled = true;
+          await AG.updateProduct(id, { status: status === "published" ? "draft" : "published" });
+          await render();
+        };
+      });
+      productsWrap.querySelectorAll("[data-delete]").forEach((btn) => {
+        btn.onclick = async () => {
+          if (!confirm("Bu ürünü silmek istediğinden emin misin?")) return;
+          btn.disabled = true;
+          await AG.deleteProduct(btn.getAttribute("data-delete"));
+          await render();
+        };
+      });
+    }
+
+    function attachHandlers() {
+      document.getElementById("product-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const fd = new FormData(e.currentTarget);
+        const required = ["name", "sku", "category", "description"];
+        if (required.some((k) => !fd.get(k)?.toString().trim())) return;
+        const btn = e.currentTarget.querySelector("button[type=submit], button:last-of-type");
+        if (btn) { btn.disabled = true; btn.textContent = "Kaydediliyor…"; }
+        await AG.addProduct(createProductFromForm(fd));
+        e.currentTarget.reset();
+        if (btn) { btn.disabled = false; btn.textContent = "Ürünü Kaydet (Taslak)"; }
+        await render();
+      });
+
+    function parseCsvLine(line) {
+      const out = [];
+      let cur = "";
+      let inQuote = false;
+      for (let i = 0; i < line.length; i++) {
+        const ch = line[i];
+        if (ch === '"' && line[i + 1] === '"') {
+          cur += '"';
+          i++;
+        } else if (ch === '"') {
+          inQuote = !inQuote;
+        } else if (ch === "," && !inQuote) {
+          out.push(cur.trim());
+          cur = "";
+        } else {
+          cur += ch;
+        }
+      }
+      out.push(cur.trim());
+      return out.map((v) => v.replace(/^"|"$/g, ""));
+    }
+
+    function importCsv(text) {
+      const lines = text.split(/\r?\n/).filter(Boolean);
+      if (lines.length < 2) return { ok: false, message: "CSV boş görünüyor." };
+      const headers = parseCsvLine(lines[0]);
+      const idx = (name) => headers.indexOf(name);
+      const required = ["name", "sku", "category", "description"];
+      for (const field of required) {
+        if (idx(field) === -1) return { ok: false, message: `Eksik başlık: ${field}` };
+      }
+      const products = [];
+      for (let i = 1; i < lines.length; i++) {
+        const row = parseCsvLine(lines[i]);
+        if (!row.length) continue;
+        const get = (k) => (idx(k) > -1 ? row[idx(k)] || "" : "");
+        const name = get("name").trim();
+        const sku = get("sku").trim();
+        const category = get("category").trim();
+        const description = get("description").trim();
+        if (!name || !sku || !category || !description) continue;
+        const technical = {
+          fireClass:    get("fireClass").trim(),
+          acoustic:     get("acoustic").trim(),
+          dimensions:   get("dimensions").trim(),
+          thickness:    get("thickness").trim(),
+          certificates: get("certificates").trim(),
+        };
+        products.push({
+          brandId:     session.id,
+          brandName:   session.name || session.email,
+          name, sku, category, description,
+          technical,
+          spec:  buildSpec(technical),
+          image: get("image").trim(),
+          files: { pdfUrl: get("pdfUrl").trim(), cadUrl: get("cadUrl").trim(), bimUrl: get("bimUrl").trim() },
+          hasPdf: Boolean(get("pdfUrl").trim()),
+          hasCad: Boolean(get("cadUrl").trim()),
+          status: "draft",
+        });
+      }
+      return { ok: true, added: products.length, products };
+    }
+
+    document.getElementById("download-template").addEventListener("click", () => {
+      const sample = [
+        "name,sku,category,description,fireClass,acoustic,dimensions,thickness,certificates,image,pdfUrl,cadUrl,bimUrl",
+        "\"Unica Baffle Tavan\",\"UNI-BAF-1200\",\"Akustik\",\"Yüksek akustik performanslı tavan paneli\",\"B-s1,d0\",\"NRC 0.85\",\"40x1200 mm\",\"40 mm\",\"EPD;CE\",\"https://images.unsplash.com/photo-1615874959474-d609969a20ed?q=80&w=1200&auto=format&fit=crop\",\"https://example.com/datasheet.pdf\",\"https://example.com/detail.dwg\",\"https://example.com/revit.rfa\"",
+      ].join("\n");
+      const blob = new Blob([sample], { type: "text/csv;charset=utf-8;" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "antigravity-urun-sablonu.csv";
+      a.click();
+      URL.revokeObjectURL(a.href);
+    });
+
+      document.getElementById("import-csv").addEventListener("click", async () => {
+        const file = document.getElementById("csv-file").files[0];
+        const msg = document.getElementById("csv-msg");
+        if (!file) { msg.textContent = "Önce bir CSV dosyası seç."; return; }
+        const text = await file.text();
+        const res = importCsv(text);
+        if (!res.ok) { msg.textContent = res.message; return; }
+        msg.textContent = `${res.added} ürün içeri aktarılıyor…`;
+        for (const p of res.products) { await AG.addProduct(p); }
+        msg.textContent = `${res.added} ürün taslak olarak kaydedildi.`;
+        await render();
+      });
+
+      document.getElementById("clear-products").addEventListener("click", async () => {
+        if (!confirm("Tüm ürünleri silmek istediğinden emin misin?")) return;
+        const items = await AG.getProducts({ brandId: session.id });
+        for (const p of items) { await AG.deleteProduct(p.id); }
+        await render();
+      });
+
+    // --- URL Import ---
+    document.getElementById("btn-fetch-url").addEventListener("click", async () => {
+      const urlInput = document.getElementById("url-input");
+      const rawUrl = urlInput.value.trim();
+      const loadingEl = document.getElementById("url-loading");
+      const errorEl = document.getElementById("url-error");
+      const previewEl = document.getElementById("url-preview");
+      const saveMsgEl = document.getElementById("url-save-msg");
+
+      errorEl.classList.add("hidden");
+      previewEl.classList.add("hidden");
+      saveMsgEl.classList.add("hidden");
+
+      if (!rawUrl) {
+        errorEl.textContent = "Lütfen bir URL girin.";
+        errorEl.classList.remove("hidden");
+        return;
+      }
+
+      let parsedUrl;
+      try {
+        parsedUrl = new URL(rawUrl);
+      } catch {
+        errorEl.textContent = "Geçersiz URL. Lütfen https:// ile başlayan tam adresi girin.";
+        errorEl.classList.remove("hidden");
+        return;
+      }
+
+      loadingEl.classList.remove("hidden");
+
+      try {
+        const encoded = encodeURIComponent(rawUrl);
+        const proxies = [
+          () => fetch(`https://corsproxy.io/?${encoded}`).then(async r => { if(!r.ok) throw new Error(r.status); return { contents: await r.text() }; }),
+          () => fetch(`https://api.allorigins.win/get?url=${encoded}`).then(async r => { if(!r.ok) throw new Error(r.status); return r.json(); }),
+          () => fetch(`https://api.codetabs.com/v1/proxy?quest=${encoded}`).then(async r => { if(!r.ok) throw new Error(r.status); return { contents: await r.text() }; }),
+        ];
+        let data = null;
+        for (const tryProxy of proxies) {
+          try { data = await tryProxy(); if (data?.contents) break; } catch(e) { continue; }
+        }
+        if (!data?.contents) throw new Error("Sayfa alınamadı.");
+
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(data.contents, "text/html");
+
+        const h1 = doc.querySelector("h1")?.textContent?.trim();
+        const title = h1 || doc.title?.trim() || "";
+
+        const metaDesc = doc.querySelector('meta[name="description"]')?.getAttribute("content") || "";
+        const firstPara = [...doc.querySelectorAll("p")]
+          .map((p) => p.textContent.trim())
+          .find((t) => t.length > 40) || "";
+        const description = metaDesc || firstPara;
+
+        const bodyText = doc.body?.textContent || "";
+
+        const nrcMatch = bodyText.match(/NRC[\s:]*([0-9]\.[0-9]{1,2})/i);
+        const fireMatch = bodyText.match(/([A-Ea-e]-s[0-2],d[0-2])/);
+        const enFireMatch = bodyText.match(/(EN\s*13501-1\s*[/\-]\s*[A-Ea-e]-s[0-2],d[0-2])/i);
+        const thicknessMatch = bodyText.match(/([0-9]+(?:\s*[/,]\s*[0-9]+)*)\s*mm/i);
+        const dimsMatch = bodyText.match(/([0-9]+\s*[xX×]\s*[0-9]+(?:\s*[xX×]\s*[0-9]+)?\s*(?:mm|cm))/i);
+        const certMatches = [];
+        if (/OEKO-TEX/i.test(bodyText)) certMatches.push("OEKO-TEX");
+        if (/EPD/i.test(bodyText)) certMatches.push("EPD");
+        if (/\bCE\b/.test(bodyText)) certMatches.push("CE");
+        if (/ISO\s*\d+/i.test(bodyText)) certMatches.push(bodyText.match(/ISO\s*\d+/i)[0]);
+
+        const origin = parsedUrl.origin;
+        const pageImages = [...doc.querySelectorAll("img")]
+          .map((img) => {
+            let src = img.getAttribute("src") || "";
+            if (!src) return null;
+            if (src.startsWith("//")) return "https:" + src;
+            if (src.startsWith("/")) return origin + src;
+            if (!src.startsWith("http")) return null;
+            return src;
+          })
+          .filter((src) => {
+            if (!src) return false;
+            const lower = src.toLowerCase();
+            return !lower.includes("logo") && !lower.includes("icon") &&
+              !lower.includes("sprite") && !lower.includes("placeholder") &&
+              (lower.endsWith(".jpg") || lower.endsWith(".jpeg") ||
+               lower.endsWith(".png") || lower.endsWith(".webp") ||
+               lower.includes(".jpg?") || lower.includes(".png?") || lower.includes(".webp?") ||
+               lower.includes("wixstatic") || lower.includes("cloudinary") || lower.includes("imgix"));
+          });
+
+        document.getElementById("prev-name").value = title;
+        document.getElementById("prev-desc").value = description;
+        document.getElementById("prev-acoustic").value = nrcMatch ? `NRC ${nrcMatch[1]}` : "";
+        document.getElementById("prev-fire").value = enFireMatch ? enFireMatch[1] : (fireMatch ? fireMatch[1] : "");
+        document.getElementById("prev-thickness").value = thicknessMatch ? `${thicknessMatch[1]} mm` : "";
+        document.getElementById("prev-dimensions").value = dimsMatch ? dimsMatch[1] : "";
+        document.getElementById("prev-certs").value = certMatches.join(", ");
+        document.getElementById("prev-image").value = pageImages[0] || "";
+        document.getElementById("prev-source-url").value = rawUrl;
+        document.getElementById("prev-category").value = "Akustik";
+
+        const imgPreview = document.getElementById("prev-img-preview");
+        if (pageImages[0]) {
+          imgPreview.src = pageImages[0];
+          imgPreview.classList.remove("hidden");
+        } else {
+          imgPreview.classList.add("hidden");
+        }
+
+        previewEl.classList.remove("hidden");
+      } catch (err) {
+        errorEl.textContent = `Veri çekilemedi: Sayfa CORS kısıtlaması veya ağ hatası nedeniyle erişilemiyor olabilir. (${err.message})`;
+        errorEl.classList.remove("hidden");
+      } finally {
+        loadingEl.classList.add("hidden");
+      }
+    });
+
+      document.getElementById("btn-save-url-product").addEventListener("click", async () => {
+        const name        = document.getElementById("prev-name").value.trim();
+        const description = document.getElementById("prev-desc").value.trim();
+        if (!name) { alert("Ürün adı zorunlu."); return; }
+        const saveBtn = document.getElementById("btn-save-url-product");
+        saveBtn.disabled = true; saveBtn.textContent = "Kaydediliyor…";
+        const technical = {
+          fireClass:    document.getElementById("prev-fire").value.trim(),
+          acoustic:     document.getElementById("prev-acoustic").value.trim(),
+          dimensions:   document.getElementById("prev-dimensions").value.trim(),
+          thickness:    document.getElementById("prev-thickness").value.trim(),
+          certificates: document.getElementById("prev-certs").value.trim(),
+        };
+        await AG.addProduct({
+          brandId:     session.id,
+          brandName:   session.name || session.email,
+          name,
+          sku:         `URL-${Date.now()}`,
+          category:    document.getElementById("prev-category").value.trim() || "Akustik",
+          description,
+          technical,
+          spec:  buildSpec(technical),
+          image: document.getElementById("prev-image").value.trim(),
+          files: { pdfUrl: document.getElementById("prev-source-url").value.trim(), cadUrl: "", bimUrl: "" },
+          hasPdf: Boolean(document.getElementById("prev-source-url").value.trim()),
+          hasCad: false,
+          status: "draft",
+        });
+        saveBtn.disabled = false; saveBtn.textContent = "Ürünü Kaydet (Taslak)";
+        document.getElementById("url-preview").classList.add("hidden");
+        document.getElementById("url-input").value = "";
+        const saveMsgEl = document.getElementById("url-save-msg");
+        saveMsgEl.textContent = "Ürün Supabase'e kaydedildi!";
+        saveMsgEl.classList.remove("hidden");
+        setTimeout(() => saveMsgEl.classList.add("hidden"), 4000);
+        await render();
+      });
+
+    // update image preview when URL field changes
+    document.getElementById("prev-image").addEventListener("input", (e) => {
+      const imgPreview = document.getElementById("prev-img-preview");
+      const val = e.target.value.trim();
+      if (val) {
+        imgPreview.src = val;
+        imgPreview.classList.remove("hidden");
+      } else {
+        imgPreview.classList.add("hidden");
+      }
+    });
+
+      document.querySelectorAll(".mode-tab").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const mode = btn.dataset.mode;
+          document.querySelectorAll(".mode-tab").forEach((b) => b.className = "mode-tab px-4 py-2 rounded-full text-[13px] border border-black/10 bg-white");
+          btn.className = "mode-tab px-4 py-2 rounded-full text-[13px] border border-black/10 bg-black text-white";
+          document.querySelectorAll(".mode-panel").forEach((p) => p.classList.add("hidden"));
+          document.getElementById(`mode-${mode}`).classList.remove("hidden");
+        });
+      });
+    } // end attachHandlers
+
+    init();
+  </script>
+</body>
+</html>

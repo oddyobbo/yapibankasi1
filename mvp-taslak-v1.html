@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Antigravity | Türkiye Mimari Malzeme Platformu</title>
+  <meta name="description" content="Mimarlar için teknik veriye sahip ürün keşfi. Markalar için ücretsiz başvuru, ürün yönetimi ve lead toplama altyapısı.">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ink: "#0b0b0c",
+            paper: "#fafafa",
+            mute: "#6e6e73",
+            line: "rgba(0,0,0,0.08)",
+          },
+          fontFamily: {
+            sans: ['"SF Pro Display"', '-apple-system', 'BlinkMacSystemFont', 'Inter', 'sans-serif'],
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    html { scroll-behavior: smooth; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", system-ui, sans-serif; }
+    .lift { transition: transform .35s cubic-bezier(.2,.7,.2,1), border-color .35s, background .35s; }
+    .lift:hover { transform: translateY(-3px); border-color: rgba(0,0,0,.25); }
+    .reveal { opacity: 0; transform: translateY(14px); transition: opacity .8s ease, transform .8s ease; }
+    .reveal.is-visible { opacity: 1; transform: translateY(0); }
+    .grain {
+      background:
+        radial-gradient(800px 300px at 90% -10%, rgba(255,255,255,0.06), transparent 60%),
+        radial-gradient(700px 240px at 5% 110%, rgba(255,255,255,0.04), transparent 60%),
+        #0b0b0c;
+    }
+    .product-mock { background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02)); }
+    .ticker { display: inline-block; min-width: 1ch; }
+  </style>
+</head>
+<body data-page="home" class="bg-white text-ink min-h-screen">
+  <div id="site-header"></div>
+
+  <main>
+    <!-- HERO -->
+    <section class="grain text-white">
+      <div class="max-w-[1320px] mx-auto px-6 lg:px-10 pt-20 pb-24 lg:pt-28 lg:pb-32 grid lg:grid-cols-[1.05fr_1fr] gap-12 items-center">
+        <div class="reveal">
+          <div class="inline-flex items-center gap-2 rounded-full border border-white/15 px-3 py-1 text-[12px] text-white/80">
+            <span class="w-1.5 h-1.5 rounded-full bg-white"></span>
+            Antigravity · Türkiye odaklı mimari malzeme platformu
+          </div>
+          <h1 class="text-[44px] sm:text-[56px] lg:text-[72px] leading-[1.02] font-semibold tracking-tight mt-6">
+            Doğru malzemeyi<br>
+            mimarın hızıyla bul.
+          </h1>
+          <p class="text-[17px] lg:text-[18px] text-white/70 mt-6 max-w-[56ch] leading-relaxed">
+            Yüzlerce markanın doğrulanmış teknik verisine, dosyalarına ve projelerine tek bir arama deneyiminden ulaş. Markalar için kendi paneliyle ücretsiz başlangıç.
+          </p>
+          <ul class="mt-8 space-y-3 text-[15px] text-white/85">
+            <li class="flex items-start gap-3"><span class="mt-[5px] flex w-4 h-4 items-center justify-center rounded-full bg-white text-ink text-[10px] font-bold">✓</span> Tek aramada NRC, yangın, EPD, BIM filtreleri</li>
+            <li class="flex items-start gap-3"><span class="mt-[5px] flex w-4 h-4 items-center justify-center rounded-full bg-white text-ink text-[10px] font-bold">✓</span> Markalar için kendi paneli, lead'ler tek yerde</li>
+            <li class="flex items-start gap-3"><span class="mt-[5px] flex w-4 h-4 items-center justify-center rounded-full bg-white text-ink text-[10px] font-bold">✓</span> İlk aşamada marka üyeliği tamamen ücretsiz</li>
+          </ul>
+          <div class="mt-9 flex flex-wrap gap-3">
+            <a href="/urunler.html" class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white text-ink text-[14px] font-semibold hover:bg-white/90 transition">Ürünleri Keşfet →</a>
+            <a href="/marka-basvuru.html" class="inline-flex items-center gap-2 px-6 py-3 rounded-full border border-white/25 text-white text-[14px] font-semibold hover:bg-white/10 transition">Marka Başvur</a>
+          </div>
+        </div>
+
+        <!-- Product mock -->
+        <div class="relative reveal">
+          <div class="product-mock rounded-3xl border border-white/10 p-3 backdrop-blur">
+            <div class="rounded-2xl bg-white text-ink overflow-hidden">
+              <div class="flex items-center justify-between px-5 h-12 border-b border-line">
+                <div class="flex items-center gap-2 text-[13px] text-mute">
+                  <span class="w-2 h-2 rounded-full bg-black/20"></span>
+                  <span class="w-2 h-2 rounded-full bg-black/20"></span>
+                  <span class="w-2 h-2 rounded-full bg-black/20"></span>
+                  <span class="ml-3">antigravity.com / ürünler</span>
+                </div>
+                <span class="text-[11px] text-mute">Canlı önizleme</span>
+              </div>
+              <div class="p-5">
+                <div class="flex items-center gap-2 rounded-2xl bg-paper border border-line px-4 py-3">
+                  <span class="text-mute text-[13px]">Ara:</span>
+                  <span class="text-[14px] font-medium">Akustik tavan · NRC ≥ 0.80 · BIM</span>
+                  <span class="ml-auto text-[12px] text-mute">↩</span>
+                </div>
+                <div class="grid grid-cols-2 gap-3 mt-4">
+                  <div class="rounded-xl border border-line overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1615874959474-d609969a20ed?q=80&w=1200&auto=format&fit=crop" class="h-24 w-full object-cover" alt="">
+                    <div class="p-3">
+                      <p class="text-[11px] text-mute">Akustik</p>
+                      <p class="text-[13px] font-semibold mt-0.5">Unica Baffle Tavan</p>
+                      <p class="text-[11px] text-mute mt-0.5">NRC 0.85 · B-s1,d0</p>
+                    </div>
+                  </div>
+                  <div class="rounded-xl border border-line overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1519710164239-da123dc03ef4?q=80&w=1200&auto=format&fit=crop" class="h-24 w-full object-cover" alt="">
+                    <div class="p-3">
+                      <p class="text-[11px] text-mute">Aydınlatma</p>
+                      <p class="text-[13px] font-semibold mt-0.5">Lineer Ray Sistemi</p>
+                      <p class="text-[11px] text-mute mt-0.5">UGR&lt;19 · 4000K · IES</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="mt-4 grid grid-cols-3 gap-2 text-[11px] text-mute">
+                  <div class="rounded-lg bg-paper border border-line px-3 py-2">EPD</div>
+                  <div class="rounded-lg bg-paper border border-line px-3 py-2">BIM hazır</div>
+                  <div class="rounded-lg bg-paper border border-line px-3 py-2">B-s1,d0</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Floating ask pill on hero -->
+          <div class="absolute -bottom-4 left-6 lg:left-10 flex items-center gap-2 rounded-full bg-white text-ink px-4 py-2.5 shadow-[0_10px_40px_rgba(0,0,0,0.25)]">
+            <span class="w-6 h-6 rounded-full bg-ink text-white text-[12px] flex items-center justify-center">↑</span>
+            <span class="text-[13px] font-semibold">Bana sor: hangi malzeme?</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- STATS -->
+    <section class="border-b border-line">
+      <div class="max-w-[1320px] mx-auto px-6 lg:px-10 py-24">
+        <div class="max-w-[720px]">
+          <p class="text-[12px] uppercase tracking-[0.2em] text-mute font-semibold">Sayılarla</p>
+          <h2 class="text-[34px] lg:text-[44px] font-semibold tracking-tight mt-3 leading-[1.05]">Mimar ve marka için tek bir gerçek kaynak.</h2>
+        </div>
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-y-12 gap-x-10 mt-14">
+          <div>
+            <p class="text-[56px] lg:text-[72px] font-semibold leading-none tracking-tight"><span class="ticker" data-target="124">0</span><span>+</span></p>
+            <p class="text-[14px] text-mute mt-3">Aktif marka</p>
+          </div>
+          <div>
+            <p class="text-[56px] lg:text-[72px] font-semibold leading-none tracking-tight"><span class="ticker" data-target="8420">0</span></p>
+            <p class="text-[14px] text-mute mt-3">Yüklü ürün</p>
+          </div>
+          <div>
+            <p class="text-[56px] lg:text-[72px] font-semibold leading-none tracking-tight"><span class="ticker" data-target="21300">0</span></p>
+            <p class="text-[14px] text-mute mt-3">Teknik dosya</p>
+          </div>
+          <div>
+            <p class="text-[56px] lg:text-[72px] font-semibold leading-none tracking-tight"><span class="ticker" data-target="39">0</span><span>K</span></p>
+            <p class="text-[14px] text-mute mt-3">Aylık arama</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TRUSTED BRANDS (DARK) -->
+    <section class="bg-ink text-white">
+      <div class="max-w-[1320px] mx-auto px-6 lg:px-10 py-20">
+        <div class="grid lg:grid-cols-[1fr_1.4fr] gap-12 items-center">
+          <div>
+            <p class="text-[12px] uppercase tracking-[0.2em] text-white/50 font-semibold">Birlikte Çalıştığımız Markalar</p>
+            <h2 class="text-[30px] lg:text-[40px] font-semibold tracking-tight mt-3 leading-[1.05]">Antigravity, sektörün en güçlü 100+ markasıyla çalışıyor.</h2>
+            <a href="/markalar.html" class="inline-flex items-center gap-2 mt-6 px-5 py-2.5 rounded-full border border-white/25 text-[14px] font-semibold hover:bg-white/10 transition">Tüm markaları gör →</a>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-x-10 gap-y-12 items-center">
+            <img src="https://logo.clearbit.com/hermanmiller.com?greyscale=true" alt="Herman Miller" class="h-7 object-contain mx-auto invert opacity-80">
+            <img src="https://logo.clearbit.com/vitra.com?greyscale=true" alt="Vitra" class="h-7 object-contain mx-auto invert opacity-80">
+            <img src="https://logo.clearbit.com/flos.com?greyscale=true" alt="Flos" class="h-7 object-contain mx-auto invert opacity-80">
+            <img src="https://logo.clearbit.com/usm.com?greyscale=true" alt="USM" class="h-7 object-contain mx-auto invert opacity-80">
+            <img src="https://logo.clearbit.com/kvadrat.dk?greyscale=true" alt="Kvadrat" class="h-7 object-contain mx-auto invert opacity-80">
+            <img src="https://logo.clearbit.com/artemide.com?greyscale=true" alt="Artemide" class="h-7 object-contain mx-auto invert opacity-80">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VALUE FOR EACH SIDE (editorial, no cards) -->
+    <section class="border-b border-line">
+      <div class="max-w-[1320px] mx-auto px-6 lg:px-10 py-24 grid lg:grid-cols-2 gap-16">
+        <div class="reveal">
+          <p class="text-[12px] uppercase tracking-[0.2em] text-mute font-semibold">Mimarlar için</p>
+          <h2 class="text-[36px] lg:text-[48px] font-semibold tracking-tight mt-3 leading-[1.05]">Bir aramada doğru ürünü bul.</h2>
+          <p class="text-[16px] text-mute mt-5 leading-relaxed">Performans, sertifika, kullanım alanı ve marka filtreleri tek arayüzde. Aramadan teknik dosyaya kadar süreç kesintisiz.</p>
+          <ul class="mt-8 divide-y divide-line border-t border-line">
+            <li class="py-4 flex items-center gap-4">
+              <span class="text-[12px] text-mute w-12">01</span>
+              <p class="text-[16px] font-medium">Performans odaklı arama (NRC, yangın sınıfı, EPD)</p>
+            </li>
+            <li class="py-4 flex items-center gap-4">
+              <span class="text-[12px] text-mute w-12">02</span>
+              <p class="text-[16px] font-medium">Tek tıkla PDF, DWG, BIM dosyalarına erişim</p>
+            </li>
+            <li class="py-4 flex items-center gap-4">
+              <span class="text-[12px] text-mute w-12">03</span>
+              <p class="text-[16px] font-medium">Projede kullanılmış malzemeleri bağlamıyla görme</p>
+            </li>
+            <li class="py-4 flex items-center gap-4">
+              <span class="text-[12px] text-mute w-12">04</span>
+              <p class="text-[16px] font-medium">Markaya doğrudan teklif veya bilgi talebi</p>
+            </li>
+          </ul>
+          <a href="/urunler.html" class="inline-flex items-center gap-2 mt-8 px-5 py-2.5 rounded-full bg-ink text-white text-[14px] font-semibold">Aramayı dene →</a>
+        </div>
+        <div class="reveal">
+          <p class="text-[12px] uppercase tracking-[0.2em] text-mute font-semibold">Markalar için</p>
+          <h2 class="text-[36px] lg:text-[48px] font-semibold tracking-tight mt-3 leading-[1.05]">Doğru talebe ulaş, kendi panelinden yönet.</h2>
+          <p class="text-[16px] text-mute mt-5 leading-relaxed">Ürünlerini, dosyalarını ve gelen lead’leri kendi panelinden yönet. Karmaşık entegrasyon yok, demo değil; gerçek talep akışı.</p>
+          <ul class="mt-8 divide-y divide-line border-t border-line">
+            <li class="py-4 flex items-center gap-4">
+              <span class="text-[12px] text-mute w-12">01</span>
+              <p class="text-[16px] font-medium">Tek panelden ürün ve dosya yönetimi</p>
+            </li>
+            <li class="py-4 flex items-center gap-4">
+              <span class="text-[12px] text-mute w-12">02</span>
+              <p class="text-[16px] font-medium">CSV ile toplu ürün yükleme (gelişmiş plan)</p>
+            </li>
+            <li class="py-4 flex items-center gap-4">
+              <span class="text-[12px] text-mute w-12">03</span>
+              <p class="text-[16px] font-medium">Lead, görüntülenme ve dönüşüm istatistikleri</p>
+            </li>
+            <li class="py-4 flex items-center gap-4">
+              <span class="text-[12px] text-mute w-12">04</span>
+              <p class="text-[16px] font-medium">Editör kontrolü sonrası yayına alma</p>
+            </li>
+          </ul>
+          <a href="/marka-basvuru.html" class="inline-flex items-center gap-2 mt-8 px-5 py-2.5 rounded-full border border-line text-[14px] font-semibold">Ücretsiz başvur →</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- CATEGORIES -->
+    <section class="border-b border-line bg-paper">
+      <div class="max-w-[1320px] mx-auto px-6 lg:px-10 py-24">
+        <div class="flex items-end justify-between gap-6 flex-wrap">
+          <div>
+            <p class="text-[12px] uppercase tracking-[0.2em] text-mute font-semibold">Keşif</p>
+            <h2 class="text-[34px] lg:text-[44px] font-semibold tracking-tight mt-3 leading-[1.05]">Öne çıkan kategoriler</h2>
+          </div>
+          <a href="/urunler.html" class="text-[14px] text-mute hover:text-ink">Tüm kategoriler →</a>
+        </div>
+        <div class="mt-12 grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
+          <a href="/urunler.html" class="lift rounded-2xl bg-white border border-line p-5"><p class="font-semibold text-[15px]">Akustik</p><p class="text-[12px] text-mute mt-1">Panel · baffle · tavan</p></a>
+          <a href="/urunler.html" class="lift rounded-2xl bg-white border border-line p-5"><p class="font-semibold text-[15px]">Aydınlatma</p><p class="text-[12px] text-mute mt-1">Lineer · ray · dekoratif</p></a>
+          <a href="/urunler.html" class="lift rounded-2xl bg-white border border-line p-5"><p class="font-semibold text-[15px]">Dış Cephe</p><p class="text-[12px] text-mute mt-1">Panel · giydirme · kaplama</p></a>
+          <a href="/urunler.html" class="lift rounded-2xl bg-white border border-line p-5"><p class="font-semibold text-[15px]">Zemin</p><p class="text-[12px] text-mute mt-1">LVT · taş · seramik</p></a>
+          <a href="/urunler.html" class="lift rounded-2xl bg-white border border-line p-5"><p class="font-semibold text-[15px]">Tavan Sistemleri</p><p class="text-[12px] text-mute mt-1">Asma tavan çözümleri</p></a>
+          <a href="/urunler.html" class="lift rounded-2xl bg-white border border-line p-5"><p class="font-semibold text-[15px]">Mobilya</p><p class="text-[12px] text-mute mt-1">Ofis · ortak alan</p></a>
+        </div>
+      </div>
+    </section>
+
+    <!-- FEATURED PRODUCTS -->
+    <section class="border-b border-line">
+      <div class="max-w-[1320px] mx-auto px-6 lg:px-10 py-24">
+        <div class="flex items-end justify-between gap-6 flex-wrap">
+          <div>
+            <p class="text-[12px] uppercase tracking-[0.2em] text-mute font-semibold">Öne çıkan</p>
+            <h2 class="text-[34px] lg:text-[44px] font-semibold tracking-tight mt-3 leading-[1.05]">Bu hafta keşfedilen ürünler</h2>
+          </div>
+          <a href="/urunler.html" class="text-[14px] text-mute hover:text-ink">Tüm ürünler →</a>
+        </div>
+        <div class="mt-12 grid md:grid-cols-2 xl:grid-cols-4 gap-5">
+          <a href="/urun-unica-baffle.html" class="lift rounded-2xl overflow-hidden border border-line bg-white">
+            <img src="https://images.unsplash.com/photo-1615874959474-d609969a20ed?q=80&w=1932&auto=format&fit=crop" alt="" class="w-full h-48 object-cover">
+            <div class="p-4"><p class="text-[11px] text-mute uppercase tracking-wider">Akustik</p><h3 class="text-[16px] font-semibold mt-1">Unica Baffle Tavan Paneli</h3><p class="text-[12px] text-mute mt-1.5">NRC 0.85 · BIM hazır · B-s1,d0</p></div>
+          </a>
+          <a href="/urun-unica-baffle.html" class="lift rounded-2xl overflow-hidden border border-line bg-white">
+            <img src="https://images.unsplash.com/photo-1519710164239-da123dc03ef4?q=80&w=1974&auto=format&fit=crop" alt="" class="w-full h-48 object-cover">
+            <div class="p-4"><p class="text-[11px] text-mute uppercase tracking-wider">Aydınlatma</p><h3 class="text-[16px] font-semibold mt-1">Lineer Ray Aydınlatma</h3><p class="text-[12px] text-mute mt-1.5">UGR&lt;19 · 3000K/4000K · IES</p></div>
+          </a>
+          <a href="/urun-unica-baffle.html" class="lift rounded-2xl overflow-hidden border border-line bg-white">
+            <img src="https://images.unsplash.com/photo-1616046229478-9901c5536a45?q=80&w=1974&auto=format&fit=crop" alt="" class="w-full h-48 object-cover">
+            <div class="p-4"><p class="text-[11px] text-mute uppercase tracking-wider">Yüzey</p><h3 class="text-[16px] font-semibold mt-1">Doğal Taş Kompozit Levha</h3><p class="text-[12px] text-mute mt-1.5">EPD mevcut · 12 mm</p></div>
+          </a>
+          <a href="/urun-unica-baffle.html" class="lift rounded-2xl overflow-hidden border border-line bg-white">
+            <img src="https://images.unsplash.com/photo-1616594039964-3f5d1b96f1f8?q=80&w=1932&auto=format&fit=crop" alt="" class="w-full h-48 object-cover">
+            <div class="p-4"><p class="text-[11px] text-mute uppercase tracking-wider">Dış Cephe</p><h3 class="text-[16px] font-semibold mt-1">Alüminyum Cephe Paneli</h3><p class="text-[12px] text-mute mt-1.5">A2 sınıfı · UV dayanım</p></div>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- TESTIMONIAL + STATS -->
+    <section class="border-b border-line">
+      <div class="max-w-[1320px] mx-auto px-6 lg:px-10 py-24">
+        <div class="rounded-3xl bg-paper border border-line p-6 lg:p-10 grid lg:grid-cols-[1.1fr_1fr] gap-10 items-center">
+          <div class="rounded-2xl overflow-hidden h-[320px] lg:h-[420px]">
+            <img src="https://images.unsplash.com/photo-1497366754035-f200968a6e72?q=80&w=1974&auto=format&fit=crop" alt="" class="w-full h-full object-cover">
+          </div>
+          <div>
+            <p class="text-[14px] uppercase tracking-[0.16em] text-mute font-semibold">Müşteri Hikâyesi</p>
+            <p class="mt-4 text-[22px] lg:text-[28px] leading-snug font-medium">"Antigravity sayesinde malzeme araştırma süremiz dramatik şekilde düştü. Doğrulanmış teknik veri ve dosya erişimi tek yerde."</p>
+            <p class="mt-5 text-[14px]"><span class="font-semibold">Ekin Demir</span> <span class="text-mute">· Senior Architect</span></p>
+            <div class="mt-8 grid grid-cols-2 gap-x-10 border-t border-line pt-6">
+              <div>
+                <p class="text-[44px] font-semibold leading-none tracking-tight">65%</p>
+                <p class="text-[13px] text-mute mt-2">Daha kısa malzeme araştırma süresi</p>
+              </div>
+              <div>
+                <p class="text-[44px] font-semibold leading-none tracking-tight">98%</p>
+                <p class="text-[13px] text-mute mt-2">Teknik veri doğrulama oranı</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CLOSING CTA -->
+    <section class="grain text-white">
+      <div class="max-w-[1320px] mx-auto px-6 lg:px-10 py-28 text-center">
+        <h2 class="text-[44px] lg:text-[72px] font-semibold tracking-tight leading-[1.02]">
+          Bugün arama yap.<br>Yarın doğru malzemeyle inşa et.
+        </h2>
+        <p class="text-[16px] text-white/70 mt-6">Antigravity, Türkiye’nin en hızlı büyüyen mimari malzeme topluluğu. Mimarlar ve markalar için aynı doğru kaynak.</p>
+        <div class="mt-10 flex flex-wrap justify-center gap-3">
+          <a href="/urunler.html" class="px-6 py-3 rounded-full bg-white text-ink text-[14px] font-semibold">Ürünleri Keşfet</a>
+          <a href="/marka-basvuru.html" class="px-6 py-3 rounded-full border border-white/25 text-white text-[14px] font-semibold hover:bg-white/10 transition">Marka Başvur</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="site-footer"></div>
+
+  <script src="/core.js"></script>
+  <script src="/layout.js"></script>
+  <script>
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => { if (e.isIntersecting) e.target.classList.add("is-visible"); });
+    }, { threshold: 0.12 });
+    document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
+
+    const animateNumber = (el) => {
+      const target = Number(el.dataset.target || "0");
+      const dur = 1400;
+      const start = performance.now();
+      const fmt = (n) => n.toLocaleString("tr-TR");
+      const tick = (t) => {
+        const p = Math.min(1, (t - start) / dur);
+        const eased = 1 - Math.pow(1 - p, 3);
+        el.textContent = fmt(Math.round(target * eased));
+        if (p < 1) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    };
+    const numIo = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) { animateNumber(e.target); numIo.unobserve(e.target); }
+      });
+    }, { threshold: 0.4 });
+    document.querySelectorAll(".ticker").forEach((el) => numIo.observe(el));
+  </script>
+</body>
+</html>
