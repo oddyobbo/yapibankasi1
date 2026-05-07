@@ -1,658 +1,1232 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Antigravity | Tasarım Panosu</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tasarım Panosu — AntiGravity</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="/core.js"></script>
   <style>
-    .tool-btn { transition: all .12s ease; }
-    .tool-btn.active { background:#111; color:#fff; border-color:#111; }
-    #canvas-wrap canvas { display:block; border-radius:12px; box-shadow:0 1px 8px rgba(0,0,0,.08); }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; margin: 0; padding: 0; overflow: hidden; background: #1a1a1a; color: #e5e5e5; }
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button { opacity: 1; }
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
+
+    /* Tool rail buttons */
+    .tool-btn {
+      width: 40px; height: 40px; margin: 2px auto; border: none; background: none;
+      border-radius: 8px; display: flex; align-items: center; justify-content: center;
+      color: #aaa; cursor: pointer; transition: all 0.15s; position: relative;
+    }
+    .tool-btn:hover { color: #fff; background: rgba(255,255,255,0.1); }
+    .tool-btn.active { color: #fff; background: rgba(255,255,255,0.15); }
+    .tool-btn.danger:hover { color: #ef4444; background: rgba(239,68,68,0.1); }
+
+    /* Tooltips */
+    .tooltip {
+      position: absolute; left: calc(100% + 10px); top: 50%; transform: translateY(-50%);
+      background: #1a1a1a; color: #e5e5e5; font-size: 11px; padding: 4px 8px;
+      border-radius: 5px; white-space: nowrap; pointer-events: none; opacity: 0;
+      transition: opacity 0.12s; z-index: 9999; border: 1px solid rgba(255,255,255,0.1);
+    }
+    .tool-btn:hover .tooltip { opacity: 1; }
+
+    /* Separator */
+    .tool-sep { height: 1px; background: rgba(255,255,255,0.06); margin: 4px 8px; }
+
+    /* Property inputs */
+    .pi {
+      background: #333; border: 1px solid rgba(255,255,255,0.1); color: #fff;
+      border-radius: 6px; font-size: 12px; padding: 0 8px; height: 28px; width: 100%;
+      outline: none; font-family: 'Inter', sans-serif;
+    }
+    .pi:focus { border-color: rgba(59,130,246,0.5); }
+    .pi select { height: 28px; }
+    .pl { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 3px; display: block; }
+    .sec-title {
+      font-size: 11px; font-weight: 600; color: #888; text-transform: uppercase;
+      letter-spacing: 0.08em; padding: 8px 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .pbtn {
+      background: #333; border: 1px solid rgba(255,255,255,0.1); color: #aaa;
+      border-radius: 6px; font-size: 12px; padding: 0 8px; height: 28px; cursor: pointer;
+      transition: all 0.15s; font-family: 'Inter', sans-serif;
+    }
+    .pbtn:hover { background: #444; color: #fff; }
+    .pbtn.active { background: rgba(59,130,246,0.2); border-color: rgba(59,130,246,0.5); color: #3b82f6; }
+
+    /* Color chips */
+    .cc {
+      width: 22px; height: 22px; border-radius: 4px; cursor: pointer;
+      border: 2px solid transparent; transition: border-color 0.12s; flex-shrink: 0;
+    }
+    .cc:hover, .cc.active { border-color: #3b82f6; }
+
+    /* Download dropdown */
+    #dl-menu {
+      display: none; position: absolute; top: calc(100% + 4px); right: 0;
+      background: #2a2a2a; border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px; overflow: hidden; z-index: 9999; min-width: 140px;
+    }
+    #dl-menu.open { display: block; }
+    #dl-menu button {
+      display: block; width: 100%; padding: 9px 14px; font-size: 13px;
+      color: #e5e5e5; background: none; border: none; cursor: pointer;
+      text-align: left; font-family: 'Inter', sans-serif;
+    }
+    #dl-menu button:hover { background: rgba(255,255,255,0.08); }
+
+    /* Product list */
+    .prod-item {
+      display: flex; align-items: center; gap: 8px; padding: 5px 8px;
+      border-radius: 6px; cursor: pointer; transition: background 0.12s; user-select: none;
+    }
+    .prod-item:hover { background: rgba(255,255,255,0.06); }
+    .prod-item img { width: 36px; height: 36px; object-fit: cover; border-radius: 4px; flex-shrink: 0; }
+    .prod-item .pn { font-size: 11px; color: #e5e5e5; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .prod-item .pc { font-size: 10px; color: #666; }
+
+    /* Save status */
+    #save-status { font-size: 11px; color: #888; transition: color 0.3s; }
+
+    /* Canvas cursor overrides */
+    #canvas-wrap.panning canvas { cursor: grab !important; }
+    #canvas-wrap.panning canvas:active { cursor: grabbing !important; }
+
+    /* Top bar inputs */
+    #board-name {
+      background: transparent; border: 1px solid transparent; color: #e5e5e5;
+      font-size: 13px; font-weight: 500; padding: 2px 8px; border-radius: 6px;
+      outline: none; width: 180px; transition: border-color 0.15s; font-family: 'Inter', sans-serif;
+    }
+    #board-name:hover { border-color: rgba(255,255,255,0.1); }
+    #board-name:focus { border-color: rgba(255,255,255,0.25); }
   </style>
 </head>
-<body data-page="moodboard" class="bg-[#f5f5f7] text-[#111] min-h-screen">
+<body style="display:flex;flex-direction:column;height:100vh;overflow:hidden;">
+
   <div id="site-header"></div>
 
-  <main class="px-4 lg:px-6 py-4">
-    <section class="max-w-[1600px] mx-auto flex gap-3">
+  <main id="main-layout" style="flex:1;display:flex;overflow:hidden;min-height:0;">
 
-      <!-- Sol araç rayı -->
-      <aside class="rounded-2xl border border-black/10 bg-white p-2 flex flex-col items-center gap-1.5 w-[68px] flex-shrink-0 sticky top-[86px] h-fit">
+    <!-- ═══════════════════════ LEFT TOOLBAR ═══════════════════════ -->
+    <aside style="width:52px;background:#2a2a2a;border-right:1px solid rgba(255,255,255,0.06);display:flex;flex-direction:column;padding:6px 0;overflow:hidden;flex-shrink:0;">
 
-        <!-- Geri -->
-        <a href="/mimar-paneli.html" title="Panele dön"
-           class="w-11 h-11 rounded-xl border border-black/10 flex items-center justify-center text-[#6e6e73] hover:border-black/30 hover:bg-[#f5f5f7] transition">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
-        </a>
+      <!-- Back -->
+      <a href="/mimar-paneli.html" class="tool-btn" style="text-decoration:none;display:flex;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+        <span class="tooltip">Geri</span>
+      </a>
 
-        <div class="w-full h-px bg-black/[0.07]"></div>
+      <div class="tool-sep"></div>
 
-        <!-- Seçim aracı -->
-        <button id="tool-select" data-tool="select" title="Seçim aracı"
-                class="tool-btn w-11 h-11 rounded-xl border border-black/10 flex items-center justify-center hover:border-black/30 hover:bg-[#f5f5f7]">
-          <svg width="13" height="15" viewBox="0 0 13 15" fill="currentColor">
-            <path d="M0 0v14.5l3.5-3.5H7L0 0z"/>
-            <path d="M5 8.5l2 5 1-.4-2-5 2.5-.1L1 .5 5 8.5z" fill="currentColor"/>
-          </svg>
-        </button>
+      <!-- Select -->
+      <button class="tool-btn active" id="tool-select" onclick="setTool('select')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 3 7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/><path d="m13 13 6 6"/></svg>
+        <span class="tooltip">Seçim (V)</span>
+      </button>
 
-        <!-- Metin ekle -->
-        <button id="tool-text" data-tool="text" title="Metin ekle (T)"
-                class="tool-btn w-11 h-11 rounded-xl border border-black/10 flex items-center justify-center hover:border-black/30 hover:bg-[#f5f5f7] text-[15px] font-bold leading-none">
-          T
-        </button>
+      <!-- Text -->
+      <button class="tool-btn" id="tool-text" onclick="setTool('text')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></svg>
+        <span class="tooltip">Metin (T)</span>
+      </button>
 
-        <!-- Dikdörtgen -->
-        <button id="tool-rect" data-tool="rect" title="Dikdörtgen ekle"
-                class="tool-btn w-11 h-11 rounded-xl border border-black/10 flex items-center justify-center hover:border-black/30 hover:bg-[#f5f5f7]">
-          <svg width="17" height="14" viewBox="0 0 17 14" fill="none" stroke="currentColor" stroke-width="1.8">
-            <rect x="1" y="1" width="15" height="12" rx="2"/>
-          </svg>
-        </button>
+      <!-- Rect -->
+      <button class="tool-btn" id="tool-rect" onclick="setTool('rect')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+        <span class="tooltip">Dikdörtgen (R)</span>
+      </button>
 
-        <!-- Daire -->
-        <button id="tool-circle" data-tool="circle" title="Daire ekle"
-                class="tool-btn w-11 h-11 rounded-xl border border-black/10 flex items-center justify-center hover:border-black/30 hover:bg-[#f5f5f7]">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8">
-            <circle cx="8" cy="8" r="7"/>
-          </svg>
-        </button>
+      <!-- Circle -->
+      <button class="tool-btn" id="tool-circle" onclick="setTool('circle')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/></svg>
+        <span class="tooltip">Daire (C)</span>
+      </button>
 
-        <!-- Görsel yükle -->
-        <button id="tool-image" title="Görsel yükle (bilgisayardan)"
-                class="w-11 h-11 rounded-xl border border-black/10 flex items-center justify-center hover:border-black/30 hover:bg-[#f5f5f7] transition">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-            <rect x="3" y="3" width="18" height="18" rx="2"/>
-            <circle cx="8.5" cy="8.5" r="1.5"/>
-            <path d="M21 15l-5-5L5 21"/>
-          </svg>
-        </button>
-        <input id="file-input" type="file" accept="image/*" class="hidden" multiple>
+      <!-- Line -->
+      <button class="tool-btn" id="tool-line" onclick="setTool('line')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="19" x2="19" y2="5"/></svg>
+        <span class="tooltip">Çizgi (L)</span>
+      </button>
 
-        <!-- Arkaplan rengi -->
-        <button id="tool-bg" title="Arkaplan rengi"
-                class="w-11 h-11 rounded-xl border border-black/10 flex items-center justify-center hover:border-black/30 hover:bg-[#f5f5f7] transition">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/>
-            <path d="M12 2v20M2 12h20" stroke-opacity=".4"/>
-          </svg>
-        </button>
+      <!-- Image -->
+      <button class="tool-btn" id="tool-image" onclick="document.getElementById('img-upload').click()">
+        <input type="file" id="img-upload" accept="image/*" style="display:none;" onchange="handleImageUpload(this)" />
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        <span class="tooltip">Görsel Yükle (I)</span>
+      </button>
 
-        <div class="w-full h-px bg-black/[0.07]"></div>
+      <div class="tool-sep"></div>
 
-        <!-- Öne getir -->
-        <button id="tool-front" title="Öne getir"
-                class="w-11 h-11 rounded-xl border border-black/10 flex items-center justify-center hover:border-black/30 hover:bg-[#f5f5f7] transition">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-            <path d="M12 19V5M5 12l7-7 7 7"/>
-          </svg>
-        </button>
+      <!-- Bring to front -->
+      <button class="tool-btn" onclick="bringToFront()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 11 12 6 7 11"/><polyline points="17 18 12 13 7 18"/></svg>
+        <span class="tooltip">Öne Getir</span>
+      </button>
 
-        <!-- Arkaya gönder -->
-        <button id="tool-back" title="Arkaya gönder"
-                class="w-11 h-11 rounded-xl border border-black/10 flex items-center justify-center hover:border-black/30 hover:bg-[#f5f5f7] transition">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-            <path d="M12 5v14M5 12l7 7 7-7"/>
-          </svg>
-        </button>
+      <!-- Send to back -->
+      <button class="tool-btn" onclick="sendToBack()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 13 12 18 7 13"/><polyline points="17 6 12 11 7 6"/></svg>
+        <span class="tooltip">Arkaya Gönder</span>
+      </button>
 
-        <!-- Sil -->
-        <button id="tool-delete" title="Seçiliyi sil (Delete)"
-                class="w-11 h-11 rounded-xl border border-black/10 flex items-center justify-center hover:border-red-200 hover:text-red-500 hover:bg-red-50 transition">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-            <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/>
-          </svg>
-        </button>
+      <!-- Duplicate -->
+      <button class="tool-btn" onclick="duplicateSelected()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        <span class="tooltip">Çoğalt (Ctrl+D)</span>
+      </button>
 
-        <div class="w-full h-px bg-black/[0.07]"></div>
+      <!-- Lock -->
+      <button class="tool-btn" id="tool-lock" onclick="toggleLock()">
+        <svg id="lock-svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+          <path id="lock-shackle" d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        </svg>
+        <span class="tooltip">Kilitle / Aç</span>
+      </button>
 
-        <!-- İndir -->
-        <button id="tool-download" title="İndir"
-                class="w-11 h-11 rounded-xl border border-black/10 flex items-center justify-center hover:border-black/30 hover:bg-[#f5f5f7] transition">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-            <path d="M12 3v13M5 16l7 7 7-7"/>
-            <path d="M3 21h18"/>
-          </svg>
-        </button>
+      <div class="tool-sep"></div>
 
-      </aside>
+      <!-- Undo -->
+      <button class="tool-btn" onclick="undo()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg>
+        <span class="tooltip">Geri Al (Ctrl+Z)</span>
+      </button>
 
-      <!-- Kanvas bölümü -->
-      <section class="rounded-2xl border border-black/10 bg-white overflow-hidden flex flex-col flex-1 min-w-0">
+      <!-- Redo -->
+      <button class="tool-btn" onclick="redo()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 7v6h-6"/><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3L21 13"/></svg>
+        <span class="tooltip">İleri Al (Ctrl+Y)</span>
+      </button>
 
-        <!-- Üst bar -->
-        <div class="h-14 px-4 border-b border-black/10 flex items-center gap-3 flex-shrink-0">
-          <input id="board-name"
-                 class="h-9 rounded-lg border border-black/15 px-3 text-[14px] min-w-[200px] outline-none focus:border-black/30 transition"
-                 placeholder="Pano adı">
-          <div class="ml-auto flex items-center gap-2">
-            <div class="h-9 px-3 rounded-lg border border-black/10 text-[12px] text-[#6e6e73] inline-flex items-center gap-1.5">
-              <button id="zoom-out-btn" class="w-5 h-5 flex items-center justify-center text-[16px] leading-none hover:text-black">−</button>
-              <span id="zoom-indicator" class="w-10 text-center tabular-nums">100%</span>
-              <button id="zoom-in-btn" class="w-5 h-5 flex items-center justify-center text-[16px] leading-none hover:text-black">+</button>
-            </div>
-            <button id="save-btn"
-                    class="h-9 px-4 rounded-lg bg-black text-white text-[13px] font-semibold hover:bg-[#222] transition">
-              Kaydet
+      <div class="tool-sep"></div>
+
+      <!-- Delete -->
+      <button class="tool-btn danger" onclick="deleteSelected()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+        <span class="tooltip">Sil (Del)</span>
+      </button>
+
+    </aside>
+
+    <!-- ═══════════════════════ CANVAS SECTION ═══════════════════════ -->
+    <section style="flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;">
+
+      <!-- Top bar -->
+      <div style="height:44px;background:#2a2a2a;border-bottom:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;padding:0 12px;gap:10px;flex-shrink:0;">
+
+        <input type="text" id="board-name" value="Yeni Pano"
+          onblur="saveBoardName()"
+          onkeydown="if(event.key==='Enter')this.blur()" />
+
+        <!-- Zoom controls (centered) -->
+        <div style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;">
+          <button onclick="adjustZoom(-0.1)" style="background:#333;border:1px solid rgba(255,255,255,0.1);color:#aaa;width:24px;height:24px;border-radius:5px;cursor:pointer;font-size:16px;line-height:1;display:flex;align-items:center;justify-content:center;">−</button>
+          <span id="zoom-display" style="font-size:12px;color:#888;min-width:42px;text-align:center;">100%</span>
+          <button onclick="adjustZoom(0.1)" style="background:#333;border:1px solid rgba(255,255,255,0.1);color:#aaa;width:24px;height:24px;border-radius:5px;cursor:pointer;font-size:16px;line-height:1;display:flex;align-items:center;justify-content:center;">+</button>
+          <button onclick="resetZoom()" style="background:#333;border:1px solid rgba(255,255,255,0.1);color:#888;font-size:11px;padding:0 8px;height:24px;border-radius:5px;cursor:pointer;font-family:'Inter',sans-serif;">Sıfırla</button>
+        </div>
+
+        <!-- Right actions -->
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span id="save-status">—</span>
+          <button onclick="saveBoard()"
+            style="background:#3b82f6;border:none;color:#fff;font-size:12px;font-weight:500;padding:0 14px;height:30px;border-radius:6px;cursor:pointer;transition:background 0.15s;font-family:'Inter',sans-serif;"
+            onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3b82f6'">
+            Kaydet
+          </button>
+          <div style="position:relative;">
+            <button id="dl-btn" onclick="toggleDlMenu()"
+              style="background:#333;border:1px solid rgba(255,255,255,0.1);color:#e5e5e5;font-size:12px;padding:0 12px;height:30px;border-radius:6px;cursor:pointer;display:flex;align-items:center;gap:5px;font-family:'Inter',sans-serif;">
+              İndir
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
             </button>
-            <span id="save-msg" class="text-[11px] text-[#6e6e73] hidden ml-1"></span>
+            <div id="dl-menu">
+              <button onclick="downloadJPG()">JPG olarak indir</button>
+              <button onclick="downloadPDF()">PDF olarak indir</button>
+            </div>
           </div>
         </div>
 
-        <!-- Kanvas wrap -->
-        <div id="canvas-wrap" class="flex-1 bg-[#f3f4f6] p-4 relative overflow-hidden">
-          <canvas id="fc"></canvas>
-        </div>
+      </div>
 
-      </section>
-
-      <!-- Sağ panel -->
-      <aside class="rounded-2xl border border-black/10 bg-white p-4 w-[280px] flex-shrink-0 overflow-hidden flex flex-col sticky top-[86px] h-[calc(100vh-112px)]">
-        <h2 class="text-[14px] font-semibold mb-1">Ürün Ekle</h2>
-        <p class="text-[12px] text-[#6e6e73] mb-3 flex-shrink-0">Favorilerinizden ürün seçin ya da bilgisayarınızdan görsel sürükleyin.</p>
-        <input id="product-search"
-               placeholder="Ürün ara..."
-               class="w-full h-9 rounded-xl border border-black/10 px-3 text-[12px] mb-3 outline-none focus:border-black/30 flex-shrink-0 transition">
-        <div id="favorites-list" class="space-y-2 flex-1 overflow-auto"></div>
-        <p class="text-[11px] text-[#6e6e73] mt-3 flex-shrink-0">
-          Önce <a href="/urunler.html" class="underline hover:text-black">Ürünler</a> sayfasından favorile.
-        </p>
-      </aside>
+      <!-- Canvas wrapper -->
+      <div id="canvas-wrap" style="flex:1;overflow:hidden;background:#1a1a1a;position:relative;">
+        <canvas id="fc"></canvas>
+      </div>
 
     </section>
+
+    <!-- ═══════════════════════ RIGHT PANEL ═══════════════════════ -->
+    <aside style="width:240px;background:#2a2a2a;border-left:1px solid rgba(255,255,255,0.06);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0;">
+
+      <!-- Properties scroll -->
+      <div id="props-scroll" style="flex:1;overflow-y:auto;overflow-x:hidden;min-height:0;">
+
+        <!-- Background section (no selection) -->
+        <div id="bg-section">
+          <div class="sec-title">Pano Arkaplanı</div>
+          <div style="padding:10px 12px;">
+            <div id="bg-chips" style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px;"></div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span class="pl" style="margin:0;white-space:nowrap;">Özel renk</span>
+              <input type="color" id="bg-custom" value="#ffffff"
+                style="width:34px;height:26px;border:1px solid rgba(255,255,255,0.1);border-radius:5px;background:#333;cursor:pointer;padding:2px;"
+                oninput="setCanvasBg(this.value)" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Object section (has selection) -->
+        <div id="obj-section" style="display:none;">
+
+          <!-- Badge + delete -->
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-bottom:1px solid rgba(255,255,255,0.06);">
+            <span id="obj-badge" style="font-size:10px;background:rgba(59,130,246,0.15);color:#3b82f6;padding:2px 9px;border-radius:20px;font-weight:500;letter-spacing:0.02em;"></span>
+            <button onclick="deleteSelected()" style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);color:#ef4444;font-size:11px;padding:2px 9px;border-radius:4px;cursor:pointer;font-family:'Inter',sans-serif;">Sil</button>
+          </div>
+
+          <!-- Position & size -->
+          <div style="padding:10px 12px;border-bottom:1px solid rgba(255,255,255,0.06);">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px;">
+              <div><span class="pl">X</span><input type="number" id="prop-x" class="pi" oninput="applyProp('left',+this.value)" /></div>
+              <div><span class="pl">Y</span><input type="number" id="prop-y" class="pi" oninput="applyProp('top',+this.value)" /></div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+              <div><span class="pl">W</span><input type="number" id="prop-w" class="pi" oninput="applySize('w',+this.value)" /></div>
+              <div><span class="pl">H</span><input type="number" id="prop-h" class="pi" oninput="applySize('h',+this.value)" /></div>
+            </div>
+          </div>
+
+          <!-- Opacity & rotation -->
+          <div style="padding:10px 12px;border-bottom:1px solid rgba(255,255,255,0.06);">
+            <div style="margin-bottom:8px;">
+              <span class="pl">Opaklık</span>
+              <div style="display:flex;align-items:center;gap:6px;">
+                <input type="range" id="prop-op" min="0" max="100" style="flex:1;accent-color:#3b82f6;cursor:pointer;"
+                  oninput="applyProp('opacity',+this.value/100);document.getElementById('prop-op-n').value=this.value;" />
+                <input type="number" id="prop-op-n" min="0" max="100" class="pi" style="width:48px;"
+                  oninput="applyProp('opacity',+this.value/100);document.getElementById('prop-op').value=this.value;" />
+              </div>
+            </div>
+            <div>
+              <span class="pl">Döndürme (°)</span>
+              <input type="number" id="prop-rot" min="0" max="360" class="pi" oninput="applyProp('angle',+this.value)" />
+            </div>
+          </div>
+
+          <!-- TEXT properties -->
+          <div id="text-props" style="display:none;border-bottom:1px solid rgba(255,255,255,0.06);">
+            <div class="sec-title">Metin</div>
+            <div style="padding:10px 12px;">
+              <div style="margin-bottom:7px;">
+                <span class="pl">Font</span>
+                <select id="prop-font" class="pi" style="height:28px;" onchange="applyTextProp('fontFamily',this.value)">
+                  <option value="Inter">Inter</option>
+                  <option value="Georgia">Georgia</option>
+                  <option value="Courier New">Courier New</option>
+                  <option value="Impact">Impact</option>
+                  <option value="Playfair Display">Playfair Display</option>
+                  <option value="Arial Black">Arial Black</option>
+                </select>
+              </div>
+              <div style="margin-bottom:7px;">
+                <span class="pl">Boyut</span>
+                <select id="prop-fsize" class="pi" style="height:28px;" onchange="applyTextProp('fontSize',+this.value)">
+                  <option>8</option><option>12</option><option>14</option><option>16</option>
+                  <option>20</option><option>24</option><option>32</option><option>48</option>
+                  <option>64</option><option>96</option>
+                </select>
+              </div>
+              <div style="display:flex;gap:4px;margin-bottom:7px;">
+                <button class="pbtn" id="btn-bold" style="width:32px;font-weight:700;" onclick="toggleTextStyle('bold')">B</button>
+                <button class="pbtn" id="btn-italic" style="width:32px;font-style:italic;" onclick="toggleTextStyle('italic')">I</button>
+                <button class="pbtn" id="btn-under" style="width:32px;text-decoration:underline;" onclick="toggleTextStyle('underline')">U</button>
+              </div>
+              <div style="margin-bottom:7px;">
+                <span class="pl">Renk</span>
+                <input type="color" id="prop-tcolor" class="pi" style="height:28px;padding:2px 4px;cursor:pointer;" oninput="applyTextProp('fill',this.value)" />
+              </div>
+              <div>
+                <span class="pl">Hizalama</span>
+                <div style="display:flex;gap:4px;">
+                  <button class="pbtn" id="align-l" style="flex:1;" onclick="applyTextProp('textAlign','left')">
+                    <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="1" y1="4" x2="15" y2="4"/><line x1="1" y1="8" x2="10" y2="8"/><line x1="1" y1="12" x2="12" y2="12"/></svg>
+                  </button>
+                  <button class="pbtn" id="align-c" style="flex:1;" onclick="applyTextProp('textAlign','center')">
+                    <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="1" y1="4" x2="15" y2="4"/><line x1="3" y1="8" x2="13" y2="8"/><line x1="2" y1="12" x2="14" y2="12"/></svg>
+                  </button>
+                  <button class="pbtn" id="align-r" style="flex:1;" onclick="applyTextProp('textAlign','right')">
+                    <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="1" y1="4" x2="15" y2="4"/><line x1="6" y1="8" x2="15" y2="8"/><line x1="4" y1="12" x2="15" y2="12"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SHAPE properties -->
+          <div id="shape-props" style="display:none;border-bottom:1px solid rgba(255,255,255,0.06);">
+            <div class="sec-title">Şekil</div>
+            <div style="padding:10px 12px;">
+              <div style="margin-bottom:7px;">
+                <span class="pl">Dolgu</span>
+                <input type="color" id="prop-fill" class="pi" style="height:28px;padding:2px 4px;cursor:pointer;" oninput="applyProp('fill',this.value)" />
+              </div>
+              <div style="margin-bottom:7px;">
+                <span class="pl">Kenar Rengi</span>
+                <input type="color" id="prop-stroke" class="pi" style="height:28px;padding:2px 4px;cursor:pointer;" oninput="applyProp('stroke',this.value)" />
+              </div>
+              <div>
+                <span class="pl">Kenar Kalınlığı</span>
+                <input type="number" id="prop-sw" min="0" max="20" class="pi" oninput="applyProp('strokeWidth',+this.value)" />
+              </div>
+            </div>
+          </div>
+
+          <!-- IMAGE properties -->
+          <div id="image-props" style="display:none;border-bottom:1px solid rgba(255,255,255,0.06);">
+            <div class="sec-title">Görsel</div>
+            <div style="padding:10px 12px;">
+              <div style="margin-bottom:8px;">
+                <button class="pbtn" style="width:100%;" onclick="document.getElementById('img-replace').click()">
+                  Görseli Değiştir
+                </button>
+                <input type="file" id="img-replace" accept="image/*" style="display:none;" onchange="replaceImage(this)" />
+              </div>
+              <div>
+                <span class="pl">Kenar Yarıçapı</span>
+                <div style="display:flex;align-items:center;gap:6px;">
+                  <input type="range" id="prop-rad" min="0" max="100" style="flex:1;accent-color:#3b82f6;cursor:pointer;"
+                    oninput="applyRadius(+this.value);document.getElementById('prop-rad-n').textContent=this.value;" />
+                  <span id="prop-rad-n" style="font-size:12px;color:#888;min-width:24px;text-align:right;">0</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        <!-- /obj-section -->
+
+      </div>
+      <!-- /props-scroll -->
+
+      <!-- Products section -->
+      <div style="border-top:1px solid rgba(255,255,255,0.06);display:flex;flex-direction:column;flex-shrink:0;max-height:230px;">
+        <div class="sec-title">Ürün Ekle</div>
+        <div style="padding:5px 8px;flex-shrink:0;">
+          <input type="text" id="prod-search" class="pi" placeholder="Ara..." oninput="filterProducts(this.value)" />
+        </div>
+        <div id="prod-list" style="flex:1;overflow-y:auto;padding:0 4px 4px;min-height:60px;"></div>
+      </div>
+
+    </aside>
+
   </main>
 
   <div id="site-footer"></div>
-
-  <!-- Floating popup: arkaplan rengi -->
-  <div id="bg-palette" class="hidden fixed z-[9999] bg-white rounded-2xl border border-black/10 shadow-xl p-3" style="min-width:148px">
-    <p class="text-[11px] text-[#6e6e73] mb-2 font-medium">Arkaplan rengi</p>
-    <div class="grid grid-cols-5 gap-1.5">
-      <button data-bg="#f5f5f5"  class="w-6 h-6 rounded-md border border-black/15" style="background:#f5f5f5"  title="Açık gri"></button>
-      <button data-bg="#ffffff"  class="w-6 h-6 rounded-md border border-black/15" style="background:#ffffff"  title="Beyaz"></button>
-      <button data-bg="#111111"  class="w-6 h-6 rounded-md border border-black/15" style="background:#111111"  title="Siyah"></button>
-      <button data-bg="#f5e6d3"  class="w-6 h-6 rounded-md border border-black/15" style="background:#f5e6d3"  title="Bej"></button>
-      <button data-bg="#ddeeff"  class="w-6 h-6 rounded-md border border-black/15" style="background:#ddeeff"  title="Mavi"></button>
-      <button data-bg="#e8f5e9"  class="w-6 h-6 rounded-md border border-black/15" style="background:#e8f5e9"  title="Yeşil"></button>
-      <button data-bg="#fce4ec"  class="w-6 h-6 rounded-md border border-black/15" style="background:#fce4ec"  title="Pembe"></button>
-      <button data-bg="#fff9c4"  class="w-6 h-6 rounded-md border border-black/15" style="background:#fff9c4"  title="Sarı"></button>
-      <button data-bg="#ede7f6"  class="w-6 h-6 rounded-md border border-black/15" style="background:#ede7f6"  title="Mor"></button>
-      <button data-bg="#efebe9"  class="w-6 h-6 rounded-md border border-black/15" style="background:#efebe9"  title="Kahve"></button>
-    </div>
-  </div>
-
-  <!-- Floating popup: indir -->
-  <div id="download-menu" class="hidden fixed z-[9999] bg-white rounded-xl border border-black/10 shadow-xl overflow-hidden" style="min-width:160px">
-    <button id="dl-jpg" class="w-full text-left px-4 py-2.5 text-[13px] hover:bg-[#f5f5f7]">JPG olarak indir</button>
-    <div class="h-px bg-black/[0.06]"></div>
-    <button id="dl-pdf" class="w-full text-left px-4 py-2.5 text-[13px] hover:bg-[#f5f5f7]">PDF olarak indir</button>
-  </div>
-
-  <script src="/core.js"></script>
   <script src="/layout.js"></script>
+
   <script>
-    const FALLBACK_IMG = "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?q=80&w=1200&auto=format&fit=crop";
+  // ─── Constants ─────────────────────────────────────────────────────────────
+  const FALLBACK_IMG = "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?q=80&w=1200";
+  const BG_COLORS = [
+    { hex: "#ffffff", label: "Beyaz" },
+    { hex: "#111111", label: "Siyah" },
+    { hex: "#9ca3af", label: "Gri" },
+    { hex: "#e7ddd0", label: "Bej" },
+    { hex: "#3b82f6", label: "Mavi" },
+    { hex: "#22c55e", label: "Yeşil" },
+    { hex: "#ec4899", label: "Pembe" },
+    { hex: "#eab308", label: "Sarı" },
+    { hex: "#a855f7", label: "Mor" },
+    { hex: "#f97316", label: "Turuncu" },
+    { hex: "#92400e", label: "Kahve" },
+    { hex: "#1e3a5f", label: "Lacivert" },
+  ];
 
-    let fc = null;
-    let boardId = null;
-    let boardData = null;
-    let allFavProducts = [];
-    let activeTool = "select";
-    let zoomLevel = 1;
+  // ─── State ─────────────────────────────────────────────────────────────────
+  let fc = null;
+  let boardId = null;
+  let currentTool = "select";
+  let allProducts = [];
 
-    const $id = (id) => document.getElementById(id);
-    const saveMsgEl = $id("save-msg");
-    const zoomEl = $id("zoom-indicator");
+  // Panning state
+  let _panning = false;      // space held
+  let _panStart = null;
 
-    // ── Helpers ──────────────────────────────────────────────────────────────
+  // History state
+  let _hist = [];
+  let _histIdx = -1;
+  let _histLoading = false;
+  const MAX_HIST = 50;
 
-    function setSaveMsg(text, ok) {
-      if (!text) { saveMsgEl.classList.add("hidden"); return; }
-      saveMsgEl.textContent = text;
-      saveMsgEl.className = `text-[11px] ml-1 ${ok ? "text-green-600" : "text-[#6e6e73]"}`;
-      saveMsgEl.classList.remove("hidden");
-      if (ok) setTimeout(() => saveMsgEl.classList.add("hidden"), 3000);
-    }
+  // Mouse down position (for click-to-place threshold)
+  let _mdPos = null;
 
-    function setActiveTool(name) {
-      activeTool = name;
-      document.querySelectorAll(".tool-btn").forEach((btn) => {
-        const on = btn.dataset.tool === name;
-        btn.classList.toggle("active", on);
-      });
+  // ─── History ───────────────────────────────────────────────────────────────
+  function pushHistory() {
+    if (_histLoading || !fc) return;
+    _hist = _hist.slice(0, _histIdx + 1);
+    _hist.push(fc.toJSON(["id","productId","name","locked","_borderRadius"]));
+    if (_hist.length > MAX_HIST) _hist.shift();
+    _histIdx = _hist.length - 1;
+    triggerAutoSave();
+  }
+
+  function undo() {
+    if (!fc || _histIdx <= 0) return;
+    _histIdx--;
+    loadHistoryState(_hist[_histIdx]);
+  }
+
+  function redo() {
+    if (!fc || _histIdx >= _hist.length - 1) return;
+    _histIdx++;
+    loadHistoryState(_hist[_histIdx]);
+  }
+
+  function loadHistoryState(state) {
+    _histLoading = true;
+    fc.loadFromJSON(state, () => {
+      _histLoading = false;
+      restoreStyles();
+      fc.renderAll();
+      updatePanel();
+    });
+  }
+
+  // ─── Canvas init ───────────────────────────────────────────────────────────
+  function initCanvas() {
+    const wrap = document.getElementById("canvas-wrap");
+
+    fc = new fabric.Canvas("fc", {
+      width: wrap.clientWidth,
+      height: wrap.clientHeight,
+      backgroundColor: "#ffffff",
+      preserveObjectStacking: true,
+      selection: true,
+    });
+
+    // Global default handle styles
+    fabric.Object.prototype.set({
+      borderColor: "#3b82f6",
+      cornerColor: "#3b82f6",
+      cornerStrokeColor: "#fff",
+      cornerSize: 8,
+      transparentCorners: false,
+      borderScaleFactor: 1.5,
+    });
+
+    // ── Mouse wheel zoom ──
+    fc.on("mouse:wheel", opt => {
+      const e = opt.e;
+      if (!e) return;
+      let z = fc.getZoom() * (0.999 ** e.deltaY);
+      z = Math.max(0.05, Math.min(10, z));
+      fc.zoomToPoint({ x: e.offsetX, y: e.offsetY }, z);
+      e.preventDefault(); e.stopPropagation();
+      updateZoomDisplay();
+    });
+
+    // ── Pan (space+drag / middle mouse) ──
+    fc.on("mouse:down", opt => {
+      const e = opt.e;
+      if (_panning || (e && e.button === 1)) {
+        fc.isDragging = true;
+        fc.selection = false;
+        _panStart = { x: e.clientX, y: e.clientY };
+        e.preventDefault();
+      }
+      if (!_panning && e && e.button !== 1 && currentTool !== "select") {
+        _mdPos = { x: e.clientX, y: e.clientY };
+      }
+    });
+
+    fc.on("mouse:move", opt => {
+      if (!fc.isDragging || !_panStart || !opt.e) return;
+      const vpt = fc.viewportTransform;
+      vpt[4] += opt.e.clientX - _panStart.x;
+      vpt[5] += opt.e.clientY - _panStart.y;
+      fc.requestRenderAll();
+      _panStart = { x: opt.e.clientX, y: opt.e.clientY };
+    });
+
+    fc.on("mouse:up", opt => {
+      if (fc.isDragging) {
+        fc.isDragging = false;
+        if (!_panning) fc.selection = true;
+        _panStart = null;
+        return;
+      }
+      // Click-to-place for tool modes
+      if (currentTool !== "select" && _mdPos && opt.e) {
+        const dx = Math.abs(opt.e.clientX - _mdPos.x);
+        const dy = Math.abs(opt.e.clientY - _mdPos.y);
+        if (dx < 6 && dy < 6) handlePlaceTool(opt);
+      }
+      _mdPos = null;
+    });
+
+    // ── Selection events → panel ──
+    fc.on("selection:created", updatePanel);
+    fc.on("selection:updated", updatePanel);
+    fc.on("selection:cleared", updatePanel);
+    fc.on("object:modified", () => { updatePanel(); pushHistory(); });
+    fc.on("object:added", () => { if (!_histLoading) pushHistory(); });
+    fc.on("object:removed", () => { if (!_histLoading) pushHistory(); });
+
+    // ── Resize ──
+    window.addEventListener("resize", () => {
       if (!fc) return;
-      fc.defaultCursor = name === "select" ? "default" : "crosshair";
-      fc.selection = name === "select";
-      fc.forEachObject((o) => { o.selectable = name === "select"; o.evented = name === "select"; });
-    }
+      const w = wrap.clientWidth;
+      const h = wrap.clientHeight;
+      fc.setDimensions({ width: w, height: h });
+    });
+  }
 
-    function showPopup(popup, anchor) {
-      const r = anchor.getBoundingClientRect();
-      popup.style.top  = `${r.top}px`;
-      popup.style.left = `${r.right + 8}px`;
-      popup.classList.remove("hidden");
-    }
-
-    function hideAllPopups() {
-      $id("bg-palette").classList.add("hidden");
-      $id("download-menu").classList.add("hidden");
-    }
-
-    function boardLabel() {
-      return ($id("board-name").value.trim() || "tasarim-panosu")
-        .replace(/\s+/g, "-").toLowerCase();
-    }
-
-    // ── Fabric canvas init ────────────────────────────────────────────────────
-
-    function initCanvas() {
-      const wrap = $id("canvas-wrap");
-      const w = Math.max(500, wrap.clientWidth  - 32);
-      const h = Math.max(400, window.innerHeight - 180);
-
-      fc = new fabric.Canvas("fc", {
-        width: w,
-        height: h,
-        backgroundColor: "#f5f5f5",
-        preserveObjectStacking: true,
-      });
-
-      // Global object handle style (v5)
-      fabric.Object.prototype.set({
-        borderColor:        "#3b82f6",
-        cornerColor:        "#3b82f6",
-        cornerStrokeColor:  "#fff",
-        cornerSize:         10,
+  // ─── Restore handle styles after history load ───────────────────────────────
+  function restoreStyles() {
+    if (!fc) return;
+    fc.getObjects().forEach(obj => {
+      obj.set({
+        borderColor: "#3b82f6",
+        cornerColor: "#3b82f6",
+        cornerStrokeColor: "#fff",
+        cornerSize: 8,
         transparentCorners: false,
-        borderScaleFactor:  1.5,
+        borderScaleFactor: 1.5,
       });
+    });
+  }
 
-      // Drawing tool: mouse:down
-      fc.on("mouse:down", (opt) => {
-        if (activeTool === "select") return;
-        // Only draw on empty area (no target)
-        if (opt.target) return;
+  // ─── Tool management ──────────────────────────────────────────────────────
+  function setTool(t) {
+    currentTool = t;
+    document.querySelectorAll(".tool-btn").forEach(b => b.classList.remove("active"));
+    const btn = document.getElementById("tool-" + t);
+    if (btn) btn.classList.add("active");
 
-        const pointer = fc.getPointer(opt.e);
+    if (t === "select") {
+      fc.isDrawingMode = false;
+      fc.selection = true;
+      fc.defaultCursor = "default";
+      fc.hoverCursor = "move";
+      document.getElementById("canvas-wrap").style.cursor = "";
+    } else {
+      fc.isDrawingMode = false;
+      fc.selection = false;
+      fc.discardActiveObject();
+      fc.renderAll();
+      fc.defaultCursor = "crosshair";
+      fc.hoverCursor = "crosshair";
+      document.getElementById("canvas-wrap").style.cursor = "crosshair";
+    }
+  }
 
-        if (activeTool === "text") {
-          const text = new fabric.IText("Metin gir...", {
-            left: pointer.x,
-            top:  pointer.y,
-            fontFamily: "sans-serif",
-            fontSize: 24,
-            fill: "#111",
-            editable: true,
-          });
-          fc.add(text);
-          fc.setActiveObject(text);
-          text.enterEditing();
-          setActiveTool("select");
+  function handlePlaceTool(opt) {
+    const pt = fc.getPointer(opt.e);
 
-        } else if (activeTool === "rect") {
-          const rect = new fabric.Rect({
-            left: pointer.x - 100,
-            top:  pointer.y - 60,
-            width: 200, height: 120,
-            fill: "#e5e7eb",
-            rx: 8, ry: 8,
-          });
-          fc.add(rect);
-          fc.setActiveObject(rect);
-          setActiveTool("select");
-
-        } else if (activeTool === "circle") {
-          const circle = new fabric.Circle({
-            left:   pointer.x - 60,
-            top:    pointer.y - 60,
-            radius: 60,
-            fill: "#e5e7eb",
-          });
-          fc.add(circle);
-          fc.setActiveObject(circle);
-          setActiveTool("select");
-        }
-
-        fc.renderAll();
+    if (currentTool === "text") {
+      const txt = new fabric.IText("Metin girin", {
+        left: pt.x,
+        top: pt.y,
+        fontFamily: "Inter",
+        fontSize: 24,
+        fill: "#111111",
+        selectable: true,
+        editable: true,
       });
+      _histLoading = true; // suppress double-push
+      fc.add(txt);
+      _histLoading = false;
+      fc.setActiveObject(txt);
+      fc.renderAll();
+      setTool("select");
+      setTimeout(() => txt.enterEditing(), 50);
+      pushHistory();
 
-      // Window resize
-      window.addEventListener("resize", () => {
-        if (!fc) return;
-        const newW = Math.max(500, wrap.clientWidth  - 32);
-        const newH = Math.max(400, window.innerHeight - 180);
-        fc.setDimensions({ width: newW, height: newH });
-        fc.renderAll();
+    } else if (currentTool === "rect") {
+      const r = new fabric.Rect({
+        left: pt.x - 75, top: pt.y - 50,
+        width: 150, height: 100,
+        fill: "#e5e7eb", stroke: "#9ca3af", strokeWidth: 1,
       });
+      fc.add(r);
+      fc.setActiveObject(r);
+      fc.renderAll();
+      setTool("select");
+
+    } else if (currentTool === "circle") {
+      const ci = new fabric.Circle({
+        left: pt.x - 50, top: pt.y - 50,
+        radius: 50,
+        fill: "#e5e7eb", stroke: "#9ca3af", strokeWidth: 1,
+      });
+      fc.add(ci);
+      fc.setActiveObject(ci);
+      fc.renderAll();
+      setTool("select");
+
+    } else if (currentTool === "line") {
+      const li = new fabric.Line(
+        [pt.x - 60, pt.y, pt.x + 60, pt.y],
+        { stroke: "#333333", strokeWidth: 2, selectable: true }
+      );
+      fc.add(li);
+      fc.setActiveObject(li);
+      fc.renderAll();
+      setTool("select");
+    }
+  }
+
+  // ─── Object actions ────────────────────────────────────────────────────────
+  function bringToFront() {
+    const o = fc.getActiveObject(); if (!o) return;
+    fc.bringToFront(o); fc.renderAll(); pushHistory();
+  }
+  function sendToBack() {
+    const o = fc.getActiveObject(); if (!o) return;
+    fc.sendToBack(o); fc.renderAll(); pushHistory();
+  }
+  function duplicateSelected() {
+    const o = fc.getActiveObject(); if (!o) return;
+    o.clone(cloned => {
+      cloned.set({ left: o.left + 20, top: o.top + 20 });
+      fc.add(cloned);
+      fc.setActiveObject(cloned);
+      fc.renderAll();
+    });
+  }
+  function toggleLock() {
+    const o = fc.getActiveObject(); if (!o) return;
+    const locked = !o.locked;
+    o.set({
+      locked,
+      selectable: !locked,
+      evented: !locked,
+      hasControls: !locked,
+      lockMovementX: locked,
+      lockMovementY: locked,
+    });
+    fc.renderAll();
+    const shackle = document.getElementById("lock-shackle");
+    const btn = document.getElementById("tool-lock");
+    if (locked) {
+      shackle.setAttribute("d", "M7 11V7a5 5 0 0 1 10 0v4");
+      btn.classList.add("active");
+    } else {
+      shackle.setAttribute("d", "M7 11V7a5 5 0 0 0-1-5");
+      btn.classList.remove("active");
+    }
+    pushHistory();
+  }
+  function deleteSelected() {
+    const o = fc.getActiveObject(); if (!o) return;
+    if (o.locked) return;
+    if (o.type === "activeSelection") {
+      o.forEachObject(x => fc.remove(x));
+      fc.discardActiveObject();
+    } else {
+      fc.remove(o);
+    }
+    fc.renderAll();
+  }
+
+  // ─── Properties panel ─────────────────────────────────────────────────────
+  function updatePanel() {
+    if (!fc) return;
+    const obj = fc.getActiveObject();
+    const bgSec = document.getElementById("bg-section");
+    const objSec = document.getElementById("obj-section");
+
+    if (!obj) {
+      bgSec.style.display = "block";
+      objSec.style.display = "none";
+      return;
+    }
+    bgSec.style.display = "none";
+    objSec.style.display = "block";
+
+    const labels = {
+      "i-text": "Metin", text: "Metin", rect: "Dikdörtgen",
+      circle: "Daire", image: "Görsel", line: "Çizgi",
+      group: "Grup", activeSelection: "Çoklu",
+    };
+    document.getElementById("obj-badge").textContent = labels[obj.type] || obj.type;
+
+    // Position
+    document.getElementById("prop-x").value = Math.round(obj.left || 0);
+    document.getElementById("prop-y").value = Math.round(obj.top || 0);
+
+    // Size
+    let ow = 0, oh = 0;
+    if (obj.type === "circle") {
+      ow = oh = Math.round((obj.radius || 0) * 2 * (obj.scaleX || 1));
+    } else if (obj.type === "line") {
+      ow = Math.round(Math.abs((obj.x2 - obj.x1) || obj.width || 0) * (obj.scaleX || 1));
+      oh = Math.round(Math.abs((obj.y2 - obj.y1) || obj.height || 0) * (obj.scaleY || 1));
+    } else {
+      ow = Math.round((obj.width || 0) * (obj.scaleX || 1));
+      oh = Math.round((obj.height || 0) * (obj.scaleY || 1));
+    }
+    document.getElementById("prop-w").value = ow;
+    document.getElementById("prop-h").value = oh;
+
+    // Opacity
+    const opPct = Math.round((obj.opacity !== undefined ? obj.opacity : 1) * 100);
+    document.getElementById("prop-op").value = opPct;
+    document.getElementById("prop-op-n").value = opPct;
+
+    // Rotation
+    document.getElementById("prop-rot").value = Math.round(obj.angle || 0);
+
+    // Sub-panels
+    const isText = obj.type === "i-text" || obj.type === "text";
+    const isShape = obj.type === "rect" || obj.type === "circle";
+    const isImage = obj.type === "image";
+
+    document.getElementById("text-props").style.display = isText ? "block" : "none";
+    document.getElementById("shape-props").style.display = isShape ? "block" : "none";
+    document.getElementById("image-props").style.display = isImage ? "block" : "none";
+
+    if (isText) {
+      document.getElementById("prop-font").value = obj.fontFamily || "Inter";
+      const fszEl = document.getElementById("prop-fsize");
+      const fszVal = String(obj.fontSize || 24);
+      let found = false;
+      for (let opt of fszEl.options) { if (opt.value === fszVal) { opt.selected = true; found = true; break; } }
+      if (!found) fszEl.options[5].selected = true; // default 24
+      document.getElementById("btn-bold").classList.toggle("active", obj.fontWeight === "bold");
+      document.getElementById("btn-italic").classList.toggle("active", obj.fontStyle === "italic");
+      document.getElementById("btn-under").classList.toggle("active", !!obj.underline);
+      const fc_ = obj.fill;
+      document.getElementById("prop-tcolor").value = (typeof fc_ === "string" && fc_.startsWith("#")) ? fc_ : "#111111";
+      document.getElementById("align-l").classList.toggle("active", obj.textAlign === "left" || !obj.textAlign);
+      document.getElementById("align-c").classList.toggle("active", obj.textAlign === "center");
+      document.getElementById("align-r").classList.toggle("active", obj.textAlign === "right");
     }
 
-    // ── Image helpers ─────────────────────────────────────────────────────────
+    if (isShape) {
+      const fill = obj.fill || "#e5e7eb";
+      document.getElementById("prop-fill").value = (typeof fill === "string" && /^#[0-9a-fA-F]{6}$/.test(fill)) ? fill : "#e5e7eb";
+      const st = obj.stroke || "#9ca3af";
+      document.getElementById("prop-stroke").value = (typeof st === "string" && /^#[0-9a-fA-F]{6}$/.test(st)) ? st : "#9ca3af";
+      document.getElementById("prop-sw").value = obj.strokeWidth || 0;
+    }
 
-    function addImageFromURL(url, overrides = {}) {
-      fabric.Image.fromURL(url, (img) => {
-        img.scaleToWidth(220);
-        img.set({ left: fc.width / 2 - 110, top: fc.height / 2 - 110, ...overrides });
+    if (isImage) {
+      const r = obj._borderRadius || 0;
+      document.getElementById("prop-rad").value = r;
+      document.getElementById("prop-rad-n").textContent = r;
+    }
+  }
+
+  // ─── Apply props ───────────────────────────────────────────────────────────
+  function applyProp(prop, val) {
+    const o = fc && fc.getActiveObject(); if (!o || o.locked) return;
+    o.set(prop, val); fc.renderAll();
+  }
+
+  function applySize(axis, val) {
+    const o = fc && fc.getActiveObject(); if (!o || o.locked) return;
+    if (o.type === "circle") {
+      o.set("radius", val / 2); o.set("scaleX", 1); o.set("scaleY", 1);
+    } else if (axis === "w") {
+      o.set("scaleX", val / Math.max(o.width || 1, 1));
+    } else {
+      o.set("scaleY", val / Math.max(o.height || 1, 1));
+    }
+    fc.renderAll();
+  }
+
+  function applyTextProp(prop, val) {
+    const o = fc && fc.getActiveObject();
+    if (!o || (o.type !== "i-text" && o.type !== "text")) return;
+    o.set(prop, val); fc.renderAll();
+    updatePanel();
+  }
+
+  function toggleTextStyle(style) {
+    const o = fc && fc.getActiveObject();
+    if (!o || (o.type !== "i-text" && o.type !== "text")) return;
+    if (style === "bold") o.set("fontWeight", o.fontWeight === "bold" ? "normal" : "bold");
+    else if (style === "italic") o.set("fontStyle", o.fontStyle === "italic" ? "normal" : "italic");
+    else if (style === "underline") o.set("underline", !o.underline);
+    fc.renderAll(); updatePanel();
+  }
+
+  function applyRadius(val) {
+    const o = fc && fc.getActiveObject();
+    if (!o || o.type !== "image") return;
+    o._borderRadius = val;
+    const clip = new fabric.Rect({
+      width: o.width,
+      height: o.height,
+      rx: (o.width * val) / 200,
+      ry: (o.height * val) / 200,
+      originX: "center",
+      originY: "center",
+    });
+    o.set("clipPath", clip);
+    fc.renderAll();
+  }
+
+  // ─── Image upload / replace ────────────────────────────────────────────────
+  function handleImageUpload(input) {
+    if (!input.files || !input.files[0]) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      fabric.Image.fromURL(e.target.result, img => {
+        const maxW = fc.width * 0.45;
+        const maxH = fc.height * 0.45;
+        const scale = Math.min(maxW / img.width, maxH / img.height, 1);
+        img.scale(scale);
+        img.set({
+          left: fc.width / 2 - (img.width * scale) / 2,
+          top:  fc.height / 2 - (img.height * scale) / 2,
+        });
         fc.add(img);
         fc.setActiveObject(img);
         fc.renderAll();
       }, { crossOrigin: "anonymous" });
-    }
+    };
+    reader.readAsDataURL(input.files[0]);
+    input.value = "";
+    setTool("select");
+  }
 
-    // ── Favorites list ────────────────────────────────────────────────────────
-
-    function renderFavList(products) {
-      const wrap = $id("favorites-list");
-      if (!products.length) {
-        wrap.innerHTML = `<p class="text-[12px] text-[#6e6e73] py-6 text-center">Favori ürün bulunamadı.</p>`;
-        return;
-      }
-      wrap.innerHTML = products.map((p) => `
-        <button draggable="true" data-product-id="${p.id}"
-                class="w-full text-left rounded-xl border border-black/10 p-2 hover:border-black/35 hover:bg-[#fafafa] transition cursor-grab active:cursor-grabbing">
-          <div class="flex gap-2 items-center">
-            <img src="${p.image || FALLBACK_IMG}"
-                 class="w-12 h-12 rounded-lg object-cover flex-shrink-0 pointer-events-none"
-                 alt="${p.name}">
-            <div class="min-w-0">
-              <p class="text-[12px] font-medium leading-tight truncate">${p.name}</p>
-              <p class="text-[11px] text-[#6e6e73] mt-0.5">Tıkla veya sürükle</p>
-            </div>
-          </div>
-        </button>
-      `).join("");
-
-      wrap.querySelectorAll("[data-product-id]").forEach((btn) => {
-        const product = products.find((x) => String(x.id) === btn.dataset.productId);
-        if (!product) return;
-
-        btn.addEventListener("click", () => {
-          addImageFromURL(product.image || FALLBACK_IMG);
-          setSaveMsg("Ürün eklendi. Kaydetmeyi unutma.", false);
-        });
-
-        btn.addEventListener("dragstart", (e) => {
-          e.dataTransfer.effectAllowed = "copy";
-          e.dataTransfer.setData("application/json", JSON.stringify(product));
-        });
-      });
-    }
-
-    // ── Save ──────────────────────────────────────────────────────────────────
-
-    async function saveBoard() {
-      if (!fc || !boardId) return;
-      const name = $id("board-name").value.trim() || "Tasarım Panosu";
-      setSaveMsg("Kaydediliyor...", false);
-      const canvasJSON = fc.toJSON(["id", "productId", "name"]);
-      const res = await AG.updateMoodboard(boardId, {
-        name,
-        canvas_json: JSON.stringify(canvasJSON),
-      });
-      if (!res.ok) { setSaveMsg(res.message || "Kaydedilemedi.", false); return; }
-      setSaveMsg("Pano kaydedildi.", true);
-    }
-
-    // ── Boot ──────────────────────────────────────────────────────────────────
-
-    async function boot() {
-      await AG.ready;
-      const session = await AG.getSessionArchitect();
-      if (!session) { location.href = "/mimar-giris.html"; return; }
-
-      const qp = new URLSearchParams(location.search);
-      boardId = qp.get("id");
-
-      if (!boardId) {
-        const created = await AG.createMoodboard({ name: "Yeni Tasarım Panosu" });
-        if (!created.ok) { setSaveMsg("Pano oluşturulamadı.", false); return; }
-        location.href = `/tasarim-panosu.html?id=${encodeURIComponent(created.moodboard.id)}`;
-        return;
-      }
-
-      boardData = await AG.getMoodboard(boardId);
-      if (!boardData) { setSaveMsg("Pano bulunamadı.", false); return; }
-
-      $id("board-name").value = boardData.name || "Tasarım Panosu";
-
-      // Fabric canvas başlat
-      initCanvas();
-      setActiveTool("select");
-
-      // Board yükle: canvas_json önce, sonra eski items[] fallback
-      if (boardData.canvas_json) {
-        try {
-          fc.loadFromJSON(JSON.parse(boardData.canvas_json), () => fc.renderAll());
-        } catch (err) {
-          console.warn("canvas_json yüklenemedi:", err);
+  function replaceImage(input) {
+    const o = fc && fc.getActiveObject();
+    if (!o || o.type !== "image" || !input.files || !input.files[0]) return;
+    const { left, top, scaleX, scaleY, angle, name, productId, _borderRadius } = o;
+    const reader = new FileReader();
+    reader.onload = e => {
+      fabric.Image.fromURL(e.target.result, img => {
+        img.set({ left, top, scaleX, scaleY, angle, name, productId, _borderRadius });
+        if (_borderRadius) {
+          img.set("clipPath", new fabric.Rect({
+            width: img.width, height: img.height,
+            rx: (img.width * _borderRadius) / 200,
+            ry: (img.height * _borderRadius) / 200,
+            originX: "center", originY: "center",
+          }));
         }
-      } else if (Array.isArray(boardData.items) && boardData.items.length > 0) {
-        boardData.items.forEach((item) => {
-          if (item.image) {
-            fabric.Image.fromURL(item.image, (img) => {
-              img.scaleToWidth(item.w || 220);
-              img.set({ left: item.x || 50, top: item.y || 50 });
-              fc.add(img);
-              fc.renderAll();
-            }, { crossOrigin: "anonymous" });
-          }
-        });
-      }
-
-      // Arkaplan rengi
-      if (boardData.bgColor) {
-        fc.backgroundColor = boardData.bgColor;
+        fc.remove(o);
+        fc.add(img);
+        fc.setActiveObject(img);
         fc.renderAll();
+      }, { crossOrigin: "anonymous" });
+    };
+    reader.readAsDataURL(input.files[0]);
+    input.value = "";
+  }
+
+  // ─── Canvas background ─────────────────────────────────────────────────────
+  function setCanvasBg(color) {
+    if (!fc) return;
+    fc.setBackgroundColor(color, fc.renderAll.bind(fc));
+    document.querySelectorAll(".cc").forEach(c => c.classList.toggle("active", c.dataset.color === color));
+    document.getElementById("bg-custom").value = color;
+    pushHistory();
+  }
+
+  function buildBgChips() {
+    const wrap = document.getElementById("bg-chips");
+    wrap.innerHTML = "";
+    BG_COLORS.forEach(({ hex, label }) => {
+      const c = document.createElement("div");
+      c.className = "cc";
+      c.dataset.color = hex;
+      c.style.background = hex;
+      c.title = label;
+      if (hex === "#ffffff") c.style.border = "2px solid rgba(200,200,200,0.25)";
+      c.onclick = () => setCanvasBg(hex);
+      wrap.appendChild(c);
+    });
+  }
+
+  // ─── Zoom ──────────────────────────────────────────────────────────────────
+  function updateZoomDisplay() {
+    if (!fc) return;
+    document.getElementById("zoom-display").textContent = Math.round(fc.getZoom() * 100) + "%";
+  }
+
+  function adjustZoom(delta) {
+    if (!fc) return;
+    const z = Math.max(0.05, Math.min(10, fc.getZoom() + delta));
+    fc.setZoom(z);
+    updateZoomDisplay();
+  }
+
+  function resetZoom() {
+    if (!fc) return;
+    fc.setViewportTransform([1, 0, 0, 1, 0, 0]);
+    updateZoomDisplay();
+  }
+
+  // ─── Auto-save + manual save ──────────────────────────────────────────────
+  let _saveTimeout = null;
+  function triggerAutoSave() {
+    clearTimeout(_saveTimeout);
+    _saveTimeout = setTimeout(() => _doSave(false), 3000);
+  }
+
+  async function saveBoard() { await _doSave(true); }
+
+  async function _doSave(feedback) {
+    if (!fc || !boardId) return;
+    const name = (document.getElementById("board-name").value || "").trim() || "Yeni Pano";
+    const canvas_json = JSON.stringify(fc.toJSON(["id","productId","name","locked","_borderRadius"]));
+    try {
+      await AG.updateMoodboard(boardId, { name, canvas_json });
+      if (feedback) {
+        const el = document.getElementById("save-status");
+        el.style.color = "#22c55e"; el.textContent = "Kaydedildi ✓";
+        setTimeout(() => { el.style.color = "#888"; el.textContent = "—"; }, 2000);
       }
+    } catch(e) { console.error("save:", e); }
+  }
 
-      // Favori ürünler
-      allFavProducts = await AG.getFavoriteProducts();
-      renderFavList(allFavProducts);
+  function saveBoardName() {
+    if (!boardId) return;
+    const name = (document.getElementById("board-name").value || "").trim() || "Yeni Pano";
+    AG.updateMoodboard(boardId, { name });
+  }
 
-      // ── Event listeners ──────────────────────────────────────────────────
+  // ─── Download ─────────────────────────────────────────────────────────────
+  function toggleDlMenu() {
+    document.getElementById("dl-menu").classList.toggle("open");
+  }
 
-      // Ürün arama
-      $id("product-search").addEventListener("input", (e) => {
-        const q = e.target.value.trim().toLowerCase();
-        renderFavList(q ? allFavProducts.filter((p) => p.name.toLowerCase().includes(q)) : allFavProducts);
+  document.addEventListener("click", e => {
+    if (!e.target.closest("#dl-menu") && !e.target.closest("#dl-btn")) {
+      const m = document.getElementById("dl-menu");
+      if (m) m.classList.remove("open");
+    }
+  });
+
+  function downloadJPG() {
+    document.getElementById("dl-menu").classList.remove("open");
+    if (!fc) return;
+    const url = fc.toDataURL({ format: "jpeg", quality: 0.95, multiplier: 2 });
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = (document.getElementById("board-name").value.trim() || "tasarim-panosu") + ".jpg";
+    a.click();
+  }
+
+  function downloadPDF() {
+    document.getElementById("dl-menu").classList.remove("open");
+    if (!fc || !window.jspdf) return;
+    const { jsPDF } = window.jspdf;
+    const w = fc.width, h = fc.height;
+    const pdf = new jsPDF({ orientation: w > h ? "landscape" : "portrait", unit: "px", format: [w, h] });
+    const url = fc.toDataURL({ format: "png", multiplier: 2 });
+    pdf.addImage(url, "PNG", 0, 0, w, h);
+    pdf.save((document.getElementById("board-name").value.trim() || "tasarim-panosu") + ".pdf");
+  }
+
+  // ─── Products ─────────────────────────────────────────────────────────────
+  function addProductToCanvas(product) {
+    const src = product.image || FALLBACK_IMG;
+    fabric.Image.fromURL(src, img => {
+      const maxS = Math.min(fc.width, fc.height) * 0.25;
+      const scale = Math.min(maxS / img.width, maxS / img.height, 1);
+      img.scale(scale);
+      img.set({
+        left: 60 + Math.random() * 120,
+        top:  60 + Math.random() * 80,
+        name: product.name,
+        productId: product.id,
       });
+      fc.add(img);
+      fc.setActiveObject(img);
+      fc.renderAll();
+    }, { crossOrigin: "anonymous" });
+  }
 
-      // Kaydet
-      $id("save-btn").addEventListener("click", saveBoard);
-      document.addEventListener("keydown", (e) => {
-        if ((e.ctrlKey || e.metaKey) && e.key === "s") { e.preventDefault(); saveBoard(); }
-      });
+  function filterProducts(q) {
+    const qL = (q || "").toLowerCase();
+    const list = qL ? allProducts.filter(p =>
+      p.name.toLowerCase().includes(qL) || (p.category || "").toLowerCase().includes(qL)
+    ) : allProducts;
+    renderProducts(list);
+  }
 
-      // Delete tuşu
-      document.addEventListener("keydown", (e) => {
-        if ((e.key === "Delete" || e.key === "Backspace") &&
-            !["INPUT", "TEXTAREA"].includes(document.activeElement.tagName)) {
-          const obj = fc.getActiveObject();
-          if (obj) { fc.remove(obj); fc.discardActiveObject(); fc.renderAll(); }
-        }
-      });
+  function renderProducts(list) {
+    const el = document.getElementById("prod-list");
+    if (!list.length) {
+      el.innerHTML = '<div style="padding:14px 8px;font-size:11px;color:#555;text-align:center;">Favori ürün bulunamadı</div>';
+      return;
+    }
+    el.innerHTML = "";
+    list.forEach(p => {
+      const div = document.createElement("div");
+      div.className = "prod-item";
+      div.draggable = true;
+      div.innerHTML = `
+        <img src="${p.image || FALLBACK_IMG}" alt="${p.name}" onerror="this.src='${FALLBACK_IMG}'" />
+        <div style="overflow:hidden;min-width:0;">
+          <div class="pn">${p.name}</div>
+          <div class="pc">${p.category || ""}</div>
+        </div>`;
+      div.onclick = () => addProductToCanvas(p);
+      div.ondragstart = e => {
+        e.dataTransfer.setData("ag-product", JSON.stringify(p));
+      };
+      el.appendChild(div);
+    });
+  }
 
-      // Araç butonları
-      $id("tool-select").addEventListener("click", () => setActiveTool("select"));
-      $id("tool-text"  ).addEventListener("click", () => setActiveTool("text"));
-      $id("tool-rect"  ).addEventListener("click", () => setActiveTool("rect"));
-      $id("tool-circle").addEventListener("click", () => setActiveTool("circle"));
+  // ─── Canvas drag-drop ─────────────────────────────────────────────────────
+  function setupDragDrop() {
+    const wrap = document.getElementById("canvas-wrap");
+    wrap.addEventListener("dragover", e => e.preventDefault());
+    wrap.addEventListener("drop", e => {
+      e.preventDefault();
+      const raw = e.dataTransfer.getData("ag-product");
+      if (!raw) return;
+      try {
+        const p = JSON.parse(raw);
+        const rect = wrap.getBoundingClientRect();
+        const pt = fc.getPointer({ clientX: e.clientX, clientY: e.clientY, offsetX: e.clientX - rect.left, offsetY: e.clientY - rect.top });
+        fabric.Image.fromURL(p.image || FALLBACK_IMG, img => {
+          const maxS = Math.min(fc.width, fc.height) * 0.25;
+          const scale = Math.min(maxS / img.width, maxS / img.height, 1);
+          img.scale(scale);
+          img.set({ left: pt.x - (img.width * scale) / 2, top: pt.y - (img.height * scale) / 2, name: p.name, productId: p.id });
+          fc.add(img); fc.setActiveObject(img); fc.renderAll();
+        }, { crossOrigin: "anonymous" });
+      } catch {}
+    });
+  }
 
-      // Görsel yükle (file input)
-      const fileInput = $id("file-input");
-      $id("tool-image").addEventListener("click", () => fileInput.click());
-      fileInput.addEventListener("change", () => {
-        Array.from(fileInput.files).forEach((file) => {
-          if (!file.type.startsWith("image/")) return;
-          const reader = new FileReader();
-          reader.onload = (ev) => {
-            fabric.Image.fromURL(ev.target.result, (img) => {
-              img.scaleToWidth(220);
-              img.set({ left: fc.width / 2 - 110, top: fc.height / 2 - 110 });
-              fc.add(img);
-              fc.setActiveObject(img);
-              fc.renderAll();
-            });
-          };
-          reader.readAsDataURL(file);
-        });
-        fileInput.value = "";
-        setSaveMsg("Görsel eklendi. Kaydetmeyi unutma.", false);
-      });
+  // ─── Keyboard shortcuts ───────────────────────────────────────────────────
+  document.addEventListener("keydown", e => {
+    const tag = document.activeElement ? document.activeElement.tagName : "";
+    const isInput = tag === "INPUT" || tag === "TEXTAREA" || document.activeElement.contentEditable === "true";
 
-      // Z-order
-      $id("tool-front").addEventListener("click", () => {
-        const obj = fc.getActiveObject();
-        if (obj) { fc.bringToFront(obj); fc.renderAll(); }
-      });
-      $id("tool-back").addEventListener("click", () => {
-        const obj = fc.getActiveObject();
-        if (obj) { fc.sendToBack(obj); fc.renderAll(); }
-      });
-
-      // Sil butonu
-      $id("tool-delete").addEventListener("click", () => {
-        const obj = fc.getActiveObject();
-        if (obj) { fc.remove(obj); fc.discardActiveObject(); fc.renderAll(); }
-      });
-
-      // Zoom
-      $id("zoom-in-btn").addEventListener("click", () => {
-        zoomLevel = Math.min(3, +(zoomLevel + 0.1).toFixed(1));
-        fc.setZoom(zoomLevel);
-        zoomEl.textContent = `${Math.round(zoomLevel * 100)}%`;
-      });
-      $id("zoom-out-btn").addEventListener("click", () => {
-        zoomLevel = Math.max(0.2, +(zoomLevel - 0.1).toFixed(1));
-        fc.setZoom(zoomLevel);
-        zoomEl.textContent = `${Math.round(zoomLevel * 100)}%`;
-      });
-
-      // Arkaplan rengi popup
-      const bgBtn = $id("tool-bg");
-      const bgPalette = $id("bg-palette");
-      bgBtn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        const vis = !bgPalette.classList.contains("hidden");
-        hideAllPopups();
-        if (!vis) showPopup(bgPalette, bgBtn);
-      });
-      bgPalette.addEventListener("click", (e) => e.stopPropagation());
-      bgPalette.querySelectorAll("[data-bg]").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          fc.backgroundColor = btn.dataset.bg;
-          fc.renderAll();
-          bgPalette.classList.add("hidden");
-          if (boardData) boardData.bgColor = btn.dataset.bg;
-        });
-      });
-
-      // İndir popup
-      const dlBtn = $id("tool-download");
-      const dlMenu = $id("download-menu");
-      dlBtn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        const vis = !dlMenu.classList.contains("hidden");
-        hideAllPopups();
-        if (!vis) showPopup(dlMenu, dlBtn);
-      });
-      dlMenu.addEventListener("click", (e) => e.stopPropagation());
-
-      $id("dl-jpg").addEventListener("click", () => {
-        dlMenu.classList.add("hidden");
-        const dataURL = fc.toDataURL({ format: "jpeg", quality: 0.92, multiplier: 2 });
-        const a = document.createElement("a");
-        a.href = dataURL;
-        a.download = `${boardLabel()}.jpg`;
-        a.click();
-        setSaveMsg("JPG indirildi.", true);
-      });
-
-      $id("dl-pdf").addEventListener("click", () => {
-        dlMenu.classList.add("hidden");
-        const dataURL = fc.toDataURL({ format: "jpeg", quality: 0.92, multiplier: 2 });
-        const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF({
-          orientation: fc.width > fc.height ? "landscape" : "portrait",
-          unit: "px",
-          format: [fc.width * 2, fc.height * 2],
-        });
-        pdf.addImage(dataURL, "JPEG", 0, 0, fc.width * 2, fc.height * 2);
-        pdf.save(`${boardLabel()}.pdf`);
-        setSaveMsg("PDF indirildi.", true);
-      });
-
-      // Popup kapat (dışarı tıklayınca)
-      document.addEventListener("click", hideAllPopups);
-
-      // ── Drag-drop: kanvasa bırakma ───────────────────────────────────────
-      const canvasWrap = $id("canvas-wrap");
-
-      canvasWrap.addEventListener("dragover", (e) => {
-        e.preventDefault();
-        e.dataTransfer.dropEffect = "copy";
-        canvasWrap.style.outline       = "3px solid #3b82f6";
-        canvasWrap.style.outlineOffset = "-3px";
-        canvasWrap.style.borderRadius  = "1rem";
-      });
-
-      canvasWrap.addEventListener("dragleave", (e) => {
-        if (!canvasWrap.contains(e.relatedTarget)) {
-          canvasWrap.style.outline = "";
-        }
-      });
-
-      canvasWrap.addEventListener("drop", (e) => {
-        e.preventDefault();
-        canvasWrap.style.outline = "";
-
-        const fcEl = fc.getElement();
-        const rect  = fcEl.getBoundingClientRect();
-        const dropX = (e.clientX - rect.left)  / zoomLevel;
-        const dropY = (e.clientY - rect.top)   / zoomLevel;
-
-        // Bilgisayardan dosya bırakma
-        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-          const file = e.dataTransfer.files[0];
-          if (file.type.startsWith("image/")) {
-            const reader = new FileReader();
-            reader.onload = (evt) => {
-              fabric.Image.fromURL(evt.target.result).then((img) => {
-                img.scaleToWidth(220);
-                img.set({ left: Math.max(0, dropX - 110), top: Math.max(0, dropY - 110) });
-                fc.add(img);
-                fc.setActiveObject(img);
-                fc.renderAll();
-                setSaveMsg("Görsel eklendi. Kaydetmeyi unutma.", false);
-              });
-            };
-            reader.readAsDataURL(file);
-          }
-          return;
-        }
-
-        // Sağ panelden ürün bırakma
-        const raw = e.dataTransfer.getData("application/json");
-        if (raw) {
-          try {
-            const product = JSON.parse(raw);
-            fabric.Image.fromURL(product.image || FALLBACK_IMG, (img) => {
-              img.scaleToWidth(220);
-              img.set({ left: Math.max(0, dropX - 110), top: Math.max(0, dropY - 110) });
-              fc.add(img);
-              fc.setActiveObject(img);
-              fc.renderAll();
-              setSaveMsg("Ürün eklendi. Kaydetmeyi unutma.", false);
-            }, { crossOrigin: "anonymous" });
-          } catch {}
-        }
-      });
+    // Space panning
+    if (e.code === "Space" && !isInput) {
+      e.preventDefault();
+      _panning = true;
+      if (fc) { fc.defaultCursor = "grab"; fc.hoverCursor = "grab"; }
+      document.getElementById("canvas-wrap").classList.add("panning");
     }
 
-    boot();
+    if (isInput) return;
+
+    if (e.ctrlKey || e.metaKey) {
+      if (e.key === "z" && !e.shiftKey) { e.preventDefault(); undo(); return; }
+      if (e.key === "y" || (e.key === "z" && e.shiftKey)) { e.preventDefault(); redo(); return; }
+      if (e.key === "d") { e.preventDefault(); duplicateSelected(); return; }
+      if (e.key === "s") { e.preventDefault(); saveBoard(); return; }
+    }
+
+    if (e.key === "Delete" || e.key === "Backspace") { e.preventDefault(); deleteSelected(); }
+    if (e.key === "v") setTool("select");
+    if (e.key === "t") setTool("text");
+    if (e.key === "r") setTool("rect");
+    if (e.key === "c") setTool("circle");
+    if (e.key === "l") setTool("line");
+    if (e.key === "i") document.getElementById("img-upload").click();
+  });
+
+  document.addEventListener("keyup", e => {
+    if (e.code === "Space") {
+      _panning = false;
+      if (fc) { fc.defaultCursor = "default"; fc.hoverCursor = "move"; fc.isDragging = false; }
+      document.getElementById("canvas-wrap").classList.remove("panning");
+    }
+  });
+
+  // ─── Boot ─────────────────────────────────────────────────────────────────
+  (async () => {
+    await AG.ready;
+
+    const session = await AG.getSessionArchitect();
+    if (!session) { window.location.href = "/mimar-giris.html"; return; }
+
+    const params = new URLSearchParams(location.search);
+    boardId = params.get("id") || params.get("boardId");
+
+    if (!boardId) {
+      const res = await AG.createMoodboard({ name: "Yeni Pano" });
+      if (res.ok && res.moodboard) {
+        window.location.replace(location.pathname + "?id=" + res.moodboard.id);
+      }
+      return;
+    }
+
+    // Init canvas
+    initCanvas();
+    buildBgChips();
+    setupDragDrop();
+    updateZoomDisplay();
+
+    // Load board data
+    const boardData = await AG.getMoodboard(boardId);
+    if (boardData) {
+      document.getElementById("board-name").value = boardData.name || "Yeni Pano";
+
+      if (boardData.canvas_json) {
+        _histLoading = true;
+        fc.loadFromJSON(boardData.canvas_json, () => {
+          _histLoading = false;
+          restoreStyles();
+          fc.renderAll();
+          _hist = [];
+          _histIdx = -1;
+          pushHistory();
+        });
+      } else if (Array.isArray(boardData.items) && boardData.items.length > 0) {
+        // Legacy items[] format
+        let loaded = 0;
+        const total = boardData.items.length;
+        _histLoading = true;
+        boardData.items.forEach(item => {
+          if (!item.image) { loaded++; return; }
+          fabric.Image.fromURL(item.image || FALLBACK_IMG, img => {
+            const scaleX = (item.w || 200) / img.width;
+            const scaleY = (item.h || 180) / img.height;
+            img.scale(Math.min(scaleX, scaleY));
+            img.set({ left: item.x || 30, top: item.y || 30, name: item.name, productId: item.productId });
+            fc.add(img);
+            loaded++;
+            if (loaded >= total) {
+              _histLoading = false;
+              fc.renderAll();
+              _hist = []; _histIdx = -1;
+              pushHistory();
+            }
+          }, { crossOrigin: "anonymous" });
+        });
+      } else {
+        _hist = []; _histIdx = -1;
+        pushHistory();
+      }
+    } else {
+      _hist = []; _histIdx = -1;
+      pushHistory();
+    }
+
+    // Load favourite products
+    try {
+      allProducts = await AG.getFavoriteProducts() || [];
+      renderProducts(allProducts);
+    } catch { renderProducts([]); }
+
+    updatePanel();
+  })();
   </script>
+
 </body>
 </html>
