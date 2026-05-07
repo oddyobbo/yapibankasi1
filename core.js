@@ -4,6 +4,9 @@
   const ADMIN_EMAIL  = "admin@antigravity.com";
 
   const CATEGORIES = ["Akustik", "Aydınlatma", "Dış Cephe", "Zemin", "Tavan Sistemleri", "Mobilya"];
+  const LS_PROJECTS_KEY = "ag_projects_v1";
+  const LS_ARCHITECT_ACCOUNTS_KEY = "ag_architect_accounts_v1";
+  const LS_ARCHITECT_SESSION_KEY = "ag_architect_session_v1";
 
   // ── localStorage cache helpers ──────────────────────────────────────────
   const lsRead  = (k, fb) => { try { const r = localStorage.getItem(k); return r ? JSON.parse(r) : fb; } catch { return fb; } };
@@ -213,6 +216,309 @@
   const uploadBrandImage = async (file, brandId) => uploadBrandAsset(file, brandId, "product-images");
   const uploadBrandDocument = async (file, brandId) => uploadBrandAsset(file, brandId, "product-documents");
 
+  // ── Projects (Supabase first, local fallback) ───────────────────────────
+  const dbToProject = (row) => ({
+    id: row.id,
+    brandId: row.brand_id,
+    brandName: row.brand_name || "",
+    title: row.title || "",
+    location: row.location || "",
+    architect: row.architect || "",
+    year: row.year || "",
+    description: row.description || "",
+    image: row.image || "",
+    materials: row.materials || [],
+    status: row.status || "published",
+    createdAt: row.created_at ? new Date(row.created_at).getTime() : Date.now(),
+  });
+
+  const projectToDB = (p) => ({
+    brand_id: p.brandId,
+    brand_name: p.brandName || "",
+    title: p.title || "",
+    location: p.location || "",
+    architect: p.architect || "",
+    year: p.year || "",
+    description: p.description || "",
+    image: p.image || "",
+    materials: p.materials || [],
+    status: p.status || "published",
+  });
+
+  const getProjects = async (opts = {}) => {
+    await ready;
+    const sb = getSB();
+    if (sb) {
+      try {
+        let q = sb.from("projects").select("*").order("created_at", { ascending: false });
+        if (opts.brandId) q = q.eq("brand_id", opts.brandId);
+        const { data, error } = await q;
+        if (!error) return (data || []).map(dbToProject);
+      } catch {}
+    }
+    const local = lsRead(LS_PROJECTS_KEY, []);
+    if (opts.brandId) return local.filter((p) => p.brandId === opts.brandId);
+    return local;
+  };
+
+  const addProject = async (project) => {
+    await ready;
+    const sb = getSB();
+    if (sb) {
+      try {
+        const { data, error } = await sb.from("projects").insert(projectToDB(project)).select().single();
+        if (!error && data) return dbToProject(data);
+      } catch {}
+    }
+    const local = lsRead(LS_PROJECTS_KEY, []);
+    const created = { ...project, id: `p-${Date.now()}`, createdAt: Date.now() };
+    local.unshift(created);
+    lsWrite(LS_PROJECTS_KEY, local);
+    return created;
+  };
+
+  // ── Architect auth & moodboard data (local-first robust fallback) ───────
+  const getArchitectAccounts = () => lsRead(LS_ARCHITECT_ACCOUNTS_KEY, []);
+  const setArchitectAccounts = (accounts) => lsWrite(LS_ARCHITECT_ACCOUNTS_KEY, accounts);
+  const getArchitectSessionSync = () => lsRead(LS_ARCHITECT_SESSION_KEY, null);
+  const setArchitectSession = (session) => lsWrite(LS_ARCHITECT_SESSION_KEY, session || null);
+  const nsKey = (suffix, architectId) => `ag_architect_${suffix}_${architectId}`;
+
+  const registerArchitect = async ({ name, email, password, office }) => {
+    const safeEmail = (email || "").trim().toLowerCase();
+    const safeName = (name || "").trim();
+    if (!safeName || !safeEmail || !password) {
+      return { ok: false, message: "Ad, e-posta ve şifre zorunludur." };
+    }
+
+    const accounts = getArchitectAccounts();
+    if (accounts.some((x) => x.email === safeEmail)) {
+      return { ok: false, message: "Bu e-posta ile kayıtlı mimar hesabı var." };
+    }
+
+    const architect = {
+      id: `arch-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      name: safeName,
+      email: safeEmail,
+      password,
+      office: (office || "").trim(),
+      createdAt: Date.now(),
+    };
+    accounts.push(architect);
+    setArchitectAccounts(accounts);
+    const session = { id: architect.id, name: architect.name, email: architect.email, office: architect.office };
+    setArchitectSession(session);
+    return { ok: true, architect: session };
+  };
+
+  const loginArchitect = async ({ email, password }) => {
+    const safeEmail = (email || "").trim().toLowerCase();
+    const accounts = getArchitectAccounts();
+    const found = accounts.find((x) => x.email === safeEmail && x.password === password);
+    if (!found) return { ok: false, message: "E-posta veya şifre hatalı." };
+    const session = { id: found.id, name: found.name, email: found.email, office: found.office || "" };
+    setArchitectSession(session);
+    return { ok: true, architect: session };
+  };
+
+  const logoutArchitect = async () => {
+    setArchitectSession(null);
+  };
+
+  const getSessionArchitect = async () => getArchitectSessionSync();
+
+  const getArchitectArray = (suffix, architectId, fallback = []) => {
+    if (!architectId) return fallback;
+    return lsRead(nsKey(suffix, architectId), fallback);
+  };
+  const setArchitectArray = (suffix, architectId, value) => {
+    if (!architectId) return;
+    lsWrite(nsKey(suffix, architectId), value);
+  };
+
+  const getFavoriteProducts = async () => {
+    const session = getArchitectSessionSync();
+    if (!session) return [];
+    return getArchitectArray("favorite_products", session.id, []);
+  };
+
+  const getFavoriteProjects = async () => {
+    const session = getArchitectSessionSync();
+    if (!session) return [];
+    return getArchitectArray("favorite_projects", session.id, []);
+  };
+
+  const toggleFavoriteProduct = async (item) => {
+    const session = getArchitectSessionSync();
+    if (!session) return { ok: false, message: "Favori eklemek için mimar girişi yapın." };
+    const list = getArchitectArray("favorite_products", session.id, []);
+    const idx = list.findIndex((x) => x.id === item.id);
+    if (idx >= 0) {
+      list.splice(idx, 1);
+      setArchitectArray("favorite_products", session.id, list);
+      return { ok: true, active: false };
+    }
+    list.unshift({
+      id: item.id,
+      name: item.name || "",
+      image: item.image || "",
+      category: item.category || "",
+      url: item.url || `/urun-unica-baffle.html?id=${encodeURIComponent(item.id || "")}`,
+      savedAt: Date.now(),
+    });
+    setArchitectArray("favorite_products", session.id, list);
+    return { ok: true, active: true };
+  };
+
+  const toggleFavoriteProject = async (item) => {
+    const session = getArchitectSessionSync();
+    if (!session) return { ok: false, message: "Favori eklemek için mimar girişi yapın." };
+    const list = getArchitectArray("favorite_projects", session.id, []);
+    const idx = list.findIndex((x) => x.id === item.id);
+    if (idx >= 0) {
+      list.splice(idx, 1);
+      setArchitectArray("favorite_projects", session.id, list);
+      return { ok: true, active: false };
+    }
+    list.unshift({
+      id: item.id,
+      name: item.name || "",
+      image: item.image || "",
+      location: item.location || "",
+      url: item.url || `/proje-detay.html?id=${encodeURIComponent(item.id || "")}`,
+      savedAt: Date.now(),
+    });
+    setArchitectArray("favorite_projects", session.id, list);
+    return { ok: true, active: true };
+  };
+
+  const createCollection = async (name) => {
+    const session = getArchitectSessionSync();
+    if (!session) return { ok: false, message: "Koleksiyon oluşturmak için giriş yapın." };
+    const safeName = (name || "").trim();
+    if (!safeName) return { ok: false, message: "Koleksiyon adı zorunludur." };
+    const list = getArchitectArray("collections", session.id, []);
+    const created = { id: `col-${Date.now()}`, name: safeName, items: [], createdAt: Date.now() };
+    list.unshift(created);
+    setArchitectArray("collections", session.id, list);
+    return { ok: true, collection: created };
+  };
+
+  const getCollections = async () => {
+    const session = getArchitectSessionSync();
+    if (!session) return [];
+    return getArchitectArray("collections", session.id, []);
+  };
+
+  const addCollectionItem = async ({ collectionId, item }) => {
+    const session = getArchitectSessionSync();
+    if (!session) return { ok: false, message: "Giriş yapın." };
+    const list = getArchitectArray("collections", session.id, []);
+    const target = list.find((x) => x.id === collectionId);
+    if (!target) return { ok: false, message: "Koleksiyon bulunamadı." };
+    const itemType = item.type || "product";
+    if (!target.items.some((x) => x.id === item.id && x.type === itemType)) {
+      target.items.unshift({ ...item, type: itemType, addedAt: Date.now() });
+    }
+    setArchitectArray("collections", session.id, list);
+    return { ok: true };
+  };
+
+  const removeCollectionItem = async ({ collectionId, itemId, type }) => {
+    const session = getArchitectSessionSync();
+    if (!session) return { ok: false, message: "Giriş yapın." };
+    const list = getArchitectArray("collections", session.id, []);
+    const target = list.find((x) => x.id === collectionId);
+    if (!target) return { ok: false, message: "Koleksiyon bulunamadı." };
+    target.items = target.items.filter((x) => !(x.id === itemId && (!type || x.type === type)));
+    setArchitectArray("collections", session.id, list);
+    return { ok: true };
+  };
+
+  const createMoodboard = async ({ name }) => {
+    const session = getArchitectSessionSync();
+    if (!session) return { ok: false, message: "Moodboard oluşturmak için giriş yapın." };
+    const list = getArchitectArray("moodboards", session.id, []);
+    const created = {
+      id: `mb-${Date.now()}`,
+      name: (name || "Yeni Moodboard").trim(),
+      items: [],
+      canvas: { width: 1400, height: 900 },
+      updatedAt: Date.now(),
+      createdAt: Date.now(),
+    };
+    list.unshift(created);
+    setArchitectArray("moodboards", session.id, list);
+    return { ok: true, moodboard: created };
+  };
+
+  const getMoodboards = async () => {
+    const session = getArchitectSessionSync();
+    if (!session) return [];
+    return getArchitectArray("moodboards", session.id, []);
+  };
+
+  const getMoodboard = async (id) => {
+    const list = await getMoodboards();
+    return list.find((x) => x.id === id) || null;
+  };
+
+  const updateMoodboard = async (id, patch) => {
+    const session = getArchitectSessionSync();
+    if (!session) return { ok: false, message: "Giriş yapın." };
+    const list = getArchitectArray("moodboards", session.id, []);
+    const idx = list.findIndex((x) => x.id === id);
+    if (idx < 0) return { ok: false, message: "Moodboard bulunamadı." };
+    list[idx] = {
+      ...list[idx],
+      ...patch,
+      items: Array.isArray(patch.items) ? patch.items : list[idx].items,
+      updatedAt: Date.now(),
+    };
+    setArchitectArray("moodboards", session.id, list);
+    return { ok: true, moodboard: list[idx] };
+  };
+
+  const addProductToMoodboard = async ({ moodboardId, moodboardName, product }) => {
+    const session = getArchitectSessionSync();
+    if (!session) return { ok: false, message: "Lütfen mimar girişi yapın." };
+    const list = getArchitectArray("moodboards", session.id, []);
+    let idx = list.findIndex((x) => x.id === moodboardId);
+
+    if (idx < 0 && moodboardName) {
+      const created = {
+        id: `mb-${Date.now()}`,
+        name: moodboardName.trim() || "Yeni Moodboard",
+        items: [],
+        canvas: { width: 1400, height: 900 },
+        updatedAt: Date.now(),
+        createdAt: Date.now(),
+      };
+      list.unshift(created);
+      idx = 0;
+    }
+    if (idx < 0) return { ok: false, message: "Moodboard bulunamadı." };
+
+    const board = list[idx];
+    const count = Array.isArray(board.items) ? board.items.length : 0;
+    const created = {
+      id: `card-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      productId: product.id,
+      name: product.name || "Ürün",
+      image: product.image || "",
+      x: 30 + (count % 6) * 220,
+      y: 30 + Math.floor(count / 6) * 170,
+      w: 220,
+      h: 190,
+    };
+    board.items = Array.isArray(board.items) ? board.items : [];
+    board.items.push(created);
+    board.updatedAt = Date.now();
+    list[idx] = board;
+    setArchitectArray("moodboards", session.id, list);
+    return { ok: true, moodboard: board };
+  };
+
   // ── Admin data queries ──────────────────────────────────────────────────
   const getAllBrands = async () => {
     await ready;
@@ -306,6 +612,24 @@
     loginAdmin,
     logoutAdmin,
     isAdmin,
+    // architect
+    registerArchitect,
+    loginArchitect,
+    logoutArchitect,
+    getSessionArchitect,
+    getFavoriteProducts,
+    getFavoriteProjects,
+    toggleFavoriteProduct,
+    toggleFavoriteProject,
+    createCollection,
+    getCollections,
+    addCollectionItem,
+    removeCollectionItem,
+    createMoodboard,
+    getMoodboards,
+    getMoodboard,
+    updateMoodboard,
+    addProductToMoodboard,
     // products
     getProducts,
     getAllProducts,
@@ -316,6 +640,8 @@
     uploadBrandAsset,
     uploadBrandImage,
     uploadBrandDocument,
+    getProjects,
+    addProject,
     // admin data
     getAllBrands,
     getVisits,

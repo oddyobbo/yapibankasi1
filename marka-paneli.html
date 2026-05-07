@@ -255,6 +255,26 @@
         </div>
         <div id="brand-products" class="mt-4 grid md:grid-cols-2 xl:grid-cols-3 gap-4"></div>
       </section>
+
+      <section class="rounded-2xl border border-black/10 p-5">
+        <h3 class="text-[20px] font-semibold">Proje Paylaş ve Malzeme Etiketle</h3>
+        <p class="text-[13px] text-[#6e6e73] mt-1">Firma projeni paylaş, bu projede kullandığın kendi ürünlerini etiketle. Projeler sayfasında “Bu projede kullanılan malzemeler” alanında yayınlanır.</p>
+        <form id="project-form" class="mt-4 grid md:grid-cols-2 gap-3 text-[14px]">
+          <input name="title" required class="h-11 rounded-xl border border-black/10 px-4 md:col-span-2" placeholder="Proje adı *">
+          <input name="location" class="h-11 rounded-xl border border-black/10 px-4" placeholder="Lokasyon (örn: İstanbul)">
+          <input name="year" class="h-11 rounded-xl border border-black/10 px-4" placeholder="Yıl (örn: 2026)">
+          <input name="architect" class="h-11 rounded-xl border border-black/10 px-4 md:col-span-2" placeholder="Mimarlık ofisi / ekip">
+          <input name="image" class="h-11 rounded-xl border border-black/10 px-4 md:col-span-2" placeholder="Proje kapak görsel URL'si">
+          <textarea name="description" rows="3" class="rounded-xl border border-black/10 px-4 py-2 md:col-span-2" placeholder="Proje detayı"></textarea>
+          <div class="md:col-span-2">
+            <label class="block text-[12px] text-[#6e6e73] mb-1">Bu projede kullanılan malzemeler (kendi ürünlerinden seç)</label>
+            <select id="project-materials" multiple class="w-full min-h-[120px] rounded-xl border border-black/10 px-3 py-2 bg-white"></select>
+            <p class="text-[12px] text-[#6e6e73] mt-1">Birden fazla ürün seçebilirsin (Ctrl/Cmd + tık).</p>
+          </div>
+          <button class="md:col-span-2 h-11 rounded-xl bg-black text-white font-semibold">Projeyi Yayınla</button>
+          <p id="project-save-msg" class="md:col-span-2 text-[12px] text-[#6e6e73]"></p>
+        </form>
+      </section>
     </main>
     <div id="site-footer"></div>
   </div>
@@ -327,6 +347,7 @@
 
       attachHandlers();
       await render();
+      await hydrateProjectMaterialOptions();
     }
 
     function buildSpec(technical) {
@@ -708,6 +729,42 @@
         await render();
       });
 
+      document.getElementById("project-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const msg = document.getElementById("project-save-msg");
+        const fd = new FormData(e.currentTarget);
+        const title = fd.get("title")?.toString().trim();
+        if (!title) return;
+        const sel = document.getElementById("project-materials");
+        const chosenIds = [...sel.selectedOptions].map((o) => o.value);
+        const ownProducts = await AG.getProducts({ brandId: session.id });
+        const materials = ownProducts
+          .filter((p) => chosenIds.includes(String(p.id)))
+          .map((p) => ({ id: p.id, name: p.name, image: p.image || "", category: p.category || "" }));
+
+        const created = await AG.addProject({
+          brandId: session.id,
+          brandName: session.name || session.email,
+          title,
+          location: fd.get("location")?.toString().trim() || "",
+          year: fd.get("year")?.toString().trim() || "",
+          architect: fd.get("architect")?.toString().trim() || "",
+          image: fd.get("image")?.toString().trim() || "",
+          description: fd.get("description")?.toString().trim() || "",
+          materials,
+          status: "published",
+        });
+        if (!created) {
+          msg.textContent = "Proje kaydedilemedi.";
+          msg.className = "md:col-span-2 text-[12px] text-red-600";
+          return;
+        }
+        e.currentTarget.reset();
+        [...sel.options].forEach((o) => (o.selected = false));
+        msg.textContent = "Proje yayınlandı.";
+        msg.className = "md:col-span-2 text-[12px] text-green-600";
+      });
+
     // --- URL Import ---
     document.getElementById("btn-fetch-url").addEventListener("click", async () => {
       const urlInput = document.getElementById("url-input");
@@ -952,6 +1009,15 @@
         });
       });
     } // end attachHandlers
+
+    async function hydrateProjectMaterialOptions() {
+      const sel = document.getElementById("project-materials");
+      if (!sel || !session) return;
+      const ownProducts = await AG.getProducts({ brandId: session.id });
+      sel.innerHTML = ownProducts.length
+        ? ownProducts.map((p) => `<option value="${p.id}">${p.name} (${p.category || "-"})</option>`).join("")
+        : `<option disabled>Kendi ürününü önce yukarıdan ekle</option>`;
+    }
 
     init();
   </script>

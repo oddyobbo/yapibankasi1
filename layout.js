@@ -1,4 +1,9 @@
 (() => {
+  let architectSession = null;
+  try {
+    architectSession = JSON.parse(localStorage.getItem("ag_architect_session_v1") || "null");
+  } catch {}
+
   if (!document.querySelector('link[data-ag-css="site"]')) {
     const link = document.createElement("link");
     link.rel = "stylesheet";
@@ -9,7 +14,7 @@
 
   const current = document.body.dataset.page || "";
 
-  const navItems = [
+  const baseNavItems = [
     { id: "home", href: "/mvp-taslak-v1.html", label: "Anasayfa" },
     { id: "products", href: "/urunler.html", label: "Ürünler" },
     { id: "brands", href: "/markalar.html", label: "Markalar" },
@@ -98,6 +103,14 @@
 
   const headerTarget = document.getElementById("site-header");
   if (headerTarget) {
+    const navItems = [...baseNavItems];
+    if (architectSession) {
+      navItems.push({ id: "architect-panel", href: "/mimar-paneli.html", label: "Mimar Paneli" });
+      navItems.push({ id: "moodboard", href: "/moodboard.html", label: "Moodboard" });
+    } else {
+      navItems.push({ id: "architect-login", href: "/mimar-giris.html", label: "Mimar Girişi" });
+    }
+
     const nav = navItems
       .map((item) => {
         const isActive = item.id === current;
@@ -164,14 +177,35 @@
       })
       .join("");
 
+    const desktopAuthLinks = architectSession
+      ? `
+        <a href="/marka-giris.html" class="inline-flex items-center px-3 py-2 rounded-full text-[13px] hover:bg-black/[0.05]">Marka Girişi</a>
+        <a href="/mimar-paneli.html" class="inline-flex items-center px-3 py-2 rounded-full text-[13px] hover:bg-black/[0.05]">Mimar Paneli</a>
+        <a href="/marka-basvuru.html" class="px-4 py-2 rounded-full bg-black text-white text-[13px] font-semibold hover:bg-black/85 transition">Marka Başla</a>
+      `
+      : `
+        <a href="/marka-giris.html" class="inline-flex items-center px-3 py-2 rounded-full text-[13px] hover:bg-black/[0.05]">Marka Girişi</a>
+        <a href="/marka-basvuru.html" class="px-4 py-2 rounded-full bg-black text-white text-[13px] font-semibold hover:bg-black/85 transition">Marka Başla</a>
+      `;
+
+    const mobileAuthLinks = architectSession
+      ? `
+        <a href="/marka-giris.html" class="flex-1 h-10 inline-flex items-center justify-center rounded-full border border-black/[0.10] text-[13px]">Marka Girişi</a>
+        <a href="/mimar-paneli.html" class="flex-1 h-10 inline-flex items-center justify-center rounded-full border border-black/[0.10] text-[13px]">Mimar Paneli</a>
+        <a href="/moodboard.html" class="flex-1 h-10 inline-flex items-center justify-center rounded-full bg-black text-white text-[13px] font-semibold">Moodboard</a>
+      `
+      : `
+        <a href="/marka-giris.html" class="flex-1 h-10 inline-flex items-center justify-center rounded-full border border-black/[0.10] text-[13px]">Marka Girişi</a>
+        <a href="/marka-basvuru.html" class="flex-1 h-10 inline-flex items-center justify-center rounded-full bg-black text-white text-[13px] font-semibold">Marka Başla</a>
+      `;
+
     headerTarget.innerHTML = `
       <header class="border-b border-black/[0.06] sticky top-0 bg-white/85 backdrop-blur-xl z-30">
         <div class="h-[72px] px-4 sm:px-6 lg:px-10 flex items-center justify-between">
           <a href="/mvp-taslak-v1.html" class="text-[22px] font-semibold tracking-tight">Antigravity</a>
           <nav class="hidden lg:flex items-center gap-1">${nav}</nav>
           <div class="hidden lg:flex items-center gap-2">
-            <a href="/marka-giris.html" class="inline-flex items-center px-3 py-2 rounded-full text-[13px] hover:bg-black/[0.05]">Giriş</a>
-            <a href="/marka-basvuru.html" class="px-4 py-2 rounded-full bg-black text-white text-[13px] font-semibold hover:bg-black/85 transition">Başla</a>
+            ${desktopAuthLinks}
           </div>
           <button id="mobile-menu-btn" class="lg:hidden inline-flex items-center justify-center w-10 h-10 rounded-full border border-black/[0.08] text-[18px]" aria-label="Menü">☰</button>
         </div>
@@ -179,8 +213,7 @@
           <div class="rounded-2xl border border-black/[0.08] bg-white px-4">
             ${mobileNav}
             <div class="py-4 flex gap-2">
-              <a href="/marka-giris.html" class="flex-1 h-10 inline-flex items-center justify-center rounded-full border border-black/[0.10] text-[13px]">Giriş</a>
-              <a href="/marka-basvuru.html" class="flex-1 h-10 inline-flex items-center justify-center rounded-full bg-black text-white text-[13px] font-semibold">Başla</a>
+              ${mobileAuthLinks}
             </div>
           </div>
         </div>
@@ -265,7 +298,7 @@
   }
 
   // Floating ask pill (site-wide), hide on admin/login pages
-  const noPillPages = new Set(["admin-login", "admin", "brand-login", "brand-panel"]);
+  const noPillPages = new Set(["admin-login", "admin", "brand-login", "brand-panel", "architect-login", "architect-panel", "moodboard"]);
   if (!noPillPages.has(current)) {
     const pill = document.createElement("a");
     pill.href = "/urunler.html";
@@ -295,4 +328,5 @@
     );
     revealEls.forEach((el) => io.observe(el));
   }
+
 })();

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Antigravity | Proje Detayı</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body data-page="projects" class="bg-[#f5f5f7] text-[#111] font-sans min-h-screen">
+  <div class="w-full min-h-screen">
+    <div class="w-full min-h-screen bg-white overflow-hidden">
+      <div id="site-header"></div>
+      <main class="p-6 lg:p-8">
+        <a href="/projeler.html" class="inline-flex items-center gap-2 text-[13px] text-[#6e6e73] hover:text-black mb-4">← Projelere dön</a>
+        <section id="project-wrap" class="rounded-2xl border border-black/10 bg-white overflow-hidden"></section>
+      </main>
+      <div id="site-footer"></div>
+    </div>
+  </div>
+
+  <script src="/core.js"></script>
+  <script src="/layout.js"></script>
+  <script>
+    const SAMPLE_PROJECTS = [
+      { id: "sample-istanbul-hq", title: "Ortak Alan Dönüşümü", location: "Maslak, İstanbul", architect: "Nokta İç Mimarlık", description: "Açık ofis katında yankıyı azaltan, markanın sade dilini koruyan akustik bir tavan ve duvar kurgusu uygulandı.", image: "https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=1974&auto=format&fit=crop", materials: [{ id: "unica-baffle-01", name: "Unica Baffle Tavan Paneli", image: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=500&auto=format&fit=crop" }, { id: "akustik-kece-duvar-02", name: "Akustik Kece Duvar Paneli", image: "https://images.unsplash.com/photo-1616594039964-3f7f89d7a5d8?q=80&w=500&auto=format&fit=crop" }] },
+      { id: "sample-ankara-hotel", title: "Butik Otel Lobi Akustiği", location: "Çankaya, Ankara", architect: "Atolye 34", description: "Lobi ve bekleme alanlarında konuşma anlaşılırlığını artırmak için tavan baffle ve dekoratif duvar panel kombinasyonu kullanıldı.", image: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=1974&auto=format&fit=crop", materials: [{ id: "baffle-lineer-03", name: "Lineer Baffle Seri", image: "https://images.unsplash.com/photo-1493666438817-866a91353ca9?q=80&w=500&auto=format&fit=crop" }, { id: "pet-felt-panel-04", name: "PET Felt Akustik Panel", image: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=500&auto=format&fit=crop" }] },
+      { id: "sample-izmir-campus", title: "Kampus Cok Amacli Salon", location: "Bornova, İzmir", architect: "Mekan Lab", description: "Cok amacli etkinlik salonunda ders, sunum ve etkinlik modlari icin kontrollu yutuculuk saglayan katmanli sistem kuruldu.", image: "https://images.unsplash.com/photo-1517502884422-41eaead166d4?q=80&w=1974&auto=format&fit=crop", materials: [{ id: "vcut-akustik-05", name: "V-Cut Akustik Bulut Panel", image: "https://images.unsplash.com/photo-1617104551722-3b2d51366443?q=80&w=500&auto=format&fit=crop" }, { id: "ahsap-lamel-06", name: "Ahsap Lamel Tavan Sistemi", image: "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?q=80&w=500&auto=format&fit=crop" }] },
+    ];
+
+    const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?q=80&w=1974&auto=format&fit=crop";
+
+    function renderMissing() {
+      document.getElementById("project-wrap").innerHTML = `
+        <div class="p-6">
+          <h1 class="text-[24px] font-semibold">Proje bulunamadı</h1>
+          <p class="text-[14px] text-[#6e6e73] mt-2">Bu proje kaydı silinmiş veya link geçersiz olabilir.</p>
+        </div>`;
+    }
+
+    function renderProject(p) {
+      const materials = p.materials || [];
+      document.getElementById("project-wrap").innerHTML = `
+        <img src="${p.image || FALLBACK_IMAGE}" class="w-full h-[320px] object-cover" alt="${p.title}">
+        <div class="p-6">
+          <h1 class="text-[30px] font-semibold tracking-tight">${p.title}</h1>
+          <p class="text-[14px] text-[#6e6e73] mt-2">${p.location || "-"} · ${p.architect || p.brandName || "-"}</p>
+          <p class="text-[15px] mt-4 leading-relaxed">${p.description || ""}</p>
+          <div class="mt-6">
+            <p class="text-[13px] font-semibold text-[#4a4a4f] mb-3">Bu projede kullanılan malzemeler</p>
+            <div class="flex flex-wrap gap-2">
+              ${materials.length ? materials.map((m) => `
+                <a href="/urun-unica-baffle.html?id=${encodeURIComponent(m.id)}" class="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-black/10 hover:border-black/25">
+                  <img src="${m.image || FALLBACK_IMAGE}" class="w-7 h-7 rounded object-cover" alt="${m.name}">
+                  <span class="text-[12px]">${m.name}</span>
+                </a>
+              `).join("") : `<span class="text-[12px] text-[#6e6e73]">Etiketli malzeme yok.</span>`}
+            </div>
+          </div>
+        </div>`;
+    }
+
+    async function init() {
+      await AG.ready;
+      const id = new URLSearchParams(window.location.search).get("id");
+      if (!id) return renderMissing();
+      try {
+        const list = await AG.getProjects();
+        const merged = [...(Array.isArray(list) ? list : []), ...SAMPLE_PROJECTS];
+        const project = merged.find((x) => String(x.id) === String(id));
+        if (!project) return renderMissing();
+        renderProject(project);
+      } catch {
+        const project = SAMPLE_PROJECTS.find((x) => String(x.id) === String(id));
+        if (!project) return renderMissing();
+        renderProject(project);
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>

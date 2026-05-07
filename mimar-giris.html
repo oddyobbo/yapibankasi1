@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Antigravity | Mimar Girişi</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body data-page="architect-login" class="bg-[#f5f5f7] text-[#111] min-h-screen">
+  <div id="site-header"></div>
+  <main class="px-6 lg:px-10 py-10">
+    <section class="max-w-[1200px] mx-auto grid lg:grid-cols-2 gap-6">
+      <article class="rounded-3xl border border-black/10 bg-white p-6 lg:p-8">
+        <p class="text-[12px] uppercase tracking-[0.14em] text-[#6e6e73]">Mimar Hesabı</p>
+        <h1 class="text-[30px] font-semibold mt-3">Giriş Yap</h1>
+        <p class="text-[14px] text-[#6e6e73] mt-2">Favori ürün/proje, klasör ve moodboard alanına eriş.</p>
+        <form id="login-form" class="mt-6 space-y-3">
+          <input name="email" type="email" required placeholder="E-posta" class="w-full h-11 rounded-xl border border-black/15 px-3 text-[14px]">
+          <input name="password" type="password" required placeholder="Şifre" class="w-full h-11 rounded-xl border border-black/15 px-3 text-[14px]">
+          <button class="w-full h-11 rounded-xl bg-black text-white text-[14px] font-semibold">Giriş Yap</button>
+        </form>
+      </article>
+      <article class="rounded-3xl border border-black/10 bg-white p-6 lg:p-8">
+        <p class="text-[12px] uppercase tracking-[0.14em] text-[#6e6e73]">Yeni Üyelik</p>
+        <h2 class="text-[30px] font-semibold mt-3">Kayıt Ol</h2>
+        <p class="text-[14px] text-[#6e6e73] mt-2">Amacımız kaydetme ve bookmark akışını hızlandırmak.</p>
+        <form id="register-form" class="mt-6 space-y-3">
+          <input name="name" type="text" required placeholder="Ad Soyad" class="w-full h-11 rounded-xl border border-black/15 px-3 text-[14px]">
+          <input name="office" type="text" placeholder="Ofis / Stüdyo (opsiyonel)" class="w-full h-11 rounded-xl border border-black/15 px-3 text-[14px]">
+          <input name="email" type="email" required placeholder="E-posta" class="w-full h-11 rounded-xl border border-black/15 px-3 text-[14px]">
+          <input name="password" type="password" required placeholder="Şifre" class="w-full h-11 rounded-xl border border-black/15 px-3 text-[14px]">
+          <button class="w-full h-11 rounded-xl bg-black text-white text-[14px] font-semibold">Hesap Oluştur</button>
+        </form>
+      </article>
+    </section>
+    <p id="msg" class="max-w-[1200px] mx-auto mt-4 text-[14px] text-[#6e6e73]"></p>
+  </main>
+  <div id="site-footer"></div>
+
+  <script src="/core.js"></script>
+  <script src="/layout.js"></script>
+  <script>
+    const msg = document.getElementById("msg");
+    const setMsg = (text, ok = false) => {
+      msg.textContent = text || "";
+      msg.className = `max-w-[1200px] mx-auto mt-4 text-[14px] ${ok ? "text-[#1f6f45]" : "text-[#6e6e73]"}`;
+    };
+
+    async function boot() {
+      await AG.ready;
+      const session = await AG.getSessionArchitect();
+      if (session) {
+        location.href = "/mimar-paneli.html";
+        return;
+      }
+
+      document.getElementById("login-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const fd = new FormData(e.currentTarget);
+        const res = await AG.loginArchitect({
+          email: String(fd.get("email") || ""),
+          password: String(fd.get("password") || "")
+        });
+        if (!res.ok) { setMsg(res.message || "Giriş başarısız."); return; }
+        setMsg("Giriş başarılı. Panele yönlendiriliyorsun...", true);
+        setTimeout(() => { location.href = "/mimar-paneli.html"; }, 350);
+      });
+
+      document.getElementById("register-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const fd = new FormData(e.currentTarget);
+        const res = await AG.registerArchitect({
+          name: String(fd.get("name") || ""),
+          office: String(fd.get("office") || ""),
+          email: String(fd.get("email") || ""),
+          password: String(fd.get("password") || "")
+        });
+        if (!res.ok) { setMsg(res.message || "Kayıt oluşturulamadı."); return; }
+        setMsg("Hesap oluşturuldu. Panele yönlendiriliyorsun...", true);
+        setTimeout(() => { location.href = "/mimar-paneli.html"; }, 350);
+      });
+    }
+
+    boot().catch(() => setMsg("Sayfa yüklenirken bir sorun oluştu."));
+  </script>
+</body>
+</html>

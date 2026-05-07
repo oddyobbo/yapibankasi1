@@ -17,6 +17,7 @@
 </head>
 <body data-page="products" class="bg-white text-[#0b0b0c] min-h-screen">
   <div id="site-header"></div>
+  <div id="toast" class="hidden fixed top-5 right-5 z-50 px-4 py-2 rounded-xl bg-black text-white text-[13px] shadow-lg"></div>
 
   <main>
     <section class="border-b border-black/[0.08] px-6 lg:px-10 py-8">
@@ -47,12 +48,33 @@
   </main>
 
   <div id="site-footer"></div>
+  <div id="board-modal" class="hidden fixed inset-0 z-50">
+    <div class="absolute inset-0 bg-black/35" data-board-close="1"></div>
+    <div class="absolute inset-0 flex items-center justify-center p-4">
+      <div class="w-full max-w-[460px] rounded-2xl bg-white border border-black/10 p-5">
+        <h3 class="text-[19px] font-semibold">Board'a ekle</h3>
+        <p class="text-[13px] text-[#6e6e73] mt-1">Var olan bir board seç veya hızlıca yeni board oluştur.</p>
+        <div id="board-list" class="mt-4 space-y-2 max-h-[220px] overflow-auto"></div>
+        <form id="quick-board-form" class="mt-4 flex gap-2">
+          <input id="quick-board-name" class="flex-1 h-10 rounded-xl border border-black/15 px-3 text-[14px]" placeholder="Yeni board adı">
+          <button class="h-10 px-3 rounded-xl bg-black text-white text-[13px]">Oluştur + Ekle</button>
+        </form>
+        <div class="mt-4 flex justify-end">
+          <button id="board-cancel-btn" class="h-10 px-4 rounded-xl border border-black/15 text-[13px]">Vazgeç</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <script src="/core.js"></script>
   <script src="/layout.js"></script>
   <script>
     const STATIC = [];
     let allProducts = [...STATIC];
+    let architectSession = null;
+    let favoriteProductIds = new Set();
+    let moodboards = [];
+    let selectedProduct = null;
     let searchQuery = "";
     let activeQuick = "";
     const selected = {
@@ -65,7 +87,14 @@
       fireClass: new Set(),
     };
 
-    AG.ready.then(() => AG.getProducts()).then((dbProds) => {
+    AG.ready.then(async () => {
+      architectSession = await AG.getSessionArchitect();
+      const [dbProds, favs] = await Promise.all([
+        AG.getProducts(),
+        architectSession ? AG.getFavoriteProducts() : Promise.resolve([])
+      ]);
+      moodboards = architectSession ? await AG.getMoodboards() : [];
+      favoriteProductIds = new Set((favs || []).map((x) => x.id));
       allProducts = [...STATIC, ...dbProds];
       const qp = new URLSearchParams(location.search);
       const qpCategory = (qp.get("category") || "").trim();
@@ -77,8 +106,10 @@
     });
 
     function renderCard(p) {
+      const isFav = favoriteProductIds.has(p.id);
       return `
-        <a href="/urun-unica-baffle.html?id=${encodeURIComponent(p.id)}" data-view="${p.id}" class="card-lift group rounded-2xl overflow-hidden border border-black/[0.08] bg-white flex flex-col">
+        <div class="card-lift group rounded-2xl overflow-hidden border border-black/[0.08] bg-white flex flex-col relative">
+          <a href="/urun-unica-baffle.html?id=${encodeURIComponent(p.id)}" data-view="${p.id}" class="block">
           <div class="overflow-hidden h-48 bg-[#f5f5f7]">
             <img src="${p.image || 'https://images.unsplash.com/photo-1600607686527-6fb886090705?q=80&w=800&auto=format&fit=crop'}"
               alt="${p.name}" class="w-full h-full object-cover group-hover:scale-[1.03] transition duration-500">
@@ -92,7 +123,61 @@
               <span class="text-[12px] font-medium text-[#0b0b0c] opacity-0 group-hover:opacity-100 transition">Detay →</span>
             </div>
           </div>
-        </a>`;
+          </a>
+          ${
+            architectSession
+              ? `<button data-fav-product="${p.id}" class="absolute top-3 left-3 px-2.5 h-8 rounded-full text-[12px] border border-black/15 bg-white/95 hover:bg-black hover:text-white transition">${isFav ? "★ Favoride" : "☆ Favorile"}</button>`
+              : `<a href="/mimar-giris.html" class="absolute top-3 left-3 px-2.5 h-8 inline-flex items-center rounded-full text-[11px] border border-black/15 bg-white/95">Giriş yapıp kaydet</a>`
+          }
+          ${
+            architectSession
+              ? `<button data-add-board="${p.id}" class="absolute top-3 right-3 px-2.5 h-8 rounded-full text-[12px] border border-black/15 bg-white/95 hover:bg-black hover:text-white transition">Add to Board</button>`
+              : `<a href="/mimar-giris.html" class="absolute top-3 right-3 px-2.5 h-8 inline-flex items-center rounded-full text-[11px] border border-black/15 bg-white/95">Add to Board</a>`
+          }
+        </div>`;
+    }
+
+    function showToast(text) {
+      const t = document.getElementById("toast");
+      t.textContent = text;
+      t.classList.remove("hidden");
+      setTimeout(() => t.classList.add("hidden"), 1700);
+    }
+
+    function closeBoardModal() {
+      document.getElementById("board-modal").classList.add("hidden");
+      selectedProduct = null;
+    }
+
+    function renderBoardList() {
+      const wrap = document.getElementById("board-list");
+      if (!moodboards.length) {
+        wrap.innerHTML = `<p class="text-[13px] text-[#6e6e73]">Henüz board yok. Aşağıdan hızlıca oluşturabilirsin.</p>`;
+        return;
+      }
+      wrap.innerHTML = moodboards.map((m) => `
+        <button data-board-id="${m.id}" class="w-full h-10 rounded-xl border border-black/15 text-[13px] text-left px-3 hover:border-black/35">${m.name || "Moodboard"}</button>
+      `).join("");
+      wrap.querySelectorAll("[data-board-id]").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          if (!selectedProduct) return;
+          const res = await AG.addProductToMoodboard({ moodboardId: btn.dataset.boardId, product: selectedProduct });
+          if (!res.ok) return;
+          moodboards = await AG.getMoodboards();
+          closeBoardModal();
+          showToast("Board'a eklendi");
+        });
+      });
+    }
+
+    function openBoardModal(product) {
+      if (!architectSession) {
+        location.href = "/mimar-giris.html";
+        return;
+      }
+      selectedProduct = product;
+      renderBoardList();
+      document.getElementById("board-modal").classList.remove("hidden");
     }
 
     function getTaxonomy(p) {
@@ -207,11 +292,54 @@
       grid.querySelectorAll("[data-view]").forEach(a =>
         a.addEventListener("click", () => AG.incrementView(a.dataset.view).catch(() => {}))
       );
+      grid.querySelectorAll("[data-fav-product]").forEach((btn) => {
+        btn.addEventListener("click", async (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const id = btn.dataset.favProduct;
+          const product = allProducts.find((x) => x.id === id);
+          if (!product) return;
+          const res = await AG.toggleFavoriteProduct({
+            id: product.id,
+            name: product.name,
+            image: product.image,
+            category: product.category,
+            url: `/urun-unica-baffle.html?id=${encodeURIComponent(product.id)}`
+          });
+          if (!res?.ok) return;
+          if (res.active) favoriteProductIds.add(id);
+          else favoriteProductIds.delete(id);
+          btn.textContent = res.active ? "★ Favoride" : "☆ Favorile";
+        });
+      });
+      grid.querySelectorAll("[data-add-board]").forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const product = allProducts.find((x) => x.id === btn.dataset.addBoard);
+          if (!product) return;
+          openBoardModal({ id: product.id, name: product.name, image: product.image });
+        });
+      });
     }
 
     document.getElementById("search-input").addEventListener("input", e => {
       searchQuery = e.target.value.trim();
       render();
+    });
+    document.getElementById("board-cancel-btn").addEventListener("click", closeBoardModal);
+    document.querySelectorAll("[data-board-close='1']").forEach((el) => el.addEventListener("click", closeBoardModal));
+    document.getElementById("quick-board-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (!selectedProduct) return;
+      const name = document.getElementById("quick-board-name").value.trim();
+      if (!name) return;
+      const res = await AG.addProductToMoodboard({ moodboardName: name, product: selectedProduct });
+      if (!res.ok) return;
+      moodboards = await AG.getMoodboards();
+      document.getElementById("quick-board-name").value = "";
+      closeBoardModal();
+      showToast("Board'a eklendi");
     });
 
     renderQuickChips();

@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Antigravity | Mimar Paneli</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body data-page="architect-panel" class="bg-[#f5f5f7] text-[#111] min-h-screen">
+  <div id="site-header"></div>
+  <div id="toast" class="hidden fixed top-5 right-5 z-50 px-4 py-2 rounded-xl bg-black text-white text-[13px] shadow-lg"></div>
+  <main class="px-6 lg:px-10 py-8">
+    <section class="max-w-[1250px] mx-auto">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <p id="welcome" class="text-[13px] text-[#6e6e73]"></p>
+          <h1 class="text-[30px] font-semibold">Mimar Paneli</h1>
+        </div>
+        <div class="flex gap-2">
+          <button id="new-moodboard-btn" class="h-10 px-4 rounded-full bg-black text-white text-[13px] font-semibold">Yeni Moodboard</button>
+          <button id="logout-btn" class="h-10 px-4 rounded-full border border-black/15 text-[13px]">Çıkış</button>
+        </div>
+      </div>
+
+      <div class="mt-6 flex flex-wrap gap-2" id="tabs"></div>
+      <section class="mt-4 rounded-2xl border border-black/10 bg-white p-5">
+        <div id="tab-content"></div>
+      </section>
+    </section>
+  </main>
+  <div id="site-footer"></div>
+  <div id="board-modal" class="hidden fixed inset-0 z-50">
+    <div class="absolute inset-0 bg-black/35" data-board-close="1"></div>
+    <div class="absolute inset-0 flex items-center justify-center p-4">
+      <div class="w-full max-w-[460px] rounded-2xl bg-white border border-black/10 p-5">
+        <h3 class="text-[19px] font-semibold">Board'a ekle</h3>
+        <p class="text-[13px] text-[#6e6e73] mt-1">Var olan bir board seç veya hızlıca yeni board oluştur.</p>
+        <div id="board-list" class="mt-4 space-y-2 max-h-[220px] overflow-auto"></div>
+        <form id="quick-board-form" class="mt-4 flex gap-2">
+          <input id="quick-board-name" class="flex-1 h-10 rounded-xl border border-black/15 px-3 text-[14px]" placeholder="Yeni board adı">
+          <button class="h-10 px-3 rounded-xl bg-black text-white text-[13px]">Oluştur + Ekle</button>
+        </form>
+        <div class="mt-4 flex justify-end">
+          <button id="board-cancel-btn" class="h-10 px-4 rounded-xl border border-black/15 text-[13px]">Vazgeç</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/core.js"></script>
+  <script src="/layout.js"></script>
+  <script>
+    const TAB_IDS = ["fav-products", "fav-projects", "collections", "moodboards"];
+    const TAB_LABELS = {
+      "fav-products": "Favori Ürünler",
+      "fav-projects": "Favori Projeler",
+      "collections": "Koleksiyonlar",
+      "moodboards": "Moodboard'lar"
+    };
+    let activeTab = "fav-products";
+    let moodboards = [];
+    let selectedProduct = null;
+
+    function renderTabs() {
+      const el = document.getElementById("tabs");
+      el.innerHTML = TAB_IDS.map((id) =>
+        `<button data-tab="${id}" class="h-9 px-4 rounded-full text-[13px] ${activeTab === id ? "bg-black text-white" : "bg-white border border-black/15"}">${TAB_LABELS[id]}</button>`
+      ).join("");
+      el.querySelectorAll("[data-tab]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          activeTab = btn.dataset.tab;
+          renderTabs();
+          renderContent();
+        });
+      });
+    }
+
+    function cardTemplate(item, href, withBoardAction = false) {
+      const safeProduct = encodeURIComponent(JSON.stringify({ id: item.id, name: item.name, image: item.image || "" }));
+      return `
+        <div class="block rounded-xl border border-black/10 hover:border-black/25 transition overflow-hidden relative">
+          <a href="${href}" class="block">
+            <img src="${item.image || "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?q=80&w=1200&auto=format&fit=crop"}" class="w-full h-36 object-cover" alt="${item.name}">
+            <div class="p-3">
+              <p class="text-[14px] font-medium">${item.name}</p>
+              <p class="text-[12px] text-[#6e6e73] mt-1">${new Date(item.savedAt || Date.now()).toLocaleDateString("tr-TR")}</p>
+            </div>
+          </a>
+          ${withBoardAction ? `<button data-add-board="${safeProduct}" class="absolute top-3 right-3 px-2.5 h-8 rounded-full text-[12px] border border-black/15 bg-white/95 hover:bg-black hover:text-white transition">Add to Board</button>` : ""}
+        </div>`;
+    }
+
+    function showToast(text) {
+      const t = document.getElementById("toast");
+      t.textContent = text;
+      t.classList.remove("hidden");
+      setTimeout(() => t.classList.add("hidden"), 1700);
+    }
+
+    function closeBoardModal() {
+      document.getElementById("board-modal").classList.add("hidden");
+      selectedProduct = null;
+    }
+
+    function renderBoardList() {
+      const wrap = document.getElementById("board-list");
+      if (!moodboards.length) {
+        wrap.innerHTML = `<p class="text-[13px] text-[#6e6e73]">Henüz board yok. Aşağıdan hızlıca oluşturabilirsin.</p>`;
+        return;
+      }
+      wrap.innerHTML = moodboards.map((m) => `
+        <button data-board-id="${m.id}" class="w-full h-10 rounded-xl border border-black/15 text-[13px] text-left px-3 hover:border-black/35">${m.name || "Moodboard"}</button>
+      `).join("");
+      wrap.querySelectorAll("[data-board-id]").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          if (!selectedProduct) return;
+          const res = await AG.addProductToMoodboard({ moodboardId: btn.dataset.boardId, product: selectedProduct });
+          if (!res.ok) return;
+          moodboards = await AG.getMoodboards();
+          closeBoardModal();
+          showToast("Board'a eklendi");
+        });
+      });
+    }
+
+    function openBoardModal(product) {
+      selectedProduct = product;
+      renderBoardList();
+      document.getElementById("board-modal").classList.remove("hidden");
+    }
+
+    function bindBoardButtons(root) {
+      root.querySelectorAll("[data-add-board]").forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const parsed = JSON.parse(decodeURIComponent(btn.dataset.addBoard || "{}"));
+          openBoardModal(parsed);
+        });
+      });
+    }
+
+    async function renderContent() {
+      const content = document.getElementById("tab-content");
+      if (activeTab === "fav-products") {
+        const list = await AG.getFavoriteProducts();
+        content.innerHTML = list.length
+          ? `<div class="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">${list.map((x) => cardTemplate(x, x.url || "/urunler.html", true)).join("")}</div>`
+          : `<p class="text-[14px] text-[#6e6e73]">Henüz favori ürün yok. Ürünler sayfasından yıldız ile ekleyebilirsin.</p>`;
+        bindBoardButtons(content);
+        return;
+      }
+
+      if (activeTab === "fav-projects") {
+        const list = await AG.getFavoriteProjects();
+        content.innerHTML = list.length
+          ? `<div class="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">${list.map((x) => cardTemplate(x, x.url || "/projeler.html")).join("")}</div>`
+          : `<p class="text-[14px] text-[#6e6e73]">Henüz favori proje yok. Projeler sayfasından favorileyebilirsin.</p>`;
+        return;
+      }
+
+      if (activeTab === "collections") {
+        const collections = await AG.getCollections();
+        content.innerHTML = `
+          <form id="collection-form" class="flex gap-2 mb-4">
+            <input name="name" required placeholder="Yeni koleksiyon adı (örn. Ofis Lobi Referansları)" class="flex-1 h-10 rounded-xl border border-black/15 px-3 text-[14px]">
+            <button class="h-10 px-4 rounded-xl bg-black text-white text-[13px]">Oluştur</button>
+          </form>
+          ${
+            collections.length
+              ? `<div class="space-y-3">${collections.map((c) => `<article class="rounded-xl border border-black/10 p-3"><p class="font-medium">${c.name}</p><p class="text-[12px] text-[#6e6e73] mt-1">${(c.items || []).length} kayıt</p></article>`).join("")}</div>`
+              : `<p class="text-[14px] text-[#6e6e73]">Henüz koleksiyon yok.</p>`
+          }
+        `;
+        document.getElementById("collection-form").addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const name = String(new FormData(e.currentTarget).get("name") || "");
+          const res = await AG.createCollection(name);
+          if (res.ok) renderContent();
+        });
+        return;
+      }
+
+      const list = await AG.getMoodboards();
+      content.innerHTML = list.length
+        ? `<div class="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">
+            ${list.map((m) => `
+              <a href="/moodboard.html?id=${encodeURIComponent(m.id)}" class="rounded-xl border border-black/10 p-4 hover:border-black/25 transition block">
+                <p class="font-medium">${m.name || "Moodboard"}</p>
+                <p class="text-[12px] text-[#6e6e73] mt-1">${(m.items || []).length} kart</p>
+              </a>`).join("")}
+          </div>`
+        : `<p class="text-[14px] text-[#6e6e73]">Henüz moodboard yok. Sağ üstten yeni moodboard oluşturabilirsin.</p>`;
+    }
+
+    async function boot() {
+      await AG.ready;
+      const session = await AG.getSessionArchitect();
+      if (!session) { location.href = "/mimar-giris.html"; return; }
+      moodboards = await AG.getMoodboards();
+      document.getElementById("welcome").textContent = `${session.name || "Mimar"} olarak giriş yapıldı`;
+      renderTabs();
+      renderContent();
+
+      document.getElementById("logout-btn").addEventListener("click", async () => {
+        await AG.logoutArchitect();
+        location.href = "/mimar-giris.html";
+      });
+      document.getElementById("new-moodboard-btn").addEventListener("click", async () => {
+        const res = await AG.createMoodboard({ name: "Yeni Moodboard" });
+        if (res.ok) location.href = `/moodboard.html?id=${encodeURIComponent(res.moodboard.id)}`;
+      });
+
+      document.getElementById("board-cancel-btn").addEventListener("click", closeBoardModal);
+      document.querySelectorAll("[data-board-close='1']").forEach((el) => el.addEventListener("click", closeBoardModal));
+      document.getElementById("quick-board-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        if (!selectedProduct) return;
+        const name = document.getElementById("quick-board-name").value.trim();
+        if (!name) return;
+        const res = await AG.addProductToMoodboard({ moodboardName: name, product: selectedProduct });
+        if (!res.ok) return;
+        moodboards = await AG.getMoodboards();
+        document.getElementById("quick-board-name").value = "";
+        closeBoardModal();
+        showToast("Board'a eklendi");
+      });
+    }
+
+    boot();
+  </script>
+</body>
+</html>

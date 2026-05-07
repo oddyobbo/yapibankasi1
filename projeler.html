@@ -16,25 +16,176 @@
           <a href="/urunler.html" class="text-[14px] text-[#6e6e73] hover:text-black">Ürün kataloğuna dön</a>
         </div>
         <p class="text-[14px] text-[#6e6e73] mb-4">Bu sayfada ürünlerin gerçek proje bağlamındaki kullanımını görebilir, ilgili ürün detaylarına doğrudan geçiş yapabilirsin.</p>
-        <div class="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
-          <article class="rounded-2xl overflow-hidden border border-black/10 bg-white">
-            <img src="https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?q=80&w=1974&auto=format&fit=crop" class="w-full h-40 object-cover" alt="Açık ofis dönüşüm projesi">
-            <div class="p-4"><h3 class="font-semibold">Açık Ofis Dönüşümü</h3><p class="text-[13px] text-[#6e6e73] mt-1">İstanbul · OSO Mimarlık</p><p class="text-[13px] mt-2">Kullanılan ürünler: Unica Baffle, Lineer Ray Aydınlatma</p><a href="/urun-unica-baffle.html" class="inline-block mt-3 text-[13px] underline">Ürün detayına git</a></div>
-          </article>
-          <article class="rounded-2xl overflow-hidden border border-black/10 bg-white">
-            <img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=2070&auto=format&fit=crop" class="w-full h-40 object-cover" alt="Cephe yenileme projesi">
-            <div class="p-4"><h3 class="font-semibold">Cephe Yenileme</h3><p class="text-[13px] text-[#6e6e73] mt-1">Ankara · Form Studio</p><p class="text-[13px] mt-2">Kullanılan ürünler: Alüminyum Cephe Paneli, Güneş Kırıcı</p><a href="/urun-unica-baffle.html" class="inline-block mt-3 text-[13px] underline">Ürün detayına git</a></div>
-          </article>
-          <article class="rounded-2xl overflow-hidden border border-black/10 bg-white">
-            <img src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=1932&auto=format&fit=crop" class="w-full h-40 object-cover" alt="Otel lobi kurgusu projesi">
-            <div class="p-4"><h3 class="font-semibold">Otel Lobi Kurgusu</h3><p class="text-[13px] text-[#6e6e73] mt-1">İzmir · Loop Interiors</p><p class="text-[13px] mt-2">Kullanılan ürünler: Doğal Taş Kompozit, Dekoratif Aydınlatma</p><a href="/urun-unica-baffle.html" class="inline-block mt-3 text-[13px] underline">Ürün detayına git</a></div>
-          </article>
-        </div>
+        <div id="projects-grid" class="grid md:grid-cols-2 xl:grid-cols-3 gap-4"></div>
+        <section id="project-detail-panel" class="hidden mt-6 p-4 rounded-2xl border border-black/10 bg-white" aria-live="polite">
+          <div class="flex items-start justify-between gap-3">
+            <div>
+              <p class="text-[12px] font-semibold text-[#6e6e73]">Proje detayı</p>
+              <h2 id="project-detail-title" class="text-[20px] font-semibold mt-1"></h2>
+              <p id="project-detail-meta" class="text-[13px] text-[#6e6e73] mt-1"></p>
+            </div>
+            <button id="project-detail-close" type="button" class="text-[13px] px-3 py-1 rounded-lg border border-black/10 hover:border-black/25">Kapat</button>
+          </div>
+          <p id="project-detail-description" class="text-[14px] mt-3"></p>
+        </section>
+        <p id="projects-empty" class="hidden text-[14px] text-[#6e6e73]">Henüz yayınlanmış proje yok.</p>
       </main>
       <div id="site-footer"></div>
     </div>
   </div>
   <script src="/core.js"></script>
   <script src="/layout.js"></script>
+  <script>
+    let architectSession = null;
+    let favoriteProjectIds = new Set();
+    const SAMPLE_PROJECTS = [
+      {
+        id: "sample-istanbul-hq",
+        title: "Ortak Alan Dönüşümü",
+        location: "Maslak, İstanbul",
+        architect: "Nokta İç Mimarlık",
+        description: "Açık ofis katında yankıyı azaltan, markanın sade dilini koruyan akustik bir tavan ve duvar kurgusu uygulandı.",
+        image: "https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=1974&auto=format&fit=crop",
+        materials: [
+          {
+            id: "unica-baffle-01",
+            name: "Unica Baffle Tavan Paneli",
+            image: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=500&auto=format&fit=crop"
+          },
+          {
+            id: "akustik-kece-duvar-02",
+            name: "Akustik Kece Duvar Paneli",
+            image: "https://images.unsplash.com/photo-1616594039964-3f7f89d7a5d8?q=80&w=500&auto=format&fit=crop"
+          }
+        ]
+      },
+      {
+        id: "sample-ankara-hotel",
+        title: "Butik Otel Lobi Akustiği",
+        location: "Çankaya, Ankara",
+        architect: "Atolye 34",
+        description: "Lobi ve bekleme alanlarında konuşma anlaşılırlığını artırmak için tavan baffle ve dekoratif duvar panel kombinasyonu kullanıldı.",
+        image: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?q=80&w=1974&auto=format&fit=crop",
+        materials: [
+          {
+            id: "baffle-lineer-03",
+            name: "Lineer Baffle Seri",
+            image: "https://images.unsplash.com/photo-1493666438817-866a91353ca9?q=80&w=500&auto=format&fit=crop"
+          },
+          {
+            id: "pet-felt-panel-04",
+            name: "PET Felt Akustik Panel",
+            image: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=500&auto=format&fit=crop"
+          }
+        ]
+      },
+      {
+        id: "sample-izmir-campus",
+        title: "Kampus Cok Amacli Salon",
+        location: "Bornova, İzmir",
+        architect: "Mekan Lab",
+        description: "Cok amacli etkinlik salonunda ders, sunum ve etkinlik modlari icin kontrollu yutuculuk saglayan katmanli sistem kuruldu.",
+        image: "https://images.unsplash.com/photo-1517502884422-41eaead166d4?q=80&w=1974&auto=format&fit=crop",
+        materials: [
+          {
+            id: "vcut-akustik-05",
+            name: "V-Cut Akustik Bulut Panel",
+            image: "https://images.unsplash.com/photo-1617104551722-3b2d51366443?q=80&w=500&auto=format&fit=crop"
+          },
+          {
+            id: "ahsap-lamel-06",
+            name: "Ahsap Lamel Tavan Sistemi",
+            image: "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?q=80&w=500&auto=format&fit=crop"
+          }
+        ]
+      }
+    ];
+
+    const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?q=80&w=1974&auto=format&fit=crop";
+
+    function projectCard(p) {
+      const image = p.image || FALLBACK_IMAGE;
+      const materials = (p.materials || []).slice(0, 3);
+      const safeId = encodeURIComponent(p.id || "");
+      const projectHref = `/proje-detay.html?id=${safeId}`;
+      const isFav = favoriteProjectIds.has(p.id);
+      return `
+        <div class="block rounded-2xl overflow-hidden border border-black/10 bg-white transition hover:border-black/25 focus:outline-none focus-visible:ring-2 focus-visible:ring-black/30 relative">
+          <a href="${projectHref}" class="block" aria-label="${p.title} detayını aç">
+          <img src="${image}" class="w-full h-44 object-cover" alt="${p.title}">
+          <div class="p-4">
+            <h3 class="font-semibold text-[17px]">${p.title}</h3>
+            <p class="text-[13px] text-[#6e6e73] mt-1">${p.location || "-"} · ${p.architect || p.brandName || "-"}</p>
+            <p class="text-[13px] mt-2">${p.description || ""}</p>
+            <div class="mt-3">
+              <p class="text-[12px] font-semibold text-[#4a4a4f] mb-2">Bu projede kullanılan malzemeler</p>
+              <div class="flex flex-wrap gap-2">
+                ${materials.length ? materials.map((m) => `
+                  <span class="inline-flex items-center gap-2 px-2 py-1 rounded-lg border border-black/10 bg-[#fafafa]">
+                    <img src="${m.image || FALLBACK_IMAGE}" class="w-6 h-6 rounded object-cover" alt="${m.name}">
+                    <span class="text-[12px]">${m.name}</span>
+                  </span>
+                `).join("") : `<span class="text-[12px] text-[#6e6e73]">Etiketli malzeme yok</span>`}
+              </div>
+            </div>
+          </div>
+          </a>
+          ${
+            architectSession
+              ? `<button data-fav-project="${p.id}" class="absolute top-3 right-3 px-2.5 h-8 rounded-full text-[12px] border border-black/15 bg-white/95 hover:bg-black hover:text-white transition">${isFav ? "★ Favoride" : "☆ Favorile"}</button>`
+              : `<a href="/mimar-giris.html" class="absolute top-3 right-3 px-2.5 h-8 inline-flex items-center rounded-full text-[11px] border border-black/15 bg-white/95">Giriş yapıp kaydet</a>`
+          }
+        </div>`;
+    }
+
+    async function initProjects() {
+      await AG.ready;
+      architectSession = await AG.getSessionArchitect();
+      const grid = document.getElementById("projects-grid");
+      const empty = document.getElementById("projects-empty");
+      try {
+        const [list, favs] = await Promise.all([
+          AG.getProjects(),
+          architectSession ? AG.getFavoriteProjects() : Promise.resolve([])
+        ]);
+        favoriteProjectIds = new Set((favs || []).map((x) => x.id));
+        const safeList = Array.isArray(list) ? list : [];
+        const displayList = safeList.length ? safeList : SAMPLE_PROJECTS;
+
+        empty.classList.add("hidden");
+        grid.innerHTML = displayList.map(projectCard).join("");
+        bindFavoriteActions(displayList);
+      } catch (err) {
+        console.error("Projeler yuklenemedi, ornek veriler gosteriliyor:", err);
+        empty.classList.add("hidden");
+        grid.innerHTML = SAMPLE_PROJECTS.map(projectCard).join("");
+        bindFavoriteActions(SAMPLE_PROJECTS);
+      }
+    }
+
+    function bindFavoriteActions(list) {
+      document.querySelectorAll("[data-fav-project]").forEach((btn) => {
+        btn.addEventListener("click", async (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const id = btn.dataset.favProject;
+          const project = list.find((x) => x.id === id);
+          if (!project) return;
+          const res = await AG.toggleFavoriteProject({
+            id: project.id,
+            name: project.title || project.name || "Proje",
+            image: project.image,
+            location: project.location || "",
+            url: `/proje-detay.html?id=${encodeURIComponent(project.id)}`
+          });
+          if (!res?.ok) return;
+          if (res.active) favoriteProjectIds.add(id);
+          else favoriteProjectIds.delete(id);
+          btn.textContent = res.active ? "★ Favoride" : "☆ Favorile";
+        });
+      });
+    }
+    initProjects();
+  </script>
 </body>
 </html>
