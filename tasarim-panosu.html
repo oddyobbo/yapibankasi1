@@ -135,7 +135,14 @@
       <div style="font-size:13px; font-weight:600; color:#111; margin-bottom:8px;">Ürün Ekle</div>
       <input id="product-search" placeholder="Favorilerde ara..." style="width:100%; background:#f5f5f7; border:1px solid rgba(0,0,0,.1); color:#111; border-radius:8px; font-size:12px; padding:0 10px; height:30px; outline:none; font-family:inherit;">
     </div>
-    <div id="fav-list" style="flex:1; overflow-y:auto; padding:0 12px 12px; display:flex; flex-direction:column; gap:5px; min-height:0;"></div>
+    <div id="fav-list" style="flex:1; overflow-y:auto; padding:0 12px 8px; display:flex; flex-direction:column; gap:5px; min-height:0;"></div>
+    <div style="padding:0 12px 12px; flex-shrink:0;">
+      <input id="right-file-input" type="file" accept="image/jpeg,image/png,image/webp" class="hidden" multiple>
+      <button id="right-upload-btn" style="width:100%;height:34px;background:#f5f5f7;border:1px dashed rgba(0,0,0,.18);border-radius:9px;font-size:12px;font-weight:500;color:#4a4a4f;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;transition:border .12s,background .12s;" onmouseover="this.style.background='#ebebef';this.style.borderColor='rgba(0,0,0,.3)'" onmouseout="this.style.background='#f5f5f7';this.style.borderColor='rgba(0,0,0,.18)'">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Bilgisayardan yükle
+      </button>
+    </div>
   </div>
 
   <!-- ═══ Floating props panel (obje seçince çıkar) ═══ -->
@@ -358,18 +365,25 @@ function updateProps() {
   // Compact yatay layout
   let html = `<div style="display:flex; align-items:flex-start; gap:16px; flex-wrap:wrap;">`;
 
-  // Konum/boyut grubu
-  html += `<div>
-    <div style="font-size:10px;font-weight:600;color:#6e6e73;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;">${isText?"Metin":isShape?"Şekil":isImg?"Görsel":type==="line"?"Çizgi":"Obje"}</div>
-    <div style="display:flex;gap:5px;flex-wrap:wrap;">
-      <div style="display:flex;flex-direction:column;gap:1px;"><span style="font-size:10px;color:#999;">X</span><input class="prop-input" id="p-x" type="number" value="${Math.round(obj.left)}" style="width:54px;"></div>
-      <div style="display:flex;flex-direction:column;gap:1px;"><span style="font-size:10px;color:#999;">Y</span><input class="prop-input" id="p-y" type="number" value="${Math.round(obj.top)}" style="width:54px;"></div>
-      <div style="display:flex;flex-direction:column;gap:1px;"><span style="font-size:10px;color:#999;">W</span><input class="prop-input" id="p-w" type="number" value="${Math.round(obj.getScaledWidth())}" style="width:54px;"></div>
-      <div style="display:flex;flex-direction:column;gap:1px;"><span style="font-size:10px;color:#999;">H</span><input class="prop-input" id="p-h" type="number" value="${Math.round(obj.getScaledHeight())}" style="width:54px;"></div>
-      <div style="display:flex;flex-direction:column;gap:1px;"><span style="font-size:10px;color:#999;">°</span><input class="prop-input" id="p-rot" type="number" min="0" max="360" value="${Math.round(obj.angle||0)}" style="width:46px;"></div>
-      <div style="display:flex;flex-direction:column;gap:1px;"><span style="font-size:10px;color:#999;">Opaklık</span><input class="prop-input" id="p-opacity-num" type="number" min="0" max="100" value="${Math.round((obj.opacity||1)*100)}" style="width:52px;"></div>
-    </div>
-  </div>`;
+  // Konum/boyut grubu — görsel için sadece opaklık
+  if (!isImg) {
+    html += `<div>
+      <div style="font-size:10px;font-weight:600;color:#6e6e73;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;">${isText?"Metin":isShape?"Şekil":type==="line"?"Çizgi":"Obje"}</div>
+      <div style="display:flex;gap:5px;flex-wrap:wrap;">
+        <div style="display:flex;flex-direction:column;gap:1px;"><span style="font-size:10px;color:#999;">X</span><input class="prop-input" id="p-x" type="number" value="${Math.round(obj.left)}" style="width:54px;"></div>
+        <div style="display:flex;flex-direction:column;gap:1px;"><span style="font-size:10px;color:#999;">Y</span><input class="prop-input" id="p-y" type="number" value="${Math.round(obj.top)}" style="width:54px;"></div>
+        <div style="display:flex;flex-direction:column;gap:1px;"><span style="font-size:10px;color:#999;">W</span><input class="prop-input" id="p-w" type="number" value="${Math.round(obj.getScaledWidth())}" style="width:54px;"></div>
+        <div style="display:flex;flex-direction:column;gap:1px;"><span style="font-size:10px;color:#999;">H</span><input class="prop-input" id="p-h" type="number" value="${Math.round(obj.getScaledHeight())}" style="width:54px;"></div>
+        <div style="display:flex;flex-direction:column;gap:1px;"><span style="font-size:10px;color:#999;">°</span><input class="prop-input" id="p-rot" type="number" min="0" max="360" value="${Math.round(obj.angle||0)}" style="width:46px;"></div>
+        <div style="display:flex;flex-direction:column;gap:1px;"><span style="font-size:10px;color:#999;">Opaklık</span><input class="prop-input" id="p-opacity-num" type="number" min="0" max="100" value="${Math.round((obj.opacity||1)*100)}" style="width:52px;"></div>
+      </div>
+    </div>`;
+  } else {
+    html += `<div style="display:flex;flex-direction:column;gap:1px;">
+      <span style="font-size:10px;font-weight:600;color:#6e6e73;text-transform:uppercase;letter-spacing:.07em;">Opaklık</span>
+      <input class="prop-input" id="p-opacity-num" type="number" min="0" max="100" value="${Math.round((obj.opacity||1)*100)}" style="width:60px;">
+    </div>`;
+  }
 
   if (isText) {
     const fonts = ["-apple-system, BlinkMacSystemFont, sans-serif","Georgia, serif","Courier New, monospace","Impact, sans-serif","Arial Black, sans-serif"];
@@ -743,6 +757,18 @@ async function boot() {
       fc.setZoom(1); zoom = 1; $("zoom-val").textContent = "100%";
       fc.renderAll();
     });
+  });
+
+  // Sağ panelden yükle butonu
+  $("right-upload-btn").addEventListener("click", () => $("right-file-input").click());
+  $("right-file-input").addEventListener("change", () => {
+    Array.from($("right-file-input").files).forEach(file => {
+      if (!file.type.startsWith("image/")) return;
+      const r = new FileReader();
+      r.onload = ev => addImgFromURL(ev.target.result);
+      r.readAsDataURL(file);
+    });
+    $("right-file-input").value = "";
   });
 
   // Product search
