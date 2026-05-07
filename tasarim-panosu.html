@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Antigravity | Tasarım Panosu</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body data-page="moodboard" class="bg-[#f5f5f7] text-[#111] min-h-screen">
   <div id="site-header"></div>
@@ -14,19 +16,51 @@
       <!-- Sol araç rayı -->
       <aside class="rounded-2xl border border-black/10 bg-white p-2 flex flex-col items-center gap-2 h-fit sticky top-[86px]">
         <a href="/mimar-paneli.html" title="Panele dön" class="w-11 h-11 rounded-xl border border-black/10 text-[16px] text-[#6e6e73] flex items-center justify-center hover:border-black/30">←</a>
-        <button title="Seç" class="w-11 h-11 rounded-xl border border-black/10 flex items-center justify-center hover:border-black/30">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 3l14 9-7 1-4 7z"/></svg>
-        </button>
-        <button title="Görsel ekle" class="w-11 h-11 rounded-xl border border-black/10 flex items-center justify-center hover:border-black/30">
+        <div class="w-full h-px bg-black/[0.07]"></div>
+
+        <!-- Görsel ekle -->
+        <button id="tool-image" title="Görsel ekle (bilgisayardan)" class="w-11 h-11 rounded-xl border border-black/10 flex items-center justify-center hover:border-black/30 hover:bg-[#f5f5f7]">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
         </button>
-        <button title="Metin" class="w-11 h-11 rounded-xl border border-black/10 flex items-center justify-center hover:border-black/30 text-[13px] font-semibold">T</button>
-        <button title="Renk" class="w-11 h-11 rounded-xl border border-black/10 flex items-center justify-center hover:border-black/30">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18"/></svg>
-        </button>
-        <div class="w-full h-px bg-black/[0.07] my-1"></div>
-        <button id="undo-btn" title="Geri al" class="w-11 h-11 rounded-xl border border-black/10 flex items-center justify-center hover:border-black/30 text-[15px]">↶</button>
-        <button id="redo-btn" title="Yinele" class="w-11 h-11 rounded-xl border border-black/10 flex items-center justify-center hover:border-black/30 text-[15px]">↷</button>
+        <input id="file-input" type="file" accept="image/*" class="hidden" multiple>
+
+        <!-- Metin -->
+        <button id="tool-text" title="Metin ekle" class="w-11 h-11 rounded-xl border border-black/10 flex items-center justify-center hover:border-black/30 hover:bg-[#f5f5f7] text-[14px] font-bold">T</button>
+
+        <!-- Arkaplan rengi -->
+        <div class="relative group/color">
+          <button id="tool-bg" title="Kanvas arkaplan rengi" class="w-11 h-11 rounded-xl border border-black/10 flex items-center justify-center hover:border-black/30 hover:bg-[#f5f5f7]">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22C6.48 22 2 17.52 2 12S6.48 2 12 2s10 4.48 10 10-4.48 10-10 10z"/><path d="M12 2v20"/></svg>
+          </button>
+          <div id="bg-palette" class="hidden absolute left-14 top-0 z-30 bg-white rounded-2xl border border-black/10 shadow-lg p-2 flex flex-col gap-1.5 w-[130px]">
+            <p class="text-[11px] text-[#6e6e73] px-1 mb-1">Arkaplan</p>
+            <div class="grid grid-cols-5 gap-1">
+              <button data-bg="#ececef" class="w-6 h-6 rounded-md border border-black/10" style="background:#ececef"></button>
+              <button data-bg="#ffffff" class="w-6 h-6 rounded-md border border-black/10" style="background:#ffffff"></button>
+              <button data-bg="#111111" class="w-6 h-6 rounded-md border border-black/10" style="background:#111111"></button>
+              <button data-bg="#f5e6d3" class="w-6 h-6 rounded-md border border-black/10" style="background:#f5e6d3"></button>
+              <button data-bg="#ddeeff" class="w-6 h-6 rounded-md border border-black/10" style="background:#ddeeff"></button>
+              <button data-bg="#e8f5e9" class="w-6 h-6 rounded-md border border-black/10" style="background:#e8f5e9"></button>
+              <button data-bg="#fce4ec" class="w-6 h-6 rounded-md border border-black/10" style="background:#fce4ec"></button>
+              <button data-bg="#fff9c4" class="w-6 h-6 rounded-md border border-black/10" style="background:#fff9c4"></button>
+              <button data-bg="#ede7f6" class="w-6 h-6 rounded-md border border-black/10" style="background:#ede7f6"></button>
+              <button data-bg="#efebe9" class="w-6 h-6 rounded-md border border-black/10" style="background:#efebe9"></button>
+            </div>
+          </div>
+        </div>
+
+        <div class="w-full h-px bg-black/[0.07]"></div>
+
+        <!-- İndir -->
+        <div class="relative">
+          <button id="tool-download" title="İndir" class="w-11 h-11 rounded-xl border border-black/10 flex items-center justify-center hover:border-black/30 hover:bg-[#f5f5f7]">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v13M5 16l7 7 7-7"/><path d="M3 21h18"/></svg>
+          </button>
+          <div id="download-menu" class="hidden absolute left-14 top-0 z-30 bg-white rounded-xl border border-black/10 shadow-lg overflow-hidden w-[130px]">
+            <button id="dl-jpg" class="w-full text-left px-3 py-2.5 text-[13px] hover:bg-[#f5f5f7]">JPG olarak indir</button>
+            <button id="dl-pdf" class="w-full text-left px-3 py-2.5 text-[13px] hover:bg-[#f5f5f7]">PDF olarak indir</button>
+          </div>
+        </div>
       </aside>
 
       <!-- Kanvas -->
@@ -41,6 +75,7 @@
             </div>
             <button id="save-btn" class="h-9 px-4 rounded-lg bg-black text-white text-[12px] font-semibold">Kaydet</button>
           </div>
+          <span id="saving-indicator" class="text-[11px] text-[#6e6e73] ml-1 hidden">Kaydediliyor...</span>
         </div>
         <div id="canvas-wrap" class="p-4 bg-[#f3f4f6] min-h-[78vh]">
           <div id="canvas" class="relative rounded-2xl border border-black/10 bg-[#ececef] min-h-[72vh] overflow-hidden origin-top-left"></div>
@@ -295,6 +330,7 @@
       if (!board) { setSaveMsg("Pano bulunamadı.", false); return; }
       board.items = (Array.isArray(board.items) ? board.items : []).map((item) => ({ w: 220, h: 190, ...item }));
       document.getElementById("board-name").value = board.name || "Tasarım Panosu";
+      if (board.bgColor) canvas.style.backgroundColor = board.bgColor;
       renderCanvas();
 
       allFavProducts = await AG.getFavoriteProducts();
@@ -317,8 +353,82 @@
         zoomIndicator.textContent = `${Math.round(zoomLevel * 100)}%`;
       });
 
-      document.querySelector('[title="Metin"]').addEventListener("click", () => {
-        addTextItem();
+      // ── Sol araç rayı ──────────────────────────────────────────────────────
+      document.getElementById("tool-text").addEventListener("click", addTextItem);
+
+      // Görsel ekle aracı → dosya seçici
+      const fileInput = document.getElementById("file-input");
+      document.getElementById("tool-image").addEventListener("click", () => fileInput.click());
+      fileInput.addEventListener("change", () => {
+        Array.from(fileInput.files).forEach((file) => {
+          if (!file.type.startsWith("image/")) return;
+          const reader = new FileReader();
+          reader.onload = (ev) => {
+            const n = board.items.length;
+            board.items.push({
+              id: `file-${Date.now()}-${Math.random().toString(36).slice(2,6)}`,
+              name: file.name.replace(/\.[^.]+$/, ""),
+              image: ev.target.result,
+              x: 30 + (n % 4) * 250,
+              y: 30 + Math.floor(n / 4) * 220,
+              w: 220, h: 190
+            });
+            renderCanvas();
+            setSaveMsg("Görsel eklendi. Kaydetmeyi unutma.", false);
+          };
+          reader.readAsDataURL(file);
+        });
+        fileInput.value = "";
+      });
+
+      // Arkaplan renk paleti
+      const bgBtn = document.getElementById("tool-bg");
+      const bgPalette = document.getElementById("bg-palette");
+      bgBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        bgPalette.classList.toggle("hidden");
+      });
+      bgPalette.querySelectorAll("[data-bg]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          canvas.style.backgroundColor = btn.dataset.bg;
+          bgPalette.classList.add("hidden");
+          if (board) board.bgColor = btn.dataset.bg;
+        });
+      });
+
+      // İndir menüsü
+      const dlBtn = document.getElementById("tool-download");
+      const dlMenu = document.getElementById("download-menu");
+      dlBtn.addEventListener("click", (e) => { e.stopPropagation(); dlMenu.classList.toggle("hidden"); });
+      document.addEventListener("click", () => { dlMenu.classList.add("hidden"); bgPalette.classList.add("hidden"); });
+
+      const boardLabel = () => (document.getElementById("board-name").value.trim() || "tasarim-panosu").replace(/\s+/g, "-").toLowerCase();
+
+      document.getElementById("dl-jpg").addEventListener("click", async () => {
+        dlMenu.classList.add("hidden");
+        setSaveMsg("JPG hazırlanıyor...", false);
+        try {
+          const cvs = await html2canvas(canvas, { useCORS: true, allowTaint: true, scale: 2, backgroundColor: canvas.style.backgroundColor || "#ececef" });
+          const a = document.createElement("a");
+          a.href = cvs.toDataURL("image/jpeg", 0.92);
+          a.download = `${boardLabel()}.jpg`;
+          a.click();
+          setSaveMsg("JPG indirildi.", true);
+        } catch(e) { setSaveMsg("İndirme başarısız: " + e.message, false); }
+      });
+
+      document.getElementById("dl-pdf").addEventListener("click", async () => {
+        dlMenu.classList.add("hidden");
+        setSaveMsg("PDF hazırlanıyor...", false);
+        try {
+          const { jsPDF } = window.jspdf;
+          const cvs = await html2canvas(canvas, { useCORS: true, allowTaint: true, scale: 2, backgroundColor: canvas.style.backgroundColor || "#ececef" });
+          const imgData = cvs.toDataURL("image/jpeg", 0.92);
+          const pdf = new jsPDF({ orientation: cvs.width > cvs.height ? "landscape" : "portrait", unit: "px", format: [cvs.width, cvs.height] });
+          pdf.addImage(imgData, "JPEG", 0, 0, cvs.width, cvs.height);
+          pdf.save(`${boardLabel()}.pdf`);
+          setSaveMsg("PDF indirildi.", true);
+        } catch(e) { setSaveMsg("İndirme başarısız: " + e.message, false); }
       });
 
       // ── Drag-drop: dosya sistemi ve favori ürün listesi ──────────────────
