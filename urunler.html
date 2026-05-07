@@ -11,55 +11,37 @@
     .filter-chip.active { background: #0b0b0c; color: #fff; border-color: #0b0b0c; }
     .card-lift { transition: transform .3s cubic-bezier(.2,.7,.2,1), border-color .3s; }
     .card-lift:hover { transform: translateY(-3px); border-color: rgba(0,0,0,.22); }
+    .filter-group-body { max-height: 0; overflow: hidden; transition: max-height .2s ease; }
+    .filter-group.open .filter-group-body { max-height: 280px; overflow-y: auto; }
   </style>
 </head>
 <body data-page="products" class="bg-white text-[#0b0b0c] min-h-screen">
   <div id="site-header"></div>
 
   <main>
-    <!-- PAGE HEADER -->
-    <section class="border-b border-black/[0.08] px-6 lg:px-10 py-12">
-      <div class="max-w-[1320px] mx-auto">
-        <p class="text-[12px] uppercase tracking-[0.2em] text-[#6e6e73] font-semibold">Katalog</p>
-        <div class="mt-3 flex flex-col lg:flex-row lg:items-end justify-between gap-6">
-          <h1 class="text-[40px] lg:text-[56px] font-semibold tracking-tight leading-[1.04]">Ürün Kataloğu</h1>
-          <div class="flex items-center gap-3 w-full lg:w-auto">
-            <div class="relative w-full lg:w-auto">
-              <input id="search-input" type="text" placeholder="Ara: ürün adı, kategori, teknik kriter…" class="w-full lg:w-[320px] h-11 rounded-full border border-black/15 bg-[#fafafa] pl-4 pr-10 text-[13.5px] outline-none focus:border-black/40 placeholder:text-[#6e6e73]">
-              <span class="absolute right-3 top-1/2 -translate-y-1/2 text-[#6e6e73] text-[16px]">↵</span>
-            </div>
-            <span id="result-count" class="hidden sm:inline text-[13px] text-[#6e6e73] whitespace-nowrap"></span>
+    <section class="border-b border-black/[0.08] px-6 lg:px-10 py-8">
+      <div class="max-w-[1360px] mx-auto">
+        <div class="flex flex-wrap items-center gap-2">
+          <button class="px-4 h-10 rounded-xl border border-black/15 text-[13px] font-medium">Filters</button>
+          <div id="quick-chips" class="flex flex-wrap gap-2"></div>
+          <div class="ml-auto w-full lg:w-[320px]">
+            <input id="search-input" type="text" placeholder="Search filters / ürün ara" class="w-full h-10 rounded-xl border border-black/15 bg-[#fafafa] px-3 text-[13px] outline-none focus:border-black/40">
           </div>
-        </div>
-
-        <!-- CATEGORY CHIPS -->
-        <div class="mt-7 flex flex-nowrap sm:flex-wrap gap-2 overflow-x-auto pb-1" id="cat-chips">
-          <button data-cat="" class="filter-chip active px-4 py-2 rounded-full border border-black/[0.08] text-[13px] font-medium">Tümü</button>
-          <button data-cat="Akustik" class="filter-chip px-4 py-2 rounded-full border border-black/[0.08] bg-[#fafafa] text-[13px]">Akustik</button>
-          <button data-cat="Aydınlatma" class="filter-chip px-4 py-2 rounded-full border border-black/[0.08] bg-[#fafafa] text-[13px]">Aydınlatma</button>
-          <button data-cat="Dış Cephe" class="filter-chip px-4 py-2 rounded-full border border-black/[0.08] bg-[#fafafa] text-[13px]">Dış Cephe</button>
-          <button data-cat="Zemin" class="filter-chip px-4 py-2 rounded-full border border-black/[0.08] bg-[#fafafa] text-[13px]">Zemin</button>
-          <button data-cat="Tavan Sistemleri" class="filter-chip px-4 py-2 rounded-full border border-black/[0.08] bg-[#fafafa] text-[13px]">Tavan Sistemleri</button>
-          <button data-cat="Mobilya" class="filter-chip px-4 py-2 rounded-full border border-black/[0.08] bg-[#fafafa] text-[13px]">Mobilya</button>
-        </div>
-
-        <!-- TECHNICAL FILTER CHIPS -->
-        <div class="mt-3 flex flex-wrap gap-2">
-          <span class="text-[12px] text-[#6e6e73] self-center mr-1">Teknik:</span>
-          <button data-tech="NRC" class="filter-chip px-3 py-1.5 rounded-full border border-black/[0.08] bg-[#fafafa] text-[12px]">NRC ≥ 0.80</button>
-          <button data-tech="EPD" class="filter-chip px-3 py-1.5 rounded-full border border-black/[0.08] bg-[#fafafa] text-[12px]">EPD mevcut</button>
-          <button data-tech="BIM" class="filter-chip px-3 py-1.5 rounded-full border border-black/[0.08] bg-[#fafafa] text-[12px]">BIM / Revit</button>
-          <button data-tech="DWG" class="filter-chip px-3 py-1.5 rounded-full border border-black/[0.08] bg-[#fafafa] text-[12px]">DWG mevcut</button>
-          <button data-tech="A2" class="filter-chip px-3 py-1.5 rounded-full border border-black/[0.08] bg-[#fafafa] text-[12px]">Yangın A2</button>
         </div>
       </div>
     </section>
 
-    <!-- GRID -->
-    <section class="px-6 lg:px-10 py-12">
-      <div class="max-w-[1320px] mx-auto">
-        <div id="products-grid" class="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"></div>
-        <p id="empty-msg" class="hidden text-center text-[#6e6e73] py-20 text-[15px]">Arama kriterlerine uygun ürün bulunamadı.</p>
+    <section class="px-6 lg:px-10 py-6">
+      <div class="max-w-[1360px] mx-auto grid lg:grid-cols-[280px_minmax(0,1fr)] gap-6">
+        <aside class="border border-black/[0.08] rounded-2xl p-4 h-fit sticky top-[84px]">
+          <p class="text-[12px] text-[#6e6e73] mb-2">Filtreler</p>
+          <div id="filters-panel" class="space-y-2"></div>
+        </aside>
+        <div>
+          <div class="mb-3 text-[13px] text-[#6e6e73]" id="result-count"></div>
+          <div id="products-grid" class="grid sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-5"></div>
+          <p id="empty-msg" class="hidden text-center text-[#6e6e73] py-20 text-[15px]">Arama kriterlerine uygun ürün bulunamadı.</p>
+        </div>
       </div>
     </section>
   </main>
@@ -69,31 +51,30 @@
   <script src="/core.js"></script>
   <script src="/layout.js"></script>
   <script>
-    const STATIC = [
-      { id:"s1", name:"Unica Baffle Tavan Paneli", brandName:"Unica Acoustic", category:"Akustik", spec:"NRC 0.85 · B-s1,d0 · BIM hazır", status:"published", image:"https://images.unsplash.com/photo-1615874959474-d609969a20ed?q=80&w=1200&auto=format&fit=crop" },
-      { id:"s2", name:"Lineer Ray Aydınlatma", brandName:"LightForm", category:"Aydınlatma", spec:"UGR<19 · 4000K · IES", status:"published", image:"https://images.unsplash.com/photo-1519710164239-da123dc03ef4?q=80&w=1200&auto=format&fit=crop" },
-      { id:"s3", name:"Doğal Taş Kompozit Levha", brandName:"StoneWorks", category:"Zemin", spec:"EPD mevcut · 12mm · İç/Dış", status:"published", image:"https://images.unsplash.com/photo-1616046229478-9901c5536a45?q=80&w=1200&auto=format&fit=crop" },
-      { id:"s4", name:"Alüminyum Cephe Paneli", brandName:"CepheForm", category:"Dış Cephe", spec:"A2 sınıfı · UV dayanım · DWG", status:"published", image:"https://images.unsplash.com/photo-1616594039964-3f5d1b96f1f8?q=80&w=1200&auto=format&fit=crop" },
-      { id:"s5", name:"Akustik Duvar Kaplaması", brandName:"SoundBoard", category:"Akustik", spec:"NRC 0.90 · EPD mevcut · BIM", status:"published", image:"https://images.unsplash.com/photo-1558618666-fcd25c85cd64?q=80&w=1200&auto=format&fit=crop" },
-      { id:"s6", name:"Entegre Tavan Sistemi", brandName:"CeilTech", category:"Tavan Sistemleri", spec:"BIM hazır · Modüler · DWG", status:"published", image:"https://images.unsplash.com/photo-1497366811353-6870744d04b2?q=80&w=1200&auto=format&fit=crop" },
-      { id:"s7", name:"Endüstriyel Oturma Grubu", brandName:"FormWork", category:"Mobilya", spec:"EN 15373 · Sertleştirilmiş kaplama", status:"published", image:"https://images.unsplash.com/photo-1555041469-a586c61ea9bc?q=80&w=1200&auto=format&fit=crop" },
-      { id:"s8", name:"LVT Vinil Zemin", brandName:"FloorBase", category:"Zemin", spec:"AC5 · Su geçirmez · DWG", status:"published", image:"https://images.unsplash.com/photo-1586023492125-27b2c045efd7?q=80&w=1200&auto=format&fit=crop" },
-    ];
-
+    const STATIC = [];
     let allProducts = [...STATIC];
-    let activeCat = "";
-    let activeTechs = new Set();
     let searchQuery = "";
+    let activeQuick = "";
+    const selected = {
+      brand: new Set(),
+      category: new Set(),
+      subcategory: new Set(),
+      hasPdf: new Set(),
+      hasCad: new Set(),
+      hasBim: new Set(),
+      fireClass: new Set(),
+    };
 
-    // Load real products from Supabase
-    AG.ready.then(() => AG.getProducts()).then(dbProds => {
+    AG.ready.then(() => AG.getProducts()).then((dbProds) => {
       allProducts = [...STATIC, ...dbProds];
+      renderQuickChips();
+      renderFilterPanel();
       render();
     });
 
     function renderCard(p) {
       return `
-        <a href="/urun-unica-baffle.html" data-view="${p.id}" class="card-lift group rounded-2xl overflow-hidden border border-black/[0.08] bg-white flex flex-col">
+        <a href="/urun-unica-baffle.html?id=${encodeURIComponent(p.id)}" data-view="${p.id}" class="card-lift group rounded-2xl overflow-hidden border border-black/[0.08] bg-white flex flex-col">
           <div class="overflow-hidden h-48 bg-[#f5f5f7]">
             <img src="${p.image || 'https://images.unsplash.com/photo-1600607686527-6fb886090705?q=80&w=800&auto=format&fit=crop'}"
               alt="${p.name}" class="w-full h-full object-cover group-hover:scale-[1.03] transition duration-500">
@@ -110,24 +91,103 @@
         </a>`;
     }
 
+    function getTaxonomy(p) {
+      const raw = p.category || "";
+      const [main, sub] = raw.split(">").map((x) => (x || "").trim());
+      return { main: main || raw, sub: sub || "" };
+    }
+
+    function matchesBoolean(setValue, boolValue) {
+      if (!setValue.size) return true;
+      return setValue.has(boolValue ? "Var" : "Yok");
+    }
+
     function filtered() {
       return allProducts.filter(p => {
-        if (activeCat && p.category !== activeCat) return false;
-        if (activeTechs.size) {
-          const spec = (p.spec || "").toLowerCase();
-          for (const t of activeTechs) {
-            if (t === "NRC" && !spec.includes("nrc")) return false;
-            if (t === "EPD" && !spec.includes("epd")) return false;
-            if (t === "BIM" && !spec.includes("bim")) return false;
-            if (t === "DWG" && !spec.includes("dwg")) return false;
-            if (t === "A2" && !spec.includes("a2")) return false;
-          }
-        }
+        const tax = getTaxonomy(p);
+        if (activeQuick && tax.sub !== activeQuick && tax.main !== activeQuick) return false;
+        if (selected.brand.size && !selected.brand.has(p.brandName || "")) return false;
+        if (selected.category.size && !selected.category.has(tax.main)) return false;
+        if (selected.subcategory.size && !selected.subcategory.has(tax.sub)) return false;
+        if (!matchesBoolean(selected.hasPdf, Boolean(p.files?.pdfUrl))) return false;
+        if (!matchesBoolean(selected.hasCad, Boolean(p.files?.cadUrl))) return false;
+        if (!matchesBoolean(selected.hasBim, Boolean(p.files?.bimUrl))) return false;
+        const fire = (p.technical?.fireClass || "").trim();
+        if (selected.fireClass.size && !selected.fireClass.has(fire)) return false;
         if (searchQuery) {
           const q = searchQuery.toLowerCase();
-          return (p.name + p.category + p.spec + p.brandName).toLowerCase().includes(q);
+          return (p.name + p.category + p.spec + p.brandName + JSON.stringify(p.technical || {})).toLowerCase().includes(q);
         }
         return true;
+      });
+    }
+
+    function distinct(list) {
+      return [...new Set(list.filter(Boolean))].sort((a, b) => a.localeCompare(b, "tr"));
+    }
+
+    function renderQuickChips() {
+      const quick = document.getElementById("quick-chips");
+      const subs = distinct(allProducts.map((p) => getTaxonomy(p).sub || getTaxonomy(p).main)).slice(0, 10);
+      const total = allProducts.length;
+      quick.innerHTML = `
+        <button data-quick="" class="filter-chip ${!activeQuick ? "active" : ""} px-3 h-10 rounded-xl border border-black/[0.08] text-[13px]">All <span class="ml-1 text-[11px] opacity-70">${total}</span></button>
+        ${subs.map((s) => `<button data-quick="${s}" class="filter-chip ${activeQuick === s ? "active" : ""} px-3 h-10 rounded-xl border border-black/[0.08] text-[13px]">${s}</button>`).join("")}
+      `;
+      quick.querySelectorAll("[data-quick]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          activeQuick = btn.dataset.quick || "";
+          renderQuickChips();
+          render();
+        });
+      });
+    }
+
+    function groupTemplate(id, title, values) {
+      return `
+        <div class="filter-group border border-black/[0.08] rounded-xl open" data-group="${id}">
+          <button class="w-full px-3 py-2.5 text-left flex items-center justify-between text-[13px] font-semibold" data-toggle="${id}">
+            <span>${title}</span><span>⌄</span>
+          </button>
+          <div class="filter-group-body">
+            <div class="px-3 pb-3 space-y-1">
+              ${values.map((v) => `
+                <label class="flex items-center gap-2 text-[12px] text-[#4a4a4f]">
+                  <input type="checkbox" data-filter="${id}" value="${v}" class="rounded border-black/20">
+                  <span>${v}</span>
+                </label>`).join("")}
+            </div>
+          </div>
+        </div>`;
+    }
+
+    function renderFilterPanel() {
+      const panel = document.getElementById("filters-panel");
+      const brands = distinct(allProducts.map((p) => p.brandName || ""));
+      const categories = distinct(allProducts.map((p) => getTaxonomy(p).main));
+      const subcategories = distinct(allProducts.map((p) => getTaxonomy(p).sub));
+      const fires = distinct(allProducts.map((p) => p.technical?.fireClass || ""));
+
+      panel.innerHTML = [
+        groupTemplate("brand", "Brand", brands),
+        groupTemplate("category", "Kategori", categories),
+        groupTemplate("subcategory", "Alt Kategori", subcategories),
+        groupTemplate("hasPdf", "PDF", ["Var", "Yok"]),
+        groupTemplate("hasCad", "CAD", ["Var", "Yok"]),
+        groupTemplate("hasBim", "BIM", ["Var", "Yok"]),
+        groupTemplate("fireClass", "Flammability", fires),
+      ].join("");
+
+      panel.querySelectorAll("[data-toggle]").forEach((btn) => {
+        btn.addEventListener("click", () => btn.closest(".filter-group").classList.toggle("open"));
+      });
+      panel.querySelectorAll("[data-filter]").forEach((cb) => {
+        cb.addEventListener("change", () => {
+          const key = cb.dataset.filter;
+          if (cb.checked) selected[key].add(cb.value);
+          else selected[key].delete(cb.value);
+          render();
+        });
       });
     }
 
@@ -136,7 +196,7 @@
       const grid = document.getElementById("products-grid");
       const empty = document.getElementById("empty-msg");
       const count = document.getElementById("result-count");
-      count.textContent = `${list.length} sonuç`;
+      count.textContent = `${list.length} ürün listeleniyor`;
       if (!list.length) { grid.innerHTML = ""; empty.classList.remove("hidden"); return; }
       empty.classList.add("hidden");
       grid.innerHTML = list.map(renderCard).join("");
@@ -145,29 +205,13 @@
       );
     }
 
-    document.querySelectorAll("[data-cat]").forEach(btn => {
-      btn.addEventListener("click", () => {
-        activeCat = btn.dataset.cat;
-        document.querySelectorAll("[data-cat]").forEach(b => b.classList.remove("active"));
-        btn.classList.add("active");
-        render();
-      });
-    });
-
-    document.querySelectorAll("[data-tech]").forEach(btn => {
-      btn.addEventListener("click", () => {
-        const t = btn.dataset.tech;
-        if (activeTechs.has(t)) { activeTechs.delete(t); btn.classList.remove("active"); }
-        else { activeTechs.add(t); btn.classList.add("active"); }
-        render();
-      });
-    });
-
     document.getElementById("search-input").addEventListener("input", e => {
       searchQuery = e.target.value.trim();
       render();
     });
 
+    renderQuickChips();
+    renderFilterPanel();
     render();
   </script>
 </body>
