@@ -3,155 +3,367 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Antigravity | Tasarım Panosu</title>
+  <title>Tasarım Panosu</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
-    * { box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif; background: #f5f5f7; color: #111; margin: 0; overflow: hidden; }
-    .tool-btn { width:40px; height:40px; display:flex; align-items:center; justify-content:center; border-radius:10px; color:#6e6e73; cursor:pointer; transition:all .12s; border:none; background:transparent; margin:1px auto; }
-    .tool-btn:hover { background:rgba(0,0,0,.06); color:#111; }
-    .tool-btn.active { background:#111; color:#fff; }
-    .tool-btn.danger:hover { background:rgba(220,38,38,.08); color:#dc2626; }
-    .sep { height:1px; background:rgba(0,0,0,.07); margin:5px 8px; }
-    .panel-label { font-size:10px; font-weight:600; color:#6e6e73; text-transform:uppercase; letter-spacing:.08em; padding:0 12px; margin-bottom:4px; margin-top:12px; display:block; }
-    .prop-input { background:#fff; border:1px solid rgba(0,0,0,.12); color:#111; border-radius:7px; font-size:12px; padding:0 8px; height:28px; width:100%; outline:none; font-family:inherit; }
-    .prop-input:focus { border-color:rgba(0,0,0,.35); }
-    .prop-btn { height:28px; padding:0 10px; border-radius:7px; border:1px solid rgba(0,0,0,.12); background:#fff; color:#4a4a4f; font-size:12px; cursor:pointer; font-family:inherit; transition:all .12s; }
-    .prop-btn:hover { background:#f5f5f7; color:#111; }
-    .prop-btn.active { background:#111; border-color:#111; color:#fff; }
-    .color-chip { width:22px; height:22px; border-radius:6px; cursor:pointer; border:2px solid transparent; transition:border .1s; flex-shrink:0; }
-    .color-chip:hover, .color-chip.active { border-color:#111; }
-    .range-input { -webkit-appearance:none; width:100%; height:4px; border-radius:2px; background:#e5e5ea; outline:none; }
-    .range-input::-webkit-slider-thumb { -webkit-appearance:none; width:14px; height:14px; border-radius:50%; background:#111; cursor:pointer; }
-    #canvas-area canvas { display:block; box-shadow:0 4px 32px rgba(0,0,0,.13); border-radius:4px; }
-    .dl-item { display:block; width:100%; text-align:left; padding:8px 14px; font-size:13px; color:#333; background:transparent; border:none; cursor:pointer; font-family:inherit; transition:background .1s; }
-    .dl-item:hover { background:#f5f5f7; color:#111; }
-    .ratio-btn { padding:4px 10px; border-radius:6px; border:1px solid rgba(0,0,0,.12); background:#fff; color:#4a4a4f; font-size:11px; cursor:pointer; font-family:inherit; transition:all .12s; white-space:nowrap; }
-    .ratio-btn:hover { border-color:rgba(0,0,0,.3); color:#111; }
-    .ratio-btn.active { background:#111; border-color:#111; color:#fff; }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue",Arial,sans-serif;background:#f0f0f2;color:#111;overflow:hidden;height:100vh;display:flex;flex-direction:column;}
+
+    /* Board header */
+    #board-header{height:52px;background:#fff;border-bottom:1px solid rgba(0,0,0,.09);display:flex;align-items:center;padding:0 16px;flex-shrink:0;position:relative;z-index:100;}
+    .board-name-wrap{display:flex;flex-direction:column;min-width:160px;max-width:240px;}
+    [contenteditable]{outline:none;}
+    #board-name-el{font-size:14px;font-weight:600;color:#111;cursor:text;border-radius:4px;padding:1px 4px;margin:-1px -4px;}
+    #board-name-el:focus{background:rgba(0,0,0,.04);}
+    #board-desc-el{font-size:11px;color:#9a9a9f;cursor:text;padding:1px 4px;margin:-1px -4px;border-radius:4px;margin-top:1px;}
+    #board-desc-el:focus{background:rgba(0,0,0,.04);}
+
+    /* Tabs */
+    .tabs{display:flex;align-items:center;gap:2px;position:absolute;left:50%;transform:translateX(-50%);}
+    .tab-btn{height:36px;padding:0 14px;background:transparent;border:none;font-size:13px;color:#6e6e73;cursor:pointer;font-family:inherit;border-radius:8px;transition:all .12s;position:relative;white-space:nowrap;}
+    .tab-btn:hover{color:#111;background:rgba(0,0,0,.04);}
+    .tab-btn.active{color:#111;font-weight:600;}
+    .tab-btn.active::after{content:'';position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);width:calc(100% - 20px);height:2px;background:#111;border-radius:2px;}
+
+    /* Header right */
+    .header-right{margin-left:auto;display:flex;align-items:center;gap:8px;}
+    .hdr-btn{height:34px;padding:0 12px;border-radius:20px;border:1px solid rgba(0,0,0,.14);background:#fff;color:#333;font-size:13px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;transition:all .12s;}
+    .hdr-btn:hover{background:#f5f5f7;}
+    .hdr-btn.primary{background:#111;color:#fff;border-color:#111;}
+    .hdr-btn.primary:hover{background:#333;}
+    .icon-btn{width:34px;height:34px;border-radius:8px;border:none;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#6e6e73;transition:all .12s;}
+    .icon-btn:hover{background:rgba(0,0,0,.06);color:#111;}
+
+    /* Settings dropdown */
+    #settings-dd{display:none;position:absolute;top:48px;right:16px;background:#fff;border:1px solid rgba(0,0,0,.1);border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,.13);z-index:9999;min-width:220px;padding:8px 0;overflow:hidden;}
+    .sd-item{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;font-size:13px;color:#111;cursor:pointer;transition:background .1s;}
+    .sd-item:hover{background:#f5f5f7;}
+    .sd-sep{height:1px;background:rgba(0,0,0,.07);margin:4px 0;}
+    .sd-fullscreen{padding:10px 16px;font-size:13px;color:#111;cursor:pointer;}
+    .sd-fullscreen:hover{background:#f5f5f7;}
+
+    /* Toggle */
+    .toggle{width:34px;height:20px;background:#d1d1d6;border-radius:10px;position:relative;transition:background .2s;flex-shrink:0;cursor:pointer;}
+    .toggle.on{background:#111;}
+    .toggle::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.2);}
+    .toggle.on::after{left:16px;}
+
+    /* Download dropdown */
+    #dl-menu{display:none;position:absolute;top:48px;right:0;background:#fff;border:1px solid rgba(0,0,0,.1);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.12);z-index:9999;min-width:160px;overflow:hidden;padding:4px 0;}
+    .dl-item{display:block;width:100%;text-align:left;padding:9px 16px;font-size:13px;color:#333;background:transparent;border:none;cursor:pointer;font-family:inherit;transition:background .1s;}
+    .dl-item:hover{background:#f5f5f7;}
+
+    /* Main area */
+    #editor-body{flex:1;display:flex;min-height:0;}
+
+    /* Left toolbar */
+    #left-toolbar{width:52px;background:#fff;border-right:1px solid rgba(0,0,0,.08);display:flex;flex-direction:column;align-items:center;padding:8px 0;gap:2px;flex-shrink:0;}
+    .tool-btn{width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:8px;color:#6e6e73;cursor:pointer;transition:all .12s;border:none;background:transparent;}
+    .tool-btn:hover{background:rgba(0,0,0,.06);color:#111;}
+    .tool-btn.active{background:#111;color:#fff;}
+    .tool-btn.danger:hover{background:rgba(220,38,38,.08);color:#dc2626;}
+    .tsep{width:28px;height:1px;background:rgba(0,0,0,.08);margin:3px 0;flex-shrink:0;}
+
+    /* Canvas area */
+    #canvas-area{flex:1;overflow:hidden;display:flex;align-items:center;justify-content:center;background:#f0f0f2;position:relative;}
+    #canvas-area canvas{display:block;box-shadow:0 4px 40px rgba(0,0,0,.15);border-radius:2px;}
+
+    /* Image picker panel */
+    #img-picker{position:absolute;right:0;top:0;bottom:0;width:260px;background:#fff;border-left:1px solid rgba(0,0,0,.08);display:flex;flex-direction:column;transform:translateX(100%);transition:transform .2s ease;z-index:200;}
+    #img-picker.open{transform:translateX(0);}
+    .picker-head{padding:14px 14px 10px;border-bottom:1px solid rgba(0,0,0,.07);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;}
+    .picker-head h3{font-size:13px;font-weight:600;color:#111;}
+    #close-picker{background:none;border:none;cursor:pointer;color:#6e6e73;border-radius:6px;width:26px;height:26px;display:flex;align-items:center;justify-content:center;}
+    #close-picker:hover{background:rgba(0,0,0,.06);color:#111;}
+
+    /* Bottom bar */
+    #bottom-bar{height:40px;background:#fff;border-top:1px solid rgba(0,0,0,.08);display:flex;align-items:center;justify-content:space-between;padding:0 16px;flex-shrink:0;}
+    .page-pill{display:flex;align-items:center;gap:6px;font-size:12px;color:#6e6e73;cursor:default;}
+    .zoom-ctrl{display:flex;align-items:center;gap:4px;background:#f5f5f7;border:1px solid rgba(0,0,0,.1);border-radius:20px;padding:0 10px;height:28px;}
+    .zoom-btn{background:none;border:none;cursor:pointer;color:#6e6e73;font-size:16px;line-height:1;padding:0 2px;transition:color .12s;}
+    .zoom-btn:hover{color:#111;}
+    #zoom-val{font-size:12px;color:#6e6e73;width:36px;text-align:center;user-select:none;}
+
+    /* Props panel */
+    #props-panel{display:none;position:fixed;bottom:56px;left:50%;transform:translateX(-50%);background:#fff;border:1px solid rgba(0,0,0,.09);border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,.1),0 1px 4px rgba(0,0,0,.06);padding:10px 16px;z-index:500;width:max-content;max-width:calc(100vw - 80px);}
+
+    /* Prop inputs */
+    .prop-input{background:#fff;border:1px solid rgba(0,0,0,.12);color:#111;border-radius:7px;font-size:12px;padding:0 8px;height:28px;width:100%;outline:none;font-family:inherit;}
+    .prop-input:focus{border-color:rgba(0,0,0,.35);}
+    .prop-btn{height:28px;padding:0 10px;border-radius:7px;border:1px solid rgba(0,0,0,.12);background:#fff;color:#4a4a4f;font-size:12px;cursor:pointer;font-family:inherit;transition:all .12s;}
+    .prop-btn:hover{background:#f5f5f7;color:#111;}
+    .prop-btn.active{background:#111;border-color:#111;color:#fff;}
+
+    /* Grid overlay */
+    #grid-overlay{position:absolute;inset:0;pointer-events:none;display:none;background-image:linear-gradient(rgba(0,0,0,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(0,0,0,.06) 1px,transparent 1px);background-size:20px 20px;}
+    #grid-overlay.on{display:block;}
+
+    /* Save msg */
+    #save-msg{font-size:11px;color:#9a9a9f;transition:color .2s;}
   </style>
 </head>
 <body>
-<div id="site-header"></div>
+<div id="site-header" style="display:none;"></div>
 
-<div id="main-layout" style="display:flex; height:calc(100vh - 60px);">
+<!-- ═══ BOARD HEADER ═══ -->
+<div id="board-header">
+  <!-- Left: board name + desc -->
+  <div class="board-name-wrap">
+    <div id="board-name-el" contenteditable="true" spellcheck="false">Yeni Pano</div>
+    <div id="board-desc-el" contenteditable="true" spellcheck="false" style="font-size:11px;color:#9a9a9f;margin-top:1px;">Pano açıklaması girin</div>
+  </div>
 
-  <!-- ═══ SOL ARAÇ RAYI ═══ -->
-  <div style="width:52px; background:#fff; border-right:1px solid rgba(0,0,0,.08); display:flex; flex-direction:column; padding:6px 0; overflow-y:auto; flex-shrink:0;">
-    <a href="/mimar-paneli.html" title="Panele dön" class="tool-btn">
+  <!-- Center: tabs -->
+  <div class="tabs">
+    <button class="tab-btn" data-tab="overview">Genel Bakış</button>
+    <button class="tab-btn active" data-tab="design">Tasarım Panosu</button>
+    <button class="tab-btn" data-tab="export" id="tab-export">Dışa Aktar</button>
+  </div>
+
+  <!-- Right: save msg + settings + download -->
+  <div class="header-right">
+    <span id="save-msg"></span>
+    <button id="save-btn" class="hdr-btn">Kaydet</button>
+    <!-- Settings -->
+    <div style="position:relative;">
+      <button id="settings-btn" class="icon-btn" title="Ayarlar">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      </button>
+      <div id="settings-dd">
+        <div class="sd-item" data-setting="grid">
+          <span>Izgara göster</span>
+          <div class="toggle" id="tog-grid"></div>
+        </div>
+        <div class="sd-item" data-setting="snap">
+          <span>Izgaraya yapıştır</span>
+          <div class="toggle" id="tog-snap"></div>
+        </div>
+        <div class="sd-item" data-setting="details">
+          <span>Ürün bilgileri</span>
+          <div class="toggle" id="tog-details"></div>
+        </div>
+        <div class="sd-item" data-setting="comments">
+          <span>Yorumları göster</span>
+          <div class="toggle" id="tog-comments"></div>
+        </div>
+        <div class="sd-item" data-setting="frames">
+          <span>Çerçeveleri göster</span>
+          <div class="toggle on" id="tog-frames"></div>
+        </div>
+        <div class="sd-sep"></div>
+        <div class="sd-fullscreen" id="fullscreen-btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="display:inline;vertical-align:-2px;margin-right:6px;"><path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"/></svg>
+          Tam ekran
+        </div>
+      </div>
+    </div>
+
+    <!-- Download -->
+    <div style="position:relative;">
+      <button id="dl-btn" class="hdr-btn primary">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        İndir
+      </button>
+      <div id="dl-menu">
+        <button class="dl-item" id="dl-jpg">JPG olarak indir</button>
+        <button class="dl-item" id="dl-pdf">PDF olarak indir</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ EDITOR BODY ═══ -->
+<div id="editor-body">
+
+  <!-- ── Left Toolbar ── -->
+  <div id="left-toolbar">
+    <!-- Back -->
+    <a href="/mimar-paneli.html" class="tool-btn" title="Panele dön" style="color:#6e6e73;text-decoration:none;">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6"/></svg>
     </a>
-    <div class="sep"></div>
-    <button id="t-select" class="tool-btn active" title="Seçim (V)" data-tool="select">
+    <div class="tsep"></div>
+
+    <!-- Select -->
+    <button id="t-select" class="tool-btn active" data-tool="select" title="Seçim (V)">
       <svg width="13" height="14" viewBox="0 0 13 15" fill="currentColor"><path d="M1 1l10.5 6.5L8 9 5.5 14 1 1z"/></svg>
     </button>
-    <button id="t-text" class="tool-btn" title="Metin (T)" data-tool="text" style="font-size:15px;font-weight:700;color:inherit;">T</button>
-    <button id="t-rect" class="tool-btn" title="Dikdörtgen (R)" data-tool="rect">
-      <svg width="15" height="12" viewBox="0 0 15 12" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="1" y="1" width="13" height="10" rx="1.5"/></svg>
-    </button>
-    <button id="t-circle" class="tool-btn" title="Daire (C)" data-tool="circle">
-      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="7" cy="7" r="6"/></svg>
-    </button>
-    <button id="t-line" class="tool-btn" title="Çizgi (L)" data-tool="line">
-      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="2" y1="12" x2="12" y2="2"/></svg>
-    </button>
-    <button id="t-image" class="tool-btn" title="Görsel yükle (I)" data-tool="image">
+
+    <!-- Image / product picker -->
+    <button id="t-image" class="tool-btn" data-tool="image" title="Görsel ekle (I)">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
     </button>
-    <input id="file-input" type="file" accept="image/*" style="display:none;" multiple>
-    <div class="sep"></div>
+
+    <!-- Frame (ratio selector trigger) -->
+    <button id="t-frame" class="tool-btn" data-tool="frame" title="Boyut seç">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+    </button>
+
+    <!-- Text -->
+    <button id="t-text" class="tool-btn" data-tool="text" title="Metin (T)" style="font-size:15px;font-weight:700;">T</button>
+
+    <!-- Color / background -->
+    <button id="t-bg" class="tool-btn" title="Arkaplan rengi" style="padding:0;">
+      <svg width="18" height="18" viewBox="0 0 24 24"><defs><radialGradient id="cg" cx="50%" cy="50%"><stop offset="0%" stop-color="#ff6b6b"/><stop offset="33%" stop-color="#ffd93d"/><stop offset="66%" stop-color="#6bcb77"/><stop offset="100%" stop-color="#4d96ff"/></radialGradient></defs><circle cx="12" cy="12" r="9" fill="url(#cg)"/></svg>
+    </button>
+
+    <!-- Rect -->
+    <button id="t-rect" class="tool-btn" data-tool="rect" title="Dikdörtgen (R)">
+      <svg width="15" height="12" viewBox="0 0 15 12" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="1" y="1" width="13" height="10" rx="2"/></svg>
+    </button>
+
+    <!-- Circle -->
+    <button id="t-circle" class="tool-btn" data-tool="circle" title="Daire (C)">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="7" cy="7" r="6"/></svg>
+    </button>
+
+    <!-- Line -->
+    <button id="t-line" class="tool-btn" data-tool="line" title="Çizgi (L)">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="2" y1="12" x2="12" y2="2"/></svg>
+    </button>
+
+    <div class="tsep"></div>
+
+    <!-- Undo -->
+    <button id="t-undo" class="tool-btn" title="Geri al (Ctrl+Z)">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v6h6"/><path d="M3 13A9 9 0 1012 3"/></svg>
+    </button>
+
+    <!-- Redo -->
+    <button id="t-redo" class="tool-btn" title="İleri al (Ctrl+Y)">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 7v6h-6"/><path d="M21 13A9 9 0 1112 3"/></svg>
+    </button>
+
+    <div class="tsep"></div>
+
+    <!-- Duplicate -->
+    <button id="t-dup" class="tool-btn" title="Çoğalt (Ctrl+D)">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+    </button>
+
+    <!-- Lock -->
+    <button id="t-lock" class="tool-btn" title="Kilitle/Aç">
+      <svg width="13" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+    </button>
+
+    <!-- Front/Back -->
     <button id="t-front" class="tool-btn" title="Öne getir">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
     </button>
     <button id="t-back" class="tool-btn" title="Arkaya gönder">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
     </button>
-    <button id="t-dup" class="tool-btn" title="Çoğalt (Ctrl+D)">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
-    </button>
-    <button id="t-lock" class="tool-btn" title="Kilitle/Aç">
-      <svg width="13" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-    </button>
-    <div class="sep"></div>
-    <button id="t-undo" class="tool-btn" title="Geri al (Ctrl+Z)">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v6h6"/><path d="M3 13A9 9 0 1012 3"/></svg>
-    </button>
-    <button id="t-redo" class="tool-btn" title="İleri al (Ctrl+Y)">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 7v6h-6"/><path d="M21 13A9 9 0 1112 3"/></svg>
-    </button>
-    <div class="sep"></div>
+
+    <div class="tsep"></div>
+
+    <!-- Delete -->
     <button id="t-delete" class="tool-btn danger" title="Sil (Delete)">
       <svg width="13" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>
     </button>
   </div>
 
-  <!-- ═══ KANVAS ALANI ═══ -->
-  <div style="flex:1; display:flex; flex-direction:column; min-width:0; overflow:hidden;">
+  <!-- ── Canvas ── -->
+  <div id="canvas-area">
+    <div id="grid-overlay"></div>
+    <canvas id="fc"></canvas>
 
-    <!-- Üst bar -->
-    <div style="height:50px; background:#fff; border-bottom:1px solid rgba(0,0,0,.08); display:flex; align-items:center; padding:0 14px; gap:8px; flex-shrink:0;">
-      <input id="board-name" placeholder="Pano adı" style="background:transparent; border:1px solid rgba(0,0,0,.1); color:#111; border-radius:8px; font-size:13px; padding:0 10px; height:30px; outline:none; font-family:inherit; min-width:160px; max-width:240px;">
-      <!-- Ratio seçici -->
-      <div style="display:flex; align-items:center; gap:4px; margin-left:8px;">
-        <button class="ratio-btn active" data-ratio="free">Serbest</button>
-        <button class="ratio-btn" data-ratio="16:9">16:9</button>
-        <button class="ratio-btn" data-ratio="4:3">4:3</button>
-        <button class="ratio-btn" data-ratio="1:1">Kare</button>
-        <button class="ratio-btn" data-ratio="a4-l">A4 Yatay</button>
-        <button class="ratio-btn" data-ratio="a4-p">A4 Dikey</button>
-        <button class="ratio-btn" data-ratio="story">Story</button>
+    <!-- Background color palette (floating) -->
+    <div id="bg-palette" style="display:none;position:fixed;background:#fff;border:1px solid rgba(0,0,0,.1);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.12);padding:12px;z-index:9999;">
+      <div style="font-size:11px;font-weight:600;color:#6e6e73;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;">Arkaplan Rengi</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;width:164px;">
+        <div class="bg-chip" data-color="#ffffff" style="width:28px;height:28px;border-radius:7px;border:1.5px solid rgba(0,0,0,.15);background:#fff;cursor:pointer;"></div>
+        <div class="bg-chip" data-color="#f5f5f7" style="width:28px;height:28px;border-radius:7px;background:#f5f5f7;cursor:pointer;"></div>
+        <div class="bg-chip" data-color="#1c1c1e" style="width:28px;height:28px;border-radius:7px;background:#1c1c1e;cursor:pointer;"></div>
+        <div class="bg-chip" data-color="#f0ede8" style="width:28px;height:28px;border-radius:7px;background:#f0ede8;cursor:pointer;"></div>
+        <div class="bg-chip" data-color="#e8f0f0" style="width:28px;height:28px;border-radius:7px;background:#e8f0f0;cursor:pointer;"></div>
+        <div class="bg-chip" data-color="#f5f0e8" style="width:28px;height:28px;border-radius:7px;background:#f5f0e8;cursor:pointer;"></div>
+        <div class="bg-chip" data-color="#e8eaf5" style="width:28px;height:28px;border-radius:7px;background:#e8eaf5;cursor:pointer;"></div>
+        <div class="bg-chip" data-color="#f5e8e8" style="width:28px;height:28px;border-radius:7px;background:#f5e8e8;cursor:pointer;"></div>
+        <div class="bg-chip" data-color="#e8f5ea" style="width:28px;height:28px;border-radius:7px;background:#e8f5ea;cursor:pointer;"></div>
+        <div class="bg-chip" data-color="#2c2c2e" style="width:28px;height:28px;border-radius:7px;background:#2c2c2e;cursor:pointer;"></div>
+        <div class="bg-chip" data-color="#3a3a3c" style="width:28px;height:28px;border-radius:7px;background:#3a3a3c;cursor:pointer;"></div>
+        <div class="bg-chip" data-color="#48484a" style="width:28px;height:28px;border-radius:7px;background:#48484a;cursor:pointer;"></div>
+        <div class="bg-chip" data-color="#d4b896" style="width:28px;height:28px;border-radius:7px;background:#d4b896;cursor:pointer;"></div>
+        <div class="bg-chip" data-color="#b8ccd4" style="width:28px;height:28px;border-radius:7px;background:#b8ccd4;cursor:pointer;"></div>
+        <div class="bg-chip" data-color="#c4d4b8" style="width:28px;height:28px;border-radius:7px;background:#c4d4b8;cursor:pointer;"></div>
       </div>
-      <div style="margin-left:auto; display:flex; align-items:center; gap:8px;">
-        <span id="save-msg" style="font-size:11px; color:#6e6e73;"></span>
-        <div style="display:flex; align-items:center; gap:3px; background:#f5f5f7; border:1px solid rgba(0,0,0,.1); border-radius:8px; padding:0 8px; height:30px;">
-          <button id="zoom-out" style="color:#6e6e73; background:none; border:none; cursor:pointer; font-size:16px; padding:0; line-height:1;">−</button>
-          <span id="zoom-val" style="font-size:12px; color:#6e6e73; width:40px; text-align:center; user-select:none;">100%</span>
-          <button id="zoom-in" style="color:#6e6e73; background:none; border:none; cursor:pointer; font-size:16px; padding:0; line-height:1;">+</button>
-        </div>
-        <button id="save-btn" style="height:30px; padding:0 16px; background:#111; color:#fff; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; font-family:inherit; transition:background .12s;" onmouseover="this.style.background='#333'" onmouseout="this.style.background='#111'">Kaydet</button>
-        <div style="position:relative;">
-          <button id="dl-btn" style="height:30px; padding:0 12px; background:#f5f5f7; color:#333; border:1px solid rgba(0,0,0,.1); border-radius:8px; font-size:13px; cursor:pointer; font-family:inherit; display:flex; align-items:center; gap:4px;">
-            İndir <svg width="10" height="6" viewBox="0 0 10 6" fill="currentColor"><path d="M0 0l5 6 5-6z"/></svg>
-          </button>
-          <div id="dl-menu" style="display:none; position:absolute; right:0; top:36px; background:#fff; border:1px solid rgba(0,0,0,.1); border-radius:10px; overflow:hidden; z-index:999; min-width:150px; box-shadow:0 8px 24px rgba(0,0,0,.12);">
-            <button class="dl-item" id="dl-jpg">JPG olarak indir</button>
-            <button class="dl-item" id="dl-pdf">PDF olarak indir</button>
-          </div>
-        </div>
+      <div style="margin-top:10px;display:flex;align-items:center;gap:6px;">
+        <input type="color" id="bg-custom" value="#ffffff" style="width:28px;height:28px;border-radius:7px;border:1px solid rgba(0,0,0,.1);cursor:pointer;padding:2px;background:#fff;">
+        <span style="font-size:11px;color:#6e6e73;">Özel renk</span>
       </div>
     </div>
 
-    <!-- Kanvas -->
-    <div id="canvas-area" style="flex:1; overflow:hidden; display:flex; align-items:center; justify-content:center; background:#f0f0f2; position:relative;">
-      <canvas id="fc"></canvas>
+    <!-- Frame / ratio picker (floating) -->
+    <div id="frame-picker" style="display:none;position:fixed;background:#fff;border:1px solid rgba(0,0,0,.1);border-radius:14px;box-shadow:0 8px 24px rgba(0,0,0,.12);padding:12px 14px;z-index:9999;min-width:180px;">
+      <div style="font-size:11px;font-weight:600;color:#6e6e73;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;">Tuval Boyutu</div>
+      <div style="display:flex;flex-direction:column;gap:4px;">
+        <button class="ratio-opt active" data-ratio="free">Serbest</button>
+        <button class="ratio-opt" data-ratio="16:9">16:9 Geniş Ekran</button>
+        <button class="ratio-opt" data-ratio="4:3">4:3</button>
+        <button class="ratio-opt" data-ratio="1:1">1:1 Kare</button>
+        <button class="ratio-opt" data-ratio="a4-l">A4 Yatay</button>
+        <button class="ratio-opt" data-ratio="a4-p">A4 Dikey</button>
+        <button class="ratio-opt" data-ratio="story">9:16 Story</button>
+      </div>
     </div>
+    <style>
+      .ratio-opt{width:100%;text-align:left;padding:7px 10px;border-radius:7px;border:none;background:transparent;font-size:13px;color:#333;cursor:pointer;font-family:inherit;transition:background .1s;}
+      .ratio-opt:hover{background:#f5f5f7;}
+      .ratio-opt.active{background:#111;color:#fff;}
+    </style>
   </div>
 
-  <!-- ═══ SAĞ PANEL: Sadece ürünler ═══ -->
-  <div style="width:260px; background:#fff; border-left:1px solid rgba(0,0,0,.08); display:flex; flex-direction:column; overflow:hidden; flex-shrink:0;">
-    <div style="padding:12px 12px 8px; flex-shrink:0;">
-      <div style="font-size:13px; font-weight:600; color:#111; margin-bottom:8px;">Ürün Ekle</div>
-      <input id="product-search" placeholder="Favorilerde ara..." style="width:100%; background:#f5f5f7; border:1px solid rgba(0,0,0,.1); color:#111; border-radius:8px; font-size:12px; padding:0 10px; height:30px; outline:none; font-family:inherit;">
+  <!-- ── Image Picker Panel ── -->
+  <div id="img-picker">
+    <div class="picker-head">
+      <h3>Görsel Ekle</h3>
+      <button id="close-picker">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
     </div>
-    <div id="fav-list" style="flex:1; overflow-y:auto; padding:0 12px 8px; display:flex; flex-direction:column; gap:5px; min-height:0;"></div>
-    <div style="padding:0 12px 12px; flex-shrink:0;">
+    <div style="padding:10px 12px 8px; flex-shrink:0;">
+      <input id="product-search" placeholder="Favorilerde ara..." style="width:100%;background:#f5f5f7;border:1px solid rgba(0,0,0,.1);color:#111;border-radius:8px;font-size:12px;padding:0 10px;height:30px;outline:none;font-family:inherit;">
+    </div>
+    <div id="fav-list" style="flex:1;overflow-y:auto;padding:0 12px;display:flex;flex-direction:column;gap:5px;min-height:0;"></div>
+    <div style="padding:12px;flex-shrink:0;border-top:1px solid rgba(0,0,0,.07);">
       <input id="right-file-input" type="file" accept="image/jpeg,image/png,image/webp" style="display:none;" multiple>
-      <button id="right-upload-btn" style="width:100%;height:34px;background:#f5f5f7;border:1px dashed rgba(0,0,0,.18);border-radius:9px;font-size:12px;font-weight:500;color:#4a4a4f;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;transition:border .12s,background .12s;" onmouseover="this.style.background='#ebebef';this.style.borderColor='rgba(0,0,0,.3)'" onmouseout="this.style.background='#f5f5f7';this.style.borderColor='rgba(0,0,0,.18)'">
+      <button id="right-upload-btn" style="width:100%;height:36px;background:#f5f5f7;border:1.5px dashed rgba(0,0,0,.2);border-radius:9px;font-size:12px;font-weight:500;color:#4a4a4f;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:7px;transition:all .12s;">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
         Bilgisayardan yükle
       </button>
     </div>
   </div>
 
-  <!-- ═══ Floating props panel ═══ -->
-  <div id="props-panel" style="display:none; position:fixed; bottom:18px; left:50%; transform:translateX(-50%); background:#fff; border:1px solid rgba(0,0,0,.09); border-radius:16px; box-shadow:0 4px 24px rgba(0,0,0,.1), 0 1px 4px rgba(0,0,0,.06); padding:10px 16px; z-index:500; max-width:800px; width:max-content; max-width:calc(100vw - 80px);"></div>
+</div><!-- end editor-body -->
+
+<!-- ═══ BOTTOM BAR ═══ -->
+<div id="bottom-bar">
+  <div class="page-pill">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/></svg>
+    Sayfa 1
+    <svg width="10" height="10" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 1l4 4 4-4"/></svg>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px;">
+    <span id="save-msg2" style="font-size:11px;color:#9a9a9f;"></span>
+    <button id="fit-btn" class="icon-btn" title="Sığdır" style="width:28px;height:28px;">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"/></svg>
+    </button>
+    <div class="zoom-ctrl">
+      <button id="zoom-out" class="zoom-btn">−</button>
+      <span id="zoom-val">100%</span>
+      <button id="zoom-in" class="zoom-btn">+</button>
+    </div>
+  </div>
 </div>
 
-<div id="site-footer" style="display:none;"></div>
+<!-- ═══ FLOATING PROPS PANEL ═══ -->
+<div id="props-panel"></div>
 
-<!-- ═══ SCRIPTS ═══ -->
+<!-- ═══ HIDDEN INPUTS ═══ -->
+<input id="file-input" type="file" accept="image/*" style="display:none;" multiple>
+
+<div id="site-footer" style="display:none;"></div>
 <script src="/core.js"></script>
 <script src="/layout.js"></script>
 <script>
@@ -161,17 +373,21 @@ let activeTool = "select";
 let zoom = 1;
 let history = [], histIdx = -1, _histBusy = false;
 let _autoSaveTimer = null;
+let _snapEnabled = false;
+const SNAP_SIZE = 20;
 
-// ─── Helpers ───────────────────────────────────────────────────────────────
 const $ = id => document.getElementById(id);
+
 function setSaveMsg(t, ok) {
-  const el = $("save-msg");
-  el.textContent = t;
-  el.style.color = ok ? "#34d399" : "#666";
-  if (ok) setTimeout(() => { el.textContent = ""; }, 3000);
+  [$("save-msg"), $("save-msg2")].forEach(el => {
+    if (!el) return;
+    el.textContent = t;
+    el.style.color = ok ? "#34c759" : "#9a9a9f";
+    if (ok) setTimeout(() => { el.textContent = ""; }, 3000);
+  });
 }
 
-// ─── Araç seçimi ───────────────────────────────────────────────────────────
+// ─── Tool selection ──────────────────────────────────────────────────────────
 function setTool(name) {
   activeTool = name;
   document.querySelectorAll("[data-tool]").forEach(b => b.classList.remove("active"));
@@ -193,10 +409,10 @@ function setTool(name) {
   }
 }
 
-// ─── History ───────────────────────────────────────────────────────────────
+// ─── History ─────────────────────────────────────────────────────────────────
 function pushHistory() {
   if (_histBusy || !fc) return;
-  const json = fc.toJSON(["_locked"]);
+  const json = fc.toJSON(["_locked","_rx"]);
   history = history.slice(0, histIdx + 1);
   history.push(JSON.stringify(json));
   if (history.length > 60) history.shift();
@@ -219,7 +435,7 @@ function redo() {
   });
 }
 
-// ─── Fabric init ───────────────────────────────────────────────────────────
+// ─── Fabric init ─────────────────────────────────────────────────────────────
 function initCanvas() {
   const area = $("canvas-area");
   const W = area.clientWidth;
@@ -230,8 +446,6 @@ function initCanvas() {
     preserveObjectStacking: true,
     selection: true,
   });
-
-  // Global handle style
   fabric.Object.prototype.set({
     borderColor: "#111",
     cornerColor: "#111",
@@ -242,18 +456,16 @@ function initCanvas() {
     padding: 4,
   });
 
-  // Mouse:down → shape ekle
   fc.on("mouse:down", opt => {
     if (activeTool === "select") return;
     if (opt.target) { setTool("select"); return; }
     const p = fc.getPointer(opt.e);
     let obj;
-
     if (activeTool === "text") {
       obj = new fabric.IText("Metin gir...", {
         left: p.x, top: p.y,
-        fontFamily: "Inter, sans-serif",
-        fontSize: 28, fill: "#111111", editable: true,
+        fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
+        fontSize: 28, fill: "#111", editable: true,
       });
       fc.add(obj); fc.setActiveObject(obj);
       obj.enterEditing(); obj.selectAll();
@@ -278,11 +490,16 @@ function initCanvas() {
       });
       fc.add(obj); fc.setActiveObject(obj);
     }
-
     setTool("select");
     fc.renderAll();
     pushHistory();
     updateProps();
+  });
+
+  fc.on("object:moving", opt => {
+    if (!_snapEnabled) return;
+    const o = opt.target;
+    o.set({ left: Math.round(o.left / SNAP_SIZE) * SNAP_SIZE, top: Math.round(o.top / SNAP_SIZE) * SNAP_SIZE });
   });
 
   fc.on("object:modified", () => { pushHistory(); updateProps(); scheduleAutoSave(); });
@@ -303,20 +520,21 @@ function initCanvas() {
     $("zoom-val").textContent = Math.round(z * 100) + "%";
   });
 
-  // Space+drag / middle mouse pan
+  // Space+drag pan
   let isPanning = false, lastPan = null;
+  let spaceDown = false;
   document.addEventListener("keydown", e => {
-    if (e.code === "Space" && !["INPUT","TEXTAREA"].includes(document.activeElement.tagName)) {
+    if (e.code === "Space" && !["INPUT","TEXTAREA","SELECT"].includes(document.activeElement.tagName)) {
+      spaceDown = true;
       $("canvas-area").style.cursor = "grab";
     }
   });
   document.addEventListener("keyup", e => {
-    if (e.code === "Space") $("canvas-area").style.cursor = "";
+    if (e.code === "Space") { spaceDown = false; $("canvas-area").style.cursor = ""; }
   });
   fc.on("mouse:down", opt => {
     const e = opt.e;
-    if (e.button === 1 || (e.code === "Space") ||
-        (e.buttons === 1 && e.altKey)) {
+    if (e.button === 1 || spaceDown || e.altKey) {
       isPanning = true;
       lastPan = { x: e.clientX, y: e.clientY };
       fc.defaultCursor = "grabbing";
@@ -336,7 +554,6 @@ function initCanvas() {
     if (activeTool === "select") fc.defaultCursor = "default";
   });
 
-  // Resize
   window.addEventListener("resize", () => {
     if (!fc) return;
     fc.setDimensions({ width: $("canvas-area").clientWidth, height: $("canvas-area").clientHeight });
@@ -346,43 +563,31 @@ function initCanvas() {
   pushHistory();
 }
 
-// ─── Properties panel ──────────────────────────────────────────────────────
+// ─── Properties panel ────────────────────────────────────────────────────────
 function updateProps() {
   const panel = $("props-panel");
   const obj = fc?.getActiveObject();
-
-  if (!obj) {
-    panel.style.display = "none";
-    return;
-  }
+  if (!obj) { panel.style.display = "none"; return; }
   panel.style.display = "block";
-
   const type = obj.type;
   const isText = type === "i-text" || type === "textbox";
   const isShape = type === "rect" || type === "circle" || type === "polygon";
   const isImg = type === "image";
+  const isLine = type === "line";
 
-  // Compact yatay layout
-  let html = `<div style="display:flex; align-items:flex-start; gap:16px; flex-wrap:wrap;">`;
-
-  // Yardımcı: labeled input
-  const lbl = (label, inputHtml) => `
-    <div style="display:flex;flex-direction:column;gap:3px;">
-      <span style="font-size:10px;color:#9a9a9f;font-weight:500;">${label}</span>
-      ${inputHtml}
-    </div>`;
+  const lbl = (label, inputHtml) => `<div style="display:flex;flex-direction:column;gap:3px;"><span style="font-size:10px;color:#9a9a9f;font-weight:500;">${label}</span>${inputHtml}</div>`;
   const numInput = (id, val, w=52) => `<input class="prop-input" id="${id}" type="number" value="${val}" style="width:${w}px;">`;
   const colorInput = (id, val) => `<input type="color" id="${id}" value="${val}" style="width:32px;height:30px;border-radius:7px;border:1px solid rgba(0,0,0,.1);cursor:pointer;padding:2px;background:#fff;">`;
   const vdiv = `<div style="width:1px;height:30px;background:rgba(0,0,0,.08);flex-shrink:0;"></div>`;
 
-  html += `<div style="display:flex;align-items:flex-end;gap:10px;flex-wrap:nowrap;">`;
+  let html = `<div style="display:flex;align-items:flex-end;gap:10px;flex-wrap:nowrap;">`;
 
-  // Görsel için sadece opaklık + silme
   if (isImg) {
     html += lbl("Opaklık %", numInput("p-opacity-num", Math.round((obj.opacity||1)*100)));
+    html += lbl("Köşe", numInput("p-imgrx", obj._rx||0));
     html += vdiv;
+    html += `<div style="align-self:flex-end;"><button class="prop-btn" id="p-replace">Değiştir</button></div>`;
   } else {
-    // Diğerleri için tam konum/boyut
     html += lbl("X", numInput("p-x", Math.round(obj.left)));
     html += lbl("Y", numInput("p-y", Math.round(obj.top)));
     html += vdiv;
@@ -395,8 +600,8 @@ function updateProps() {
   }
 
   if (isText) {
-    const fonts = ["-apple-system, BlinkMacSystemFont, sans-serif","Georgia, serif","Courier New, monospace","Impact, sans-serif","Arial Black, sans-serif"];
-    html += lbl("Font", `<select class="prop-input" id="p-font" style="width:120px;">${fonts.map(f=>`<option value="${f}" ${obj.fontFamily===f?"selected":""}>${f.split(",")[0].replace(/['"]/g,"")}</option>`).join("")}</select>`);
+    const fonts = ["-apple-system, BlinkMacSystemFont, sans-serif","Georgia, serif","Courier New, monospace","Impact, sans-serif","Arial Black, sans-serif","Trebuchet MS, sans-serif"];
+    html += lbl("Font", `<select class="prop-input" id="p-font" style="width:130px;">${fonts.map(f=>`<option value="${f}" ${obj.fontFamily===f?"selected":""}>${f.split(",")[0].replace(/['"]/g,"")}</option>`).join("")}</select>`);
     html += lbl("Boyut", `<select class="prop-input" id="p-fsize" style="width:58px;">${[10,12,14,16,18,20,24,28,32,40,48,56,72,96].map(s=>`<option value="${s}" ${obj.fontSize==s?"selected":""}>${s}</option>`).join("")}</select>`);
     html += lbl("Renk", colorInput("p-fcolor", obj.fill||"#111111"));
     html += vdiv;
@@ -406,15 +611,9 @@ function updateProps() {
       <button class="prop-btn ${obj.underline?'active':''}" id="p-under" style="text-decoration:underline;width:30px;padding:0;">U</button>
     </div>`;
     html += `<div style="display:flex;gap:4px;align-self:flex-end;">
-      <button class="prop-btn ${!obj.textAlign||obj.textAlign==='left'?'active':''}" id="p-align-l" style="width:30px;padding:0;" title="Sola">
-        <svg width="12" height="10" viewBox="0 0 12 10" fill="currentColor"><rect y="0" width="12" height="1.5" rx="1"/><rect y="3" width="8" height="1.5" rx="1"/><rect y="6" width="10" height="1.5" rx="1"/><rect y="9" width="6" height="1.5" rx="1"/></svg>
-      </button>
-      <button class="prop-btn ${obj.textAlign==='center'?'active':''}" id="p-align-c" style="width:30px;padding:0;" title="Orta">
-        <svg width="12" height="10" viewBox="0 0 12 10" fill="currentColor"><rect y="0" width="12" height="1.5" rx="1"/><rect x="2" y="3" width="8" height="1.5" rx="1"/><rect x="1" y="6" width="10" height="1.5" rx="1"/><rect x="3" y="9" width="6" height="1.5" rx="1"/></svg>
-      </button>
-      <button class="prop-btn ${obj.textAlign==='right'?'active':''}" id="p-align-r" style="width:30px;padding:0;" title="Sağa">
-        <svg width="12" height="10" viewBox="0 0 12 10" fill="currentColor"><rect y="0" width="12" height="1.5" rx="1"/><rect x="4" y="3" width="8" height="1.5" rx="1"/><rect x="2" y="6" width="10" height="1.5" rx="1"/><rect x="6" y="9" width="6" height="1.5" rx="1"/></svg>
-      </button>
+      <button class="prop-btn ${!obj.textAlign||obj.textAlign==='left'?'active':''}" id="p-align-l" style="width:30px;padding:0;" title="Sola"><svg width="12" height="10" viewBox="0 0 12 10" fill="currentColor"><rect y="0" width="12" height="1.5" rx="1"/><rect y="3" width="8" height="1.5" rx="1"/><rect y="6" width="10" height="1.5" rx="1"/><rect y="9" width="6" height="1.5" rx="1"/></svg></button>
+      <button class="prop-btn ${obj.textAlign==='center'?'active':''}" id="p-align-c" style="width:30px;padding:0;" title="Orta"><svg width="12" height="10" viewBox="0 0 12 10" fill="currentColor"><rect y="0" width="12" height="1.5" rx="1"/><rect x="2" y="3" width="8" height="1.5" rx="1"/><rect x="1" y="6" width="10" height="1.5" rx="1"/><rect x="3" y="9" width="6" height="1.5" rx="1"/></svg></button>
+      <button class="prop-btn ${obj.textAlign==='right'?'active':''}" id="p-align-r" style="width:30px;padding:0;" title="Sağa"><svg width="12" height="10" viewBox="0 0 12 10" fill="currentColor"><rect y="0" width="12" height="1.5" rx="1"/><rect x="4" y="3" width="8" height="1.5" rx="1"/><rect x="2" y="6" width="10" height="1.5" rx="1"/><rect x="6" y="9" width="6" height="1.5" rx="1"/></svg></button>
     </div>`;
     html += vdiv;
   }
@@ -427,29 +626,20 @@ function updateProps() {
     html += vdiv;
   }
 
-  if (type === "line") {
+  if (isLine) {
     html += lbl("Renk", colorInput("p-stroke", obj.stroke||'#6b7280'));
     html += lbl("Kalınlık", numInput("p-sw", obj.strokeWidth||2));
     html += vdiv;
   }
 
-  if (isImg) {
-    html += lbl("Köşe", numInput("p-imgrx", obj._rx||0, 52));
-    html += `<div style="align-self:flex-end;"><button class="prop-btn" id="p-replace">Değiştir</button></div>`;
-    html += vdiv;
-  }
-
   html += `<div style="align-self:flex-end;">
-    <button id="p-delete" style="height:30px;padding:0 12px;background:rgba(220,38,38,.06);border:1px solid rgba(220,38,38,.18);color:#dc2626;border-radius:8px;font-size:12px;cursor:pointer;font-family:inherit;transition:background .12s;" onmouseover="this.style.background='rgba(220,38,38,.14)'" onmouseout="this.style.background='rgba(220,38,38,.06)'">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="display:inline;vertical-align:-2px;margin-right:4px;"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>Sil
+    <button id="p-delete" style="height:30px;padding:0 12px;background:rgba(220,38,38,.06);border:1px solid rgba(220,38,38,.18);color:#dc2626;border-radius:8px;font-size:12px;cursor:pointer;font-family:inherit;" onmouseover="this.style.background='rgba(220,38,38,.14)'" onmouseout="this.style.background='rgba(220,38,38,.06)'">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="display:inline;vertical-align:-1px;margin-right:3px;"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>Sil
     </button>
   </div>`;
-
   html += `</div>`;
-
   panel.innerHTML = html;
 
-  // ── Property bindings ──
   function bind(id, fn) { const el=$(id); if(el) el.addEventListener("input", fn); }
   function bindClick(id, fn) { const el=$(id); if(el) el.addEventListener("click", fn); }
   function rerender() { fc.requestRenderAll(); updateProps(); pushHistory(); scheduleAutoSave(); }
@@ -459,9 +649,7 @@ function updateProps() {
   bind("p-w", e => { obj.scaleToWidth(+e.target.value); fc.renderAll(); });
   bind("p-h", e => { obj.scaleToHeight(+e.target.value); fc.renderAll(); });
   bind("p-rot", e => { obj.set("angle", +e.target.value); fc.renderAll(); });
-  bind("p-opacity-num", e => {
-    obj.set("opacity", Math.min(100,Math.max(0,+e.target.value))/100); fc.renderAll();
-  });
+  bind("p-opacity-num", e => { obj.set("opacity", Math.min(100,Math.max(0,+e.target.value))/100); fc.renderAll(); });
 
   if (isText) {
     bind("p-font", e => { obj.set("fontFamily", e.target.value); rerender(); });
@@ -474,13 +662,20 @@ function updateProps() {
     bindClick("p-align-c", () => { obj.set("textAlign","center"); rerender(); });
     bindClick("p-align-r", () => { obj.set("textAlign","right"); rerender(); });
   }
-  if (isShape || type==="line") {
+  if (isShape || isLine) {
     bind("p-fill", e => { obj.set("fill", e.target.value); fc.renderAll(); });
     bind("p-stroke", e => { obj.set("stroke", e.target.value); fc.renderAll(); });
     bind("p-sw", e => { obj.set("strokeWidth", +e.target.value); fc.renderAll(); });
-    if (type==="rect") bind("p-rx", e => { obj.set({ rx: +e.target.value, ry: +e.target.value }); fc.renderAll(); });
+    if (type==="rect") bind("p-rx", e => { obj.set({ rx:+e.target.value, ry:+e.target.value }); fc.renderAll(); });
   }
   if (isImg) {
+    bind("p-imgrx", e => {
+      const r = +e.target.value;
+      obj._rx = r;
+      const w = obj.getScaledWidth(), h = obj.getScaledHeight();
+      obj.clipPath = r > 0 ? new fabric.Rect({ width:w/obj.scaleX, height:h/obj.scaleY, rx:r*(w/obj.scaleX)/100, ry:r*(h/obj.scaleY)/100, originX:"center", originY:"center" }) : null;
+      fc.renderAll();
+    });
     const replaceInput = document.createElement("input");
     replaceInput.type = "file"; replaceInput.accept = "image/*";
     replaceInput.addEventListener("change", () => {
@@ -489,7 +684,7 @@ function updateProps() {
       reader.onload = ev => {
         fabric.Image.fromURL(ev.target.result, img => {
           img.scaleToWidth(obj.getScaledWidth());
-          img.set({ left: obj.left, top: obj.top, angle: obj.angle });
+          img.set({ left:obj.left, top:obj.top, angle:obj.angle });
           fc.remove(obj); fc.add(img); fc.setActiveObject(img); fc.renderAll();
           pushHistory(); updateProps();
         });
@@ -497,29 +692,22 @@ function updateProps() {
       reader.readAsDataURL(f);
     });
     bindClick("p-replace", () => replaceInput.click());
-    bind("p-imgrx", e => {
-      const r = +e.target.value;
-      obj._rx = r;
-      const w = obj.getScaledWidth(), h = obj.getScaledHeight();
-      obj.clipPath = r > 0 ? new fabric.Rect({ width: w/obj.scaleX, height: h/obj.scaleY, rx: r*(w/obj.scaleX)/100, ry: r*(h/obj.scaleY)/100, originX:"center", originY:"center" }) : null;
-      fc.renderAll();
-    });
   }
   bindClick("p-delete", deleteSelected);
 }
 
-// ─── Add image from URL ─────────────────────────────────────────────────────
+// ─── Add image ───────────────────────────────────────────────────────────────
 function addImgFromURL(url, opts={}) {
   fabric.Image.fromURL(url, img => {
     const maxW = fc.width * 0.4;
     if (img.width > maxW) img.scaleToWidth(maxW);
-    img.set({ left: fc.width/2 - img.getScaledWidth()/2, top: fc.height/2 - img.getScaledHeight()/2, ...opts });
+    img.set({ left:fc.width/2-img.getScaledWidth()/2, top:fc.height/2-img.getScaledHeight()/2, ...opts });
     fc.add(img); fc.setActiveObject(img); fc.renderAll();
     pushHistory(); updateProps(); scheduleAutoSave();
-  }, { crossOrigin: "anonymous" });
+  }, { crossOrigin:"anonymous" });
 }
 
-// ─── Delete ─────────────────────────────────────────────────────────────────
+// ─── Delete ──────────────────────────────────────────────────────────────────
 function deleteSelected() {
   const obj = fc?.getActiveObject();
   if (!obj) return;
@@ -535,17 +723,17 @@ function duplicate() {
   const obj = fc?.getActiveObject();
   if (!obj) return;
   obj.clone(cloned => {
-    cloned.set({ left: (obj.left||0)+24, top: (obj.top||0)+24 });
+    cloned.set({ left:(obj.left||0)+24, top:(obj.top||0)+24 });
     fc.add(cloned); fc.setActiveObject(cloned); fc.renderAll();
     pushHistory(); updateProps();
   });
 }
 
-// ─── Fav products ────────────────────────────────────────────────────────────
+// ─── Favorite products ───────────────────────────────────────────────────────
 function renderFavs(list) {
   const wrap = $("fav-list");
   if (!list.length) {
-    wrap.innerHTML = `<p style="font-size:11px;color:#555;padding:8px 0;">Favori ürün yok. <a href="/urunler.html" style="color:#3b82f6;">Ürünler sayfasından</a> ekle.</p>`;
+    wrap.innerHTML = `<p style="font-size:11px;color:#6e6e73;padding:10px 0;">Favori ürün yok.<br><a href="/urunler.html" style="color:#3b82f6;">Ürünler sayfasından</a> ekle.</p>`;
     return;
   }
   wrap.innerHTML = list.map(p=>`
@@ -553,7 +741,7 @@ function renderFavs(list) {
       <img src="${p.image||FALLBACK}" style="width:40px;height:40px;border-radius:7px;object-fit:cover;flex-shrink:0;" crossorigin="anonymous">
       <div style="min-width:0;">
         <div style="font-size:12px;font-weight:500;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.name}</div>
-        <div style="font-size:11px;color:#6e6e73;margin-top:1px;">Tıkla veya sürükle</div>
+        <div style="font-size:11px;color:#9a9a9f;margin-top:1px;">Tıkla veya sürükle</div>
       </div>
     </button>
   `).join("");
@@ -561,7 +749,7 @@ function renderFavs(list) {
   wrap.querySelectorAll("[data-pid]").forEach(btn => {
     const p = list.find(x=>String(x.id)===btn.dataset.pid);
     if (!p) return;
-    btn.addEventListener("click", () => addImgFromURL(p.image||FALLBACK));
+    btn.addEventListener("click", () => { addImgFromURL(p.image||FALLBACK); });
     btn.addEventListener("dragstart", e => {
       e.dataTransfer.effectAllowed = "copy";
       e.dataTransfer.setData("application/json", JSON.stringify(p));
@@ -569,7 +757,7 @@ function renderFavs(list) {
   });
 }
 
-// ─── Drag-drop on canvas ─────────────────────────────────────────────────────
+// ─── Drag-drop ───────────────────────────────────────────────────────────────
 function initDragDrop() {
   const area = $("canvas-area");
   area.addEventListener("dragover", e => { e.preventDefault(); e.dataTransfer.dropEffect = "copy"; area.style.outline = "2px solid #3b82f6"; });
@@ -580,34 +768,60 @@ function initDragDrop() {
     const vp = fc.viewportTransform;
     const dropX = (e.clientX - rect.left - vp[4]) / vp[0];
     const dropY = (e.clientY - rect.top  - vp[5]) / vp[3];
-
     if (e.dataTransfer.files?.length) {
       const file = e.dataTransfer.files[0];
       if (!file.type.startsWith("image/")) return;
       const reader = new FileReader();
-      reader.onload = ev => addImgFromURL(ev.target.result, { left: dropX - 110, top: dropY - 110 });
+      reader.onload = ev => addImgFromURL(ev.target.result, { left:dropX-110, top:dropY-110 });
       reader.readAsDataURL(file);
       return;
     }
     const raw = e.dataTransfer.getData("application/json");
     if (raw) {
-      try { const p = JSON.parse(raw); addImgFromURL(p.image||FALLBACK, { left: dropX-110, top: dropY-110 }); } catch {}
+      try { const p = JSON.parse(raw); addImgFromURL(p.image||FALLBACK, { left:dropX-110, top:dropY-110 }); } catch{}
     }
   });
 }
 
-// ─── Save / Auto-save ────────────────────────────────────────────────────────
+// ─── Save ────────────────────────────────────────────────────────────────────
 function scheduleAutoSave() {
   clearTimeout(_autoSaveTimer);
   _autoSaveTimer = setTimeout(saveBoard, 4000);
 }
 async function saveBoard() {
   if (!fc || !boardId) return;
-  const name = $("board-name").value.trim() || "Tasarım Panosu";
+  const name = $("board-name-el").textContent.trim() || "Tasarım Panosu";
   const canvas_json = JSON.stringify(fc.toJSON(["_locked","_rx"]));
   setSaveMsg("Kaydediliyor...", false);
   const res = await AG.updateMoodboard(boardId, { name, canvas_json });
   setSaveMsg(res.ok ? "Kaydedildi ✓" : "Kaydedilemedi", res.ok);
+}
+
+// ─── Ratio presets ───────────────────────────────────────────────────────────
+const RATIOS = {
+  "free":  null,
+  "16:9":  [16,9],
+  "4:3":   [4,3],
+  "1:1":   [1,1],
+  "a4-l":  [297,210],
+  "a4-p":  [210,297],
+  "story": [9,16],
+};
+function applyRatio(key) {
+  document.querySelectorAll(".ratio-opt").forEach(b=>b.classList.remove("active"));
+  const btn = document.querySelector(`.ratio-opt[data-ratio="${key}"]`);
+  if (btn) btn.classList.add("active");
+  const ratio = RATIOS[key];
+  if (!ratio || !fc) return;
+  const area = $("canvas-area");
+  const maxW = area.clientWidth - 40;
+  const maxH = area.clientHeight - 40;
+  const [rw, rh] = ratio;
+  let cw = maxW, ch = Math.round(maxW * rh / rw);
+  if (ch > maxH) { ch = maxH; cw = Math.round(maxH * rw / rh); }
+  fc.setDimensions({ width:cw, height:ch });
+  fc.setZoom(1); zoom = 1; $("zoom-val").textContent = "100%";
+  fc.renderAll();
 }
 
 // ─── Boot ────────────────────────────────────────────────────────────────────
@@ -626,7 +840,9 @@ async function boot() {
 
   boardData = await AG.getMoodboard(boardId);
   if (!boardData) { setSaveMsg("Pano bulunamadı", false); return; }
-  $("board-name").value = boardData.name || "Tasarım Panosu";
+
+  const nameEl = $("board-name-el");
+  nameEl.textContent = boardData.name || "Yeni Pano";
 
   initCanvas();
   setTool("select");
@@ -639,33 +855,55 @@ async function boot() {
       histIdx = 0;
       updateProps();
     });
-  } else if (Array.isArray(boardData.items) && boardData.items.length) {
-    boardData.items.forEach(item => {
-      if (item.image) {
-        fabric.Image.fromURL(item.image, img => {
-          img.scaleToWidth(item.w || 220);
-          img.set({ left: item.x||50, top: item.y||50 });
-          fc.add(img); fc.renderAll();
-        }, { crossOrigin:"anonymous" });
-      }
-    });
-    setTimeout(pushHistory, 800);
-  } else {
-    updateProps();
-  }
+  } else { updateProps(); }
 
-  allFavs = await AG.getFavoriteProducts();
+  allFavs = await AG.getFavoriteProducts?.() || [];
   renderFavs(allFavs);
   initDragDrop();
 
-  // ── UI bindings ──
+  // ── Tool buttons ──
   $("t-select").addEventListener("click", () => setTool("select"));
   $("t-text").addEventListener("click",   () => setTool("text"));
   $("t-rect").addEventListener("click",   () => setTool("rect"));
   $("t-circle").addEventListener("click", () => setTool("circle"));
   $("t-line").addEventListener("click",   () => setTool("line"));
-  $("t-image").addEventListener("click",  () => $("file-input").click());
+  $("t-image").addEventListener("click",  () => {
+    const picker = $("img-picker");
+    picker.classList.toggle("open");
+  });
 
+  // Frame picker
+  $("t-frame").addEventListener("click", e => {
+    const fp = $("frame-picker");
+    const isOpen = fp.style.display !== "none";
+    fp.style.display = isOpen ? "none" : "block";
+    if (!isOpen) {
+      const rect = e.currentTarget.getBoundingClientRect();
+      fp.style.left = (rect.right + 8) + "px";
+      fp.style.top = rect.top + "px";
+    }
+  });
+  document.querySelectorAll(".ratio-opt").forEach(btn => {
+    btn.addEventListener("click", () => { applyRatio(btn.dataset.ratio); $("frame-picker").style.display="none"; });
+  });
+
+  // BG palette
+  $("t-bg").addEventListener("click", e => {
+    const pal = $("bg-palette");
+    const isOpen = pal.style.display !== "none";
+    pal.style.display = isOpen ? "none" : "block";
+    if (!isOpen) {
+      const rect = e.currentTarget.getBoundingClientRect();
+      pal.style.left = (rect.right + 8) + "px";
+      pal.style.top = rect.top + "px";
+    }
+  });
+  document.querySelectorAll(".bg-chip").forEach(chip => {
+    chip.addEventListener("click", () => { fc?.set("backgroundColor", chip.dataset.color); fc?.renderAll(); scheduleAutoSave(); });
+  });
+  $("bg-custom").addEventListener("input", e => { fc?.set("backgroundColor", e.target.value); fc?.renderAll(); scheduleAutoSave(); });
+
+  // File inputs
   $("file-input").addEventListener("change", () => {
     Array.from($("file-input").files).forEach(file => {
       if (!file.type.startsWith("image/")) return;
@@ -675,7 +913,27 @@ async function boot() {
     });
     $("file-input").value = "";
   });
+  $("right-upload-btn").addEventListener("click", () => $("right-file-input").click());
+  $("right-file-input").addEventListener("change", () => {
+    Array.from($("right-file-input").files).forEach(file => {
+      if (!file.type.startsWith("image/")) return;
+      const r = new FileReader();
+      r.onload = ev => addImgFromURL(ev.target.result);
+      r.readAsDataURL(file);
+    });
+    $("right-file-input").value = "";
+  });
 
+  // Close picker
+  $("close-picker").addEventListener("click", () => $("img-picker").classList.remove("open"));
+
+  // Product search
+  $("product-search").addEventListener("input", e => {
+    const q = e.target.value.trim().toLowerCase();
+    renderFavs(q ? allFavs.filter(p=>p.name.toLowerCase().includes(q)) : allFavs);
+  });
+
+  // Action buttons
   $("t-front").addEventListener("click", () => { const o=fc.getActiveObject(); if(o){fc.bringToFront(o);fc.renderAll();pushHistory();} });
   $("t-back").addEventListener("click",  () => { const o=fc.getActiveObject(); if(o){fc.sendToBack(o);fc.renderAll();pushHistory();} });
   $("t-dup").addEventListener("click",   duplicate);
@@ -690,18 +948,60 @@ async function boot() {
   $("t-delete").addEventListener("click", deleteSelected);
   $("save-btn").addEventListener("click",  saveBoard);
 
-  // Zoom butons
+  // Zoom controls
   $("zoom-in").addEventListener("click",  () => { zoom = Math.min(5, +(zoom+0.1).toFixed(1)); fc.setZoom(zoom); $("zoom-val").textContent=Math.round(zoom*100)+"%"; });
   $("zoom-out").addEventListener("click", () => { zoom = Math.max(0.1, +(zoom-0.1).toFixed(1)); fc.setZoom(zoom); $("zoom-val").textContent=Math.round(zoom*100)+"%"; });
+  $("fit-btn").addEventListener("click", () => {
+    fc.setViewportTransform([1,0,0,1,0,0]);
+    fc.setZoom(1); zoom = 1;
+    $("zoom-val").textContent = "100%";
+    fc.renderAll();
+  });
 
-  // Download menu
+  // Settings dropdown
+  const settingsBtn = $("settings-btn");
+  const settingsDd = $("settings-dd");
+  settingsBtn.addEventListener("click", e => {
+    e.stopPropagation();
+    settingsDd.style.display = settingsDd.style.display === "none" ? "block" : "none";
+  });
+  document.addEventListener("click", e => {
+    if (!settingsDd.contains(e.target) && e.target !== settingsBtn) settingsDd.style.display = "none";
+    if (!$("bg-palette").contains(e.target) && e.target !== $("t-bg")) $("bg-palette").style.display = "none";
+    if (!$("frame-picker").contains(e.target) && e.target !== $("t-frame")) $("frame-picker").style.display = "none";
+  });
+
+  document.querySelectorAll("[data-setting]").forEach(item => {
+    item.addEventListener("click", () => {
+      const key = item.dataset.setting;
+      const tog = item.querySelector(".toggle");
+      tog.classList.toggle("on");
+      const on = tog.classList.contains("on");
+      if (key === "grid") $("grid-overlay").classList.toggle("on", on);
+      if (key === "snap") _snapEnabled = on;
+      if (key === "frames") {
+        if (fc) {
+          fc.forEachObject(o => { o.hasBorders = on; o.hasControls = on; });
+          fc.renderAll();
+        }
+      }
+    });
+  });
+
+  $("fullscreen-btn").addEventListener("click", () => {
+    settingsDd.style.display = "none";
+    if (!document.fullscreenElement) document.documentElement.requestFullscreen?.();
+    else document.exitFullscreen?.();
+  });
+
+  // Download
   const dlBtn = $("dl-btn"), dlMenu = $("dl-menu");
   dlBtn.addEventListener("click", e => { e.stopPropagation(); dlMenu.style.display = dlMenu.style.display==="none"?"block":"none"; });
   document.addEventListener("click", () => { dlMenu.style.display="none"; });
   $("dl-jpg").addEventListener("click", () => {
     dlMenu.style.display="none";
     const url = fc.toDataURL({ format:"jpeg", quality:0.95, multiplier:2 });
-    const a = document.createElement("a"); a.href=url; a.download=($("board-name").value||"pano")+".jpg"; a.click();
+    const a = document.createElement("a"); a.href=url; a.download=($("board-name-el").textContent||"pano")+".jpg"; a.click();
     setSaveMsg("JPG indirildi ✓", true);
   });
   $("dl-pdf").addEventListener("click", () => {
@@ -711,60 +1011,19 @@ async function boot() {
     const W = fc.width*2, H = fc.height*2;
     const pdf = new jsPDF({ orientation:W>H?"landscape":"portrait", unit:"px", format:[W,H] });
     pdf.addImage(url,"JPEG",0,0,W,H);
-    pdf.save(($("board-name").value||"pano")+".pdf");
+    pdf.save(($("board-name-el").textContent||"pano")+".pdf");
     setSaveMsg("PDF indirildi ✓", true);
   });
 
-  // ── Ratio seçici ──
-  const RATIOS = {
-    "free":  null,
-    "16:9":  [16,9],
-    "4:3":   [4,3],
-    "1:1":   [1,1],
-    "a4-l":  [297,210],
-    "a4-p":  [210,297],
-    "story": [9,16],
-  };
-  document.querySelectorAll("[data-ratio]").forEach(btn => {
-    btn.addEventListener("click", () => {
-      document.querySelectorAll("[data-ratio]").forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
-      const ratio = RATIOS[btn.dataset.ratio];
-      if (!ratio || !fc) return;
-      const area = $("canvas-area");
-      const maxW = area.clientWidth - 32;
-      const maxH = area.clientHeight - 32;
-      const [rw, rh] = ratio;
-      let cw = maxW, ch = Math.round(maxW * rh / rw);
-      if (ch > maxH) { ch = maxH; cw = Math.round(maxH * rw / rh); }
-      fc.setDimensions({ width: cw, height: ch });
-      fc.setZoom(1); zoom = 1; $("zoom-val").textContent = "100%";
-      fc.renderAll();
-    });
-  });
-
-  // Sağ panelden yükle butonu
-  $("right-upload-btn").addEventListener("click", () => $("right-file-input").click());
-  $("right-file-input").addEventListener("change", () => {
-    Array.from($("right-file-input").files).forEach(file => {
-      if (!file.type.startsWith("image/")) return;
-      const r = new FileReader();
-      r.onload = ev => addImgFromURL(ev.target.result);
-      r.readAsDataURL(file);
-    });
-    $("right-file-input").value = "";
-  });
-
-  // Product search
-  $("product-search").addEventListener("input", e => {
-    const q = e.target.value.trim().toLowerCase();
-    renderFavs(q ? allFavs.filter(p=>p.name.toLowerCase().includes(q)) : allFavs);
-  });
+  // Board name input triggers save
+  $("board-name-el").addEventListener("blur", scheduleAutoSave);
+  $("board-desc-el").addEventListener("blur", scheduleAutoSave);
 
   // Keyboard shortcuts
   document.addEventListener("keydown", e => {
     const tag = document.activeElement.tagName;
-    if (["INPUT","TEXTAREA","SELECT"].includes(tag)) return;
+    const isEditable = document.activeElement.isContentEditable;
+    if (["INPUT","TEXTAREA","SELECT"].includes(tag) || isEditable) return;
     if ((e.ctrlKey||e.metaKey) && e.key==="z") { e.preventDefault(); undo(); }
     if ((e.ctrlKey||e.metaKey) && (e.key==="y"||(e.shiftKey&&e.key==="z"))) { e.preventDefault(); redo(); }
     if ((e.ctrlKey||e.metaKey) && e.key==="d") { e.preventDefault(); duplicate(); }
@@ -775,21 +1034,14 @@ async function boot() {
     if (e.key==="r"||e.key==="R") setTool("rect");
     if (e.key==="c"||e.key==="C") setTool("circle");
     if (e.key==="l"||e.key==="L") setTool("line");
-    if (e.key==="Escape") { setTool("select"); fc.discardActiveObject(); fc.renderAll(); }
+    if (e.key==="i"||e.key==="I") $("img-picker").classList.toggle("open");
+    if (e.key==="Escape") {
+      setTool("select");
+      fc.discardActiveObject(); fc.renderAll();
+      $("img-picker").classList.remove("open");
+    }
   });
 }
-
-// Header yüksekliğini ölç ve layout'u güncelle
-function fixHeight() {
-  const header = document.getElementById("site-header");
-  const layout = document.getElementById("main-layout");
-  if (header && layout) {
-    const h = header.offsetHeight || 60;
-    layout.style.height = `calc(100vh - ${h}px)`;
-  }
-}
-setTimeout(fixHeight, 300);
-window.addEventListener("resize", fixHeight);
 
 boot();
 </script>
