@@ -58,7 +58,43 @@
     },
   ];
 
-  const subCategoryIcons = {};
+  const iFloor = "<svg width='14' height='14' viewBox='0 0 16 16' aria-hidden='true'><path d='M2 13h12M2 10h12M2 7h12M3 4h10' stroke='#76767d' stroke-width='1.4' fill='none' stroke-linecap='round'/></svg>";
+  const iSquare = "<svg width='14' height='14' viewBox='0 0 16 16' aria-hidden='true'><rect x='2.5' y='2.5' width='11' height='11' rx='1.5' stroke='#76767d' stroke-width='1.4' fill='none'/></svg>";
+  const iGrid = "<svg width='14' height='14' viewBox='0 0 16 16' aria-hidden='true'><path d='M2.5 5.5h11M2.5 10.5h11M5.5 2.5v11M10.5 2.5v11' stroke='#76767d' stroke-width='1.3' fill='none'/><rect x='2.5' y='2.5' width='11' height='11' rx='1.5' stroke='#76767d' stroke-width='1.2' fill='none'/></svg>";
+  const iDoor = "<svg width='14' height='14' viewBox='0 0 16 16' aria-hidden='true'><path d='M4 2.5h8v11H4zM9.7 8h.01' stroke='#76767d' stroke-width='1.4' fill='none' stroke-linecap='round'/></svg>";
+  const iLight = "<svg width='14' height='14' viewBox='0 0 16 16' aria-hidden='true'><path d='M8 2.5v7M5.5 12h5M6.5 13.5h3' stroke='#76767d' stroke-width='1.4' fill='none' stroke-linecap='round'/></svg>";
+
+  const subCategoryIcons = {
+    "Zemin": iFloor,
+    "Cam": iSquare,
+    "Deri": iSquare,
+    "Yığma ve Taş": iGrid,
+    "Metal": iSquare,
+    "Boya": iSquare,
+    "Panel": iGrid,
+    "Yüzey Bitişi": iSquare,
+    "Reçine": iSquare,
+    "Yüzey": iSquare,
+    "Tekstil": iGrid,
+    "Seramik": iGrid,
+    "Duvar Kaplama": iSquare,
+    "Akustik": iGrid,
+    "Elektrikli Cihazlar": iSquare,
+    "Banyo": iSquare,
+    "Dekor ve Aksesuar": iSquare,
+    "Mobilya": iGrid,
+    "Donanım": iSquare,
+    "Mutfak": iSquare,
+    "Aydınlatma": iLight,
+    "Dış Mekan": iSquare,
+    "Pencere Sistemleri": iSquare,
+    "Tavan": iFloor,
+    "Decking": iFloor,
+    "Kapılar": iDoor,
+    "Cephe": iGrid,
+    "Profil ve Trim": iFloor,
+    "Peyzaj ve Kaplama": iGrid,
+  };
 
   const headerTarget = document.getElementById("site-header");
   if (headerTarget) {
@@ -77,7 +113,7 @@
                           `<a href="/urunler.html?category=${encodeURIComponent(col.name)}&sub=${encodeURIComponent(
                             sub
                           )}" class="flex items-center gap-2 text-[14px] text-[#4a4a4f] hover:text-black">
-                            <span class="w-4 h-4 rounded-sm border border-black/20 bg-[#f5f5f7] inline-flex items-center justify-center"></span>
+                            <span class="w-4 h-4 inline-flex items-center justify-center">${subCategoryIcons[sub] || iSquare}</span>
                             <span>${sub}</span>
                           </a>`
                       )
