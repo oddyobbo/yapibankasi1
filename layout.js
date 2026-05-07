@@ -38,10 +38,6 @@
       ],
     },
     {
-      name: "Mimari",
-      subs: ["Tavan", "Decking", "Kapılar", "Cephe", "Profil ve Trim", "Peyzaj ve Kaplama"],
-    },
-    {
       name: "Mobilya ve Donatı",
       subs: [
         "Akustik",
@@ -55,6 +51,10 @@
         "Dış Mekan",
         "Pencere Sistemleri",
       ],
+    },
+    {
+      name: "Mimari",
+      subs: ["Tavan", "Decking", "Kapılar", "Cephe", "Profil ve Trim", "Peyzaj ve Kaplama"],
     },
   ];
 
@@ -105,14 +105,14 @@
           const megaCols = productMegaMenu.map(
               (col) => `
                 <div>
-                  <p class="text-[14px] font-semibold text-black">${col.name}</p>
+                  <p class="text-[16px] font-semibold text-black">${col.name} <span class="text-[13px] text-[#7a7a80]">›</span></p>
                   <div class="mt-2 space-y-1">
                     ${col.subs
                       .map(
                         (sub) =>
                           `<a href="/urunler.html?category=${encodeURIComponent(col.name)}&sub=${encodeURIComponent(
                             sub
-                          )}" class="flex items-center gap-2 text-[14px] text-[#4a4a4f] hover:text-black">
+                          )}" class="flex items-center gap-2 text-[15px] text-[#4a4a4f] hover:text-black">
                             <span class="w-4 h-4 inline-flex items-center justify-center">${subCategoryIcons[sub] || iSquare}</span>
                             <span>${sub}</span>
                           </a>`
@@ -124,9 +124,9 @@
             .join("");
           return `
             <div class="relative">
-              <button type="button" id="products-mega-toggle" class="px-3 py-2 rounded-full text-[13.5px] ${
+              <button type="button" id="products-mega-toggle" class="px-3 py-2 rounded-full text-[14.5px] ${
                 isActive ? "text-black" : "text-[#1f1f22] hover:text-black"
-              }">${item.label}</button>
+              }">${item.label} <span class="text-[12px] align-middle">▾</span></button>
               <div id="products-mega-panel" class="hidden fixed left-0 right-0 top-[72px] z-40">
                 <div class="w-full border-y border-black/[0.08] bg-white shadow-[0_30px_70px_rgba(0,0,0,0.16)]">
                   <div class="px-6 pt-4">
