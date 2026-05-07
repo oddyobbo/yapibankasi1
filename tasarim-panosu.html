@@ -145,8 +145,8 @@
     </div>
   </div>
 
-  <!-- ═══ Floating props panel (obje seçince çıkar) ═══ -->
-  <div id="props-panel" style="display:none; position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#fff; border:1px solid rgba(0,0,0,.1); border-radius:14px; box-shadow:0 8px 32px rgba(0,0,0,.14); padding:12px 16px; z-index:500; max-width:680px; width:calc(100vw - 120px); max-height:260px; overflow-y:auto;"></div>
+  <!-- ═══ Floating props panel ═══ -->
+  <div id="props-panel" style="display:none; position:fixed; bottom:18px; left:50%; transform:translateX(-50%); background:#fff; border:1px solid rgba(0,0,0,.09); border-radius:16px; box-shadow:0 4px 24px rgba(0,0,0,.1), 0 1px 4px rgba(0,0,0,.06); padding:10px 16px; z-index:500; max-width:800px; width:max-content; max-width:calc(100vw - 80px);"></div>
 </div>
 
 <div id="site-footer" style="display:none;"></div>
@@ -365,103 +365,87 @@ function updateProps() {
   // Compact yatay layout
   let html = `<div style="display:flex; align-items:flex-start; gap:16px; flex-wrap:wrap;">`;
 
-  // Konum/boyut grubu — görsel için sadece opaklık
-  if (!isImg) {
-    html += `<div>
-      <div style="font-size:10px;font-weight:600;color:#6e6e73;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;">${isText?"Metin":isShape?"Şekil":type==="line"?"Çizgi":"Obje"}</div>
-      <div style="display:flex;gap:5px;flex-wrap:wrap;">
-        <div style="display:flex;flex-direction:column;gap:1px;"><span style="font-size:10px;color:#999;">X</span><input class="prop-input" id="p-x" type="number" value="${Math.round(obj.left)}" style="width:54px;"></div>
-        <div style="display:flex;flex-direction:column;gap:1px;"><span style="font-size:10px;color:#999;">Y</span><input class="prop-input" id="p-y" type="number" value="${Math.round(obj.top)}" style="width:54px;"></div>
-        <div style="display:flex;flex-direction:column;gap:1px;"><span style="font-size:10px;color:#999;">W</span><input class="prop-input" id="p-w" type="number" value="${Math.round(obj.getScaledWidth())}" style="width:54px;"></div>
-        <div style="display:flex;flex-direction:column;gap:1px;"><span style="font-size:10px;color:#999;">H</span><input class="prop-input" id="p-h" type="number" value="${Math.round(obj.getScaledHeight())}" style="width:54px;"></div>
-        <div style="display:flex;flex-direction:column;gap:1px;"><span style="font-size:10px;color:#999;">°</span><input class="prop-input" id="p-rot" type="number" min="0" max="360" value="${Math.round(obj.angle||0)}" style="width:46px;"></div>
-        <div style="display:flex;flex-direction:column;gap:1px;"><span style="font-size:10px;color:#999;">Opaklık</span><input class="prop-input" id="p-opacity-num" type="number" min="0" max="100" value="${Math.round((obj.opacity||1)*100)}" style="width:52px;"></div>
-      </div>
+  // Yardımcı: labeled input
+  const lbl = (label, inputHtml) => `
+    <div style="display:flex;flex-direction:column;gap:3px;">
+      <span style="font-size:10px;color:#9a9a9f;font-weight:500;">${label}</span>
+      ${inputHtml}
     </div>`;
+  const numInput = (id, val, w=52) => `<input class="prop-input" id="${id}" type="number" value="${val}" style="width:${w}px;">`;
+  const colorInput = (id, val) => `<input type="color" id="${id}" value="${val}" style="width:32px;height:30px;border-radius:7px;border:1px solid rgba(0,0,0,.1);cursor:pointer;padding:2px;background:#fff;">`;
+  const vdiv = `<div style="width:1px;height:30px;background:rgba(0,0,0,.08);flex-shrink:0;"></div>`;
+
+  html += `<div style="display:flex;align-items:flex-end;gap:10px;flex-wrap:nowrap;">`;
+
+  // Görsel için sadece opaklık + silme
+  if (isImg) {
+    html += lbl("Opaklık %", numInput("p-opacity-num", Math.round((obj.opacity||1)*100)));
+    html += vdiv;
   } else {
-    html += `<div style="display:flex;flex-direction:column;gap:1px;">
-      <span style="font-size:10px;font-weight:600;color:#6e6e73;text-transform:uppercase;letter-spacing:.07em;">Opaklık</span>
-      <input class="prop-input" id="p-opacity-num" type="number" min="0" max="100" value="${Math.round((obj.opacity||1)*100)}" style="width:60px;">
-    </div>`;
+    // Diğerleri için tam konum/boyut
+    html += lbl("X", numInput("p-x", Math.round(obj.left)));
+    html += lbl("Y", numInput("p-y", Math.round(obj.top)));
+    html += vdiv;
+    html += lbl("G", numInput("p-w", Math.round(obj.getScaledWidth())));
+    html += lbl("Y", numInput("p-h", Math.round(obj.getScaledHeight())));
+    html += vdiv;
+    html += lbl("°", numInput("p-rot", Math.round(obj.angle||0), 46));
+    html += lbl("Opaklık %", numInput("p-opacity-num", Math.round((obj.opacity||1)*100)));
+    html += vdiv;
   }
 
   if (isText) {
     const fonts = ["-apple-system, BlinkMacSystemFont, sans-serif","Georgia, serif","Courier New, monospace","Impact, sans-serif","Arial Black, sans-serif"];
-    html += `<div>
-      <div style="font-size:10px;font-weight:600;color:#6e6e73;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;">Metin Stili</div>
-      <div style="display:flex;gap:5px;flex-wrap:wrap;align-items:flex-end;">
-        <div style="display:flex;flex-direction:column;gap:1px;"><span style="font-size:10px;color:#999;">Font</span>
-          <select class="prop-input" id="p-font" style="width:110px;">${fonts.map(f=>`<option value="${f}" ${obj.fontFamily===f?"selected":""}>${f.split(",")[0].replace(/['"]/g,"")}</option>`).join("")}</select>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:1px;"><span style="font-size:10px;color:#999;">Boyut</span>
-          <select class="prop-input" id="p-fsize" style="width:60px;">${[10,12,14,16,18,20,24,28,32,40,48,56,72,96].map(s=>`<option value="${s}" ${obj.fontSize==s?"selected":""}>${s}</option>`).join("")}</select>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:1px;"><span style="font-size:10px;color:#999;">Renk</span>
-          <input type="color" id="p-fcolor" value="${obj.fill||'#111111'}" style="width:36px;height:28px;border-radius:7px;border:1px solid rgba(0,0,0,.12);cursor:pointer;padding:2px;">
-        </div>
-        <div style="display:flex;gap:3px;">
-          <button class="prop-btn ${obj.fontWeight==='bold'?'active':''}" id="p-bold" style="font-weight:700;">B</button>
-          <button class="prop-btn ${obj.fontStyle==='italic'?'active':''}" id="p-italic" style="font-style:italic;">I</button>
-          <button class="prop-btn ${obj.underline?'active':''}" id="p-under" style="text-decoration:underline;">U</button>
-        </div>
-        <div style="display:flex;gap:3px;">
-          <button class="prop-btn ${!obj.textAlign||obj.textAlign==='left'?'active':''}" id="p-align-l" title="Sola">⬛</button>
-          <button class="prop-btn ${obj.textAlign==='center'?'active':''}" id="p-align-c" title="Orta">≡</button>
-          <button class="prop-btn ${obj.textAlign==='right'?'active':''}" id="p-align-r" title="Sağa">▶</button>
-        </div>
-      </div>
+    html += lbl("Font", `<select class="prop-input" id="p-font" style="width:120px;">${fonts.map(f=>`<option value="${f}" ${obj.fontFamily===f?"selected":""}>${f.split(",")[0].replace(/['"]/g,"")}</option>`).join("")}</select>`);
+    html += lbl("Boyut", `<select class="prop-input" id="p-fsize" style="width:58px;">${[10,12,14,16,18,20,24,28,32,40,48,56,72,96].map(s=>`<option value="${s}" ${obj.fontSize==s?"selected":""}>${s}</option>`).join("")}</select>`);
+    html += lbl("Renk", colorInput("p-fcolor", obj.fill||"#111111"));
+    html += vdiv;
+    html += `<div style="display:flex;gap:4px;align-self:flex-end;">
+      <button class="prop-btn ${obj.fontWeight==='bold'?'active':''}" id="p-bold" style="font-weight:700;width:30px;padding:0;">B</button>
+      <button class="prop-btn ${obj.fontStyle==='italic'?'active':''}" id="p-italic" style="font-style:italic;width:30px;padding:0;">I</button>
+      <button class="prop-btn ${obj.underline?'active':''}" id="p-under" style="text-decoration:underline;width:30px;padding:0;">U</button>
     </div>`;
+    html += `<div style="display:flex;gap:4px;align-self:flex-end;">
+      <button class="prop-btn ${!obj.textAlign||obj.textAlign==='left'?'active':''}" id="p-align-l" style="width:30px;padding:0;" title="Sola">
+        <svg width="12" height="10" viewBox="0 0 12 10" fill="currentColor"><rect y="0" width="12" height="1.5" rx="1"/><rect y="3" width="8" height="1.5" rx="1"/><rect y="6" width="10" height="1.5" rx="1"/><rect y="9" width="6" height="1.5" rx="1"/></svg>
+      </button>
+      <button class="prop-btn ${obj.textAlign==='center'?'active':''}" id="p-align-c" style="width:30px;padding:0;" title="Orta">
+        <svg width="12" height="10" viewBox="0 0 12 10" fill="currentColor"><rect y="0" width="12" height="1.5" rx="1"/><rect x="2" y="3" width="8" height="1.5" rx="1"/><rect x="1" y="6" width="10" height="1.5" rx="1"/><rect x="3" y="9" width="6" height="1.5" rx="1"/></svg>
+      </button>
+      <button class="prop-btn ${obj.textAlign==='right'?'active':''}" id="p-align-r" style="width:30px;padding:0;" title="Sağa">
+        <svg width="12" height="10" viewBox="0 0 12 10" fill="currentColor"><rect y="0" width="12" height="1.5" rx="1"/><rect x="4" y="3" width="8" height="1.5" rx="1"/><rect x="2" y="6" width="10" height="1.5" rx="1"/><rect x="6" y="9" width="6" height="1.5" rx="1"/></svg>
+      </button>
+    </div>`;
+    html += vdiv;
   }
 
   if (isShape) {
-    html += `<div>
-      <div style="font-size:10px;font-weight:600;color:#6e6e73;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;">Şekil</div>
-      <div style="display:flex;gap:5px;flex-wrap:wrap;align-items:flex-end;">
-        <div style="display:flex;flex-direction:column;gap:1px;"><span style="font-size:10px;color:#999;">Dolgu</span>
-          <input type="color" id="p-fill" value="${obj.fill==='transparent'||!obj.fill?'#e5e7eb':obj.fill}" style="width:36px;height:28px;border-radius:7px;border:1px solid rgba(0,0,0,.12);cursor:pointer;padding:2px;">
-        </div>
-        <div style="display:flex;flex-direction:column;gap:1px;"><span style="font-size:10px;color:#999;">Kenar</span>
-          <input type="color" id="p-stroke" value="${obj.stroke&&obj.stroke!=='transparent'?obj.stroke:'#000000'}" style="width:36px;height:28px;border-radius:7px;border:1px solid rgba(0,0,0,.12);cursor:pointer;padding:2px;">
-        </div>
-        <div style="display:flex;flex-direction:column;gap:1px;"><span style="font-size:10px;color:#999;">Kalınlık</span>
-          <input class="prop-input" id="p-sw" type="number" min="0" max="40" value="${obj.strokeWidth||0}" style="width:52px;">
-        </div>
-        ${type==="rect"?`<div style="display:flex;flex-direction:column;gap:1px;"><span style="font-size:10px;color:#999;">Köşe r</span><input class="prop-input" id="p-rx" type="number" min="0" max="200" value="${obj.rx||0}" style="width:52px;"></div>`:""}
-      </div>
-    </div>`;
+    html += lbl("Dolgu", colorInput("p-fill", obj.fill==='transparent'||!obj.fill?'#e5e7eb':obj.fill));
+    html += lbl("Kenar", colorInput("p-stroke", obj.stroke&&obj.stroke!=='transparent'?obj.stroke:'#000000'));
+    html += lbl("Kalınlık", numInput("p-sw", obj.strokeWidth||0));
+    if (type==="rect") html += lbl("Köşe", numInput("p-rx", obj.rx||0));
+    html += vdiv;
   }
 
   if (type === "line") {
-    html += `<div>
-      <div style="font-size:10px;font-weight:600;color:#6e6e73;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;">Çizgi</div>
-      <div style="display:flex;gap:5px;align-items:flex-end;">
-        <div style="display:flex;flex-direction:column;gap:1px;"><span style="font-size:10px;color:#999;">Renk</span>
-          <input type="color" id="p-stroke" value="${obj.stroke||'#6b7280'}" style="width:36px;height:28px;border-radius:7px;border:1px solid rgba(0,0,0,.12);cursor:pointer;padding:2px;">
-        </div>
-        <div style="display:flex;flex-direction:column;gap:1px;"><span style="font-size:10px;color:#999;">Kalınlık</span>
-          <input class="prop-input" id="p-sw" type="number" min="1" max="40" value="${obj.strokeWidth||2}" style="width:52px;">
-        </div>
-      </div>
-    </div>`;
+    html += lbl("Renk", colorInput("p-stroke", obj.stroke||'#6b7280'));
+    html += lbl("Kalınlık", numInput("p-sw", obj.strokeWidth||2));
+    html += vdiv;
   }
 
   if (isImg) {
-    html += `<div>
-      <div style="font-size:10px;font-weight:600;color:#6e6e73;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;">Görsel</div>
-      <div style="display:flex;gap:5px;align-items:flex-end;flex-wrap:wrap;">
-        <button class="prop-btn" id="p-replace">Değiştir</button>
-        <div style="display:flex;flex-direction:column;gap:1px;"><span style="font-size:10px;color:#999;">Köşe yuvarlama</span>
-          <input class="prop-input" id="p-imgrx" type="number" min="0" max="50" value="${obj._rx||0}" style="width:60px;">
-        </div>
-      </div>
-    </div>`;
+    html += lbl("Köşe", numInput("p-imgrx", obj._rx||0, 52));
+    html += `<div style="align-self:flex-end;"><button class="prop-btn" id="p-replace">Değiştir</button></div>`;
+    html += vdiv;
   }
 
-  html += `<div style="display:flex;align-items:flex-end;">
-    <button id="p-delete" style="height:28px;padding:0 12px;background:rgba(220,38,38,.06);border:1px solid rgba(220,38,38,.2);color:#dc2626;border-radius:7px;font-size:12px;cursor:pointer;font-family:inherit;" onmouseover="this.style.background='rgba(220,38,38,.12)'" onmouseout="this.style.background='rgba(220,38,38,.06)'">Sil</button>
+  html += `<div style="align-self:flex-end;">
+    <button id="p-delete" style="height:30px;padding:0 12px;background:rgba(220,38,38,.06);border:1px solid rgba(220,38,38,.18);color:#dc2626;border-radius:8px;font-size:12px;cursor:pointer;font-family:inherit;transition:background .12s;" onmouseover="this.style.background='rgba(220,38,38,.14)'" onmouseout="this.style.background='rgba(220,38,38,.06)'">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="display:inline;vertical-align:-2px;margin-right:4px;"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>Sil
+    </button>
   </div>`;
 
-  html += `</div>`; // flex wrap container
+  html += `</div>`;
 
   panel.innerHTML = html;
 
