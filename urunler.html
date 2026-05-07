@@ -233,7 +233,7 @@
 
       <!-- Left sidebar -->
       <aside id="filter-sidebar">
-        <div id="filter-sidebar-inner" class="border-r border-black/[0.07] sticky top-[120px]" style="height:calc(100vh - 120px); overflow-y:auto;">
+        <div id="filter-sidebar-inner" class="border-r border-black/[0.07]" style="overflow-y:auto; position:sticky; top:120px; height:calc(100vh - 120px);">
           <div class="p-4">
 
             <!-- Sidebar search -->
@@ -593,6 +593,22 @@
         g.style.display = !q || label.includes(q) ? "" : "none";
       });
     });
+
+    // ── Fix sidebar sticky top dynamically ──
+    function fixSidebarTop() {
+      const topBar = document.querySelector(".sticky.top-\\[72px\\]");
+      if (!topBar) return;
+      const h = topBar.getBoundingClientRect().height + 72;
+      const inner = document.getElementById("filter-sidebar-inner");
+      if (inner) {
+        inner.style.top = h + "px";
+        inner.style.height = "calc(100vh - " + h + "px)";
+      }
+    }
+    fixSidebarTop();
+    const _topBarObserver = new ResizeObserver(fixSidebarTop);
+    const _topBarEl = document.querySelector(".sticky.top-\\[72px\\]");
+    if (_topBarEl) _topBarObserver.observe(_topBarEl);
 
     // ── Sidebar toggle ──
     document.getElementById("sidebar-toggle").addEventListener("click", () => {
