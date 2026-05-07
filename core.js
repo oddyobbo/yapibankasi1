@@ -184,31 +184,34 @@
     try { await sb.rpc("increment_product_view", { product_id: id }); } catch {}
   };
 
-  const uploadBrandImage = async (file, brandId) => {
+  const uploadBrandAsset = async (file, brandId, bucket = "product-images") => {
     await ready;
     const sb = getSB();
     if (!sb) return { ok: false, message: "Sunucu bağlantısı kurulamadı." };
-    if (!file) return { ok: false, message: "Lütfen bir görsel seçin." };
+    if (!file) return { ok: false, message: "Lütfen bir dosya seçin." };
 
-    const safeName = (file.name || "image.jpg").replace(/[^a-zA-Z0-9._-]/g, "-");
+    const safeName = (file.name || "file.bin").replace(/[^a-zA-Z0-9._-]/g, "-");
     const ext = safeName.includes(".") ? safeName.split(".").pop() : "jpg";
     const path = `${brandId || "unknown"}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
 
-    const { error: upErr } = await sb.storage.from("product-images").upload(path, file, {
+    const { error: upErr } = await sb.storage.from(bucket).upload(path, file, {
       cacheControl: "3600",
       upsert: false,
-      contentType: file.type || "image/jpeg",
+      contentType: file.type || "application/octet-stream",
     });
     if (upErr) {
-      return { ok: false, message: `Görsel yüklenemedi: ${upErr.message}` };
+      return { ok: false, message: `Dosya yüklenemedi: ${upErr.message}` };
     }
 
-    const { data } = sb.storage.from("product-images").getPublicUrl(path);
+    const { data } = sb.storage.from(bucket).getPublicUrl(path);
     if (!data?.publicUrl) {
-      return { ok: false, message: "Görsel yüklendi ama URL alınamadı." };
+      return { ok: false, message: "Dosya yüklendi ama URL alınamadı." };
     }
     return { ok: true, url: data.publicUrl };
   };
+
+  const uploadBrandImage = async (file, brandId) => uploadBrandAsset(file, brandId, "product-images");
+  const uploadBrandDocument = async (file, brandId) => uploadBrandAsset(file, brandId, "product-documents");
 
   // ── Admin data queries ──────────────────────────────────────────────────
   const getAllBrands = async () => {
@@ -310,7 +313,9 @@
     updateProduct,
     deleteProduct,
     incrementView,
+    uploadBrandAsset,
     uploadBrandImage,
+    uploadBrandDocument,
     // admin data
     getAllBrands,
     getVisits,

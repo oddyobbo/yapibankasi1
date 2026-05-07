@@ -69,15 +69,42 @@
             </div>
 
             <h3 class="md:col-span-2 text-[15px] font-semibold mt-2">Dosya ve Medya</h3>
-            <input name="image" class="h-11 rounded-xl border border-black/10 px-4 md:col-span-2" placeholder="Görsel URL (opsiyonel)">
-            <div class="md:col-span-2 grid md:grid-cols-[1fr_auto] gap-2">
-              <input id="manual-image-file" type="file" accept="image/*" class="h-11 rounded-xl border border-black/10 px-3 bg-white">
-              <button type="button" id="upload-image-btn" class="h-11 px-4 rounded-xl border border-black/15 text-[13px] font-semibold">Görsel Yükle</button>
+            <input type="hidden" name="image">
+            <input type="hidden" name="imageGallery">
+            <input type="hidden" name="pdfUrl">
+            <input type="hidden" name="cadUrl">
+            <input type="hidden" name="bimUrl">
+
+            <div class="md:col-span-2 rounded-xl border border-black/10 bg-white p-3">
+              <div class="flex flex-wrap items-center gap-2">
+                <input id="manual-image-file" type="file" accept="image/*" multiple class="hidden">
+                <button type="button" id="upload-image-btn" class="h-10 px-4 rounded-full bg-black text-white text-[13px] font-semibold">Görsel Yükle</button>
+                <p class="text-[12px] text-[#6e6e73]">JPG/PNG/WebP · Maks 8 MB / görsel · Çoklu seçim desteklenir</p>
+              </div>
+              <p id="upload-image-msg" class="text-[12px] text-[#6e6e73] mt-2"></p>
+              <div id="uploaded-image-list" class="mt-2 flex flex-wrap gap-2"></div>
             </div>
-            <p id="upload-image-msg" class="md:col-span-2 text-[12px] text-[#6e6e73] -mt-1"></p>
-            <input type="url" name="pdfUrl" class="h-11 rounded-xl border border-black/10 px-4" placeholder="Teknik PDF URL">
-            <input type="url" name="cadUrl" class="h-11 rounded-xl border border-black/10 px-4" placeholder="DWG/CAD URL">
-            <input type="url" name="bimUrl" class="h-11 rounded-xl border border-black/10 px-4 md:col-span-2" placeholder="BIM/Revit URL">
+
+            <div class="md:col-span-2 grid md:grid-cols-3 gap-2">
+              <div class="rounded-xl border border-black/10 bg-white p-3">
+                <p class="text-[12px] font-semibold">Teknik PDF</p>
+                <input id="manual-pdf-file" type="file" accept=".pdf" class="hidden">
+                <button type="button" id="upload-pdf-btn" class="mt-2 h-9 px-3 rounded-full border border-black/15 text-[12px] font-semibold">PDF Yükle</button>
+                <p id="upload-pdf-msg" class="text-[11px] text-[#6e6e73] mt-2">Maks 25 MB</p>
+              </div>
+              <div class="rounded-xl border border-black/10 bg-white p-3">
+                <p class="text-[12px] font-semibold">DWG/CAD</p>
+                <input id="manual-cad-file" type="file" accept=".dwg,.dxf,.zip,.rar,.7z" class="hidden">
+                <button type="button" id="upload-cad-btn" class="mt-2 h-9 px-3 rounded-full border border-black/15 text-[12px] font-semibold">CAD Yükle</button>
+                <p id="upload-cad-msg" class="text-[11px] text-[#6e6e73] mt-2">Maks 50 MB</p>
+              </div>
+              <div class="rounded-xl border border-black/10 bg-white p-3">
+                <p class="text-[12px] font-semibold">BIM/Revit</p>
+                <input id="manual-bim-file" type="file" accept=".rfa,.rvt,.ifc,.zip,.rar,.7z" class="hidden">
+                <button type="button" id="upload-bim-btn" class="mt-2 h-9 px-3 rounded-full border border-black/15 text-[12px] font-semibold">BIM Yükle</button>
+                <p id="upload-bim-msg" class="text-[11px] text-[#6e6e73] mt-2">Maks 100 MB</p>
+              </div>
+            </div>
             <button class="md:col-span-2 h-11 rounded-xl bg-black text-white font-semibold">Ürünü Kaydet (Taslak)</button>
           </form>
         </div>
@@ -242,14 +269,14 @@
 
     let session = null;
     const PRODUCT_TAXONOMY = {
-      "Flooring": ["LVT", "Modular Carpet", "Broadloom Carpet", "Wood Flooring", "Resilient Sheet", "Rubber Flooring"],
-      "Wallcovering": ["Vinyl Wallcovering", "Textile Wallcovering", "Acoustic Wallcovering", "Natural Wallcovering"],
-      "Textile": ["Upholstery", "Drapery", "Acoustic Textile", "Performance Textile"],
-      "Ceiling & Acoustic": ["Baffle", "Cloud", "Acoustic Panel", "Ceiling Tile", "Acoustic Divider"],
-      "Surfaces": ["Solid Surface", "Quartz", "Natural Stone", "Terrazzo", "Decorative Surface"],
-      "Lighting": ["Pendant", "Linear", "Wall Sconce", "Acoustic Lighting"],
-      "Tile": ["Interior Floor Tile", "Exterior Floor Tile", "Wall Tile", "Porcelain Tile"],
-      "Architectural": ["Moulding & Trim", "Decking", "Paving & Landscape", "Facade Cladding"],
+      "Zemin": ["LVT", "Modüler Halı", "Rulo Halı", "Ahşap Zemin", "Kauçuk Zemin"],
+      "Duvar Kaplama": ["Vinil Duvar", "Tekstil Duvar", "Akustik Duvar", "Doğal Duvar"],
+      "Tekstil": ["Döşemelik", "Perdelik", "Akustik Tekstil", "Performans Tekstil"],
+      "Tavan ve Akustik": ["Baffle", "Cloud", "Akustik Panel", "Tavan Karosu", "Akustik Bölücü"],
+      "Yüzey": ["Solid Surface", "Kuvars", "Doğal Taş", "Terrazzo", "Dekoratif Yüzey"],
+      "Aydınlatma": ["Sarkıt", "Lineer", "Aplik", "Akustik Aydınlatma"],
+      "Seramik": ["İç Mekan Zemin", "Dış Mekan Zemin", "Duvar Seramiği", "Porselen"],
+      "Mimari": ["Profil ve Trim", "Decking", "Peyzaj Kaplama", "Cephe Kaplama"],
     };
 
     async function init() {
@@ -346,6 +373,9 @@
           pdfUrl: fd.get("pdfUrl")?.trim() || "",
           cadUrl: fd.get("cadUrl")?.trim() || "",
           bimUrl: fd.get("bimUrl")?.trim() || "",
+          imageGallery: (() => {
+            try { return JSON.parse(fd.get("imageGallery") || "[]"); } catch { return []; }
+          })(),
         },
         hasPdf: Boolean(fd.get("pdfUrl")?.trim()),
         hasCad: Boolean(fd.get("cadUrl")?.trim()),
@@ -419,33 +449,112 @@
       const uploadBtn = document.getElementById("upload-image-btn");
       const uploadMsg = document.getElementById("upload-image-msg");
       const imageInput = document.querySelector('input[name="image"]');
+      const imageGalleryInput = document.querySelector('input[name="imageGallery"]');
       const fileInput = document.getElementById("manual-image-file");
+      const uploadedImageList = document.getElementById("uploaded-image-list");
 
-      uploadBtn?.addEventListener("click", async () => {
-        const file = fileInput?.files?.[0];
-        if (!file) {
-          uploadMsg.textContent = "Önce bir görsel dosyası seç.";
-          uploadMsg.className = "md:col-span-2 text-[12px] text-red-600 -mt-1";
+      const pdfInputHidden = document.querySelector('input[name="pdfUrl"]');
+      const cadInputHidden = document.querySelector('input[name="cadUrl"]');
+      const bimInputHidden = document.querySelector('input[name="bimUrl"]');
+
+      const uploadPdfBtn = document.getElementById("upload-pdf-btn");
+      const uploadCadBtn = document.getElementById("upload-cad-btn");
+      const uploadBimBtn = document.getElementById("upload-bim-btn");
+      const manualPdfFile = document.getElementById("manual-pdf-file");
+      const manualCadFile = document.getElementById("manual-cad-file");
+      const manualBimFile = document.getElementById("manual-bim-file");
+      const pdfMsg = document.getElementById("upload-pdf-msg");
+      const cadMsg = document.getElementById("upload-cad-msg");
+      const bimMsg = document.getElementById("upload-bim-msg");
+
+      const MB = 1024 * 1024;
+      const IMAGE_MAX_MB = 8;
+      const PDF_MAX_MB = 25;
+      const CAD_MAX_MB = 50;
+      const BIM_MAX_MB = 100;
+
+      const renderImageBadges = (urls) => {
+        uploadedImageList.innerHTML = urls
+          .map((u, i) => `<span class="px-2 py-1 rounded-full bg-[#f5f5f7] border border-black/10 text-[11px]">Görsel ${i + 1}</span>`)
+          .join("");
+      };
+
+      uploadBtn?.addEventListener("click", () => fileInput?.click());
+      fileInput?.addEventListener("change", async () => {
+        const files = [...(fileInput.files || [])];
+        if (!files.length) return;
+        const tooBig = files.find((f) => f.size > IMAGE_MAX_MB * MB);
+        if (tooBig) {
+          uploadMsg.textContent = `Görsel boyutu ${IMAGE_MAX_MB} MB sınırını aşıyor: ${tooBig.name}`;
+          uploadMsg.className = "text-[12px] text-red-600 mt-2";
+          fileInput.value = "";
           return;
         }
+
         uploadBtn.disabled = true;
         uploadBtn.textContent = "Yükleniyor…";
-        uploadMsg.textContent = "";
-        const res = await AG.uploadBrandImage(file, session?.id);
-        if (!res?.ok) {
-          uploadMsg.textContent = res?.message || "Görsel yüklenemedi.";
-          uploadMsg.className = "md:col-span-2 text-[12px] text-red-600 -mt-1";
-          uploadBtn.disabled = false;
-          uploadBtn.textContent = "Görsel Yükle";
-          return;
+        uploadMsg.textContent = `${files.length} görsel yükleniyor...`;
+        uploadMsg.className = "text-[12px] text-[#6e6e73] mt-2";
+
+        const uploaded = [];
+        for (const f of files) {
+          const res = await AG.uploadBrandImage(f, session?.id);
+          if (!res?.ok) {
+            uploadMsg.textContent = res?.message || "Görsel yüklenemedi.";
+            uploadMsg.className = "text-[12px] text-red-600 mt-2";
+            uploadBtn.disabled = false;
+            uploadBtn.textContent = "Görsel Yükle";
+            return;
+          }
+          uploaded.push(res.url);
         }
-        imageInput.value = res.url;
-        uploadMsg.textContent = "Görsel yüklendi. URL otomatik eklendi.";
-        uploadMsg.className = "md:col-span-2 text-[12px] text-green-600 -mt-1";
+        imageInput.value = uploaded[0] || "";
+        imageGalleryInput.value = JSON.stringify(uploaded);
+        renderImageBadges(uploaded);
+        uploadMsg.textContent = `${uploaded.length} görsel yüklendi.`;
+        uploadMsg.className = "text-[12px] text-green-600 mt-2";
         fileInput.value = "";
         uploadBtn.disabled = false;
         uploadBtn.textContent = "Görsel Yükle";
       });
+
+      const wireDocUpload = (triggerBtn, fileInputEl, hiddenInput, msgEl, maxMb, bucketName, label) => {
+        triggerBtn?.addEventListener("click", () => fileInputEl?.click());
+        fileInputEl?.addEventListener("change", async () => {
+          const file = fileInputEl.files?.[0];
+          if (!file) return;
+          if (file.size > maxMb * MB) {
+            msgEl.textContent = `${label} dosyası ${maxMb} MB sınırını aşıyor.`;
+            msgEl.className = "text-[11px] text-red-600 mt-2";
+            fileInputEl.value = "";
+            return;
+          }
+          triggerBtn.disabled = true;
+          triggerBtn.textContent = "Yükleniyor…";
+          msgEl.textContent = `${label} yükleniyor...`;
+          msgEl.className = "text-[11px] text-[#6e6e73] mt-2";
+
+          const res = await AG.uploadBrandAsset(file, session?.id, bucketName);
+          if (!res?.ok) {
+            msgEl.textContent = res?.message || `${label} yüklenemedi.`;
+            msgEl.className = "text-[11px] text-red-600 mt-2";
+            triggerBtn.disabled = false;
+            triggerBtn.textContent = `${label} Yükle`;
+            fileInputEl.value = "";
+            return;
+          }
+          hiddenInput.value = res.url;
+          msgEl.textContent = `${label} yüklendi.`;
+          msgEl.className = "text-[11px] text-green-600 mt-2";
+          triggerBtn.disabled = false;
+          triggerBtn.textContent = `${label} Yükle`;
+          fileInputEl.value = "";
+        });
+      };
+
+      wireDocUpload(uploadPdfBtn, manualPdfFile, pdfInputHidden, pdfMsg, PDF_MAX_MB, "product-documents", "PDF");
+      wireDocUpload(uploadCadBtn, manualCadFile, cadInputHidden, cadMsg, CAD_MAX_MB, "product-documents", "CAD");
+      wireDocUpload(uploadBimBtn, manualBimFile, bimInputHidden, bimMsg, BIM_MAX_MB, "product-documents", "BIM");
 
       document.getElementById("product-form").addEventListener("submit", async (e) => {
         e.preventDefault();
@@ -458,6 +567,11 @@
         e.currentTarget.reset();
         document.getElementById("custom-tech-rows").innerHTML = "";
         document.getElementById("manual-subcategory").innerHTML = '<option value="">Alt kategori seç *</option>';
+        document.getElementById("uploaded-image-list").innerHTML = "";
+        document.getElementById("upload-image-msg").textContent = "";
+        document.getElementById("upload-pdf-msg").textContent = `Maks ${PDF_MAX_MB} MB`;
+        document.getElementById("upload-cad-msg").textContent = `Maks ${CAD_MAX_MB} MB`;
+        document.getElementById("upload-bim-msg").textContent = `Maks ${BIM_MAX_MB} MB`;
         if (btn) { btn.disabled = false; btn.textContent = "Ürünü Kaydet (Taslak)"; }
         await render();
       });
@@ -530,7 +644,7 @@
     document.getElementById("download-template").addEventListener("click", () => {
       const sample = [
         "name,sku,category,subcategory,description,fireClass,acoustic,dimensions,thickness,certificates,image,pdfUrl,cadUrl,bimUrl",
-        "\"Unica Baffle Tavan\",\"UNI-BAF-1200\",\"Ceiling & Acoustic\",\"Baffle\",\"Yüksek akustik performanslı tavan paneli\",\"B-s1,d0\",\"NRC 0.85\",\"40x1200 mm\",\"40 mm\",\"EPD;CE\",\"https://images.unsplash.com/photo-1615874959474-d609969a20ed?q=80&w=1200&auto=format&fit=crop\",\"https://example.com/datasheet.pdf\",\"https://example.com/detail.dwg\",\"https://example.com/revit.rfa\"",
+        "\"Unica Baffle Tavan\",\"UNI-BAF-1200\",\"Tavan ve Akustik\",\"Baffle\",\"Yüksek akustik performanslı tavan paneli\",\"B-s1,d0\",\"NRC 0.85\",\"40x1200 mm\",\"40 mm\",\"EPD;CE\",\"https://images.unsplash.com/photo-1615874959474-d609969a20ed?q=80&w=1200&auto=format&fit=crop\",\"https://example.com/datasheet.pdf\",\"https://example.com/detail.dwg\",\"https://example.com/revit.rfa\"",
       ].join("\n");
       const blob = new Blob([sample], { type: "text/csv;charset=utf-8;" });
       const a = document.createElement("a");
@@ -672,7 +786,7 @@
         document.getElementById("prev-certs").value = certMatches.join(", ");
         document.getElementById("prev-image").value = pageImages[0] || "";
         document.getElementById("prev-source-url").value = rawUrl;
-        document.getElementById("prev-category").value = "Ceiling & Acoustic";
+        document.getElementById("prev-category").value = "Tavan ve Akustik";
 
         const imgPreview = document.getElementById("prev-img-preview");
         const imgStrip = document.getElementById("prev-img-strip");
@@ -762,7 +876,7 @@
           brandName:   session.name || session.email,
           name,
           sku:         `URL-${Date.now()}`,
-          category:    document.getElementById("prev-category").value.trim() || "Ceiling & Acoustic",
+          category:    document.getElementById("prev-category").value.trim() || "Tavan ve Akustik",
           description,
           technical,
           spec:  buildSpec(technical),
