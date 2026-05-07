@@ -127,8 +127,8 @@
             .join("");
           return `
             <div class="relative">
-              <button type="button" id="products-mega-toggle" class="px-3 py-2 rounded-full text-[15.5px] ${
-                isActive ? "text-black" : "text-[#1f1f22] hover:text-black"
+              <button type="button" id="products-mega-toggle" class="px-3 py-2 rounded-full text-[15.5px] transition-colors ${
+                isActive ? "text-black bg-[#eef0f4]" : "text-[#1f1f22] hover:text-black hover:bg-[#f1f1f3]"
               }">${item.label}
                 <span class="inline-flex align-middle ml-1 -mt-[1px]">
                   <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6.5l4 4 4-4" stroke="currentColor" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -149,8 +149,8 @@
               </div>
             </div>`;
         }
-        return `<a href="${item.href}" class="px-3 py-2 rounded-full text-[15px] ${
-          isActive ? "text-black" : "text-[#1f1f22] hover:text-black"
+        return `<a href="${item.href}" class="px-3 py-2 rounded-full text-[15px] transition-colors ${
+          isActive ? "text-black bg-[#eef0f4]" : "text-[#1f1f22] hover:text-black hover:bg-[#f1f1f3]"
         }">${item.label}</a>`;
       })
       .join("");
