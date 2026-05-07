@@ -38,6 +38,10 @@
       ],
     },
     {
+      name: "Mimari",
+      subs: ["Tavan", "Decking", "Kapılar", "Cephe", "Profil ve Trim", "Peyzaj ve Kaplama"],
+    },
+    {
       name: "Mobilya ve Donatı",
       subs: [
         "Akustik",
@@ -52,46 +56,60 @@
         "Pencere Sistemleri",
       ],
     },
-    {
-      name: "Mimari",
-      subs: ["Tavan", "Decking", "Kapılar", "Cephe", "Profil ve Trim", "Peyzaj ve Kaplama"],
-    },
   ];
 
-  const iconStroke = "stroke=\"#8a8a8f\" stroke-width=\"1.5\" fill=\"none\" stroke-linecap=\"round\" stroke-linejoin=\"round\"";
-  const iconFloor = `<svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path ${iconStroke} d="M2 13h12M2 10h12M2 7h12M3 4h10"/></svg>`;
-  const iconSquare = `<svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><rect x="2.5" y="2.5" width="11" height="11" rx="1.5" ${iconStroke}/></svg>`;
-  const iconCircle = `<svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="5.5" ${iconStroke}/></svg>`;
-  const iconGrid = `<svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path ${iconStroke} d="M2.5 5.5h11M2.5 10.5h11M5.5 2.5v11M10.5 2.5v11"/><rect x="2.5" y="2.5" width="11" height="11" rx="1.5" ${iconStroke}/></svg>`;
-  const iconLight = `<svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path ${iconStroke} d="M8 2.5v7M5.5 12h5M6.5 13.5h3"/></svg>`;
-  const iconDoor = `<svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path ${iconStroke} d="M4 2.5h8v11H4zM9.7 8h.01"/></svg>`;
-  const iconFacade = `<svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path ${iconStroke} d="M3 13.5V2.5h10v11M3 6.5h10M3 10h10M6.3 2.5V13.5M9.7 2.5V13.5"/></svg>`;
-  const iconTrim = `<svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path ${iconStroke} d="M2.5 12.5h11M2.5 8h11M2.5 3.5h11"/></svg>`;
+  const iconStroke = "stroke=\"#76767d\" stroke-width=\"1.45\" fill=\"none\" stroke-linecap=\"round\" stroke-linejoin=\"round\"";
+  const iconFloor = `<svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path ${iconStroke} d="M2 13h12M2 10h12M2 7h12M3 4h10"/></svg>`;
+  const iconGlass = `<svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path ${iconStroke} d="M4 2.5h8v11H4zM4 13.5l8-8"/></svg>`;
+  const iconLeather = `<svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path ${iconStroke} d="M8 2.2l2.6 1.1 2.3-.2.3 2.4 1.6 1.7-1.6 1.7-.3 2.4-2.3-.2L8 13.8l-2.6-1.1-2.3.2-.3-2.4L1.2 8l1.6-1.7.3-2.4 2.3.2z"/></svg>`;
+  const iconStone = `<svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path ${iconStroke} d="M2.5 5.5l3-3 3 3-3 3zM8.5 5.5l3-3 2 2-3 3zM5.5 8.5l3-3 3 3-3 3zM2.5 11.5l3-3 2 2-3 3z"/></svg>`;
+  const iconSquare = `<svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><rect x="2.5" y="2.5" width="11" height="11" rx="1.5" ${iconStroke}/></svg>`;
+  const iconPaint = `<svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path ${iconStroke} d="M3 10.5h6.2M6.6 5.2l3.2 3.2M5.2 6.6L8.4 9.8M10.5 10.8c0-1.2 1-2.2 2.2-2.2.7 0 1.3.6 1.3 1.3 0 1.7-1.2 2.9-2.9 2.9-.3 0-.6-.2-.6-.6z"/></svg>`;
+  const iconGrid = `<svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path ${iconStroke} d="M2.5 5.5h11M2.5 10.5h11M5.5 2.5v11M10.5 2.5v11"/><rect x="2.5" y="2.5" width="11" height="11" rx="1.5" ${iconStroke}/></svg>`;
+  const iconFinish = `<svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="5.6" ${iconStroke}/><path ${iconStroke} d="M8 2.4v11.2M2.4 8h11.2"/></svg>`;
+  const iconResin = `<svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path ${iconStroke} d="M3 3h10v10H3zM3 8h10M8 3v10M5 5l1 1M10 10l1 1"/></svg>`;
+  const iconTextile = `<svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path ${iconStroke} d="M3 4h10v8H3zM5 4v8M8 4v8M11 4v8"/></svg>`;
+  const iconTile = `<svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path ${iconStroke} d="M4 3.2h3v3H4zM9 3.2h3v3H9zM4 8.2h3v3H4zM9 8.2h3v3H9z"/></svg>`;
+  const iconWallcover = `<svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><rect x="2.5" y="3" width="11" height="10" rx="1.5" ${iconStroke}/><path ${iconStroke} d="M2.5 6.2h11"/></svg>`;
+  const iconAcoustic = `<svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path ${iconStroke} d="M3 8h2M7 6v4M10 4.7v6.6M13 3.5v9"/></svg>`;
+  const iconAppliance = `<svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><rect x="2.5" y="2.8" width="11" height="10.4" rx="1.5" ${iconStroke}/><path ${iconStroke} d="M2.5 6.2h11M5 4.4h.01M7 4.4h.01"/></svg>`;
+  const iconBathroom = `<svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path ${iconStroke} d="M3 9.5h10M4.2 9.5V7.2A1.7 1.7 0 016 5.5h2.8M10.8 6.5h2.2v3M5 11.8h6"/></svg>`;
+  const iconDecor = `<svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path ${iconStroke} d="M8 2.8l2.7 1.4 1.7 2.5-.3 3-2.3 1.9H6.2L3.9 9.7l-.3-3 1.7-2.5z"/></svg>`;
+  const iconFurniture = `<svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path ${iconStroke} d="M3 8.5h10v3H3zM5 5.5h6v3H5zM4 11.5v1.7M12 11.5v1.7"/></svg>`;
+  const iconHardware = `<svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><circle cx="5" cy="5" r="2" ${iconStroke}/><path ${iconStroke} d="M6.5 6.5l6 6M9.3 9.3l1.7-1.7 1.6 1.6-1.7 1.7"/></svg>`;
+  const iconKitchen = `<svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path ${iconStroke} d="M5 3.2v9.6M8 3.2v9.6M11 3.2v9.6M4 3.2h1M8 3.2h1M11 7.2h2"/></svg>`;
+  const iconLight = `<svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path ${iconStroke} d="M8 2.5v7M5.5 12h5M6.5 13.5h3"/></svg>`;
+  const iconOutdoor = `<svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path ${iconStroke} d="M8 3.2v2M8 10.8v2M3.2 8h2M10.8 8h2M4.7 4.7l1.4 1.4M9.9 9.9l1.4 1.4M11.3 4.7L9.9 6.1M6.1 9.9 4.7 11.3"/><circle cx="8" cy="8" r="2.4" ${iconStroke}/></svg>`;
+  const iconWindow = `<svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path ${iconStroke} d="M3 3h10v10H3zM6 3v10M10 3v10"/></svg>`;
+  const iconCeiling = `<svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path ${iconStroke} d="M2.5 5h11M2.5 8h11M2.5 11h11"/></svg>`;
+  const iconDoor = `<svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path ${iconStroke} d="M4 2.5h8v11H4zM9.7 8h.01"/></svg>`;
+  const iconFacade = `<svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path ${iconStroke} d="M3 13.5V2.5h10v11M3 6.5h10M3 10h10M6.3 2.5V13.5M9.7 2.5V13.5"/></svg>`;
+  const iconTrim = `<svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path ${iconStroke} d="M2.5 12.5h11M2.5 8h11M2.5 3.5h11"/></svg>`;
   const subCategoryIcons = {
     "Zemin": iconFloor,
-    "Cam": iconSquare,
+    "Cam": iconGlass,
     "Deri": iconCircle,
-    "Yığma ve Taş": iconGrid,
+    "Yığma ve Taş": iconStone,
     "Metal": iconSquare,
-    "Boya": iconCircle,
+    "Boya": iconPaint,
     "Panel": iconGrid,
-    "Yüzey Bitişi": iconCircle,
-    "Reçine": iconCircle,
+    "Yüzey Bitişi": iconFinish,
+    "Reçine": iconResin,
     "Yüzey": iconSquare,
-    "Tekstil": iconGrid,
-    "Seramik": iconGrid,
-    "Duvar Kaplama": iconSquare,
-    "Akustik": iconCircle,
-    "Elektrikli Cihazlar": iconSquare,
-    "Banyo": iconCircle,
-    "Dekor ve Aksesuar": iconCircle,
-    "Mobilya": iconGrid,
-    "Donanım": iconSquare,
-    "Mutfak": iconSquare,
+    "Tekstil": iconTextile,
+    "Seramik": iconTile,
+    "Duvar Kaplama": iconWallcover,
+    "Akustik": iconAcoustic,
+    "Elektrikli Cihazlar": iconAppliance,
+    "Banyo": iconBathroom,
+    "Dekor ve Aksesuar": iconDecor,
+    "Mobilya": iconFurniture,
+    "Donanım": iconHardware,
+    "Mutfak": iconKitchen,
     "Aydınlatma": iconLight,
-    "Dış Mekan": iconCircle,
-    "Pencere Sistemleri": iconSquare,
-    "Tavan": iconFloor,
+    "Dış Mekan": iconOutdoor,
+    "Pencere Sistemleri": iconWindow,
+    "Tavan": iconCeiling,
     "Decking": iconFloor,
     "Kapılar": iconDoor,
     "Cephe": iconFacade,
@@ -108,14 +126,14 @@
           const megaCols = productMegaMenu.map(
               (col) => `
                 <div>
-                  <p class="text-[12px] font-semibold text-black">${col.name}</p>
+                  <p class="text-[14px] font-semibold text-black">${col.name}</p>
                   <div class="mt-2 space-y-1">
                     ${col.subs
                       .map(
                         (sub) =>
                           `<a href="/urunler.html?category=${encodeURIComponent(col.name)}&sub=${encodeURIComponent(
                             sub
-                          )}" class="flex items-center gap-2 text-[12px] text-[#4a4a4f] hover:text-black">
+                          )}" class="flex items-center gap-2 text-[14px] text-[#4a4a4f] hover:text-black">
                             <span class="w-4 h-4 inline-flex items-center justify-center">${subCategoryIcons[sub] || iconSquare}</span>
                             <span>${sub}</span>
                           </a>`
@@ -131,11 +149,11 @@
                 isActive ? "text-black" : "text-[#1f1f22] hover:text-black"
               }">${item.label}</button>
               <div id="products-mega-panel" class="hidden fixed left-0 right-0 top-[72px] z-40">
-                <div class="mx-6 lg:mx-10 rounded-b-2xl border border-black/[0.08] border-t-0 bg-white shadow-[0_30px_70px_rgba(0,0,0,0.16)]">
+                <div class="w-full border-y border-black/[0.08] bg-white shadow-[0_30px_70px_rgba(0,0,0,0.16)]">
                   <div class="px-6 pt-4">
                     <div class="inline-flex rounded-full bg-[#f1f1f3] p-1">
-                      <button data-products-tab="all" class="products-tab-btn h-9 px-4 rounded-full bg-[#2c2d3a] text-white text-[12px] font-semibold">All Products</button>
-                      <button data-products-tab="new" class="products-tab-btn h-9 px-4 rounded-full text-[12px] font-semibold text-[#3a3a40]">See New Collections</button>
+                      <button data-products-tab="all" class="products-tab-btn h-9 px-4 rounded-full bg-[#2c2d3a] text-white text-[12px] font-semibold">Tüm Ürünler</button>
+                      <button data-products-tab="new" class="products-tab-btn h-9 px-4 rounded-full text-[12px] font-semibold text-[#3a3a40]">Yeni Koleksiyonlar</button>
                     </div>
                   </div>
                   <div class="px-6 py-5 grid grid-cols-3 gap-6">
