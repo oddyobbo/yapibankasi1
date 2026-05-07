@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Antigravity | Tasarım Panosu</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body data-page="moodboard" class="bg-[#f5f5f7] text-[#111] min-h-screen">
+  <div id="site-header"></div>
+  <main class="px-4 lg:px-8 py-6">
+    <section class="max-w-[1500px] mx-auto grid lg:grid-cols-[68px_minmax(0,1fr)_300px] gap-4">
+      <aside class="rounded-2xl border border-black/10 bg-white p-2 flex flex-col items-center gap-2 h-fit sticky top-[86px]">
+        <a href="/mimar-paneli.html" class="w-11 h-11 rounded-xl border border-black/10 text-[11px] text-[#6e6e73] flex items-center justify-center hover:border-black/30">←</a>
+        <button class="w-11 h-11 rounded-xl border border-black/10 text-[12px] hover:border-black/30">S</button>
+        <button class="w-11 h-11 rounded-xl border border-black/10 text-[12px] hover:border-black/30">IMG</button>
+        <button class="w-11 h-11 rounded-xl border border-black/10 text-[12px] hover:border-black/30">T</button>
+        <button class="w-11 h-11 rounded-xl border border-black/10 text-[12px] hover:border-black/30">CLR</button>
+        <button class="w-11 h-11 rounded-xl border border-black/10 text-[12px] hover:border-black/30">↶</button>
+        <button class="w-11 h-11 rounded-xl border border-black/10 text-[12px] hover:border-black/30">↷</button>
+      </aside>
+
+      <section class="rounded-2xl border border-black/10 bg-white overflow-hidden">
+        <div class="h-14 px-4 border-b border-black/10 flex items-center gap-3">
+          <input id="board-name" class="h-9 rounded-lg border border-black/15 px-3 text-[14px] min-w-[220px]">
+          <div class="ml-auto flex items-center gap-2">
+            <button id="export-btn" class="h-9 px-3 rounded-lg border border-black/15 text-[12px] hover:border-black/35">Export</button>
+            <button id="download-btn" class="h-9 px-3 rounded-lg border border-black/15 text-[12px] hover:border-black/35">Download</button>
+            <div class="h-9 px-3 rounded-lg border border-black/10 text-[12px] text-[#6e6e73] inline-flex items-center gap-2">
+              <button id="zoom-out-btn" class="text-[14px] leading-none">−</button>
+              <span id="zoom-indicator">100%</span>
+              <button id="zoom-in-btn" class="text-[14px] leading-none">+</button>
+            </div>
+            <button id="save-btn" class="h-9 px-4 rounded-lg bg-black text-white text-[12px] font-semibold">Kaydet</button>
+          </div>
+        </div>
+        <div id="canvas-wrap" class="p-4 bg-[#f3f4f6] min-h-[78vh]">
+          <div id="canvas" class="relative rounded-2xl border border-black/10 bg-[#efeff2] min-h-[72vh] overflow-hidden origin-top-left"></div>
+        </div>
+        <p id="save-msg" class="text-[12px] text-[#6e6e73] px-4 py-2 border-t border-black/10"></p>
+      </section>
+
+      <aside class="rounded-2xl border border-black/10 bg-white p-4 h-fit sticky top-[86px]">
+        <h2 class="text-[14px] font-semibold">Favori Ürünler</h2>
+        <p class="text-[12px] text-[#6e6e73] mt-1">Ürüne tıklayıp board'a ekle.</p>
+        <div id="favorites-list" class="mt-3 space-y-2 max-h-[74vh] overflow-auto"></div>
+      </aside>
+    </section>
+  </main>
+  <div id="site-footer"></div>
+
+  <script src="/core.js"></script>
+  <script src="/layout.js"></script>
+  <script>
+    const FALLBACK_IMG = "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?q=80&w=1200&auto=format&fit=crop";
+    const qp = new URLSearchParams(location.search);
+    const moodboardId = qp.get("id");
+    const saveMsg = document.getElementById("save-msg");
+    const canvas = document.getElementById("canvas");
+    const zoomIndicator = document.getElementById("zoom-indicator");
+    let zoomLevel = 1;
+    let board = null;
+
+    function setSaveMsg(text, ok) {
+      saveMsg.textContent = text || "";
+      saveMsg.className = `text-[12px] mt-2 ${ok ? "text-[#1f6f45]" : "text-[#6e6e73]"}`;
+    }
+
+    function renderCanvas() {
+      if (!board) return;
+      canvas.innerHTML = (board.items || []).map((item) => `
+        <article data-card-id="${item.id}" class="absolute rounded-xl border border-black/15 bg-white shadow-sm overflow-hidden" style="left:${item.x || 20}px; top:${item.y || 20}px; width:${item.w || 220}px; height:${item.h || 190}px;">
+          <button data-delete-card="${item.id}" class="absolute top-2 right-2 z-20 w-6 h-6 rounded-md bg-white/95 border border-black/15 text-[12px] hover:bg-black hover:text-white">×</button>
+          <div data-drag-handle="1" class="cursor-move w-full h-full flex flex-col">
+            <img src="${item.image || FALLBACK_IMG}" class="w-full h-[70%] object-cover pointer-events-none" alt="${item.name}">
+            <div class="p-2 flex-1">
+              <p class="text-[12px] font-medium leading-tight">${item.name}</p>
+            </div>
+          </div>
+          <button data-resize-handle="${item.id}" class="absolute right-1 bottom-1 w-4 h-4 rounded-sm border border-black/15 bg-white/95 text-[10px] leading-none">◢</button>
+        </article>
+      `).join("");
+      bindDrag();
+      bindDelete();
+      bindResize();
+    }
+
+    function bindDrag() {
+      canvas.querySelectorAll("[data-card-id]").forEach((card) => {
+        let startX = 0;
+        let startY = 0;
+        let origX = 0;
+        let origY = 0;
+        const onMove = (ev) => {
+          const x = origX + (ev.clientX - startX);
+          const y = origY + (ev.clientY - startY);
+          card.style.left = `${Math.max(0, x)}px`;
+          card.style.top = `${Math.max(0, y)}px`;
+        };
+        const onUp = () => {
+          document.removeEventListener("pointermove", onMove);
+          document.removeEventListener("pointerup", onUp);
+          const id = card.dataset.cardId;
+          const target = board.items.find((x) => x.id === id);
+          if (target) {
+            target.x = parseInt(card.style.left, 10) || 0;
+            target.y = parseInt(card.style.top, 10) || 0;
+          }
+        };
+        const handle = card.querySelector("[data-drag-handle='1']");
+        handle?.addEventListener("pointerdown", (ev) => {
+          if (ev.target.closest("[data-resize-handle], [data-delete-card]")) return;
+          startX = ev.clientX;
+          startY = ev.clientY;
+          origX = parseInt(card.style.left, 10) || 0;
+          origY = parseInt(card.style.top, 10) || 0;
+          document.addEventListener("pointermove", onMove);
+          document.addEventListener("pointerup", onUp);
+        });
+      });
+    }
+
+    function bindDelete() {
+      canvas.querySelectorAll("[data-delete-card]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          if (!board) return;
+          board.items = (board.items || []).filter((x) => x.id !== btn.dataset.deleteCard);
+          renderCanvas();
+        });
+      });
+    }
+
+    function bindResize() {
+      canvas.querySelectorAll("[data-resize-handle]").forEach((handle) => {
+        const card = handle.closest("[data-card-id]");
+        if (!card) return;
+        let startX = 0;
+        let startY = 0;
+        let startW = 0;
+        let startH = 0;
+        const onMove = (ev) => {
+          const w = Math.max(150, startW + (ev.clientX - startX));
+          const h = Math.max(140, startH + (ev.clientY - startY));
+          card.style.width = `${w}px`;
+          card.style.height = `${h}px`;
+        };
+        const onUp = () => {
+          document.removeEventListener("pointermove", onMove);
+          document.removeEventListener("pointerup", onUp);
+          const id = card.dataset.cardId;
+          const target = board.items.find((x) => x.id === id);
+          if (target) {
+            target.w = parseInt(card.style.width, 10) || 220;
+            target.h = parseInt(card.style.height, 10) || 190;
+          }
+        };
+        handle.addEventListener("pointerdown", (ev) => {
+          ev.preventDefault();
+          ev.stopPropagation();
+          startX = ev.clientX;
+          startY = ev.clientY;
+          startW = parseInt(card.style.width, 10) || card.offsetWidth;
+          startH = parseInt(card.style.height, 10) || card.offsetHeight;
+          document.addEventListener("pointermove", onMove);
+          document.addEventListener("pointerup", onUp);
+        });
+      });
+    }
+
+    function addFavoriteItem(item) {
+      if (!board) return;
+      const created = {
+        id: `card-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+        productId: item.id,
+        name: item.name,
+        image: item.image || FALLBACK_IMG,
+        x: 30 + (board.items.length % 4) * 40,
+        y: 30 + (board.items.length % 3) * 50,
+        w: 220,
+        h: 190
+      };
+      board.items.push(created);
+      renderCanvas();
+    }
+
+    async function saveBoard() {
+      if (!board) return;
+      board.name = document.getElementById("board-name").value.trim() || "Tasarım Panosu";
+      const res = await AG.updateTasarım Panosu(board.id, { name: board.name, items: board.items });
+      if (!res.ok) { setSaveMsg(res.message || "Kaydedilemedi.", false); return; }
+      setSaveMsg("Tasarım Panosu kaydedildi.", true);
+    }
+
+    async function boot() {
+      await AG.ready;
+      const session = await AG.getSessionArchitect();
+      if (!session) { location.href = "/mimar-giris.html"; return; }
+
+      if (!moodboardId) {
+        const created = await AG.createTasarım Panosu({ name: "Yeni Tasarım Panosu" });
+        if (!created.ok) return;
+        location.href = `/moodboard.html?id=${encodeURIComponent(created.moodboard.id)}`;
+        return;
+      }
+
+      board = await AG.getTasarım Panosu(moodboardId);
+      if (!board) {
+        setSaveMsg("Tasarım Panosu bulunamadı.", false);
+        return;
+      }
+      board.items = Array.isArray(board.items) ? board.items : [];
+      board.items = board.items.map((item) => ({
+        ...item,
+        w: item.w || 220,
+        h: item.h || 190
+      }));
+      document.getElementById("board-name").value = board.name || "Tasarım Panosu";
+      renderCanvas();
+
+      const favProducts = await AG.getFavoriteProducts();
+      const favWrap = document.getElementById("favorites-list");
+      favWrap.innerHTML = favProducts.length
+        ? favProducts.map((p) => `
+            <button data-add-product="${p.id}" class="w-full text-left rounded-xl border border-black/10 p-2 hover:border-black/25">
+              <div class="flex gap-2">
+                <img src="${p.image || FALLBACK_IMG}" class="w-12 h-12 rounded-lg object-cover" alt="${p.name}">
+                <div>
+                  <p class="text-[12px] font-medium leading-tight">${p.name}</p>
+                  <p class="text-[11px] text-[#6e6e73] mt-1">Kanvasa ekle</p>
+                </div>
+              </div>
+            </button>
+          `).join("")
+        : `<p class="text-[12px] text-[#6e6e73]">Önce ürünleri favorilemelisin.</p>`;
+
+      favWrap.querySelectorAll("[data-add-product]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const product = favProducts.find((x) => x.id === btn.dataset.addProduct);
+          if (product) addFavoriteItem(product);
+        });
+      });
+
+      document.getElementById("save-btn").addEventListener("click", saveBoard);
+      document.getElementById("export-btn").addEventListener("click", saveBoard);
+      document.getElementById("download-btn").addEventListener("click", () => {
+        if (!board) return;
+        const blob = new Blob([JSON.stringify(board, null, 2)], { type: "application/json" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = `${(board.name || "moodboard").replace(/\s+/g, "-").toLowerCase()}.json`;
+        a.click();
+        URL.revokeObjectURL(a.href);
+      });
+      document.getElementById("zoom-in-btn").addEventListener("click", () => {
+        zoomLevel = Math.min(1.6, zoomLevel + 0.1);
+        canvas.style.transform = `scale(${zoomLevel})`;
+        zoomIndicator.textContent = `${Math.round(zoomLevel * 100)}%`;
+      });
+      document.getElementById("zoom-out-btn").addEventListener("click", () => {
+        zoomLevel = Math.max(0.7, zoomLevel - 0.1);
+        canvas.style.transform = `scale(${zoomLevel})`;
+        zoomIndicator.textContent = `${Math.round(zoomLevel * 100)}%`;
+      });
+    }
+
+    boot();
+  </script>
+</body>
+</html>

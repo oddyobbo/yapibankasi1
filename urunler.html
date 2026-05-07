@@ -69,7 +69,17 @@
   <script src="/core.js"></script>
   <script src="/layout.js"></script>
   <script>
-    const STATIC = [];
+    const STATIC = [
+      { id: "s1", name: "Unica Baffle Tavan Paneli", brandName: "Unica Acoustic", category: "Mobilya ve Donatı > Akustik", spec: "NRC 0.85 · B-s1,d0", image: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=800&auto=format&fit=crop", hasPdf: true, hasCad: true, status: "published", views: 142 },
+      { id: "s2", name: "Akustik Keçe Duvar Paneli", brandName: "Unica Acoustic", category: "Malzemeler > Duvar Kaplama", spec: "NRC 0.75 · A2-s1,d0", image: "https://images.unsplash.com/photo-1616594039964-3f7f89d7a5d8?q=80&w=800&auto=format&fit=crop", hasPdf: true, hasCad: false, status: "published", views: 98 },
+      { id: "s3", name: "V-Cut Akustik Bulut Panel", brandName: "Unica Acoustic", category: "Mimari > Tavan", spec: "NRC 0.90 · B-s1,d0", image: "https://images.unsplash.com/photo-1617104551722-3b2d51366443?q=80&w=800&auto=format&fit=crop", hasPdf: true, hasCad: true, status: "published", views: 76 },
+      { id: "s4", name: "Ahşap Lamel Tavan Sistemi", brandName: "WoodTech", category: "Mimari > Tavan", spec: "C-s2,d0 · CE Belgeli", image: "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?q=80&w=800&auto=format&fit=crop", hasPdf: true, hasCad: true, status: "published", views: 54 },
+      { id: "s5", name: "Alüminyum Cephe Paneli", brandName: "AlüForm", category: "Mimari > Cephe", spec: "A1 · EN 13501-1", image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=800&auto=format&fit=crop", hasPdf: true, hasCad: false, status: "published", views: 211 },
+      { id: "s6", name: "Doğal Taş Kompozit Kaplama", brandName: "StoneBase", category: "Malzemeler > Yığma ve Taş", spec: "CE · ISO 9001", image: "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=800&auto=format&fit=crop", hasPdf: false, hasCad: false, status: "published", views: 33 },
+      { id: "s7", name: "Lineer LED Aydınlatma Profili", brandName: "LightForm", category: "Mobilya ve Donatı > Aydınlatma", spec: "IP54 · CE", image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?q=80&w=800&auto=format&fit=crop", hasPdf: true, hasCad: true, status: "published", views: 189 },
+      { id: "s8", name: "PET Felt Akustik Bölücü", brandName: "Unica Acoustic", category: "Mobilya ve Donatı > Akustik", spec: "NRC 0.70 · Geri Dönüştürülmüş", image: "https://images.unsplash.com/photo-1493666438817-866a91353ca9?q=80&w=800&auto=format&fit=crop", hasPdf: true, hasCad: false, status: "published", views: 67 },
+      { id: "s9", name: "Seramik Zemin Karosu 60x60", brandName: "CeraStone", category: "Malzemeler > Zemin", spec: "R11 · A1 · CE", image: "https://images.unsplash.com/photo-1507089947368-19c1da9775ae?q=80&w=800&auto=format&fit=crop", hasPdf: false, hasCad: false, status: "published", views: 45 },
+    ];
     let allProducts = [...STATIC];
     let architectSession = null;
     let favoriteProductIds = new Set();

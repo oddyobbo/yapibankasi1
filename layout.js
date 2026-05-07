@@ -20,7 +20,6 @@
     { id: "brands", href: "/markalar.html", label: "Markalar" },
     { id: "projects", href: "/projeler.html", label: "Projeler" },
     { id: "how", href: "/nasil-calisir.html", label: "Nasıl Çalışır" },
-    { id: "apply", href: "/marka-basvuru.html", label: "Marka Başvuru" },
   ];
 
   const productMegaMenu = [
@@ -106,9 +105,6 @@
     const navItems = [...baseNavItems];
     if (architectSession) {
       navItems.push({ id: "architect-panel", href: "/mimar-paneli.html", label: "Mimar Paneli" });
-      navItems.push({ id: "moodboard", href: "/moodboard.html", label: "Moodboard" });
-    } else {
-      navItems.push({ id: "architect-login", href: "/mimar-giris.html", label: "Mimar Girişi" });
     }
 
     const nav = navItems
@@ -180,11 +176,10 @@
     const desktopAuthLinks = architectSession
       ? `
         <a href="/marka-giris.html" class="inline-flex items-center px-3 py-2 rounded-full text-[13px] hover:bg-black/[0.05]">Marka Girişi</a>
-        <a href="/mimar-paneli.html" class="inline-flex items-center px-3 py-2 rounded-full text-[13px] hover:bg-black/[0.05]">Mimar Paneli</a>
-        <a href="/marka-basvuru.html" class="px-4 py-2 rounded-full bg-black text-white text-[13px] font-semibold hover:bg-black/85 transition">Marka Başla</a>
+        <a href="/mimar-paneli.html" class="px-4 py-2 rounded-full bg-black text-white text-[13px] font-semibold hover:bg-black/85 transition">Mimar Paneli</a>
       `
       : `
-        <a href="/marka-giris.html" class="inline-flex items-center px-3 py-2 rounded-full text-[13px] hover:bg-black/[0.05]">Marka Girişi</a>
+        <a href="/giris.html" class="inline-flex items-center px-3 py-2 rounded-full text-[13px] hover:bg-black/[0.05]">Giriş Yap</a>
         <a href="/marka-basvuru.html" class="px-4 py-2 rounded-full bg-black text-white text-[13px] font-semibold hover:bg-black/85 transition">Marka Başla</a>
       `;
 
@@ -264,7 +259,7 @@
             </div>
           </div>
           <div>
-            <p class="font-semibold">Platform</p>
+            <p class="font-semibold">Keşfet</p>
             <div class="mt-3 space-y-2 text-[#6e6e73]">
               <a href="/urunler.html" class="block hover:text-black">Ürünler</a>
               <a href="/markalar.html" class="block hover:text-black">Markalar</a>
@@ -273,11 +268,11 @@
             </div>
           </div>
           <div>
-            <p class="font-semibold">Şirket</p>
+            <p class="font-semibold">Hesap</p>
             <div class="mt-3 space-y-2 text-[#6e6e73]">
-              <a href="/hakkimizda.html" class="block hover:text-black">Hakkımızda</a>
-              <a href="/iletisim-v2.html" class="block hover:text-black">İletişim</a>
-              <a href="/faq.html" class="block hover:text-black">SSS</a>
+              <a href="/marka-giris.html" class="block hover:text-black">Marka Girişi</a>
+              <a href="/marka-basvuru.html" class="block hover:text-black">Marka Başvuru</a>
+              <a href="/mimar-giris.html" class="block hover:text-black">Mimar Girişi</a>
             </div>
           </div>
           <div>
