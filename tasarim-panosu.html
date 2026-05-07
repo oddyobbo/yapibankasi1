@@ -28,40 +28,65 @@
         <button id="tool-text" title="Metin ekle" class="w-11 h-11 rounded-xl border border-black/10 flex items-center justify-center hover:border-black/30 hover:bg-[#f5f5f7] text-[14px] font-bold">T</button>
 
         <!-- Arkaplan rengi -->
-        <div class="relative group/color">
-          <button id="tool-bg" title="Kanvas arkaplan rengi" class="w-11 h-11 rounded-xl border border-black/10 flex items-center justify-center hover:border-black/30 hover:bg-[#f5f5f7]">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22C6.48 22 2 17.52 2 12S6.48 2 12 2s10 4.48 10 10-4.48 10-10 10z"/><path d="M12 2v20"/></svg>
-          </button>
-          <div id="bg-palette" class="hidden absolute left-14 top-0 z-30 bg-white rounded-2xl border border-black/10 shadow-lg p-2 flex flex-col gap-1.5 w-[130px]">
-            <p class="text-[11px] text-[#6e6e73] px-1 mb-1">Arkaplan</p>
-            <div class="grid grid-cols-5 gap-1">
-              <button data-bg="#ececef" class="w-6 h-6 rounded-md border border-black/10" style="background:#ececef"></button>
-              <button data-bg="#ffffff" class="w-6 h-6 rounded-md border border-black/10" style="background:#ffffff"></button>
-              <button data-bg="#111111" class="w-6 h-6 rounded-md border border-black/10" style="background:#111111"></button>
-              <button data-bg="#f5e6d3" class="w-6 h-6 rounded-md border border-black/10" style="background:#f5e6d3"></button>
-              <button data-bg="#ddeeff" class="w-6 h-6 rounded-md border border-black/10" style="background:#ddeeff"></button>
-              <button data-bg="#e8f5e9" class="w-6 h-6 rounded-md border border-black/10" style="background:#e8f5e9"></button>
-              <button data-bg="#fce4ec" class="w-6 h-6 rounded-md border border-black/10" style="background:#fce4ec"></button>
-              <button data-bg="#fff9c4" class="w-6 h-6 rounded-md border border-black/10" style="background:#fff9c4"></button>
-              <button data-bg="#ede7f6" class="w-6 h-6 rounded-md border border-black/10" style="background:#ede7f6"></button>
-              <button data-bg="#efebe9" class="w-6 h-6 rounded-md border border-black/10" style="background:#efebe9"></button>
-            </div>
-          </div>
-        </div>
+        <button id="tool-bg" title="Kanvas arkaplan rengi" class="w-11 h-11 rounded-xl border border-black/10 flex items-center justify-center hover:border-black/30 hover:bg-[#f5f5f7]">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22C6.48 22 2 17.52 2 12S6.48 2 12 2s10 4.48 10 10-4.48 10-10 10z"/><path d="M12 2v20"/></svg>
+        </button>
 
         <div class="w-full h-px bg-black/[0.07]"></div>
 
         <!-- İndir -->
-        <div class="relative">
-          <button id="tool-download" title="İndir" class="w-11 h-11 rounded-xl border border-black/10 flex items-center justify-center hover:border-black/30 hover:bg-[#f5f5f7]">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v13M5 16l7 7 7-7"/><path d="M3 21h18"/></svg>
-          </button>
-          <div id="download-menu" class="hidden absolute left-14 top-0 z-30 bg-white rounded-xl border border-black/10 shadow-lg overflow-hidden w-[130px]">
-            <button id="dl-jpg" class="w-full text-left px-3 py-2.5 text-[13px] hover:bg-[#f5f5f7]">JPG olarak indir</button>
-            <button id="dl-pdf" class="w-full text-left px-3 py-2.5 text-[13px] hover:bg-[#f5f5f7]">PDF olarak indir</button>
-          </div>
-        </div>
+        <button id="tool-download" title="İndir" class="w-11 h-11 rounded-xl border border-black/10 flex items-center justify-center hover:border-black/30 hover:bg-[#f5f5f7]">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v13M5 16l7 7 7-7"/><path d="M3 21h18"/></svg>
+        </button>
       </aside>
+
+      <!-- Floating popups (body-level stacking) -->
+      <div id="bg-palette" class="hidden fixed z-[9999] bg-white rounded-2xl border border-black/10 shadow-xl p-3" style="min-width:148px">
+        <p class="text-[11px] text-[#6e6e73] mb-2 font-medium">Arkaplan rengi</p>
+        <div class="grid grid-cols-5 gap-1.5">
+          <button data-bg="#ececef" class="w-6 h-6 rounded-md border border-black/15" style="background:#ececef" title="Gri"></button>
+          <button data-bg="#ffffff" class="w-6 h-6 rounded-md border border-black/15" style="background:#ffffff" title="Beyaz"></button>
+          <button data-bg="#111111" class="w-6 h-6 rounded-md border border-black/15" style="background:#111111" title="Siyah"></button>
+          <button data-bg="#f5e6d3" class="w-6 h-6 rounded-md border border-black/15" style="background:#f5e6d3" title="Bej"></button>
+          <button data-bg="#ddeeff" class="w-6 h-6 rounded-md border border-black/15" style="background:#ddeeff" title="Mavi"></button>
+          <button data-bg="#e8f5e9" class="w-6 h-6 rounded-md border border-black/15" style="background:#e8f5e9" title="Yeşil"></button>
+          <button data-bg="#fce4ec" class="w-6 h-6 rounded-md border border-black/15" style="background:#fce4ec" title="Pembe"></button>
+          <button data-bg="#fff9c4" class="w-6 h-6 rounded-md border border-black/15" style="background:#fff9c4" title="Sarı"></button>
+          <button data-bg="#ede7f6" class="w-6 h-6 rounded-md border border-black/15" style="background:#ede7f6" title="Mor"></button>
+          <button data-bg="#efebe9" class="w-6 h-6 rounded-md border border-black/15" style="background:#efebe9" title="Kahve"></button>
+        </div>
+      </div>
+
+      <div id="download-menu" class="hidden fixed z-[9999] bg-white rounded-xl border border-black/10 shadow-xl overflow-hidden" style="min-width:150px">
+        <button id="dl-jpg" class="w-full text-left px-4 py-2.5 text-[13px] hover:bg-[#f5f5f7]">JPG olarak indir</button>
+        <div class="h-px bg-black/[0.06]"></div>
+        <button id="dl-pdf" class="w-full text-left px-4 py-2.5 text-[13px] hover:bg-[#f5f5f7]">PDF olarak indir</button>
+      </div>
+
+      <!-- Metin kartı floating toolbar -->
+      <div id="text-toolbar" class="hidden fixed z-[9999] bg-white rounded-xl border border-black/10 shadow-xl px-2 py-1.5 flex items-center gap-1.5">
+        <select id="txt-font" class="h-7 rounded-lg border border-black/10 px-1.5 text-[12px] bg-white">
+          <option value="sans-serif">Sans-serif</option>
+          <option value="Georgia, serif">Serif</option>
+          <option value="'Courier New', monospace">Monospace</option>
+          <option value="'Playfair Display', Georgia, serif">Playfair</option>
+          <option value="Impact, sans-serif">Impact</option>
+        </select>
+        <select id="txt-size" class="h-7 rounded-lg border border-black/10 px-1.5 text-[12px] bg-white w-[58px]">
+          <option value="12">12</option>
+          <option value="14">14</option>
+          <option value="16" selected>16</option>
+          <option value="20">20</option>
+          <option value="24">24</option>
+          <option value="32">32</option>
+          <option value="48">48</option>
+          <option value="64">64</option>
+        </select>
+        <input id="txt-color" type="color" value="#111111" class="w-7 h-7 rounded-lg border border-black/10 cursor-pointer p-0.5" title="Yazı rengi">
+        <div class="w-px h-5 bg-black/[0.08]"></div>
+        <button id="txt-bold" class="w-7 h-7 rounded-lg border border-black/10 text-[13px] font-bold hover:bg-[#f5f5f7]">B</button>
+        <button id="txt-italic" class="w-7 h-7 rounded-lg border border-black/10 text-[13px] italic hover:bg-[#f5f5f7]">I</button>
+      </div>
 
       <!-- Kanvas -->
       <section class="rounded-2xl border border-black/10 bg-white overflow-hidden">
@@ -117,13 +142,15 @@
       if (!board) return;
       canvas.innerHTML = (board.items || []).map((item) => {
         if (item.type === "text") {
+          const fw = item.bold ? "bold" : (item.fontWeight || "normal");
+          const fs = item.italic ? "italic" : "normal";
           return `
-            <article data-card-id="${item.id}" class="group absolute rounded-xl border border-black/15 bg-white shadow-sm overflow-hidden" style="left:${item.x || 20}px; top:${item.y || 20}px; width:${item.w || 200}px; height:${item.h || 80}px;">
-              <button data-delete-card="${item.id}" class="absolute top-2 right-2 z-20 w-6 h-6 rounded-md bg-white/95 border border-black/15 text-[12px] hover:bg-black hover:text-white opacity-0 group-hover:opacity-100 transition-opacity">×</button>
-              <div data-drag-handle="1" class="cursor-move w-full h-full flex flex-col p-2">
-                <textarea data-text-id="${item.id}" class="w-full flex-1 resize-none bg-transparent border-none outline-none text-[14px] leading-snug cursor-text" style="font-family:${item.fontFamily || 'sans-serif'};font-size:${item.fontSize || 16}px;color:${item.color || '#111111'};">${item.text || ""}</textarea>
+            <article data-card-id="${item.id}" data-text-card="1" class="group absolute overflow-visible" style="left:${item.x || 20}px; top:${item.y || 20}px; width:${item.w || 200}px; height:${item.h || 80}px;">
+              <button data-delete-card="${item.id}" class="absolute -top-3 -right-3 z-20 w-6 h-6 rounded-full bg-white border border-black/15 text-[12px] shadow hover:bg-black hover:text-white opacity-0 group-hover:opacity-100 transition-opacity">×</button>
+              <div data-drag-handle="1" class="cursor-move w-full h-full">
+                <textarea data-text-id="${item.id}" class="w-full h-full resize-none bg-transparent border-none outline-none leading-snug cursor-text" style="font-family:${item.fontFamily || 'sans-serif'};font-size:${item.fontSize || 16}px;color:${item.color || '#111111'};font-weight:${fw};font-style:${fs};" placeholder="Metin gir...">${item.text || ""}</textarea>
               </div>
-              <button data-resize-handle="${item.id}" class="absolute right-1 bottom-1 w-5 h-5 rounded-sm border border-black/15 bg-white/95 text-[10px] leading-none flex items-center justify-center cursor-se-resize">◢</button>
+              <button data-resize-handle="${item.id}" class="absolute right-1 bottom-1 w-5 h-5 rounded-sm border border-black/20 bg-white/80 text-[10px] leading-none flex items-center justify-center cursor-se-resize opacity-0 group-hover:opacity-100 transition-opacity">◢</button>
             </article>
           `;
         }
@@ -189,14 +216,89 @@
       });
     }
 
+    let activeTextId = null;
+    const txtToolbar = document.getElementById("text-toolbar");
+    const txtFont = document.getElementById("txt-font");
+    const txtSize = document.getElementById("txt-size");
+    const txtColor = document.getElementById("txt-color");
+    const txtBold = document.getElementById("txt-bold");
+    const txtItalic = document.getElementById("txt-italic");
+
+    function updateTextItem(id, patch) {
+      const t = board.items.find((x) => x.id === id);
+      if (!t) return;
+      Object.assign(t, patch);
+      // live update the textarea style without full re-render
+      const ta = canvas.querySelector(`[data-text-id="${id}"]`);
+      if (ta) {
+        if (patch.fontFamily !== undefined) ta.style.fontFamily = patch.fontFamily;
+        if (patch.fontSize !== undefined) ta.style.fontSize = patch.fontSize + "px";
+        if (patch.color !== undefined) ta.style.color = patch.color;
+        if (patch.bold !== undefined) ta.style.fontWeight = patch.bold ? "bold" : "normal";
+        if (patch.italic !== undefined) ta.style.fontStyle = patch.italic ? "italic" : "normal";
+      }
+    }
+
+    function showTextToolbar(itemId, anchorEl) {
+      activeTextId = itemId;
+      const t = board.items.find((x) => x.id === itemId);
+      if (!t) return;
+      txtFont.value = t.fontFamily || "sans-serif";
+      txtSize.value = String(t.fontSize || 16);
+      txtColor.value = t.color || "#111111";
+      txtBold.classList.toggle("bg-black", !!t.bold);
+      txtBold.classList.toggle("text-white", !!t.bold);
+      txtItalic.classList.toggle("bg-black", !!t.italic);
+      txtItalic.classList.toggle("text-white", !!t.italic);
+      const r = anchorEl.getBoundingClientRect();
+      txtToolbar.style.left = `${r.left}px`;
+      txtToolbar.style.top = `${r.top - 52}px`;
+      txtToolbar.classList.remove("hidden");
+    }
+
     function bindTextEdit() {
       canvas.querySelectorAll("[data-text-id]").forEach((ta) => {
         ta.addEventListener("input", () => {
           const t = board.items.find((x) => x.id === ta.dataset.textId);
           if (t) t.text = ta.value;
         });
+        ta.addEventListener("focus", () => {
+          showTextToolbar(ta.dataset.textId, ta.closest("[data-card-id]"));
+        });
       });
     }
+
+    // text toolbar controls
+    if (txtFont) {
+      txtFont.addEventListener("change", () => { if (activeTextId) updateTextItem(activeTextId, { fontFamily: txtFont.value }); });
+      txtSize.addEventListener("change", () => { if (activeTextId) updateTextItem(activeTextId, { fontSize: parseInt(txtSize.value) }); });
+      txtColor.addEventListener("input", () => { if (activeTextId) updateTextItem(activeTextId, { color: txtColor.value }); });
+      txtBold.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (!activeTextId) return;
+        const t = board.items.find((x) => x.id === activeTextId);
+        if (!t) return;
+        t.bold = !t.bold;
+        txtBold.classList.toggle("bg-black", t.bold); txtBold.classList.toggle("text-white", t.bold);
+        updateTextItem(activeTextId, { bold: t.bold });
+      });
+      txtItalic.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (!activeTextId) return;
+        const t = board.items.find((x) => x.id === activeTextId);
+        if (!t) return;
+        t.italic = !t.italic;
+        txtItalic.classList.toggle("bg-black", t.italic); txtItalic.classList.toggle("text-white", t.italic);
+        updateTextItem(activeTextId, { italic: t.italic });
+      });
+    }
+
+    document.addEventListener("pointerdown", (e) => {
+      if (!e.target.closest("[data-text-card],[data-text-id]") && !e.target.closest("#text-toolbar")) {
+        txtToolbar.classList.add("hidden");
+        activeTextId = null;
+      }
+    });
 
     function addTextItem() {
       if (!board) return;
@@ -381,13 +483,28 @@
         fileInput.value = "";
       });
 
+      // ── Floating popup helper ──────────────────────────────────────────────
+      function showPopup(popup, anchorEl) {
+        const r = anchorEl.getBoundingClientRect();
+        popup.style.top = `${r.top}px`;
+        popup.style.left = `${r.right + 8}px`;
+        popup.classList.remove("hidden");
+      }
+      function hideAllPopups() {
+        ["bg-palette","download-menu"].forEach((id) => document.getElementById(id).classList.add("hidden"));
+      }
+      document.addEventListener("click", hideAllPopups);
+
       // Arkaplan renk paleti
       const bgBtn = document.getElementById("tool-bg");
       const bgPalette = document.getElementById("bg-palette");
       bgBtn.addEventListener("click", (e) => {
         e.stopPropagation();
-        bgPalette.classList.toggle("hidden");
+        const visible = !bgPalette.classList.contains("hidden");
+        hideAllPopups();
+        if (!visible) showPopup(bgPalette, bgBtn);
       });
+      bgPalette.addEventListener("click", (e) => e.stopPropagation());
       bgPalette.querySelectorAll("[data-bg]").forEach((btn) => {
         btn.addEventListener("click", () => {
           canvas.style.backgroundColor = btn.dataset.bg;
@@ -399,8 +516,13 @@
       // İndir menüsü
       const dlBtn = document.getElementById("tool-download");
       const dlMenu = document.getElementById("download-menu");
-      dlBtn.addEventListener("click", (e) => { e.stopPropagation(); dlMenu.classList.toggle("hidden"); });
-      document.addEventListener("click", () => { dlMenu.classList.add("hidden"); bgPalette.classList.add("hidden"); });
+      dlBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const visible = !dlMenu.classList.contains("hidden");
+        hideAllPopups();
+        if (!visible) showPopup(dlMenu, dlBtn);
+      });
+      dlMenu.addEventListener("click", (e) => e.stopPropagation());
 
       const boardLabel = () => (document.getElementById("board-name").value.trim() || "tasarim-panosu").replace(/\s+/g, "-").toLowerCase();
 
