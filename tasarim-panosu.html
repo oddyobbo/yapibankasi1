@@ -147,8 +147,11 @@
           return `
             <article data-card-id="${item.id}" data-text-card="1" class="group absolute rounded-xl overflow-visible text-card-idle" style="left:${item.x || 20}px; top:${item.y || 20}px; width:${item.w || 200}px; height:${item.h || 80}px; border: 1.5px dashed transparent; background: transparent;">
               <button data-delete-card="${item.id}" class="absolute -top-3 -right-3 z-20 w-6 h-6 rounded-full bg-white border border-black/15 text-[12px] shadow-sm hover:bg-black hover:text-white opacity-0 group-hover:opacity-100 transition-opacity">×</button>
-              <div data-drag-handle="1" class="cursor-move w-full h-full p-2">
-                <textarea data-text-id="${item.id}" class="w-full h-full resize-none bg-transparent border-none outline-none leading-snug" style="font-family:${item.fontFamily || 'sans-serif'};font-size:${item.fontSize || 16}px;color:${item.color || '#111111'};font-weight:${fw};font-style:${fs};cursor:move;" placeholder="Metin gir...">${item.text || ""}</textarea>
+              <div data-drag-handle="1" class="w-full flex flex-col h-full">
+                <div class="flex items-center justify-center h-5 flex-shrink-0 cursor-move opacity-0 group-hover:opacity-100 transition-opacity" style="touch-action:none;">
+                  <svg width="20" height="8" viewBox="0 0 20 8" fill="none"><circle cx="4" cy="2" r="1.2" fill="#999"/><circle cx="10" cy="2" r="1.2" fill="#999"/><circle cx="16" cy="2" r="1.2" fill="#999"/><circle cx="4" cy="6" r="1.2" fill="#999"/><circle cx="10" cy="6" r="1.2" fill="#999"/><circle cx="16" cy="6" r="1.2" fill="#999"/></svg>
+                </div>
+                <textarea data-text-id="${item.id}" class="w-full flex-1 resize-none bg-transparent border-none outline-none leading-snug px-2 pb-2" style="font-family:${item.fontFamily || 'sans-serif'};font-size:${item.fontSize || 16}px;color:${item.color || '#111111'};font-weight:${fw};font-style:${fs};" placeholder="Metin gir...">${item.text || ""}</textarea>
               </div>
               <div data-resize-handle="${item.id}" class="absolute right-0 bottom-0 w-4 h-4 cursor-se-resize opacity-0 transition-opacity" style="border-right:2px solid rgba(0,0,0,0.25);border-bottom:2px solid rgba(0,0,0,0.25);border-bottom-right-radius:10px;"></div>
             </article>
@@ -188,7 +191,9 @@
           if (t) { t.x = parseInt(card.style.left) || 0; t.y = parseInt(card.style.top) || 0; }
         };
         card.querySelector("[data-drag-handle='1']")?.addEventListener("pointerdown", (ev) => {
-          if (ev.target.closest("[data-resize-handle],[data-delete-card],[data-delete-label],textarea")) return;
+          if (ev.target.closest("[data-resize-handle],[data-delete-card],[data-delete-label]")) return;
+          // text kartlarında sadece grip bar'dan sürükle, textarea'dan değil
+          if (card.dataset.textCard && ev.target.tagName === "TEXTAREA") return;
           startX = ev.clientX; startY = ev.clientY;
           origX = parseInt(card.style.left) || 0; origY = parseInt(card.style.top) || 0;
           document.addEventListener("pointermove", onMove);
