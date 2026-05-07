@@ -873,12 +873,31 @@ async function boot() {
   // Zoom
   $("zoom-in").addEventListener("click",  () => { zoom=Math.min(5,+(zoom+0.1).toFixed(1)); fc.setZoom(zoom); $("zoom-val").textContent=Math.round(zoom*100)+"%"; });
   $("zoom-out").addEventListener("click", () => { zoom=Math.max(0.1,+(zoom-0.1).toFixed(1)); fc.setZoom(zoom); $("zoom-val").textContent=Math.round(zoom*100)+"%"; });
-  $("fit-btn").addEventListener("click",  () => {
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen().catch(()=>{});
+  let _focusMode = false;
+  $("fit-btn").addEventListener("click", () => {
+    _focusMode = !_focusMode;
+    const siteH = $("site-header");
+    const siteF = $("site-footer");
+    const boardH = $("board-header");
+    const bottomB = $("bottom-bar");
+    if (_focusMode) {
+      if (siteH) siteH.style.display = "none";
+      if (siteF) siteF.style.display = "none";
+      if (boardH) boardH.style.display = "none";
+      if (bottomB) bottomB.style.display = "none";
+      $("fit-btn").style.background = "rgba(0,0,0,.08)";
+      $("fit-btn").title = "Normal görünüm";
     } else {
-      document.exitFullscreen().catch(()=>{});
+      if (siteH) siteH.style.display = "";
+      if (siteF) siteF.style.display = "";
+      if (boardH) boardH.style.display = "";
+      if (bottomB) bottomB.style.display = "";
+      $("fit-btn").style.background = "transparent";
+      $("fit-btn").title = "Tam ekran";
     }
+    setTimeout(() => {
+      if (fc) { fc.setDimensions({ width: $("canvas-area").clientWidth, height: $("canvas-area").clientHeight }); fc.renderAll(); }
+    }, 50);
   });
 
   // Settings
