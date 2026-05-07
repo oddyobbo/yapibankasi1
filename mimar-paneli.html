@@ -194,6 +194,9 @@
     }
 
     async function boot() {
+      const urlTab = new URLSearchParams(location.search).get("tab");
+      if (urlTab && TAB_IDS.includes(urlTab)) activeTab = urlTab;
+
       await AG.ready;
       const session = await AG.getSessionArchitect();
       if (!session) { location.href = "/mimar-giris.html"; return; }

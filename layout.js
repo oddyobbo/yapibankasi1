@@ -103,9 +103,6 @@
   const headerTarget = document.getElementById("site-header");
   if (headerTarget) {
     const navItems = [...baseNavItems];
-    if (architectSession) {
-      navItems.push({ id: "architect-panel", href: "/mimar-paneli.html", label: "Mimar Paneli" });
-    }
 
     const nav = navItems
       .map((item) => {
@@ -173,10 +170,19 @@
       })
       .join("");
 
+    const archName = architectSession ? (architectSession.name || "Mimar").slice(0, 14) : "";
     const desktopAuthLinks = architectSession
       ? `
-        <a href="/marka-giris.html" class="inline-flex items-center px-3 py-2 rounded-full text-[13px] hover:bg-black/[0.05]">Marka Girişi</a>
-        <a href="/mimar-paneli.html" class="px-4 py-2 rounded-full bg-black text-white text-[13px] font-semibold hover:bg-black/85 transition">Mimar Paneli</a>
+        <a href="/mimar-paneli.html?tab=fav-products" class="inline-flex items-center px-3 py-2 rounded-full text-[13px] text-[#6e6e73] hover:text-black hover:bg-black/[0.04]">Favorilerim</a>
+        <a href="/mimar-paneli.html?tab=moodboards" class="inline-flex items-center px-3 py-2 rounded-full text-[13px] text-[#6e6e73] hover:text-black hover:bg-black/[0.04]">Boardlarım</a>
+        <div class="relative" id="arch-dropdown-wrap">
+          <button id="arch-dropdown-btn" type="button" class="inline-flex items-center gap-1 px-3 py-2 rounded-full text-[13px] hover:bg-black/[0.05]">${archName} ▾</button>
+          <div id="arch-dropdown-panel" class="hidden absolute right-0 top-full mt-1 w-44 rounded-xl border border-black/10 bg-white shadow-lg z-50 py-1">
+            <a href="/mimar-paneli.html" class="block px-4 py-2 text-[13px] hover:bg-[#f5f5f7]">Panelim</a>
+            <button id="arch-logout-btn" type="button" class="w-full text-left px-4 py-2 text-[13px] hover:bg-[#f5f5f7]">Çıkış Yap</button>
+          </div>
+        </div>
+        <a href="/marka-basvuru.html" class="px-4 py-2 rounded-full bg-black text-white text-[13px] font-semibold hover:bg-black/85 transition">Marka Başla</a>
       `
       : `
         <a href="/giris.html" class="inline-flex items-center px-3 py-2 rounded-full text-[13px] hover:bg-black/[0.05]">Giriş Yap</a>
@@ -242,6 +248,24 @@
           t.className = "products-tab-btn h-9 px-4 rounded-full bg-[#2c2d3a] text-white text-[12px] font-semibold";
         });
       });
+    }
+
+    const archDropBtn = document.getElementById("arch-dropdown-btn");
+    const archDropPanel = document.getElementById("arch-dropdown-panel");
+    if (archDropBtn && archDropPanel) {
+      archDropBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        archDropPanel.classList.toggle("hidden");
+      });
+      archDropPanel.addEventListener("click", (e) => e.stopPropagation());
+      document.addEventListener("click", () => archDropPanel.classList.add("hidden"));
+      const archLogoutBtn = document.getElementById("arch-logout-btn");
+      if (archLogoutBtn) {
+        archLogoutBtn.addEventListener("click", async () => {
+          await AG.logoutArchitect();
+          location.href = "/";
+        });
+      }
     }
   }
 
