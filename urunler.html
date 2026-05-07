@@ -22,10 +22,10 @@
     <section class="border-b border-black/[0.08] px-6 lg:px-10 py-8">
       <div class="max-w-[1360px] mx-auto">
         <div class="flex flex-wrap items-center gap-2">
-          <button class="px-4 h-10 rounded-xl border border-black/15 text-[13px] font-medium">Filters</button>
+          <button class="px-4 h-10 rounded-xl border border-black/15 text-[13px] font-medium">Filtreler</button>
           <div id="quick-chips" class="flex flex-wrap gap-2"></div>
           <div class="ml-auto w-full lg:w-[320px]">
-            <input id="search-input" type="text" placeholder="Search filters / ürün ara" class="w-full h-10 rounded-xl border border-black/15 bg-[#fafafa] px-3 text-[13px] outline-none focus:border-black/40">
+            <input id="search-input" type="text" placeholder="Filtre ara / ürün ara" class="w-full h-10 rounded-xl border border-black/15 bg-[#fafafa] px-3 text-[13px] outline-none focus:border-black/40">
           </div>
         </div>
       </div>
@@ -67,6 +67,10 @@
 
     AG.ready.then(() => AG.getProducts()).then((dbProds) => {
       allProducts = [...STATIC, ...dbProds];
+      const qp = new URLSearchParams(location.search);
+      const qpCategory = (qp.get("category") || "").trim();
+      const qpSub = (qp.get("sub") || "").trim();
+      activeQuick = qpSub || qpCategory || "";
       renderQuickChips();
       renderFilterPanel();
       render();
@@ -131,7 +135,7 @@
       const subs = distinct(allProducts.map((p) => getTaxonomy(p).sub || getTaxonomy(p).main)).slice(0, 10);
       const total = allProducts.length;
       quick.innerHTML = `
-        <button data-quick="" class="filter-chip ${!activeQuick ? "active" : ""} px-3 h-10 rounded-xl border border-black/[0.08] text-[13px]">All <span class="ml-1 text-[11px] opacity-70">${total}</span></button>
+        <button data-quick="" class="filter-chip ${!activeQuick ? "active" : ""} px-3 h-10 rounded-xl border border-black/[0.08] text-[13px]">Tümü <span class="ml-1 text-[11px] opacity-70">${total}</span></button>
         ${subs.map((s) => `<button data-quick="${s}" class="filter-chip ${activeQuick === s ? "active" : ""} px-3 h-10 rounded-xl border border-black/[0.08] text-[13px]">${s}</button>`).join("")}
       `;
       quick.querySelectorAll("[data-quick]").forEach((btn) => {
@@ -169,13 +173,13 @@
       const fires = distinct(allProducts.map((p) => p.technical?.fireClass || ""));
 
       panel.innerHTML = [
-        groupTemplate("brand", "Brand", brands),
+        groupTemplate("brand", "Marka", brands),
         groupTemplate("category", "Kategori", categories),
         groupTemplate("subcategory", "Alt Kategori", subcategories),
         groupTemplate("hasPdf", "PDF", ["Var", "Yok"]),
         groupTemplate("hasCad", "CAD", ["Var", "Yok"]),
         groupTemplate("hasBim", "BIM", ["Var", "Yok"]),
-        groupTemplate("fireClass", "Flammability", fires),
+        groupTemplate("fireClass", "Yanıcılık", fires),
       ].join("");
 
       panel.querySelectorAll("[data-toggle]").forEach((btn) => {

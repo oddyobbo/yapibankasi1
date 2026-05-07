@@ -105,7 +105,10 @@
           const megaCols = productMegaMenu.map(
               (col) => `
                 <div>
-                  <p class="text-[16px] font-semibold text-black">${col.name} <span class="text-[13px] text-[#7a7a80]">›</span></p>
+                  <a href="/urunler.html?category=${encodeURIComponent(col.name)}" class="inline-flex items-center gap-2 text-[17px] font-semibold text-black hover:opacity-80">
+                    <span>${col.name}</span>
+                    <span class="text-[15px] text-[#7a7a80]">›</span>
+                  </a>
                   <div class="mt-2 space-y-1">
                     ${col.subs
                       .map(
@@ -124,9 +127,13 @@
             .join("");
           return `
             <div class="relative">
-              <button type="button" id="products-mega-toggle" class="px-3 py-2 rounded-full text-[14.5px] ${
+              <button type="button" id="products-mega-toggle" class="px-3 py-2 rounded-full text-[15.5px] ${
                 isActive ? "text-black" : "text-[#1f1f22] hover:text-black"
-              }">${item.label} <span class="text-[12px] align-middle">▾</span></button>
+              }">${item.label}
+                <span class="inline-flex align-middle ml-1 -mt-[1px]">
+                  <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6.5l4 4 4-4" stroke="currentColor" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </span>
+              </button>
               <div id="products-mega-panel" class="hidden fixed left-0 right-0 top-[72px] z-40">
                 <div class="w-full border-y border-black/[0.08] bg-white shadow-[0_30px_70px_rgba(0,0,0,0.16)]">
                   <div class="px-6 pt-4">
@@ -142,7 +149,7 @@
               </div>
             </div>`;
         }
-        return `<a href="${item.href}" class="px-3 py-2 rounded-full text-[13.5px] ${
+        return `<a href="${item.href}" class="px-3 py-2 rounded-full text-[15px] ${
           isActive ? "text-black" : "text-[#1f1f22] hover:text-black"
         }">${item.label}</a>`;
       })
