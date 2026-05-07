@@ -145,12 +145,12 @@
           const fw = item.bold ? "bold" : (item.fontWeight || "normal");
           const fs = item.italic ? "italic" : "normal";
           return `
-            <article data-card-id="${item.id}" data-text-card="1" class="group absolute rounded-xl overflow-visible" style="left:${item.x || 20}px; top:${item.y || 20}px; width:${item.w || 200}px; height:${item.h || 80}px; border: 1.5px dashed rgba(0,0,0,0.18); background: rgba(255,255,255,0.55); backdrop-filter: blur(2px);">
+            <article data-card-id="${item.id}" data-text-card="1" class="group absolute rounded-xl overflow-visible text-card-idle" style="left:${item.x || 20}px; top:${item.y || 20}px; width:${item.w || 200}px; height:${item.h || 80}px; border: 1.5px dashed transparent; background: transparent;">
               <button data-delete-card="${item.id}" class="absolute -top-3 -right-3 z-20 w-6 h-6 rounded-full bg-white border border-black/15 text-[12px] shadow-sm hover:bg-black hover:text-white opacity-0 group-hover:opacity-100 transition-opacity">×</button>
               <div data-drag-handle="1" class="cursor-move w-full h-full p-2">
-                <textarea data-text-id="${item.id}" class="w-full h-full resize-none bg-transparent border-none outline-none leading-snug cursor-text" style="font-family:${item.fontFamily || 'sans-serif'};font-size:${item.fontSize || 16}px;color:${item.color || '#111111'};font-weight:${fw};font-style:${fs};" placeholder="Metin gir...">${item.text || ""}</textarea>
+                <textarea data-text-id="${item.id}" class="w-full h-full resize-none bg-transparent border-none outline-none leading-snug" style="font-family:${item.fontFamily || 'sans-serif'};font-size:${item.fontSize || 16}px;color:${item.color || '#111111'};font-weight:${fw};font-style:${fs};cursor:move;" placeholder="Metin gir...">${item.text || ""}</textarea>
               </div>
-              <div data-resize-handle="${item.id}" class="absolute right-0 bottom-0 w-4 h-4 cursor-se-resize opacity-0 group-hover:opacity-100 transition-opacity" style="border-right:2px solid rgba(0,0,0,0.25);border-bottom:2px solid rgba(0,0,0,0.25);border-bottom-right-radius:10px;"></div>
+              <div data-resize-handle="${item.id}" class="absolute right-0 bottom-0 w-4 h-4 cursor-se-resize opacity-0 transition-opacity" style="border-right:2px solid rgba(0,0,0,0.25);border-bottom:2px solid rgba(0,0,0,0.25);border-bottom-right-radius:10px;"></div>
             </article>
           `;
         }
@@ -263,7 +263,20 @@
           if (t) t.text = ta.value;
         });
         ta.addEventListener("focus", () => {
-          showTextToolbar(ta.dataset.textId, ta.closest("[data-card-id]"));
+          const card = ta.closest("[data-card-id]");
+          card.style.border = "1.5px dashed rgba(0,0,0,0.22)";
+          card.style.background = "rgba(255,255,255,0.55)";
+          card.querySelector("[data-resize-handle]").style.opacity = "1";
+          ta.style.cursor = "text";
+          showTextToolbar(ta.dataset.textId, card);
+        });
+        ta.addEventListener("blur", () => {
+          const card = ta.closest("[data-card-id]");
+          if (!card) return;
+          card.style.border = "1.5px dashed transparent";
+          card.style.background = "transparent";
+          card.querySelector("[data-resize-handle]").style.opacity = "0";
+          ta.style.cursor = "move";
         });
       });
     }
