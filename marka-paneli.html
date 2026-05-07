@@ -106,6 +106,7 @@
               </div>
             </div>
             <button class="md:col-span-2 h-11 rounded-xl bg-black text-white font-semibold">Ürünü Kaydet (Taslak)</button>
+            <p id="manual-save-msg" class="md:col-span-2 text-[12px] text-[#6e6e73]"></p>
           </form>
         </div>
 
@@ -558,12 +559,23 @@
 
       document.getElementById("product-form").addEventListener("submit", async (e) => {
         e.preventDefault();
+        const saveMsg = document.getElementById("manual-save-msg");
         const fd = new FormData(e.currentTarget);
         const required = ["name", "sku", "category", "subcategory", "description"];
-        if (required.some((k) => !fd.get(k)?.toString().trim())) return;
+        if (required.some((k) => !fd.get(k)?.toString().trim())) {
+          saveMsg.textContent = "Lütfen ürün adı, SKU, ana kategori, alt kategori ve açıklama alanlarını doldur.";
+          saveMsg.className = "md:col-span-2 text-[12px] text-red-600";
+          return;
+        }
         const btn = e.currentTarget.querySelector("button[type=submit], button:last-of-type");
         if (btn) { btn.disabled = true; btn.textContent = "Kaydediliyor…"; }
-        await AG.addProduct(createProductFromForm(fd));
+        const created = await AG.addProduct(createProductFromForm(fd));
+        if (!created) {
+          saveMsg.textContent = "Kaydedilemedi. Oturumunu yenileyip tekrar dene (çıkış yap/giriş yap).";
+          saveMsg.className = "md:col-span-2 text-[12px] text-red-600";
+          if (btn) { btn.disabled = false; btn.textContent = "Ürünü Kaydet (Taslak)"; }
+          return;
+        }
         e.currentTarget.reset();
         document.getElementById("custom-tech-rows").innerHTML = "";
         document.getElementById("manual-subcategory").innerHTML = '<option value="">Alt kategori seç *</option>';
@@ -572,6 +584,8 @@
         document.getElementById("upload-pdf-msg").textContent = `Maks ${PDF_MAX_MB} MB`;
         document.getElementById("upload-cad-msg").textContent = `Maks ${CAD_MAX_MB} MB`;
         document.getElementById("upload-bim-msg").textContent = `Maks ${BIM_MAX_MB} MB`;
+        saveMsg.textContent = "Ürün taslak olarak kaydedildi.";
+        saveMsg.className = "md:col-span-2 text-[12px] text-green-600";
         if (btn) { btn.disabled = false; btn.textContent = "Ürünü Kaydet (Taslak)"; }
         await render();
       });
