@@ -237,7 +237,9 @@
       <header class="border-b border-black/[0.06] sticky top-0 bg-white/85 backdrop-blur-xl z-30">
         <div class="h-[72px] px-4 sm:px-6 lg:px-10 flex items-center">
           <!-- Logo -->
-          <a href="/mvp-taslak-v1.html" class="text-[22px] font-semibold tracking-tight flex-shrink-0 mr-8">Antigravity</a>
+          <a href="/mvp-taslak-v1.html" class="flex-shrink-0 mr-8 inline-flex items-baseline gap-0 leading-none select-none" style="font-size:22px;font-weight:600;letter-spacing:-0.3px;color:#1d1d1f;text-decoration:none;" aria-label="Archilink">
+            <span>Archi</span><span style="position:relative;display:inline-block;"><span>il</span><span style="position:absolute;bottom:-3px;left:0;right:0;height:2px;background:#1d1d1f;border-radius:2px;"></span></span><span>nk</span>
+          </a>
           <!-- Nav -->
           <nav class="hidden lg:flex items-center gap-1 flex-shrink-0">${nav}</nav>
           <!-- Search (fills middle) -->
@@ -332,8 +334,10 @@
       <footer class="border-t border-black/[0.06] bg-white w-full">
         <div class="w-full px-6 lg:px-10 pt-16 pb-10 grid md:grid-cols-5 gap-10 text-[14px]">
           <div class="md:col-span-2">
-            <p class="text-[24px] font-semibold tracking-tight">Antigravity</p>
-            <p class="text-[#6e6e73] mt-3 max-w-[42ch] leading-relaxed">Mimarların doğru ürünü bulduğu, markaların gerçek talebe ulaştığı Türkiye odaklı mimari malzeme platformu.</p>
+            <p class="inline-flex items-baseline gap-0 leading-none" style="font-size:24px;font-weight:600;letter-spacing:-0.3px;color:#1d1d1f;">
+              <span>Archi</span><span style="position:relative;display:inline-block;"><span>il</span><span style="position:absolute;bottom:-3px;left:0;right:0;height:2px;background:#1d1d1f;border-radius:2px;"></span></span><span>nk</span>
+            </p>
+            <p class="text-[#6e6e73] mt-4 max-w-[42ch] leading-relaxed">Mimarların doğru ürünü bulduğu, markaların gerçek talebe ulaştığı Türkiye odaklı mimari malzeme platformu.</p>
             <div class="mt-5 flex gap-2">
               <a href="/marka-basvuru.html" class="px-4 py-2 rounded-full bg-black text-white text-[13px] font-semibold">Marka Başvur</a>
               <a href="/urunler.html" class="px-4 py-2 rounded-full border border-black/15 text-[13px] font-semibold">Ürünleri Keşfet</a>
@@ -366,7 +370,7 @@
           </div>
         </div>
         <div class="w-full px-6 lg:px-10 py-6 border-t border-black/[0.06] flex flex-wrap items-center justify-between gap-3 text-[12px] text-[#6e6e73]">
-          <p>© 2026 Antigravity. Tüm hakları saklıdır.</p>
+          <p>© 2026 Archilink. Tüm hakları saklıdır.</p>
           <p>İstanbul, Türkiye</p>
         </div>
       </footer>
