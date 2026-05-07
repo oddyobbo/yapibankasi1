@@ -184,6 +184,32 @@
     try { await sb.rpc("increment_product_view", { product_id: id }); } catch {}
   };
 
+  const uploadBrandImage = async (file, brandId) => {
+    await ready;
+    const sb = getSB();
+    if (!sb) return { ok: false, message: "Sunucu bağlantısı kurulamadı." };
+    if (!file) return { ok: false, message: "Lütfen bir görsel seçin." };
+
+    const safeName = (file.name || "image.jpg").replace(/[^a-zA-Z0-9._-]/g, "-");
+    const ext = safeName.includes(".") ? safeName.split(".").pop() : "jpg";
+    const path = `${brandId || "unknown"}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+
+    const { error: upErr } = await sb.storage.from("product-images").upload(path, file, {
+      cacheControl: "3600",
+      upsert: false,
+      contentType: file.type || "image/jpeg",
+    });
+    if (upErr) {
+      return { ok: false, message: `Görsel yüklenemedi: ${upErr.message}` };
+    }
+
+    const { data } = sb.storage.from("product-images").getPublicUrl(path);
+    if (!data?.publicUrl) {
+      return { ok: false, message: "Görsel yüklendi ama URL alınamadı." };
+    }
+    return { ok: true, url: data.publicUrl };
+  };
+
   // ── Admin data queries ──────────────────────────────────────────────────
   const getAllBrands = async () => {
     await ready;
@@ -284,6 +310,7 @@
     updateProduct,
     deleteProduct,
     incrementView,
+    uploadBrandImage,
     // admin data
     getAllBrands,
     getVisits,
