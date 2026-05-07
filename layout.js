@@ -19,9 +19,9 @@
   ];
 
   const productMegaMenu = [
-    { name: "Materials", subs: ["Flooring", "Glass", "Leather", "Masonry & Stone", "Metal", "Paints", "Paneling", "Product Finish", "Resin", "Surfaces", "Textiles", "Tile", "Wallcovering"] },
-    { name: "FF&E", subs: ["Acoustical", "Appliances", "Bathroom", "Decor & Accessories", "Furniture", "Hardware", "Kitchen", "Lighting", "Outdoor", "Window Treatments"] },
-    { name: "Architectural", subs: ["Ceiling", "Decking", "Doors", "Facade", "Moulding & Trim", "Paving & Landscape"] },
+    { name: "Malzemeler", subs: ["Zemin", "Cam", "Deri", "Yığma ve Taş", "Metal", "Boya", "Panel", "Yüzey Bitişi", "Reçine", "Yüzey", "Tekstil", "Seramik", "Duvar Kaplama"] },
+    { name: "Mobilya ve Donatı", subs: ["Akustik", "Elektrikli Cihaz", "Banyo", "Dekor ve Aksesuar", "Mobilya", "Donanım", "Mutfak", "Aydınlatma", "Dış Mekan", "Pencere Sistemleri"] },
+    { name: "Mimari", subs: ["Tavan", "Decking", "Kapı", "Cephe", "Profil ve Trim", "Peyzaj Kaplama"] },
   ];
 
   const headerTarget = document.getElementById("site-header");
