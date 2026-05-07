@@ -124,28 +124,23 @@
             <img src="${p.image || 'https://images.unsplash.com/photo-1600607686527-6fb886090705?q=80&w=800&auto=format&fit=crop'}"
               alt="${p.name}" class="w-full h-full object-cover group-hover:scale-[1.03] transition duration-500">
           </div>
-          <div class="p-5 flex flex-col flex-1">
-            <h3 class="text-[15px] font-semibold leading-snug">${p.name}</h3>
-            <p class="text-[12px] text-[#6e6e73] mt-1 leading-relaxed">${p.brandName || ""}</p>
-            <p class="text-[11px] text-[#9a9a9f] mt-1">${p.spec || ""}</p>
-            <div class="mt-auto pt-4 flex items-center justify-end">
-              <span class="text-[12px] font-medium text-[#0b0b0c] opacity-0 group-hover:opacity-100 transition">Detay →</span>
-            </div>
+          <div class="p-4 flex flex-col flex-1">
+            <h3 class="text-[14px] font-semibold leading-snug">${p.name}</h3>
+            <p class="text-[12px] text-[#6e6e73] mt-1">${p.brandName || ""}</p>
+            <a href="/urun/${p.id}" class="mt-3 w-full h-8 flex items-center justify-center bg-[#1d1d1f] text-white text-[12px] font-medium rounded-lg hover:bg-[#3a3a3c] transition">Detayı Gör</a>
           </div>
           </a>
           ${
             architectSession
-              ? `<button data-fav-product="${p.id}" title="${isFav ? "Favorilerden çıkar" : "Favorilere ekle"}" class="absolute top-3 right-3 w-8 h-8 rounded-full border ${isFav ? "border-red-300 bg-red-50 text-red-500" : "border-black/15 bg-white/95 text-[#6e6e73]"} hover:bg-red-50 hover:text-red-500 hover:border-red-300 transition flex items-center justify-center">
+              ? `<button data-fav-product="${p.id}" title="${isFav ? "Favorilerden çıkar" : "Favorilere ekle"}" class="absolute top-3 right-3 w-8 h-8 rounded-full border ${isFav ? "border-red-300 bg-red-50 text-red-500" : "border-black/15 bg-white/95 text-[#6e6e73]"} opacity-0 group-hover:opacity-100 hover:bg-red-50 hover:text-red-500 hover:border-red-300 transition flex items-center justify-center">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="${isFav ? "currentColor" : "none"}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
                 </button>`
-              : `<a href="/mimar-giris.html" title="Favorilere eklemek için giriş yapın" class="absolute top-3 right-3 w-8 h-8 inline-flex items-center justify-center rounded-full border border-black/15 bg-white/95 text-[#6e6e73]">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-                </a>`
+              : ""
           }
           ${
             architectSession
-              ? `<button data-add-board="${p.id}" class="absolute top-3 left-3 px-2.5 h-8 rounded-full text-[12px] border border-black/15 bg-white/95 hover:bg-black hover:text-white transition">+ Board</button>`
-              : `<a href="/mimar-giris.html" class="absolute top-3 left-3 px-2.5 h-8 inline-flex items-center rounded-full text-[11px] border border-black/15 bg-white/95">+ Board</a>`
+              ? `<button data-add-board="${p.id}" class="absolute top-3 left-3 px-2.5 h-7 rounded-full text-[11px] font-medium border border-black/15 bg-white/95 opacity-0 group-hover:opacity-100 hover:bg-black hover:text-white transition">+ Panoya ekle</button>`
+              : ""
           }
         </div>`;
     }
