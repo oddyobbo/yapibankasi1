@@ -1,1232 +1,799 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tasarım Panosu — AntiGravity</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Antigravity | Tasarım Panosu</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="/core.js"></script>
   <style>
-    *, *::before, *::after { box-sizing: border-box; }
-    body { font-family: 'Inter', sans-serif; margin: 0; padding: 0; overflow: hidden; background: #1a1a1a; color: #e5e5e5; }
-    input[type="number"]::-webkit-inner-spin-button,
-    input[type="number"]::-webkit-outer-spin-button { opacity: 1; }
-    ::-webkit-scrollbar { width: 4px; height: 4px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
-
-    /* Tool rail buttons */
-    .tool-btn {
-      width: 40px; height: 40px; margin: 2px auto; border: none; background: none;
-      border-radius: 8px; display: flex; align-items: center; justify-content: center;
-      color: #aaa; cursor: pointer; transition: all 0.15s; position: relative;
-    }
-    .tool-btn:hover { color: #fff; background: rgba(255,255,255,0.1); }
-    .tool-btn.active { color: #fff; background: rgba(255,255,255,0.15); }
-    .tool-btn.danger:hover { color: #ef4444; background: rgba(239,68,68,0.1); }
-
-    /* Tooltips */
-    .tooltip {
-      position: absolute; left: calc(100% + 10px); top: 50%; transform: translateY(-50%);
-      background: #1a1a1a; color: #e5e5e5; font-size: 11px; padding: 4px 8px;
-      border-radius: 5px; white-space: nowrap; pointer-events: none; opacity: 0;
-      transition: opacity 0.12s; z-index: 9999; border: 1px solid rgba(255,255,255,0.1);
-    }
-    .tool-btn:hover .tooltip { opacity: 1; }
-
-    /* Separator */
-    .tool-sep { height: 1px; background: rgba(255,255,255,0.06); margin: 4px 8px; }
-
-    /* Property inputs */
-    .pi {
-      background: #333; border: 1px solid rgba(255,255,255,0.1); color: #fff;
-      border-radius: 6px; font-size: 12px; padding: 0 8px; height: 28px; width: 100%;
-      outline: none; font-family: 'Inter', sans-serif;
-    }
-    .pi:focus { border-color: rgba(59,130,246,0.5); }
-    .pi select { height: 28px; }
-    .pl { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 3px; display: block; }
-    .sec-title {
-      font-size: 11px; font-weight: 600; color: #888; text-transform: uppercase;
-      letter-spacing: 0.08em; padding: 8px 12px;
-      border-bottom: 1px solid rgba(255,255,255,0.06);
-    }
-    .pbtn {
-      background: #333; border: 1px solid rgba(255,255,255,0.1); color: #aaa;
-      border-radius: 6px; font-size: 12px; padding: 0 8px; height: 28px; cursor: pointer;
-      transition: all 0.15s; font-family: 'Inter', sans-serif;
-    }
-    .pbtn:hover { background: #444; color: #fff; }
-    .pbtn.active { background: rgba(59,130,246,0.2); border-color: rgba(59,130,246,0.5); color: #3b82f6; }
-
-    /* Color chips */
-    .cc {
-      width: 22px; height: 22px; border-radius: 4px; cursor: pointer;
-      border: 2px solid transparent; transition: border-color 0.12s; flex-shrink: 0;
-    }
-    .cc:hover, .cc.active { border-color: #3b82f6; }
-
-    /* Download dropdown */
-    #dl-menu {
-      display: none; position: absolute; top: calc(100% + 4px); right: 0;
-      background: #2a2a2a; border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 8px; overflow: hidden; z-index: 9999; min-width: 140px;
-    }
-    #dl-menu.open { display: block; }
-    #dl-menu button {
-      display: block; width: 100%; padding: 9px 14px; font-size: 13px;
-      color: #e5e5e5; background: none; border: none; cursor: pointer;
-      text-align: left; font-family: 'Inter', sans-serif;
-    }
-    #dl-menu button:hover { background: rgba(255,255,255,0.08); }
-
-    /* Product list */
-    .prod-item {
-      display: flex; align-items: center; gap: 8px; padding: 5px 8px;
-      border-radius: 6px; cursor: pointer; transition: background 0.12s; user-select: none;
-    }
-    .prod-item:hover { background: rgba(255,255,255,0.06); }
-    .prod-item img { width: 36px; height: 36px; object-fit: cover; border-radius: 4px; flex-shrink: 0; }
-    .prod-item .pn { font-size: 11px; color: #e5e5e5; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .prod-item .pc { font-size: 10px; color: #666; }
-
-    /* Save status */
-    #save-status { font-size: 11px; color: #888; transition: color 0.3s; }
-
-    /* Canvas cursor overrides */
-    #canvas-wrap.panning canvas { cursor: grab !important; }
-    #canvas-wrap.panning canvas:active { cursor: grabbing !important; }
-
-    /* Top bar inputs */
-    #board-name {
-      background: transparent; border: 1px solid transparent; color: #e5e5e5;
-      font-size: 13px; font-weight: 500; padding: 2px 8px; border-radius: 6px;
-      outline: none; width: 180px; transition: border-color 0.15s; font-family: 'Inter', sans-serif;
-    }
-    #board-name:hover { border-color: rgba(255,255,255,0.1); }
-    #board-name:focus { border-color: rgba(255,255,255,0.25); }
+    * { box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: #161616; color: #e5e5e5; margin: 0; overflow: hidden; }
+    .tool-btn { width:40px; height:40px; display:flex; align-items:center; justify-content:center; border-radius:8px; color:#999; cursor:pointer; transition:all .12s; border:none; background:transparent; margin:1px auto; }
+    .tool-btn:hover { background:rgba(255,255,255,.1); color:#fff; }
+    .tool-btn.active { background:rgba(59,130,246,.25); color:#60a5fa; }
+    .tool-btn.danger:hover { background:rgba(239,68,68,.15); color:#f87171; }
+    .sep { height:1px; background:rgba(255,255,255,.06); margin:6px 8px; }
+    .panel-label { font-size:10px; font-weight:600; color:#666; text-transform:uppercase; letter-spacing:.08em; padding:0 12px; margin-bottom:4px; margin-top:12px; display:block; }
+    .prop-input { background:#2a2a2a; border:1px solid rgba(255,255,255,.1); color:#e5e5e5; border-radius:6px; font-size:12px; padding:0 8px; height:28px; width:100%; outline:none; font-family:inherit; }
+    .prop-input:focus { border-color:rgba(59,130,246,.6); }
+    .prop-btn { height:28px; padding:0 10px; border-radius:6px; border:1px solid rgba(255,255,255,.1); background:transparent; color:#ccc; font-size:12px; cursor:pointer; font-family:inherit; transition:all .12s; }
+    .prop-btn:hover { background:rgba(255,255,255,.08); color:#fff; }
+    .prop-btn.active { background:rgba(59,130,246,.2); border-color:rgba(59,130,246,.5); color:#60a5fa; }
+    .color-chip { width:22px; height:22px; border-radius:5px; cursor:pointer; border:2px solid transparent; transition:border .1s; flex-shrink:0; }
+    .color-chip:hover, .color-chip.active { border-color:#3b82f6; }
+    .range-input { -webkit-appearance:none; width:100%; height:4px; border-radius:2px; background:#333; outline:none; }
+    .range-input::-webkit-slider-thumb { -webkit-appearance:none; width:14px; height:14px; border-radius:50%; background:#3b82f6; cursor:pointer; }
+    #canvas-area canvas { display:block; }
+    .dl-item { display:block; width:100%; text-align:left; padding:8px 14px; font-size:13px; color:#ccc; background:transparent; border:none; cursor:pointer; font-family:inherit; transition:background .1s; }
+    .dl-item:hover { background:rgba(255,255,255,.07); color:#fff; }
   </style>
 </head>
-<body style="display:flex;flex-direction:column;height:100vh;overflow:hidden;">
+<body>
+<div id="site-header"></div>
 
-  <div id="site-header"></div>
+<div style="display:flex; height:calc(100vh - 56px);">
 
-  <main id="main-layout" style="flex:1;display:flex;overflow:hidden;min-height:0;">
+  <!-- ═══ SOL ARAÇ RAYI ═══ -->
+  <div style="width:52px; background:#1e1e1e; border-right:1px solid rgba(255,255,255,.06); display:flex; flex-direction:column; padding:6px 0; overflow-y:auto; flex-shrink:0;">
+    <a href="/mimar-paneli.html" title="Panele dön" class="tool-btn">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6"/></svg>
+    </a>
+    <div class="sep"></div>
+    <button id="t-select" class="tool-btn active" title="Seçim (V)" data-tool="select">
+      <svg width="13" height="14" viewBox="0 0 13 15" fill="currentColor"><path d="M1 1l10.5 6.5L8 9 5.5 14 1 1z"/></svg>
+    </button>
+    <button id="t-text" class="tool-btn" title="Metin (T)" data-tool="text" style="font-size:15px;font-weight:700;color:inherit;">T</button>
+    <button id="t-rect" class="tool-btn" title="Dikdörtgen (R)" data-tool="rect">
+      <svg width="15" height="12" viewBox="0 0 15 12" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="1" y="1" width="13" height="10" rx="1.5"/></svg>
+    </button>
+    <button id="t-circle" class="tool-btn" title="Daire (C)" data-tool="circle">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="7" cy="7" r="6"/></svg>
+    </button>
+    <button id="t-line" class="tool-btn" title="Çizgi (L)" data-tool="line">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="2" y1="12" x2="12" y2="2"/></svg>
+    </button>
+    <button id="t-image" class="tool-btn" title="Görsel yükle (I)" data-tool="image">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+    </button>
+    <input id="file-input" type="file" accept="image/*" class="hidden" multiple>
+    <div class="sep"></div>
+    <button id="t-front" class="tool-btn" title="Öne getir">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+    </button>
+    <button id="t-back" class="tool-btn" title="Arkaya gönder">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+    </button>
+    <button id="t-dup" class="tool-btn" title="Çoğalt (Ctrl+D)">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+    </button>
+    <button id="t-lock" class="tool-btn" title="Kilitle/Aç">
+      <svg width="13" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+    </button>
+    <div class="sep"></div>
+    <button id="t-undo" class="tool-btn" title="Geri al (Ctrl+Z)">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v6h6"/><path d="M3 13A9 9 0 1012 3"/></svg>
+    </button>
+    <button id="t-redo" class="tool-btn" title="İleri al (Ctrl+Y)">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 7v6h-6"/><path d="M21 13A9 9 0 1112 3"/></svg>
+    </button>
+    <div class="sep"></div>
+    <button id="t-delete" class="tool-btn danger" title="Sil (Delete)">
+      <svg width="13" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>
+    </button>
+  </div>
 
-    <!-- ═══════════════════════ LEFT TOOLBAR ═══════════════════════ -->
-    <aside style="width:52px;background:#2a2a2a;border-right:1px solid rgba(255,255,255,0.06);display:flex;flex-direction:column;padding:6px 0;overflow:hidden;flex-shrink:0;">
+  <!-- ═══ KANVAS ALANI ═══ -->
+  <div style="flex:1; display:flex; flex-direction:column; min-width:0; overflow:hidden;">
 
-      <!-- Back -->
-      <a href="/mimar-paneli.html" class="tool-btn" style="text-decoration:none;display:flex;">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
-        <span class="tooltip">Geri</span>
-      </a>
-
-      <div class="tool-sep"></div>
-
-      <!-- Select -->
-      <button class="tool-btn active" id="tool-select" onclick="setTool('select')">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 3 7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/><path d="m13 13 6 6"/></svg>
-        <span class="tooltip">Seçim (V)</span>
-      </button>
-
-      <!-- Text -->
-      <button class="tool-btn" id="tool-text" onclick="setTool('text')">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></svg>
-        <span class="tooltip">Metin (T)</span>
-      </button>
-
-      <!-- Rect -->
-      <button class="tool-btn" id="tool-rect" onclick="setTool('rect')">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
-        <span class="tooltip">Dikdörtgen (R)</span>
-      </button>
-
-      <!-- Circle -->
-      <button class="tool-btn" id="tool-circle" onclick="setTool('circle')">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/></svg>
-        <span class="tooltip">Daire (C)</span>
-      </button>
-
-      <!-- Line -->
-      <button class="tool-btn" id="tool-line" onclick="setTool('line')">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="19" x2="19" y2="5"/></svg>
-        <span class="tooltip">Çizgi (L)</span>
-      </button>
-
-      <!-- Image -->
-      <button class="tool-btn" id="tool-image" onclick="document.getElementById('img-upload').click()">
-        <input type="file" id="img-upload" accept="image/*" style="display:none;" onchange="handleImageUpload(this)" />
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-        <span class="tooltip">Görsel Yükle (I)</span>
-      </button>
-
-      <div class="tool-sep"></div>
-
-      <!-- Bring to front -->
-      <button class="tool-btn" onclick="bringToFront()">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 11 12 6 7 11"/><polyline points="17 18 12 13 7 18"/></svg>
-        <span class="tooltip">Öne Getir</span>
-      </button>
-
-      <!-- Send to back -->
-      <button class="tool-btn" onclick="sendToBack()">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 13 12 18 7 13"/><polyline points="17 6 12 11 7 6"/></svg>
-        <span class="tooltip">Arkaya Gönder</span>
-      </button>
-
-      <!-- Duplicate -->
-      <button class="tool-btn" onclick="duplicateSelected()">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-        <span class="tooltip">Çoğalt (Ctrl+D)</span>
-      </button>
-
-      <!-- Lock -->
-      <button class="tool-btn" id="tool-lock" onclick="toggleLock()">
-        <svg id="lock-svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-          <path id="lock-shackle" d="M7 11V7a5 5 0 0 1 10 0v4"/>
-        </svg>
-        <span class="tooltip">Kilitle / Aç</span>
-      </button>
-
-      <div class="tool-sep"></div>
-
-      <!-- Undo -->
-      <button class="tool-btn" onclick="undo()">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg>
-        <span class="tooltip">Geri Al (Ctrl+Z)</span>
-      </button>
-
-      <!-- Redo -->
-      <button class="tool-btn" onclick="redo()">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 7v6h-6"/><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3L21 13"/></svg>
-        <span class="tooltip">İleri Al (Ctrl+Y)</span>
-      </button>
-
-      <div class="tool-sep"></div>
-
-      <!-- Delete -->
-      <button class="tool-btn danger" onclick="deleteSelected()">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
-        <span class="tooltip">Sil (Del)</span>
-      </button>
-
-    </aside>
-
-    <!-- ═══════════════════════ CANVAS SECTION ═══════════════════════ -->
-    <section style="flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;">
-
-      <!-- Top bar -->
-      <div style="height:44px;background:#2a2a2a;border-bottom:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;padding:0 12px;gap:10px;flex-shrink:0;">
-
-        <input type="text" id="board-name" value="Yeni Pano"
-          onblur="saveBoardName()"
-          onkeydown="if(event.key==='Enter')this.blur()" />
-
-        <!-- Zoom controls (centered) -->
-        <div style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;">
-          <button onclick="adjustZoom(-0.1)" style="background:#333;border:1px solid rgba(255,255,255,0.1);color:#aaa;width:24px;height:24px;border-radius:5px;cursor:pointer;font-size:16px;line-height:1;display:flex;align-items:center;justify-content:center;">−</button>
-          <span id="zoom-display" style="font-size:12px;color:#888;min-width:42px;text-align:center;">100%</span>
-          <button onclick="adjustZoom(0.1)" style="background:#333;border:1px solid rgba(255,255,255,0.1);color:#aaa;width:24px;height:24px;border-radius:5px;cursor:pointer;font-size:16px;line-height:1;display:flex;align-items:center;justify-content:center;">+</button>
-          <button onclick="resetZoom()" style="background:#333;border:1px solid rgba(255,255,255,0.1);color:#888;font-size:11px;padding:0 8px;height:24px;border-radius:5px;cursor:pointer;font-family:'Inter',sans-serif;">Sıfırla</button>
+    <!-- Üst bar -->
+    <div style="height:44px; background:#1e1e1e; border-bottom:1px solid rgba(255,255,255,.06); display:flex; align-items:center; padding:0 14px; gap:10px; flex-shrink:0;">
+      <input id="board-name" placeholder="Pano adı" style="background:#2a2a2a; border:1px solid rgba(255,255,255,.1); color:#e5e5e5; border-radius:7px; font-size:13px; padding:0 10px; height:28px; outline:none; font-family:inherit; min-width:180px; max-width:280px;">
+      <div style="margin-left:auto; display:flex; align-items:center; gap:8px;">
+        <span id="save-msg" style="font-size:11px; color:#666;"></span>
+        <div style="display:flex; align-items:center; gap:4px; background:#2a2a2a; border:1px solid rgba(255,255,255,.1); border-radius:7px; padding:0 8px; height:28px;">
+          <button id="zoom-out" style="color:#aaa; background:none; border:none; cursor:pointer; font-size:16px; padding:0; line-height:1;">−</button>
+          <span id="zoom-val" style="font-size:12px; color:#aaa; width:40px; text-align:center; user-select:none;">100%</span>
+          <button id="zoom-in" style="color:#aaa; background:none; border:none; cursor:pointer; font-size:16px; padding:0; line-height:1;">+</button>
         </div>
-
-        <!-- Right actions -->
-        <div style="display:flex;align-items:center;gap:8px;">
-          <span id="save-status">—</span>
-          <button onclick="saveBoard()"
-            style="background:#3b82f6;border:none;color:#fff;font-size:12px;font-weight:500;padding:0 14px;height:30px;border-radius:6px;cursor:pointer;transition:background 0.15s;font-family:'Inter',sans-serif;"
-            onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3b82f6'">
-            Kaydet
+        <button id="save-btn" style="height:28px; padding:0 14px; background:#3b82f6; color:#fff; border:none; border-radius:7px; font-size:13px; font-weight:600; cursor:pointer; font-family:inherit; transition:background .12s;" onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3b82f6'">Kaydet</button>
+        <div style="position:relative;">
+          <button id="dl-btn" style="height:28px; padding:0 12px; background:#2a2a2a; color:#ccc; border:1px solid rgba(255,255,255,.1); border-radius:7px; font-size:13px; cursor:pointer; font-family:inherit; display:flex; align-items:center; gap:4px;">
+            İndir <svg width="10" height="6" viewBox="0 0 10 6" fill="currentColor"><path d="M0 0l5 6 5-6z"/></svg>
           </button>
-          <div style="position:relative;">
-            <button id="dl-btn" onclick="toggleDlMenu()"
-              style="background:#333;border:1px solid rgba(255,255,255,0.1);color:#e5e5e5;font-size:12px;padding:0 12px;height:30px;border-radius:6px;cursor:pointer;display:flex;align-items:center;gap:5px;font-family:'Inter',sans-serif;">
-              İndir
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
-            </button>
-            <div id="dl-menu">
-              <button onclick="downloadJPG()">JPG olarak indir</button>
-              <button onclick="downloadPDF()">PDF olarak indir</button>
-            </div>
+          <div id="dl-menu" style="display:none; position:absolute; right:0; top:34px; background:#2a2a2a; border:1px solid rgba(255,255,255,.12); border-radius:8px; overflow:hidden; z-index:999; min-width:150px; box-shadow:0 8px 24px rgba(0,0,0,.5);">
+            <button class="dl-item" id="dl-jpg">JPG olarak indir</button>
+            <button class="dl-item" id="dl-pdf">PDF olarak indir</button>
           </div>
         </div>
-
       </div>
+    </div>
 
-      <!-- Canvas wrapper -->
-      <div id="canvas-wrap" style="flex:1;overflow:hidden;background:#1a1a1a;position:relative;">
-        <canvas id="fc"></canvas>
-      </div>
+    <!-- Kanvas -->
+    <div id="canvas-area" style="flex:1; overflow:hidden; display:flex; align-items:center; justify-content:center; background:#161616; position:relative;">
+      <canvas id="fc"></canvas>
+    </div>
+  </div>
 
-    </section>
+  <!-- ═══ SAĞ PANEL ═══ -->
+  <div style="width:248px; background:#1e1e1e; border-left:1px solid rgba(255,255,255,.06); display:flex; flex-direction:column; overflow:hidden; flex-shrink:0;">
 
-    <!-- ═══════════════════════ RIGHT PANEL ═══════════════════════ -->
-    <aside style="width:240px;background:#2a2a2a;border-left:1px solid rgba(255,255,255,0.06);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0;">
+    <!-- Özellikler -->
+    <div id="props-panel" style="flex:1; overflow-y:auto; padding-bottom:8px;">
+      <!-- JS ile doldurulacak -->
+    </div>
 
-      <!-- Properties scroll -->
-      <div id="props-scroll" style="flex:1;overflow-y:auto;overflow-x:hidden;min-height:0;">
+    <!-- Alt: Ürün ekle -->
+    <div style="border-top:1px solid rgba(255,255,255,.06); padding:10px 12px 12px;">
+      <div style="font-size:11px; font-weight:600; color:#666; text-transform:uppercase; letter-spacing:.08em; margin-bottom:8px;">Ürün Ekle</div>
+      <input id="product-search" placeholder="Ara..." style="width:100%; background:#2a2a2a; border:1px solid rgba(255,255,255,.1); color:#e5e5e5; border-radius:6px; font-size:12px; padding:0 8px; height:28px; outline:none; font-family:inherit; margin-bottom:6px;">
+      <div id="fav-list" style="max-height:220px; overflow-y:auto; display:flex; flex-direction:column; gap:4px;"></div>
+    </div>
+  </div>
+</div>
 
-        <!-- Background section (no selection) -->
-        <div id="bg-section">
-          <div class="sec-title">Pano Arkaplanı</div>
-          <div style="padding:10px 12px;">
-            <div id="bg-chips" style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px;"></div>
-            <div style="display:flex;align-items:center;gap:8px;">
-              <span class="pl" style="margin:0;white-space:nowrap;">Özel renk</span>
-              <input type="color" id="bg-custom" value="#ffffff"
-                style="width:34px;height:26px;border:1px solid rgba(255,255,255,0.1);border-radius:5px;background:#333;cursor:pointer;padding:2px;"
-                oninput="setCanvasBg(this.value)" />
-            </div>
-          </div>
-        </div>
+<div id="site-footer" style="display:none;"></div>
 
-        <!-- Object section (has selection) -->
-        <div id="obj-section" style="display:none;">
+<!-- ═══ SCRIPTS ═══ -->
+<script src="/core.js"></script>
+<script src="/layout.js"></script>
+<script>
+const FALLBACK = "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?q=80&w=800";
+let fc, boardId, boardData, allFavs = [];
+let activeTool = "select";
+let zoom = 1;
+let history = [], histIdx = -1, _histBusy = false;
+let _autoSaveTimer = null;
 
-          <!-- Badge + delete -->
-          <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-bottom:1px solid rgba(255,255,255,0.06);">
-            <span id="obj-badge" style="font-size:10px;background:rgba(59,130,246,0.15);color:#3b82f6;padding:2px 9px;border-radius:20px;font-weight:500;letter-spacing:0.02em;"></span>
-            <button onclick="deleteSelected()" style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);color:#ef4444;font-size:11px;padding:2px 9px;border-radius:4px;cursor:pointer;font-family:'Inter',sans-serif;">Sil</button>
-          </div>
+// ─── Helpers ───────────────────────────────────────────────────────────────
+const $ = id => document.getElementById(id);
+function setSaveMsg(t, ok) {
+  const el = $("save-msg");
+  el.textContent = t;
+  el.style.color = ok ? "#34d399" : "#666";
+  if (ok) setTimeout(() => { el.textContent = ""; }, 3000);
+}
 
-          <!-- Position & size -->
-          <div style="padding:10px 12px;border-bottom:1px solid rgba(255,255,255,0.06);">
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px;">
-              <div><span class="pl">X</span><input type="number" id="prop-x" class="pi" oninput="applyProp('left',+this.value)" /></div>
-              <div><span class="pl">Y</span><input type="number" id="prop-y" class="pi" oninput="applyProp('top',+this.value)" /></div>
-            </div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
-              <div><span class="pl">W</span><input type="number" id="prop-w" class="pi" oninput="applySize('w',+this.value)" /></div>
-              <div><span class="pl">H</span><input type="number" id="prop-h" class="pi" oninput="applySize('h',+this.value)" /></div>
-            </div>
-          </div>
-
-          <!-- Opacity & rotation -->
-          <div style="padding:10px 12px;border-bottom:1px solid rgba(255,255,255,0.06);">
-            <div style="margin-bottom:8px;">
-              <span class="pl">Opaklık</span>
-              <div style="display:flex;align-items:center;gap:6px;">
-                <input type="range" id="prop-op" min="0" max="100" style="flex:1;accent-color:#3b82f6;cursor:pointer;"
-                  oninput="applyProp('opacity',+this.value/100);document.getElementById('prop-op-n').value=this.value;" />
-                <input type="number" id="prop-op-n" min="0" max="100" class="pi" style="width:48px;"
-                  oninput="applyProp('opacity',+this.value/100);document.getElementById('prop-op').value=this.value;" />
-              </div>
-            </div>
-            <div>
-              <span class="pl">Döndürme (°)</span>
-              <input type="number" id="prop-rot" min="0" max="360" class="pi" oninput="applyProp('angle',+this.value)" />
-            </div>
-          </div>
-
-          <!-- TEXT properties -->
-          <div id="text-props" style="display:none;border-bottom:1px solid rgba(255,255,255,0.06);">
-            <div class="sec-title">Metin</div>
-            <div style="padding:10px 12px;">
-              <div style="margin-bottom:7px;">
-                <span class="pl">Font</span>
-                <select id="prop-font" class="pi" style="height:28px;" onchange="applyTextProp('fontFamily',this.value)">
-                  <option value="Inter">Inter</option>
-                  <option value="Georgia">Georgia</option>
-                  <option value="Courier New">Courier New</option>
-                  <option value="Impact">Impact</option>
-                  <option value="Playfair Display">Playfair Display</option>
-                  <option value="Arial Black">Arial Black</option>
-                </select>
-              </div>
-              <div style="margin-bottom:7px;">
-                <span class="pl">Boyut</span>
-                <select id="prop-fsize" class="pi" style="height:28px;" onchange="applyTextProp('fontSize',+this.value)">
-                  <option>8</option><option>12</option><option>14</option><option>16</option>
-                  <option>20</option><option>24</option><option>32</option><option>48</option>
-                  <option>64</option><option>96</option>
-                </select>
-              </div>
-              <div style="display:flex;gap:4px;margin-bottom:7px;">
-                <button class="pbtn" id="btn-bold" style="width:32px;font-weight:700;" onclick="toggleTextStyle('bold')">B</button>
-                <button class="pbtn" id="btn-italic" style="width:32px;font-style:italic;" onclick="toggleTextStyle('italic')">I</button>
-                <button class="pbtn" id="btn-under" style="width:32px;text-decoration:underline;" onclick="toggleTextStyle('underline')">U</button>
-              </div>
-              <div style="margin-bottom:7px;">
-                <span class="pl">Renk</span>
-                <input type="color" id="prop-tcolor" class="pi" style="height:28px;padding:2px 4px;cursor:pointer;" oninput="applyTextProp('fill',this.value)" />
-              </div>
-              <div>
-                <span class="pl">Hizalama</span>
-                <div style="display:flex;gap:4px;">
-                  <button class="pbtn" id="align-l" style="flex:1;" onclick="applyTextProp('textAlign','left')">
-                    <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="1" y1="4" x2="15" y2="4"/><line x1="1" y1="8" x2="10" y2="8"/><line x1="1" y1="12" x2="12" y2="12"/></svg>
-                  </button>
-                  <button class="pbtn" id="align-c" style="flex:1;" onclick="applyTextProp('textAlign','center')">
-                    <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="1" y1="4" x2="15" y2="4"/><line x1="3" y1="8" x2="13" y2="8"/><line x1="2" y1="12" x2="14" y2="12"/></svg>
-                  </button>
-                  <button class="pbtn" id="align-r" style="flex:1;" onclick="applyTextProp('textAlign','right')">
-                    <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="1" y1="4" x2="15" y2="4"/><line x1="6" y1="8" x2="15" y2="8"/><line x1="4" y1="12" x2="15" y2="12"/></svg>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- SHAPE properties -->
-          <div id="shape-props" style="display:none;border-bottom:1px solid rgba(255,255,255,0.06);">
-            <div class="sec-title">Şekil</div>
-            <div style="padding:10px 12px;">
-              <div style="margin-bottom:7px;">
-                <span class="pl">Dolgu</span>
-                <input type="color" id="prop-fill" class="pi" style="height:28px;padding:2px 4px;cursor:pointer;" oninput="applyProp('fill',this.value)" />
-              </div>
-              <div style="margin-bottom:7px;">
-                <span class="pl">Kenar Rengi</span>
-                <input type="color" id="prop-stroke" class="pi" style="height:28px;padding:2px 4px;cursor:pointer;" oninput="applyProp('stroke',this.value)" />
-              </div>
-              <div>
-                <span class="pl">Kenar Kalınlığı</span>
-                <input type="number" id="prop-sw" min="0" max="20" class="pi" oninput="applyProp('strokeWidth',+this.value)" />
-              </div>
-            </div>
-          </div>
-
-          <!-- IMAGE properties -->
-          <div id="image-props" style="display:none;border-bottom:1px solid rgba(255,255,255,0.06);">
-            <div class="sec-title">Görsel</div>
-            <div style="padding:10px 12px;">
-              <div style="margin-bottom:8px;">
-                <button class="pbtn" style="width:100%;" onclick="document.getElementById('img-replace').click()">
-                  Görseli Değiştir
-                </button>
-                <input type="file" id="img-replace" accept="image/*" style="display:none;" onchange="replaceImage(this)" />
-              </div>
-              <div>
-                <span class="pl">Kenar Yarıçapı</span>
-                <div style="display:flex;align-items:center;gap:6px;">
-                  <input type="range" id="prop-rad" min="0" max="100" style="flex:1;accent-color:#3b82f6;cursor:pointer;"
-                    oninput="applyRadius(+this.value);document.getElementById('prop-rad-n').textContent=this.value;" />
-                  <span id="prop-rad-n" style="font-size:12px;color:#888;min-width:24px;text-align:right;">0</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-        </div>
-        <!-- /obj-section -->
-
-      </div>
-      <!-- /props-scroll -->
-
-      <!-- Products section -->
-      <div style="border-top:1px solid rgba(255,255,255,0.06);display:flex;flex-direction:column;flex-shrink:0;max-height:230px;">
-        <div class="sec-title">Ürün Ekle</div>
-        <div style="padding:5px 8px;flex-shrink:0;">
-          <input type="text" id="prod-search" class="pi" placeholder="Ara..." oninput="filterProducts(this.value)" />
-        </div>
-        <div id="prod-list" style="flex:1;overflow-y:auto;padding:0 4px 4px;min-height:60px;"></div>
-      </div>
-
-    </aside>
-
-  </main>
-
-  <div id="site-footer"></div>
-  <script src="/layout.js"></script>
-
-  <script>
-  // ─── Constants ─────────────────────────────────────────────────────────────
-  const FALLBACK_IMG = "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?q=80&w=1200";
-  const BG_COLORS = [
-    { hex: "#ffffff", label: "Beyaz" },
-    { hex: "#111111", label: "Siyah" },
-    { hex: "#9ca3af", label: "Gri" },
-    { hex: "#e7ddd0", label: "Bej" },
-    { hex: "#3b82f6", label: "Mavi" },
-    { hex: "#22c55e", label: "Yeşil" },
-    { hex: "#ec4899", label: "Pembe" },
-    { hex: "#eab308", label: "Sarı" },
-    { hex: "#a855f7", label: "Mor" },
-    { hex: "#f97316", label: "Turuncu" },
-    { hex: "#92400e", label: "Kahve" },
-    { hex: "#1e3a5f", label: "Lacivert" },
-  ];
-
-  // ─── State ─────────────────────────────────────────────────────────────────
-  let fc = null;
-  let boardId = null;
-  let currentTool = "select";
-  let allProducts = [];
-
-  // Panning state
-  let _panning = false;      // space held
-  let _panStart = null;
-
-  // History state
-  let _hist = [];
-  let _histIdx = -1;
-  let _histLoading = false;
-  const MAX_HIST = 50;
-
-  // Mouse down position (for click-to-place threshold)
-  let _mdPos = null;
-
-  // ─── History ───────────────────────────────────────────────────────────────
-  function pushHistory() {
-    if (_histLoading || !fc) return;
-    _hist = _hist.slice(0, _histIdx + 1);
-    _hist.push(fc.toJSON(["id","productId","name","locked","_borderRadius"]));
-    if (_hist.length > MAX_HIST) _hist.shift();
-    _histIdx = _hist.length - 1;
-    triggerAutoSave();
-  }
-
-  function undo() {
-    if (!fc || _histIdx <= 0) return;
-    _histIdx--;
-    loadHistoryState(_hist[_histIdx]);
-  }
-
-  function redo() {
-    if (!fc || _histIdx >= _hist.length - 1) return;
-    _histIdx++;
-    loadHistoryState(_hist[_histIdx]);
-  }
-
-  function loadHistoryState(state) {
-    _histLoading = true;
-    fc.loadFromJSON(state, () => {
-      _histLoading = false;
-      restoreStyles();
-      fc.renderAll();
-      updatePanel();
-    });
-  }
-
-  // ─── Canvas init ───────────────────────────────────────────────────────────
-  function initCanvas() {
-    const wrap = document.getElementById("canvas-wrap");
-
-    fc = new fabric.Canvas("fc", {
-      width: wrap.clientWidth,
-      height: wrap.clientHeight,
-      backgroundColor: "#ffffff",
-      preserveObjectStacking: true,
-      selection: true,
-    });
-
-    // Global default handle styles
-    fabric.Object.prototype.set({
-      borderColor: "#3b82f6",
-      cornerColor: "#3b82f6",
-      cornerStrokeColor: "#fff",
-      cornerSize: 8,
-      transparentCorners: false,
-      borderScaleFactor: 1.5,
-    });
-
-    // ── Mouse wheel zoom ──
-    fc.on("mouse:wheel", opt => {
-      const e = opt.e;
-      if (!e) return;
-      let z = fc.getZoom() * (0.999 ** e.deltaY);
-      z = Math.max(0.05, Math.min(10, z));
-      fc.zoomToPoint({ x: e.offsetX, y: e.offsetY }, z);
-      e.preventDefault(); e.stopPropagation();
-      updateZoomDisplay();
-    });
-
-    // ── Pan (space+drag / middle mouse) ──
-    fc.on("mouse:down", opt => {
-      const e = opt.e;
-      if (_panning || (e && e.button === 1)) {
-        fc.isDragging = true;
-        fc.selection = false;
-        _panStart = { x: e.clientX, y: e.clientY };
-        e.preventDefault();
-      }
-      if (!_panning && e && e.button !== 1 && currentTool !== "select") {
-        _mdPos = { x: e.clientX, y: e.clientY };
-      }
-    });
-
-    fc.on("mouse:move", opt => {
-      if (!fc.isDragging || !_panStart || !opt.e) return;
-      const vpt = fc.viewportTransform;
-      vpt[4] += opt.e.clientX - _panStart.x;
-      vpt[5] += opt.e.clientY - _panStart.y;
-      fc.requestRenderAll();
-      _panStart = { x: opt.e.clientX, y: opt.e.clientY };
-    });
-
-    fc.on("mouse:up", opt => {
-      if (fc.isDragging) {
-        fc.isDragging = false;
-        if (!_panning) fc.selection = true;
-        _panStart = null;
-        return;
-      }
-      // Click-to-place for tool modes
-      if (currentTool !== "select" && _mdPos && opt.e) {
-        const dx = Math.abs(opt.e.clientX - _mdPos.x);
-        const dy = Math.abs(opt.e.clientY - _mdPos.y);
-        if (dx < 6 && dy < 6) handlePlaceTool(opt);
-      }
-      _mdPos = null;
-    });
-
-    // ── Selection events → panel ──
-    fc.on("selection:created", updatePanel);
-    fc.on("selection:updated", updatePanel);
-    fc.on("selection:cleared", updatePanel);
-    fc.on("object:modified", () => { updatePanel(); pushHistory(); });
-    fc.on("object:added", () => { if (!_histLoading) pushHistory(); });
-    fc.on("object:removed", () => { if (!_histLoading) pushHistory(); });
-
-    // ── Resize ──
-    window.addEventListener("resize", () => {
-      if (!fc) return;
-      const w = wrap.clientWidth;
-      const h = wrap.clientHeight;
-      fc.setDimensions({ width: w, height: h });
-    });
-  }
-
-  // ─── Restore handle styles after history load ───────────────────────────────
-  function restoreStyles() {
-    if (!fc) return;
-    fc.getObjects().forEach(obj => {
-      obj.set({
-        borderColor: "#3b82f6",
-        cornerColor: "#3b82f6",
-        cornerStrokeColor: "#fff",
-        cornerSize: 8,
-        transparentCorners: false,
-        borderScaleFactor: 1.5,
-      });
-    });
-  }
-
-  // ─── Tool management ──────────────────────────────────────────────────────
-  function setTool(t) {
-    currentTool = t;
-    document.querySelectorAll(".tool-btn").forEach(b => b.classList.remove("active"));
-    const btn = document.getElementById("tool-" + t);
-    if (btn) btn.classList.add("active");
-
-    if (t === "select") {
-      fc.isDrawingMode = false;
-      fc.selection = true;
-      fc.defaultCursor = "default";
-      fc.hoverCursor = "move";
-      document.getElementById("canvas-wrap").style.cursor = "";
-    } else {
-      fc.isDrawingMode = false;
-      fc.selection = false;
-      fc.discardActiveObject();
-      fc.renderAll();
-      fc.defaultCursor = "crosshair";
-      fc.hoverCursor = "crosshair";
-      document.getElementById("canvas-wrap").style.cursor = "crosshair";
-    }
-  }
-
-  function handlePlaceTool(opt) {
-    const pt = fc.getPointer(opt.e);
-
-    if (currentTool === "text") {
-      const txt = new fabric.IText("Metin girin", {
-        left: pt.x,
-        top: pt.y,
-        fontFamily: "Inter",
-        fontSize: 24,
-        fill: "#111111",
-        selectable: true,
-        editable: true,
-      });
-      _histLoading = true; // suppress double-push
-      fc.add(txt);
-      _histLoading = false;
-      fc.setActiveObject(txt);
-      fc.renderAll();
-      setTool("select");
-      setTimeout(() => txt.enterEditing(), 50);
-      pushHistory();
-
-    } else if (currentTool === "rect") {
-      const r = new fabric.Rect({
-        left: pt.x - 75, top: pt.y - 50,
-        width: 150, height: 100,
-        fill: "#e5e7eb", stroke: "#9ca3af", strokeWidth: 1,
-      });
-      fc.add(r);
-      fc.setActiveObject(r);
-      fc.renderAll();
-      setTool("select");
-
-    } else if (currentTool === "circle") {
-      const ci = new fabric.Circle({
-        left: pt.x - 50, top: pt.y - 50,
-        radius: 50,
-        fill: "#e5e7eb", stroke: "#9ca3af", strokeWidth: 1,
-      });
-      fc.add(ci);
-      fc.setActiveObject(ci);
-      fc.renderAll();
-      setTool("select");
-
-    } else if (currentTool === "line") {
-      const li = new fabric.Line(
-        [pt.x - 60, pt.y, pt.x + 60, pt.y],
-        { stroke: "#333333", strokeWidth: 2, selectable: true }
-      );
-      fc.add(li);
-      fc.setActiveObject(li);
-      fc.renderAll();
-      setTool("select");
-    }
-  }
-
-  // ─── Object actions ────────────────────────────────────────────────────────
-  function bringToFront() {
-    const o = fc.getActiveObject(); if (!o) return;
-    fc.bringToFront(o); fc.renderAll(); pushHistory();
-  }
-  function sendToBack() {
-    const o = fc.getActiveObject(); if (!o) return;
-    fc.sendToBack(o); fc.renderAll(); pushHistory();
-  }
-  function duplicateSelected() {
-    const o = fc.getActiveObject(); if (!o) return;
-    o.clone(cloned => {
-      cloned.set({ left: o.left + 20, top: o.top + 20 });
-      fc.add(cloned);
-      fc.setActiveObject(cloned);
-      fc.renderAll();
-    });
-  }
-  function toggleLock() {
-    const o = fc.getActiveObject(); if (!o) return;
-    const locked = !o.locked;
-    o.set({
-      locked,
-      selectable: !locked,
-      evented: !locked,
-      hasControls: !locked,
-      lockMovementX: locked,
-      lockMovementY: locked,
-    });
-    fc.renderAll();
-    const shackle = document.getElementById("lock-shackle");
-    const btn = document.getElementById("tool-lock");
-    if (locked) {
-      shackle.setAttribute("d", "M7 11V7a5 5 0 0 1 10 0v4");
-      btn.classList.add("active");
-    } else {
-      shackle.setAttribute("d", "M7 11V7a5 5 0 0 0-1-5");
-      btn.classList.remove("active");
-    }
-    pushHistory();
-  }
-  function deleteSelected() {
-    const o = fc.getActiveObject(); if (!o) return;
-    if (o.locked) return;
-    if (o.type === "activeSelection") {
-      o.forEachObject(x => fc.remove(x));
-      fc.discardActiveObject();
-    } else {
-      fc.remove(o);
-    }
+// ─── Araç seçimi ───────────────────────────────────────────────────────────
+function setTool(name) {
+  activeTool = name;
+  document.querySelectorAll("[data-tool]").forEach(b => b.classList.remove("active"));
+  const btn = document.querySelector(`[data-tool="${name}"]`);
+  if (btn) btn.classList.add("active");
+  if (!fc) return;
+  if (name === "select") {
+    fc.isDrawingMode = false;
+    fc.defaultCursor = "default";
+    fc.selection = true;
+    fc.forEachObject(o => { if (!o._locked) { o.selectable = true; o.evented = true; } });
+  } else {
+    fc.isDrawingMode = false;
+    fc.defaultCursor = "crosshair";
+    fc.selection = false;
+    fc.forEachObject(o => { o.selectable = false; o.evented = false; });
+    fc.discardActiveObject();
     fc.renderAll();
   }
+}
 
-  // ─── Properties panel ─────────────────────────────────────────────────────
-  function updatePanel() {
-    if (!fc) return;
-    const obj = fc.getActiveObject();
-    const bgSec = document.getElementById("bg-section");
-    const objSec = document.getElementById("obj-section");
+// ─── History ───────────────────────────────────────────────────────────────
+function pushHistory() {
+  if (_histBusy || !fc) return;
+  const json = fc.toJSON(["_locked"]);
+  history = history.slice(0, histIdx + 1);
+  history.push(JSON.stringify(json));
+  if (history.length > 60) history.shift();
+  histIdx = history.length - 1;
+}
+function undo() {
+  if (histIdx <= 0 || !fc) return;
+  histIdx--;
+  _histBusy = true;
+  fc.loadFromJSON(JSON.parse(history[histIdx]), () => {
+    fc.renderAll(); _histBusy = false; updateProps();
+  });
+}
+function redo() {
+  if (histIdx >= history.length - 1 || !fc) return;
+  histIdx++;
+  _histBusy = true;
+  fc.loadFromJSON(JSON.parse(history[histIdx]), () => {
+    fc.renderAll(); _histBusy = false; updateProps();
+  });
+}
 
-    if (!obj) {
-      bgSec.style.display = "block";
-      objSec.style.display = "none";
-      return;
+// ─── Fabric init ───────────────────────────────────────────────────────────
+function initCanvas() {
+  const area = $("canvas-area");
+  const W = area.clientWidth;
+  const H = area.clientHeight;
+  fc = new fabric.Canvas("fc", {
+    width: W, height: H,
+    backgroundColor: "#ffffff",
+    preserveObjectStacking: true,
+    selection: true,
+  });
+
+  // Global handle style
+  fabric.Object.prototype.set({
+    borderColor: "#3b82f6",
+    cornerColor: "#3b82f6",
+    cornerStrokeColor: "#fff",
+    cornerSize: 9,
+    transparentCorners: false,
+    borderScaleFactor: 1.5,
+    padding: 4,
+  });
+
+  // Mouse:down → shape ekle
+  fc.on("mouse:down", opt => {
+    if (activeTool === "select") return;
+    if (opt.target) { setTool("select"); return; }
+    const p = fc.getPointer(opt.e);
+    let obj;
+
+    if (activeTool === "text") {
+      obj = new fabric.IText("Metin gir...", {
+        left: p.x, top: p.y,
+        fontFamily: "Inter, sans-serif",
+        fontSize: 28, fill: "#111111", editable: true,
+      });
+      fc.add(obj); fc.setActiveObject(obj);
+      obj.enterEditing(); obj.selectAll();
+    } else if (activeTool === "rect") {
+      obj = new fabric.Rect({
+        left: p.x - 80, top: p.y - 50,
+        width: 160, height: 100,
+        fill: "#e5e7eb", rx: 8, ry: 8,
+        stroke: "transparent", strokeWidth: 0,
+      });
+      fc.add(obj); fc.setActiveObject(obj);
+    } else if (activeTool === "circle") {
+      obj = new fabric.Circle({
+        left: p.x - 60, top: p.y - 60,
+        radius: 60, fill: "#e5e7eb",
+        stroke: "transparent", strokeWidth: 0,
+      });
+      fc.add(obj); fc.setActiveObject(obj);
+    } else if (activeTool === "line") {
+      obj = new fabric.Line([p.x - 60, p.y, p.x + 60, p.y], {
+        stroke: "#6b7280", strokeWidth: 2,
+      });
+      fc.add(obj); fc.setActiveObject(obj);
     }
-    bgSec.style.display = "none";
-    objSec.style.display = "block";
 
-    const labels = {
-      "i-text": "Metin", text: "Metin", rect: "Dikdörtgen",
-      circle: "Daire", image: "Görsel", line: "Çizgi",
-      group: "Grup", activeSelection: "Çoklu",
-    };
-    document.getElementById("obj-badge").textContent = labels[obj.type] || obj.type;
-
-    // Position
-    document.getElementById("prop-x").value = Math.round(obj.left || 0);
-    document.getElementById("prop-y").value = Math.round(obj.top || 0);
-
-    // Size
-    let ow = 0, oh = 0;
-    if (obj.type === "circle") {
-      ow = oh = Math.round((obj.radius || 0) * 2 * (obj.scaleX || 1));
-    } else if (obj.type === "line") {
-      ow = Math.round(Math.abs((obj.x2 - obj.x1) || obj.width || 0) * (obj.scaleX || 1));
-      oh = Math.round(Math.abs((obj.y2 - obj.y1) || obj.height || 0) * (obj.scaleY || 1));
-    } else {
-      ow = Math.round((obj.width || 0) * (obj.scaleX || 1));
-      oh = Math.round((obj.height || 0) * (obj.scaleY || 1));
-    }
-    document.getElementById("prop-w").value = ow;
-    document.getElementById("prop-h").value = oh;
-
-    // Opacity
-    const opPct = Math.round((obj.opacity !== undefined ? obj.opacity : 1) * 100);
-    document.getElementById("prop-op").value = opPct;
-    document.getElementById("prop-op-n").value = opPct;
-
-    // Rotation
-    document.getElementById("prop-rot").value = Math.round(obj.angle || 0);
-
-    // Sub-panels
-    const isText = obj.type === "i-text" || obj.type === "text";
-    const isShape = obj.type === "rect" || obj.type === "circle";
-    const isImage = obj.type === "image";
-
-    document.getElementById("text-props").style.display = isText ? "block" : "none";
-    document.getElementById("shape-props").style.display = isShape ? "block" : "none";
-    document.getElementById("image-props").style.display = isImage ? "block" : "none";
-
-    if (isText) {
-      document.getElementById("prop-font").value = obj.fontFamily || "Inter";
-      const fszEl = document.getElementById("prop-fsize");
-      const fszVal = String(obj.fontSize || 24);
-      let found = false;
-      for (let opt of fszEl.options) { if (opt.value === fszVal) { opt.selected = true; found = true; break; } }
-      if (!found) fszEl.options[5].selected = true; // default 24
-      document.getElementById("btn-bold").classList.toggle("active", obj.fontWeight === "bold");
-      document.getElementById("btn-italic").classList.toggle("active", obj.fontStyle === "italic");
-      document.getElementById("btn-under").classList.toggle("active", !!obj.underline);
-      const fc_ = obj.fill;
-      document.getElementById("prop-tcolor").value = (typeof fc_ === "string" && fc_.startsWith("#")) ? fc_ : "#111111";
-      document.getElementById("align-l").classList.toggle("active", obj.textAlign === "left" || !obj.textAlign);
-      document.getElementById("align-c").classList.toggle("active", obj.textAlign === "center");
-      document.getElementById("align-r").classList.toggle("active", obj.textAlign === "right");
-    }
-
-    if (isShape) {
-      const fill = obj.fill || "#e5e7eb";
-      document.getElementById("prop-fill").value = (typeof fill === "string" && /^#[0-9a-fA-F]{6}$/.test(fill)) ? fill : "#e5e7eb";
-      const st = obj.stroke || "#9ca3af";
-      document.getElementById("prop-stroke").value = (typeof st === "string" && /^#[0-9a-fA-F]{6}$/.test(st)) ? st : "#9ca3af";
-      document.getElementById("prop-sw").value = obj.strokeWidth || 0;
-    }
-
-    if (isImage) {
-      const r = obj._borderRadius || 0;
-      document.getElementById("prop-rad").value = r;
-      document.getElementById("prop-rad-n").textContent = r;
-    }
-  }
-
-  // ─── Apply props ───────────────────────────────────────────────────────────
-  function applyProp(prop, val) {
-    const o = fc && fc.getActiveObject(); if (!o || o.locked) return;
-    o.set(prop, val); fc.renderAll();
-  }
-
-  function applySize(axis, val) {
-    const o = fc && fc.getActiveObject(); if (!o || o.locked) return;
-    if (o.type === "circle") {
-      o.set("radius", val / 2); o.set("scaleX", 1); o.set("scaleY", 1);
-    } else if (axis === "w") {
-      o.set("scaleX", val / Math.max(o.width || 1, 1));
-    } else {
-      o.set("scaleY", val / Math.max(o.height || 1, 1));
-    }
-    fc.renderAll();
-  }
-
-  function applyTextProp(prop, val) {
-    const o = fc && fc.getActiveObject();
-    if (!o || (o.type !== "i-text" && o.type !== "text")) return;
-    o.set(prop, val); fc.renderAll();
-    updatePanel();
-  }
-
-  function toggleTextStyle(style) {
-    const o = fc && fc.getActiveObject();
-    if (!o || (o.type !== "i-text" && o.type !== "text")) return;
-    if (style === "bold") o.set("fontWeight", o.fontWeight === "bold" ? "normal" : "bold");
-    else if (style === "italic") o.set("fontStyle", o.fontStyle === "italic" ? "normal" : "italic");
-    else if (style === "underline") o.set("underline", !o.underline);
-    fc.renderAll(); updatePanel();
-  }
-
-  function applyRadius(val) {
-    const o = fc && fc.getActiveObject();
-    if (!o || o.type !== "image") return;
-    o._borderRadius = val;
-    const clip = new fabric.Rect({
-      width: o.width,
-      height: o.height,
-      rx: (o.width * val) / 200,
-      ry: (o.height * val) / 200,
-      originX: "center",
-      originY: "center",
-    });
-    o.set("clipPath", clip);
-    fc.renderAll();
-  }
-
-  // ─── Image upload / replace ────────────────────────────────────────────────
-  function handleImageUpload(input) {
-    if (!input.files || !input.files[0]) return;
-    const reader = new FileReader();
-    reader.onload = e => {
-      fabric.Image.fromURL(e.target.result, img => {
-        const maxW = fc.width * 0.45;
-        const maxH = fc.height * 0.45;
-        const scale = Math.min(maxW / img.width, maxH / img.height, 1);
-        img.scale(scale);
-        img.set({
-          left: fc.width / 2 - (img.width * scale) / 2,
-          top:  fc.height / 2 - (img.height * scale) / 2,
-        });
-        fc.add(img);
-        fc.setActiveObject(img);
-        fc.renderAll();
-      }, { crossOrigin: "anonymous" });
-    };
-    reader.readAsDataURL(input.files[0]);
-    input.value = "";
     setTool("select");
-  }
-
-  function replaceImage(input) {
-    const o = fc && fc.getActiveObject();
-    if (!o || o.type !== "image" || !input.files || !input.files[0]) return;
-    const { left, top, scaleX, scaleY, angle, name, productId, _borderRadius } = o;
-    const reader = new FileReader();
-    reader.onload = e => {
-      fabric.Image.fromURL(e.target.result, img => {
-        img.set({ left, top, scaleX, scaleY, angle, name, productId, _borderRadius });
-        if (_borderRadius) {
-          img.set("clipPath", new fabric.Rect({
-            width: img.width, height: img.height,
-            rx: (img.width * _borderRadius) / 200,
-            ry: (img.height * _borderRadius) / 200,
-            originX: "center", originY: "center",
-          }));
-        }
-        fc.remove(o);
-        fc.add(img);
-        fc.setActiveObject(img);
-        fc.renderAll();
-      }, { crossOrigin: "anonymous" });
-    };
-    reader.readAsDataURL(input.files[0]);
-    input.value = "";
-  }
-
-  // ─── Canvas background ─────────────────────────────────────────────────────
-  function setCanvasBg(color) {
-    if (!fc) return;
-    fc.setBackgroundColor(color, fc.renderAll.bind(fc));
-    document.querySelectorAll(".cc").forEach(c => c.classList.toggle("active", c.dataset.color === color));
-    document.getElementById("bg-custom").value = color;
+    fc.renderAll();
     pushHistory();
-  }
-
-  function buildBgChips() {
-    const wrap = document.getElementById("bg-chips");
-    wrap.innerHTML = "";
-    BG_COLORS.forEach(({ hex, label }) => {
-      const c = document.createElement("div");
-      c.className = "cc";
-      c.dataset.color = hex;
-      c.style.background = hex;
-      c.title = label;
-      if (hex === "#ffffff") c.style.border = "2px solid rgba(200,200,200,0.25)";
-      c.onclick = () => setCanvasBg(hex);
-      wrap.appendChild(c);
-    });
-  }
-
-  // ─── Zoom ──────────────────────────────────────────────────────────────────
-  function updateZoomDisplay() {
-    if (!fc) return;
-    document.getElementById("zoom-display").textContent = Math.round(fc.getZoom() * 100) + "%";
-  }
-
-  function adjustZoom(delta) {
-    if (!fc) return;
-    const z = Math.max(0.05, Math.min(10, fc.getZoom() + delta));
-    fc.setZoom(z);
-    updateZoomDisplay();
-  }
-
-  function resetZoom() {
-    if (!fc) return;
-    fc.setViewportTransform([1, 0, 0, 1, 0, 0]);
-    updateZoomDisplay();
-  }
-
-  // ─── Auto-save + manual save ──────────────────────────────────────────────
-  let _saveTimeout = null;
-  function triggerAutoSave() {
-    clearTimeout(_saveTimeout);
-    _saveTimeout = setTimeout(() => _doSave(false), 3000);
-  }
-
-  async function saveBoard() { await _doSave(true); }
-
-  async function _doSave(feedback) {
-    if (!fc || !boardId) return;
-    const name = (document.getElementById("board-name").value || "").trim() || "Yeni Pano";
-    const canvas_json = JSON.stringify(fc.toJSON(["id","productId","name","locked","_borderRadius"]));
-    try {
-      await AG.updateMoodboard(boardId, { name, canvas_json });
-      if (feedback) {
-        const el = document.getElementById("save-status");
-        el.style.color = "#22c55e"; el.textContent = "Kaydedildi ✓";
-        setTimeout(() => { el.style.color = "#888"; el.textContent = "—"; }, 2000);
-      }
-    } catch(e) { console.error("save:", e); }
-  }
-
-  function saveBoardName() {
-    if (!boardId) return;
-    const name = (document.getElementById("board-name").value || "").trim() || "Yeni Pano";
-    AG.updateMoodboard(boardId, { name });
-  }
-
-  // ─── Download ─────────────────────────────────────────────────────────────
-  function toggleDlMenu() {
-    document.getElementById("dl-menu").classList.toggle("open");
-  }
-
-  document.addEventListener("click", e => {
-    if (!e.target.closest("#dl-menu") && !e.target.closest("#dl-btn")) {
-      const m = document.getElementById("dl-menu");
-      if (m) m.classList.remove("open");
-    }
+    updateProps();
   });
 
-  function downloadJPG() {
-    document.getElementById("dl-menu").classList.remove("open");
-    if (!fc) return;
-    const url = fc.toDataURL({ format: "jpeg", quality: 0.95, multiplier: 2 });
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = (document.getElementById("board-name").value.trim() || "tasarim-panosu") + ".jpg";
-    a.click();
-  }
+  fc.on("object:modified", () => { pushHistory(); updateProps(); scheduleAutoSave(); });
+  fc.on("object:added", () => { if (!_histBusy) scheduleAutoSave(); });
+  fc.on("selection:created", updateProps);
+  fc.on("selection:updated", updateProps);
+  fc.on("selection:cleared", updateProps);
 
-  function downloadPDF() {
-    document.getElementById("dl-menu").classList.remove("open");
-    if (!fc || !window.jspdf) return;
-    const { jsPDF } = window.jspdf;
-    const w = fc.width, h = fc.height;
-    const pdf = new jsPDF({ orientation: w > h ? "landscape" : "portrait", unit: "px", format: [w, h] });
-    const url = fc.toDataURL({ format: "png", multiplier: 2 });
-    pdf.addImage(url, "PNG", 0, 0, w, h);
-    pdf.save((document.getElementById("board-name").value.trim() || "tasarim-panosu") + ".pdf");
-  }
+  // Mouse wheel zoom
+  fc.on("mouse:wheel", opt => {
+    opt.e.preventDefault();
+    const delta = opt.e.deltaY;
+    let z = fc.getZoom();
+    z *= 0.999 ** delta;
+    z = Math.min(Math.max(z, 0.1), 5);
+    fc.zoomToPoint({ x: opt.e.offsetX, y: opt.e.offsetY }, z);
+    zoom = z;
+    $("zoom-val").textContent = Math.round(z * 100) + "%";
+  });
 
-  // ─── Products ─────────────────────────────────────────────────────────────
-  function addProductToCanvas(product) {
-    const src = product.image || FALLBACK_IMG;
-    fabric.Image.fromURL(src, img => {
-      const maxS = Math.min(fc.width, fc.height) * 0.25;
-      const scale = Math.min(maxS / img.width, maxS / img.height, 1);
-      img.scale(scale);
-      img.set({
-        left: 60 + Math.random() * 120,
-        top:  60 + Math.random() * 80,
-        name: product.name,
-        productId: product.id,
-      });
-      fc.add(img);
-      fc.setActiveObject(img);
-      fc.renderAll();
-    }, { crossOrigin: "anonymous" });
-  }
-
-  function filterProducts(q) {
-    const qL = (q || "").toLowerCase();
-    const list = qL ? allProducts.filter(p =>
-      p.name.toLowerCase().includes(qL) || (p.category || "").toLowerCase().includes(qL)
-    ) : allProducts;
-    renderProducts(list);
-  }
-
-  function renderProducts(list) {
-    const el = document.getElementById("prod-list");
-    if (!list.length) {
-      el.innerHTML = '<div style="padding:14px 8px;font-size:11px;color:#555;text-align:center;">Favori ürün bulunamadı</div>';
-      return;
-    }
-    el.innerHTML = "";
-    list.forEach(p => {
-      const div = document.createElement("div");
-      div.className = "prod-item";
-      div.draggable = true;
-      div.innerHTML = `
-        <img src="${p.image || FALLBACK_IMG}" alt="${p.name}" onerror="this.src='${FALLBACK_IMG}'" />
-        <div style="overflow:hidden;min-width:0;">
-          <div class="pn">${p.name}</div>
-          <div class="pc">${p.category || ""}</div>
-        </div>`;
-      div.onclick = () => addProductToCanvas(p);
-      div.ondragstart = e => {
-        e.dataTransfer.setData("ag-product", JSON.stringify(p));
-      };
-      el.appendChild(div);
-    });
-  }
-
-  // ─── Canvas drag-drop ─────────────────────────────────────────────────────
-  function setupDragDrop() {
-    const wrap = document.getElementById("canvas-wrap");
-    wrap.addEventListener("dragover", e => e.preventDefault());
-    wrap.addEventListener("drop", e => {
-      e.preventDefault();
-      const raw = e.dataTransfer.getData("ag-product");
-      if (!raw) return;
-      try {
-        const p = JSON.parse(raw);
-        const rect = wrap.getBoundingClientRect();
-        const pt = fc.getPointer({ clientX: e.clientX, clientY: e.clientY, offsetX: e.clientX - rect.left, offsetY: e.clientY - rect.top });
-        fabric.Image.fromURL(p.image || FALLBACK_IMG, img => {
-          const maxS = Math.min(fc.width, fc.height) * 0.25;
-          const scale = Math.min(maxS / img.width, maxS / img.height, 1);
-          img.scale(scale);
-          img.set({ left: pt.x - (img.width * scale) / 2, top: pt.y - (img.height * scale) / 2, name: p.name, productId: p.id });
-          fc.add(img); fc.setActiveObject(img); fc.renderAll();
-        }, { crossOrigin: "anonymous" });
-      } catch {}
-    });
-  }
-
-  // ─── Keyboard shortcuts ───────────────────────────────────────────────────
+  // Space+drag / middle mouse pan
+  let isPanning = false, lastPan = null;
   document.addEventListener("keydown", e => {
-    const tag = document.activeElement ? document.activeElement.tagName : "";
-    const isInput = tag === "INPUT" || tag === "TEXTAREA" || document.activeElement.contentEditable === "true";
-
-    // Space panning
-    if (e.code === "Space" && !isInput) {
-      e.preventDefault();
-      _panning = true;
-      if (fc) { fc.defaultCursor = "grab"; fc.hoverCursor = "grab"; }
-      document.getElementById("canvas-wrap").classList.add("panning");
+    if (e.code === "Space" && !["INPUT","TEXTAREA"].includes(document.activeElement.tagName)) {
+      $("canvas-area").style.cursor = "grab";
     }
-
-    if (isInput) return;
-
-    if (e.ctrlKey || e.metaKey) {
-      if (e.key === "z" && !e.shiftKey) { e.preventDefault(); undo(); return; }
-      if (e.key === "y" || (e.key === "z" && e.shiftKey)) { e.preventDefault(); redo(); return; }
-      if (e.key === "d") { e.preventDefault(); duplicateSelected(); return; }
-      if (e.key === "s") { e.preventDefault(); saveBoard(); return; }
-    }
-
-    if (e.key === "Delete" || e.key === "Backspace") { e.preventDefault(); deleteSelected(); }
-    if (e.key === "v") setTool("select");
-    if (e.key === "t") setTool("text");
-    if (e.key === "r") setTool("rect");
-    if (e.key === "c") setTool("circle");
-    if (e.key === "l") setTool("line");
-    if (e.key === "i") document.getElementById("img-upload").click();
   });
-
   document.addEventListener("keyup", e => {
-    if (e.code === "Space") {
-      _panning = false;
-      if (fc) { fc.defaultCursor = "default"; fc.hoverCursor = "move"; fc.isDragging = false; }
-      document.getElementById("canvas-wrap").classList.remove("panning");
+    if (e.code === "Space") $("canvas-area").style.cursor = "";
+  });
+  fc.on("mouse:down", opt => {
+    const e = opt.e;
+    if (e.button === 1 || (e.code === "Space") ||
+        (e.buttons === 1 && e.altKey)) {
+      isPanning = true;
+      lastPan = { x: e.clientX, y: e.clientY };
+      fc.defaultCursor = "grabbing";
     }
   });
+  fc.on("mouse:move", opt => {
+    if (!isPanning || !lastPan) return;
+    const e = opt.e;
+    const vp = fc.viewportTransform.slice();
+    vp[4] += e.clientX - lastPan.x;
+    vp[5] += e.clientY - lastPan.y;
+    fc.setViewportTransform(vp);
+    lastPan = { x: e.clientX, y: e.clientY };
+  });
+  fc.on("mouse:up", () => {
+    isPanning = false; lastPan = null;
+    if (activeTool === "select") fc.defaultCursor = "default";
+  });
 
-  // ─── Boot ─────────────────────────────────────────────────────────────────
-  (async () => {
-    await AG.ready;
+  // Resize
+  window.addEventListener("resize", () => {
+    if (!fc) return;
+    fc.setDimensions({ width: $("canvas-area").clientWidth, height: $("canvas-area").clientHeight });
+    fc.renderAll();
+  });
 
-    const session = await AG.getSessionArchitect();
-    if (!session) { window.location.href = "/mimar-giris.html"; return; }
+  pushHistory();
+}
 
-    const params = new URLSearchParams(location.search);
-    boardId = params.get("id") || params.get("boardId");
+// ─── Properties panel ──────────────────────────────────────────────────────
+function updateProps() {
+  const panel = $("props-panel");
+  const obj = fc?.getActiveObject();
 
-    if (!boardId) {
-      const res = await AG.createMoodboard({ name: "Yeni Pano" });
-      if (res.ok && res.moodboard) {
-        window.location.replace(location.pathname + "?id=" + res.moodboard.id);
-      }
+  if (!obj) {
+    // Arkaplan renk paneli
+    const bgColors = ["#ffffff","#f5f5f5","#111111","#1a1a2e","#f5e6d3","#ddeeff","#e8f5e9","#fce4ec","#fff9c4","#ede7f6","#ffedd5","#e0f2fe"];
+    panel.innerHTML = `
+      <span class="panel-label" style="margin-top:14px;">Arkaplan Rengi</span>
+      <div style="display:flex; flex-wrap:wrap; gap:6px; padding:0 12px;">
+        ${bgColors.map(c=>`<div class="color-chip" data-bg="${c}" style="background:${c}; ${c==="#ffffff"?"border:2px solid #444;":""}"></div>`).join("")}
+        <label title="Özel renk" style="width:22px;height:22px;border-radius:5px;border:2px solid rgba(255,255,255,.15);background:conic-gradient(red,yellow,lime,cyan,blue,magenta,red);cursor:pointer;overflow:hidden;flex-shrink:0;">
+          <input type="color" id="bg-custom" style="opacity:0;width:1px;height:1px;position:absolute;">
+        </label>
+      </div>
+    `;
+    panel.querySelectorAll("[data-bg]").forEach(el => {
+      el.addEventListener("click", () => {
+        fc.setBackgroundColor(el.dataset.bg, () => fc.renderAll());
+        panel.querySelectorAll("[data-bg]").forEach(e => e.classList.remove("active"));
+        el.classList.add("active");
+      });
+    });
+    const bgCustom = $("bg-custom");
+    if (bgCustom) bgCustom.addEventListener("input", e => {
+      fc.setBackgroundColor(e.target.value, () => fc.renderAll());
+    });
+    return;
+  }
+
+  const type = obj.type; // 'i-text','textbox','rect','circle','line','image'
+  const isText = type === "i-text" || type === "textbox";
+  const isShape = type === "rect" || type === "circle" || type === "polygon";
+  const isImg = type === "image";
+
+  let html = `
+    <span class="panel-label" style="margin-top:14px;">
+      ${ isText?"Metin":isShape?"Şekil":isImg?"Görsel":type==="line"?"Çizgi":"Obje" }
+    </span>
+
+    <div style="padding:0 12px; display:grid; grid-template-columns:1fr 1fr; gap:6px;">
+      <div>
+        <div style="font-size:10px;color:#555;margin-bottom:2px;">X</div>
+        <input class="prop-input" id="p-x" type="number" value="${Math.round(obj.left)}">
+      </div>
+      <div>
+        <div style="font-size:10px;color:#555;margin-bottom:2px;">Y</div>
+        <input class="prop-input" id="p-y" type="number" value="${Math.round(obj.top)}">
+      </div>
+      <div>
+        <div style="font-size:10px;color:#555;margin-bottom:2px;">Genişlik</div>
+        <input class="prop-input" id="p-w" type="number" value="${Math.round(obj.getScaledWidth())}">
+      </div>
+      <div>
+        <div style="font-size:10px;color:#555;margin-bottom:2px;">Yükseklik</div>
+        <input class="prop-input" id="p-h" type="number" value="${Math.round(obj.getScaledHeight())}">
+      </div>
+    </div>
+
+    <span class="panel-label">Döndürme</span>
+    <div style="padding:0 12px;">
+      <input class="prop-input" id="p-rot" type="number" min="0" max="360" value="${Math.round(obj.angle||0)}">
+    </div>
+
+    <span class="panel-label">Opaklık</span>
+    <div style="padding:0 12px; display:flex; align-items:center; gap:8px;">
+      <input type="range" class="range-input" id="p-opacity" min="0" max="100" value="${Math.round((obj.opacity||1)*100)}" style="flex:1;">
+      <input class="prop-input" id="p-opacity-num" type="number" min="0" max="100" value="${Math.round((obj.opacity||1)*100)}" style="width:46px;">
+    </div>
+  `;
+
+  if (isText) {
+    const fonts = ["Inter, sans-serif","Georgia, serif","Courier New, monospace","Impact, sans-serif","Arial Black, sans-serif"];
+    html += `
+      <span class="panel-label">Font</span>
+      <div style="padding:0 12px;">
+        <select class="prop-input" id="p-font">
+          ${fonts.map(f=>`<option value="${f}" ${obj.fontFamily===f?"selected":""}>${f.split(",")[0]}</option>`).join("")}
+        </select>
+      </div>
+      <span class="panel-label">Boyut</span>
+      <div style="padding:0 12px;">
+        <select class="prop-input" id="p-fsize">
+          ${[10,12,14,16,18,20,24,28,32,40,48,56,72,96].map(s=>`<option value="${s}" ${obj.fontSize==s?"selected":""}>${s}</option>`).join("")}
+        </select>
+      </div>
+      <span class="panel-label">Stil & Hizalama</span>
+      <div style="padding:0 12px; display:flex; gap:4px; flex-wrap:wrap;">
+        <button class="prop-btn ${obj.fontWeight==='bold'?'active':''}" id="p-bold">B</button>
+        <button class="prop-btn ${obj.fontStyle==='italic'?'active':''}" id="p-italic" style="font-style:italic;">I</button>
+        <button class="prop-btn ${obj.underline?'active':''}" id="p-under" style="text-decoration:underline;">U</button>
+        <button class="prop-btn ${obj.textAlign==='left'||!obj.textAlign?'active':''}" id="p-align-l">⬛</button>
+        <button class="prop-btn ${obj.textAlign==='center'?'active':''}" id="p-align-c">≡</button>
+        <button class="prop-btn ${obj.textAlign==='right'?'active':''}" id="p-align-r">▶</button>
+      </div>
+      <span class="panel-label">Renk</span>
+      <div style="padding:0 12px;">
+        <input type="color" id="p-fcolor" value="${obj.fill||'#111111'}" style="width:100%;height:32px;border-radius:6px;border:1px solid rgba(255,255,255,.1);cursor:pointer;background:#2a2a2a;">
+      </div>
+    `;
+  }
+
+  if (isShape) {
+    html += `
+      <span class="panel-label">Dolgu Rengi</span>
+      <div style="padding:0 12px;">
+        <input type="color" id="p-fill" value="${obj.fill==='transparent'||!obj.fill?'#e5e7eb':obj.fill}" style="width:100%;height:32px;border-radius:6px;border:1px solid rgba(255,255,255,.1);cursor:pointer;background:#2a2a2a;">
+      </div>
+      <span class="panel-label">Kenar</span>
+      <div style="padding:0 12px; display:grid; grid-template-columns:1fr 1fr; gap:6px;">
+        <div>
+          <div style="font-size:10px;color:#555;margin-bottom:2px;">Renk</div>
+          <input type="color" id="p-stroke" value="${obj.stroke&&obj.stroke!=='transparent'?obj.stroke:'#000000'}" style="width:100%;height:28px;border-radius:6px;border:1px solid rgba(255,255,255,.1);cursor:pointer;">
+        </div>
+        <div>
+          <div style="font-size:10px;color:#555;margin-bottom:2px;">Kalınlık</div>
+          <input class="prop-input" id="p-sw" type="number" min="0" max="40" value="${obj.strokeWidth||0}">
+        </div>
+      </div>
+    `;
+    if (type === "rect") {
+      html += `
+        <span class="panel-label">Köşe Yarıçapı</span>
+        <div style="padding:0 12px;">
+          <input type="range" class="range-input" id="p-rx" min="0" max="100" value="${obj.rx||0}">
+        </div>
+      `;
+    }
+  }
+
+  if (type === "line") {
+    html += `
+      <span class="panel-label">Çizgi Rengi</span>
+      <div style="padding:0 12px;">
+        <input type="color" id="p-stroke" value="${obj.stroke||'#6b7280'}" style="width:100%;height:32px;border-radius:6px;border:1px solid rgba(255,255,255,.1);cursor:pointer;">
+      </div>
+      <span class="panel-label">Kalınlık</span>
+      <div style="padding:0 12px;">
+        <input class="prop-input" id="p-sw" type="number" min="1" max="40" value="${obj.strokeWidth||2}">
+      </div>
+    `;
+  }
+
+  if (isImg) {
+    html += `
+      <span class="panel-label">Görsel</span>
+      <div style="padding:0 12px;">
+        <button class="prop-btn" id="p-replace" style="width:100%;">Görseli Değiştir</button>
+      </div>
+      <span class="panel-label">Köşe Yuvarlama</span>
+      <div style="padding:0 12px;">
+        <input type="range" class="range-input" id="p-imgrx" min="0" max="50" value="${obj._rx||0}">
+      </div>
+    `;
+  }
+
+  html += `
+    <div style="padding:12px; margin-top:8px;">
+      <button id="p-delete" style="width:100%;height:30px;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.25);color:#f87171;border-radius:7px;font-size:12px;cursor:pointer;font-family:inherit;transition:background .12s;" onmouseover="this.style.background='rgba(239,68,68,.22)'" onmouseout="this.style.background='rgba(239,68,68,.12)'">Sil</button>
+    </div>
+  `;
+
+  panel.innerHTML = html;
+
+  // ── Property bindings ──
+  function bind(id, fn) { const el=$(id); if(el) el.addEventListener("input", fn); }
+  function bindClick(id, fn) { const el=$(id); if(el) el.addEventListener("click", fn); }
+  function rerender() { fc.requestRenderAll(); updateProps(); pushHistory(); scheduleAutoSave(); }
+
+  bind("p-x", e => { obj.set("left", +e.target.value); fc.renderAll(); });
+  bind("p-y", e => { obj.set("top", +e.target.value); fc.renderAll(); });
+  bind("p-w", e => { obj.scaleToWidth(+e.target.value); fc.renderAll(); });
+  bind("p-h", e => { obj.scaleToHeight(+e.target.value); fc.renderAll(); });
+  bind("p-rot", e => { obj.set("angle", +e.target.value); fc.renderAll(); });
+  bind("p-opacity", e => {
+    const v = +e.target.value/100;
+    obj.set("opacity", v); fc.renderAll();
+    const n = $("p-opacity-num"); if(n) n.value = e.target.value;
+  });
+  bind("p-opacity-num", e => {
+    const v = Math.min(100,Math.max(0,+e.target.value))/100;
+    obj.set("opacity", v); fc.renderAll();
+    const r = $("p-opacity"); if(r) r.value = Math.round(v*100);
+  });
+
+  if (isText) {
+    bind("p-font", e => { obj.set("fontFamily", e.target.value); rerender(); });
+    bind("p-fsize", e => { obj.set("fontSize", +e.target.value); rerender(); });
+    bind("p-fcolor", e => { obj.set("fill", e.target.value); fc.renderAll(); });
+    bindClick("p-bold", () => { obj.set("fontWeight", obj.fontWeight==="bold"?"normal":"bold"); rerender(); });
+    bindClick("p-italic", () => { obj.set("fontStyle", obj.fontStyle==="italic"?"normal":"italic"); rerender(); });
+    bindClick("p-under", () => { obj.set("underline", !obj.underline); rerender(); });
+    bindClick("p-align-l", () => { obj.set("textAlign","left"); rerender(); });
+    bindClick("p-align-c", () => { obj.set("textAlign","center"); rerender(); });
+    bindClick("p-align-r", () => { obj.set("textAlign","right"); rerender(); });
+  }
+  if (isShape || type==="line") {
+    bind("p-fill", e => { obj.set("fill", e.target.value); fc.renderAll(); });
+    bind("p-stroke", e => { obj.set("stroke", e.target.value); fc.renderAll(); });
+    bind("p-sw", e => { obj.set("strokeWidth", +e.target.value); fc.renderAll(); });
+    if (type==="rect") bind("p-rx", e => { obj.set({rx:+e.target.value,ry:+e.target.value}); fc.renderAll(); });
+  }
+  if (isImg) {
+    const replaceInput = document.createElement("input");
+    replaceInput.type = "file"; replaceInput.accept = "image/*";
+    replaceInput.addEventListener("change", () => {
+      const f = replaceInput.files[0]; if(!f) return;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        fabric.Image.fromURL(ev.target.result, img => {
+          img.scaleToWidth(obj.getScaledWidth());
+          img.set({ left: obj.left, top: obj.top, angle: obj.angle });
+          fc.remove(obj); fc.add(img); fc.setActiveObject(img); fc.renderAll();
+          pushHistory(); updateProps();
+        });
+      };
+      reader.readAsDataURL(f);
+    });
+    bindClick("p-replace", () => replaceInput.click());
+    bind("p-imgrx", e => {
+      const r = +e.target.value;
+      obj._rx = r;
+      const w = obj.getScaledWidth(), h = obj.getScaledHeight();
+      obj.clipPath = r > 0 ? new fabric.Rect({ width: w/obj.scaleX, height: h/obj.scaleY, rx: r*(w/obj.scaleX)/100, ry: r*(h/obj.scaleY)/100, originX:"center", originY:"center" }) : null;
+      fc.renderAll();
+    });
+  }
+  bindClick("p-delete", deleteSelected);
+}
+
+// ─── Add image from URL ─────────────────────────────────────────────────────
+function addImgFromURL(url, opts={}) {
+  fabric.Image.fromURL(url, img => {
+    const maxW = fc.width * 0.4;
+    if (img.width > maxW) img.scaleToWidth(maxW);
+    img.set({ left: fc.width/2 - img.getScaledWidth()/2, top: fc.height/2 - img.getScaledHeight()/2, ...opts });
+    fc.add(img); fc.setActiveObject(img); fc.renderAll();
+    pushHistory(); updateProps(); scheduleAutoSave();
+  }, { crossOrigin: "anonymous" });
+}
+
+// ─── Delete ─────────────────────────────────────────────────────────────────
+function deleteSelected() {
+  const obj = fc?.getActiveObject();
+  if (!obj) return;
+  if (obj.type === "activeSelection") {
+    obj.getObjects().forEach(o => fc.remove(o));
+  } else { fc.remove(obj); }
+  fc.discardActiveObject(); fc.renderAll();
+  pushHistory(); updateProps(); scheduleAutoSave();
+}
+
+// ─── Duplicate ───────────────────────────────────────────────────────────────
+function duplicate() {
+  const obj = fc?.getActiveObject();
+  if (!obj) return;
+  obj.clone(cloned => {
+    cloned.set({ left: (obj.left||0)+24, top: (obj.top||0)+24 });
+    fc.add(cloned); fc.setActiveObject(cloned); fc.renderAll();
+    pushHistory(); updateProps();
+  });
+}
+
+// ─── Fav products ────────────────────────────────────────────────────────────
+function renderFavs(list) {
+  const wrap = $("fav-list");
+  if (!list.length) {
+    wrap.innerHTML = `<p style="font-size:11px;color:#555;padding:8px 0;">Favori ürün yok. <a href="/urunler.html" style="color:#3b82f6;">Ürünler sayfasından</a> ekle.</p>`;
+    return;
+  }
+  wrap.innerHTML = list.map(p=>`
+    <button draggable="true" data-pid="${p.id}" style="width:100%;display:flex;align-items:center;gap:8px;background:#2a2a2a;border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:6px;cursor:grab;text-align:left;transition:border .12s;" onmouseover="this.style.borderColor='rgba(59,130,246,.5)'" onmouseout="this.style.borderColor='rgba(255,255,255,.08)'">
+      <img src="${p.image||FALLBACK}" style="width:40px;height:40px;border-radius:6px;object-fit:cover;flex-shrink:0;" crossorigin="anonymous">
+      <div style="min-width:0;">
+        <div style="font-size:12px;font-weight:500;color:#e5e5e5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.name}</div>
+        <div style="font-size:11px;color:#666;margin-top:1px;">Tıkla veya sürükle</div>
+      </div>
+    </button>
+  `).join("");
+
+  wrap.querySelectorAll("[data-pid]").forEach(btn => {
+    const p = list.find(x=>String(x.id)===btn.dataset.pid);
+    if (!p) return;
+    btn.addEventListener("click", () => addImgFromURL(p.image||FALLBACK));
+    btn.addEventListener("dragstart", e => {
+      e.dataTransfer.effectAllowed = "copy";
+      e.dataTransfer.setData("application/json", JSON.stringify(p));
+    });
+  });
+}
+
+// ─── Drag-drop on canvas ─────────────────────────────────────────────────────
+function initDragDrop() {
+  const area = $("canvas-area");
+  area.addEventListener("dragover", e => { e.preventDefault(); e.dataTransfer.dropEffect = "copy"; area.style.outline = "2px solid #3b82f6"; });
+  area.addEventListener("dragleave", e => { if (!area.contains(e.relatedTarget)) area.style.outline = ""; });
+  area.addEventListener("drop", e => {
+    e.preventDefault(); area.style.outline = "";
+    const rect = fc.getElement().getBoundingClientRect();
+    const vp = fc.viewportTransform;
+    const dropX = (e.clientX - rect.left - vp[4]) / vp[0];
+    const dropY = (e.clientY - rect.top  - vp[5]) / vp[3];
+
+    if (e.dataTransfer.files?.length) {
+      const file = e.dataTransfer.files[0];
+      if (!file.type.startsWith("image/")) return;
+      const reader = new FileReader();
+      reader.onload = ev => addImgFromURL(ev.target.result, { left: dropX - 110, top: dropY - 110 });
+      reader.readAsDataURL(file);
       return;
     }
-
-    // Init canvas
-    initCanvas();
-    buildBgChips();
-    setupDragDrop();
-    updateZoomDisplay();
-
-    // Load board data
-    const boardData = await AG.getMoodboard(boardId);
-    if (boardData) {
-      document.getElementById("board-name").value = boardData.name || "Yeni Pano";
-
-      if (boardData.canvas_json) {
-        _histLoading = true;
-        fc.loadFromJSON(boardData.canvas_json, () => {
-          _histLoading = false;
-          restoreStyles();
-          fc.renderAll();
-          _hist = [];
-          _histIdx = -1;
-          pushHistory();
-        });
-      } else if (Array.isArray(boardData.items) && boardData.items.length > 0) {
-        // Legacy items[] format
-        let loaded = 0;
-        const total = boardData.items.length;
-        _histLoading = true;
-        boardData.items.forEach(item => {
-          if (!item.image) { loaded++; return; }
-          fabric.Image.fromURL(item.image || FALLBACK_IMG, img => {
-            const scaleX = (item.w || 200) / img.width;
-            const scaleY = (item.h || 180) / img.height;
-            img.scale(Math.min(scaleX, scaleY));
-            img.set({ left: item.x || 30, top: item.y || 30, name: item.name, productId: item.productId });
-            fc.add(img);
-            loaded++;
-            if (loaded >= total) {
-              _histLoading = false;
-              fc.renderAll();
-              _hist = []; _histIdx = -1;
-              pushHistory();
-            }
-          }, { crossOrigin: "anonymous" });
-        });
-      } else {
-        _hist = []; _histIdx = -1;
-        pushHistory();
-      }
-    } else {
-      _hist = []; _histIdx = -1;
-      pushHistory();
+    const raw = e.dataTransfer.getData("application/json");
+    if (raw) {
+      try { const p = JSON.parse(raw); addImgFromURL(p.image||FALLBACK, { left: dropX-110, top: dropY-110 }); } catch {}
     }
+  });
+}
 
-    // Load favourite products
-    try {
-      allProducts = await AG.getFavoriteProducts() || [];
-      renderProducts(allProducts);
-    } catch { renderProducts([]); }
+// ─── Save / Auto-save ────────────────────────────────────────────────────────
+function scheduleAutoSave() {
+  clearTimeout(_autoSaveTimer);
+  _autoSaveTimer = setTimeout(saveBoard, 4000);
+}
+async function saveBoard() {
+  if (!fc || !boardId) return;
+  const name = $("board-name").value.trim() || "Tasarım Panosu";
+  const canvas_json = JSON.stringify(fc.toJSON(["_locked","_rx"]));
+  setSaveMsg("Kaydediliyor...", false);
+  const res = await AG.updateMoodboard(boardId, { name, canvas_json });
+  setSaveMsg(res.ok ? "Kaydedildi ✓" : "Kaydedilemedi", res.ok);
+}
 
-    updatePanel();
-  })();
-  </script>
+// ─── Boot ────────────────────────────────────────────────────────────────────
+async function boot() {
+  await AG.ready;
+  const session = await AG.getSessionArchitect();
+  if (!session) { location.href = "/mimar-giris.html"; return; }
 
+  const qp = new URLSearchParams(location.search);
+  boardId = qp.get("id");
+  if (!boardId) {
+    const r = await AG.createMoodboard({ name: "Yeni Tasarım Panosu" });
+    if (r.ok) location.href = `/tasarim-panosu.html?id=${encodeURIComponent(r.moodboard.id)}`;
+    return;
+  }
+
+  boardData = await AG.getMoodboard(boardId);
+  if (!boardData) { setSaveMsg("Pano bulunamadı", false); return; }
+  $("board-name").value = boardData.name || "Tasarım Panosu";
+
+  initCanvas();
+  setTool("select");
+
+  if (boardData.canvas_json) {
+    _histBusy = true;
+    fc.loadFromJSON(JSON.parse(boardData.canvas_json), () => {
+      fc.renderAll(); _histBusy = false;
+      history = [JSON.stringify(fc.toJSON(["_locked","_rx"]))];
+      histIdx = 0;
+      updateProps();
+    });
+  } else if (Array.isArray(boardData.items) && boardData.items.length) {
+    boardData.items.forEach(item => {
+      if (item.image) {
+        fabric.Image.fromURL(item.image, img => {
+          img.scaleToWidth(item.w || 220);
+          img.set({ left: item.x||50, top: item.y||50 });
+          fc.add(img); fc.renderAll();
+        }, { crossOrigin:"anonymous" });
+      }
+    });
+    setTimeout(pushHistory, 800);
+  } else {
+    updateProps();
+  }
+
+  allFavs = await AG.getFavoriteProducts();
+  renderFavs(allFavs);
+  initDragDrop();
+
+  // ── UI bindings ──
+  $("t-select").addEventListener("click", () => setTool("select"));
+  $("t-text").addEventListener("click",   () => setTool("text"));
+  $("t-rect").addEventListener("click",   () => setTool("rect"));
+  $("t-circle").addEventListener("click", () => setTool("circle"));
+  $("t-line").addEventListener("click",   () => setTool("line"));
+  $("t-image").addEventListener("click",  () => $("file-input").click());
+
+  $("file-input").addEventListener("change", () => {
+    Array.from($("file-input").files).forEach(file => {
+      if (!file.type.startsWith("image/")) return;
+      const r = new FileReader();
+      r.onload = ev => addImgFromURL(ev.target.result);
+      r.readAsDataURL(file);
+    });
+    $("file-input").value = "";
+  });
+
+  $("t-front").addEventListener("click", () => { const o=fc.getActiveObject(); if(o){fc.bringToFront(o);fc.renderAll();pushHistory();} });
+  $("t-back").addEventListener("click",  () => { const o=fc.getActiveObject(); if(o){fc.sendToBack(o);fc.renderAll();pushHistory();} });
+  $("t-dup").addEventListener("click",   duplicate);
+  $("t-lock").addEventListener("click", () => {
+    const o = fc.getActiveObject(); if(!o) return;
+    o._locked = !o._locked;
+    o.set({ selectable:!o._locked, evented:!o._locked, lockMovementX:o._locked, lockMovementY:o._locked, lockScalingX:o._locked, lockScalingY:o._locked, lockRotation:o._locked });
+    fc.renderAll(); pushHistory();
+  });
+  $("t-undo").addEventListener("click",   undo);
+  $("t-redo").addEventListener("click",   redo);
+  $("t-delete").addEventListener("click", deleteSelected);
+  $("save-btn").addEventListener("click",  saveBoard);
+
+  // Zoom butons
+  $("zoom-in").addEventListener("click",  () => { zoom = Math.min(5, +(zoom+0.1).toFixed(1)); fc.setZoom(zoom); $("zoom-val").textContent=Math.round(zoom*100)+"%"; });
+  $("zoom-out").addEventListener("click", () => { zoom = Math.max(0.1, +(zoom-0.1).toFixed(1)); fc.setZoom(zoom); $("zoom-val").textContent=Math.round(zoom*100)+"%"; });
+
+  // Download menu
+  const dlBtn = $("dl-btn"), dlMenu = $("dl-menu");
+  dlBtn.addEventListener("click", e => { e.stopPropagation(); dlMenu.style.display = dlMenu.style.display==="none"?"block":"none"; });
+  document.addEventListener("click", () => { dlMenu.style.display="none"; });
+  $("dl-jpg").addEventListener("click", () => {
+    dlMenu.style.display="none";
+    const url = fc.toDataURL({ format:"jpeg", quality:0.95, multiplier:2 });
+    const a = document.createElement("a"); a.href=url; a.download=($("board-name").value||"pano")+".jpg"; a.click();
+    setSaveMsg("JPG indirildi ✓", true);
+  });
+  $("dl-pdf").addEventListener("click", () => {
+    dlMenu.style.display="none";
+    const url = fc.toDataURL({ format:"jpeg", quality:0.92, multiplier:2 });
+    const { jsPDF } = window.jspdf;
+    const W = fc.width*2, H = fc.height*2;
+    const pdf = new jsPDF({ orientation:W>H?"landscape":"portrait", unit:"px", format:[W,H] });
+    pdf.addImage(url,"JPEG",0,0,W,H);
+    pdf.save(($("board-name").value||"pano")+".pdf");
+    setSaveMsg("PDF indirildi ✓", true);
+  });
+
+  // Product search
+  $("product-search").addEventListener("input", e => {
+    const q = e.target.value.trim().toLowerCase();
+    renderFavs(q ? allFavs.filter(p=>p.name.toLowerCase().includes(q)) : allFavs);
+  });
+
+  // Keyboard shortcuts
+  document.addEventListener("keydown", e => {
+    const tag = document.activeElement.tagName;
+    if (["INPUT","TEXTAREA","SELECT"].includes(tag)) return;
+    if ((e.ctrlKey||e.metaKey) && e.key==="z") { e.preventDefault(); undo(); }
+    if ((e.ctrlKey||e.metaKey) && (e.key==="y"||(e.shiftKey&&e.key==="z"))) { e.preventDefault(); redo(); }
+    if ((e.ctrlKey||e.metaKey) && e.key==="d") { e.preventDefault(); duplicate(); }
+    if ((e.ctrlKey||e.metaKey) && e.key==="s") { e.preventDefault(); saveBoard(); }
+    if (e.key==="Delete"||e.key==="Backspace") deleteSelected();
+    if (e.key==="v"||e.key==="V") setTool("select");
+    if (e.key==="t"||e.key==="T") setTool("text");
+    if (e.key==="r"||e.key==="R") setTool("rect");
+    if (e.key==="c"||e.key==="C") setTool("circle");
+    if (e.key==="l"||e.key==="L") setTool("line");
+    if (e.key==="Escape") { setTool("select"); fc.discardActiveObject(); fc.renderAll(); }
+  });
+}
+
+boot();
+</script>
 </body>
 </html>
