@@ -270,9 +270,34 @@
 
     let session = null;
     const PRODUCT_TAXONOMY = {
-      "Malzemeler": ["Zemin", "Cam", "Deri", "Yığma ve Taş", "Metal", "Boya", "Panel", "Yüzey Bitişi", "Reçine", "Yüzey", "Tekstil", "Seramik", "Duvar Kaplama"],
-      "Mobilya ve Donatı": ["Akustik", "Elektrikli Cihaz", "Banyo", "Dekor ve Aksesuar", "Mobilya", "Donanım", "Mutfak", "Aydınlatma", "Dış Mekan", "Pencere Sistemleri"],
-      "Mimari": ["Tavan", "Decking", "Kapı", "Cephe", "Profil ve Trim", "Peyzaj Kaplama"],
+      "Malzemeler": [
+        "Zemin",
+        "Cam",
+        "Deri",
+        "Yığma ve Taş",
+        "Metal",
+        "Boya",
+        "Panel",
+        "Yüzey Bitişi",
+        "Reçine",
+        "Yüzey",
+        "Tekstil",
+        "Seramik",
+        "Duvar Kaplama",
+      ],
+      "Mobilya ve Donatı": [
+        "Akustik",
+        "Elektrikli Cihazlar",
+        "Banyo",
+        "Dekor ve Aksesuar",
+        "Mobilya",
+        "Donanım",
+        "Mutfak",
+        "Aydınlatma",
+        "Dış Mekan",
+        "Pencere Sistemleri",
+      ],
+      "Mimari": ["Tavan", "Decking", "Kapılar", "Cephe", "Profil ve Trim", "Peyzaj ve Kaplama"],
     };
 
     async function init() {
@@ -316,8 +341,7 @@
       const categorySel = document.getElementById("manual-category");
       const subSel = document.getElementById("manual-subcategory");
       const previewCategorySel = document.getElementById("prev-category");
-      const sortedCategories = Object.keys(PRODUCT_TAXONOMY).sort((a, b) => a.localeCompare(b, "tr"));
-      const categoryOptions = sortedCategories.map((c) => `<option value="${c}">${c}</option>`).join("");
+      const categoryOptions = Object.keys(PRODUCT_TAXONOMY).map((c) => `<option value="${c}">${c}</option>`).join("");
       categorySel.innerHTML =
         '<option value="">Ana kategori seç *</option>' + categoryOptions;
       subSel.innerHTML = '<option value="">Alt kategori seç *</option>';
@@ -326,7 +350,7 @@
       }
 
       categorySel.addEventListener("change", () => {
-        const list = [...(PRODUCT_TAXONOMY[categorySel.value] || [])].sort((a, b) => a.localeCompare(b, "tr"));
+        const list = PRODUCT_TAXONOMY[categorySel.value] || [];
         subSel.innerHTML =
           '<option value="">Alt kategori seç *</option>' +
           list.map((s) => `<option value="${s}">${s}</option>`).join("");

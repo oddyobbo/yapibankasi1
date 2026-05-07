@@ -19,9 +19,43 @@
   ];
 
   const productMegaMenu = [
-    { name: "Malzemeler", subs: ["Zemin", "Cam", "Deri", "Yığma ve Taş", "Metal", "Boya", "Panel", "Yüzey Bitişi", "Reçine", "Yüzey", "Tekstil", "Seramik", "Duvar Kaplama"] },
-    { name: "Mobilya ve Donatı", subs: ["Akustik", "Elektrikli Cihaz", "Banyo", "Dekor ve Aksesuar", "Mobilya", "Donanım", "Mutfak", "Aydınlatma", "Dış Mekan", "Pencere Sistemleri"] },
-    { name: "Mimari", subs: ["Tavan", "Decking", "Kapı", "Cephe", "Profil ve Trim", "Peyzaj Kaplama"] },
+    {
+      name: "Malzemeler",
+      subs: [
+        "Zemin",
+        "Cam",
+        "Deri",
+        "Yığma ve Taş",
+        "Metal",
+        "Boya",
+        "Panel",
+        "Yüzey Bitişi",
+        "Reçine",
+        "Yüzey",
+        "Tekstil",
+        "Seramik",
+        "Duvar Kaplama",
+      ],
+    },
+    {
+      name: "Mobilya ve Donatı",
+      subs: [
+        "Akustik",
+        "Elektrikli Cihazlar",
+        "Banyo",
+        "Dekor ve Aksesuar",
+        "Mobilya",
+        "Donanım",
+        "Mutfak",
+        "Aydınlatma",
+        "Dış Mekan",
+        "Pencere Sistemleri",
+      ],
+    },
+    {
+      name: "Mimari",
+      subs: ["Tavan", "Decking", "Kapılar", "Cephe", "Profil ve Trim", "Peyzaj ve Kaplama"],
+    },
   ];
 
   const iconStroke = "stroke=\"#8a8a8f\" stroke-width=\"1.5\" fill=\"none\" stroke-linecap=\"round\" stroke-linejoin=\"round\"";
@@ -48,7 +82,7 @@
     "Seramik": iconGrid,
     "Duvar Kaplama": iconSquare,
     "Akustik": iconCircle,
-    "Elektrikli Cihaz": iconSquare,
+    "Elektrikli Cihazlar": iconSquare,
     "Banyo": iconCircle,
     "Dekor ve Aksesuar": iconCircle,
     "Mobilya": iconGrid,
@@ -59,10 +93,10 @@
     "Pencere Sistemleri": iconSquare,
     "Tavan": iconFloor,
     "Decking": iconFloor,
-    "Kapı": iconDoor,
+    "Kapılar": iconDoor,
     "Cephe": iconFacade,
     "Profil ve Trim": iconTrim,
-    "Peyzaj Kaplama": iconGrid,
+    "Peyzaj ve Kaplama": iconGrid,
   };
 
   const headerTarget = document.getElementById("site-header");
@@ -71,15 +105,12 @@
       .map((item) => {
         const isActive = item.id === current;
         if (item.id === "products") {
-          const megaCols = [...productMegaMenu]
-            .sort((a, b) => a.name.localeCompare(b.name, "tr"))
-            .map(
+          const megaCols = productMegaMenu.map(
               (col) => `
                 <div>
                   <p class="text-[12px] font-semibold text-black">${col.name}</p>
                   <div class="mt-2 space-y-1">
-                    ${[...col.subs]
-                      .sort((a, b) => a.localeCompare(b, "tr"))
+                    ${col.subs
                       .map(
                         (sub) =>
                           `<a href="/urunler.html?category=${encodeURIComponent(col.name)}&sub=${encodeURIComponent(
