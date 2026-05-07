@@ -71,6 +71,7 @@
         alert(result.message);
         return;
       }
+      try { localStorage.setItem("ag_brand_session_v1", JSON.stringify(result.brand)); } catch {}
       window.location.href = "/marka-paneli.html";
     });
 

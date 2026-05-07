@@ -1,8 +1,8 @@
 (() => {
   let architectSession = null;
-  try {
-    architectSession = JSON.parse(localStorage.getItem("ag_architect_session_v1") || "null");
-  } catch {}
+  let brandSession = null;
+  try { architectSession = JSON.parse(localStorage.getItem("ag_architect_session_v1") || "null"); } catch {}
+  try { brandSession = JSON.parse(localStorage.getItem("ag_brand_session_v1") || "null"); } catch {}
 
   if (!document.querySelector('link[data-ag-css="site"]')) {
     const link = document.createElement("link");
@@ -169,41 +169,58 @@
       })
       .join("");
 
-    const archName = architectSession ? (architectSession.name || "Mimar").slice(0, 14) : "";
-    const profileIcon = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>`;
+    const profileIcon = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>`;
+    const chevron = `<svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6l4 4 4-4"/></svg>`;
+    const logoutIcon = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>`;
+
+    const archName  = architectSession ? (architectSession.name  || "Mimar").slice(0, 14) : "";
+    const brandName = brandSession      ? (brandSession.name      || "Marka").slice(0, 14) : "";
+
     const desktopAuthLinks = architectSession
-      ? `
-        <div class="relative" id="arch-dropdown-wrap">
+      ? `<div class="relative" id="arch-dropdown-wrap">
           <button id="arch-dropdown-btn" type="button" class="inline-flex items-center gap-2 h-9 px-3 rounded-full border border-black/[0.12] text-[13px] hover:bg-black/[0.04] transition">
-            ${profileIcon}
-            <span class="max-w-[100px] truncate">${archName}</span>
-            <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6l4 4 4-4"/></svg>
+            ${profileIcon}<span class="max-w-[100px] truncate">${archName}</span>${chevron}
           </button>
           <div id="arch-dropdown-panel" class="hidden absolute right-0 top-full mt-2 w-52 rounded-2xl border border-black/[0.08] bg-white shadow-[0_8px_40px_rgba(0,0,0,0.14)] z-50 py-1.5 overflow-hidden">
-            <a href="/mimar-paneli.html" class="flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-[#1d1d1f] hover:bg-[#f5f5f7]">
-              ${profileIcon} Panelim
-            </a>
+            <a href="/mimar-paneli.html" class="flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-[#1d1d1f] hover:bg-[#f5f5f7]">${profileIcon} Panelim</a>
             <a href="/mimar-paneli.html?tab=fav-products" class="flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-[#1d1d1f] hover:bg-[#f5f5f7]">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l7.78 7.78 7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l7.78 7.78 7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
               Favorilerim
             </a>
             <a href="/mimar-paneli.html?tab=moodboards" class="flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-[#1d1d1f] hover:bg-[#f5f5f7]">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
               Boardlarım
             </a>
             <div class="border-t border-black/[0.07] my-1"></div>
-            <button id="arch-logout-btn" type="button" class="w-full flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-[#1d1d1f] hover:bg-[#f5f5f7]">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-              Çıkış Yap
-            </button>
+            <button id="arch-logout-btn" type="button" class="w-full flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-[#1d1d1f] hover:bg-[#f5f5f7]">${logoutIcon} Çıkış Yap</button>
           </div>
-        </div>
-      `
-      : `
-        <a href="/giris.html" class="inline-flex items-center gap-2 h-9 px-3 rounded-full border border-black/[0.12] text-[13px] hover:bg-black/[0.04] transition">
+        </div>`
+      : brandSession
+      ? `<div class="relative" id="brand-dropdown-wrap">
+          <button id="brand-dropdown-btn" type="button" class="inline-flex items-center gap-2 h-9 px-3 rounded-full border border-black/[0.12] text-[13px] hover:bg-black/[0.04] transition">
+            ${profileIcon}<span class="max-w-[100px] truncate">${brandName}</span>${chevron}
+          </button>
+          <div id="brand-dropdown-panel" class="hidden absolute right-0 top-full mt-2 w-52 rounded-2xl border border-black/[0.08] bg-white shadow-[0_8px_40px_rgba(0,0,0,0.14)] z-50 py-1.5 overflow-hidden">
+            <a href="/marka-paneli.html" class="flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-[#1d1d1f] hover:bg-[#f5f5f7]">${profileIcon} Marka Paneli</a>
+            <a href="/marka-paneli.html?tab=products" class="flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-[#1d1d1f] hover:bg-[#f5f5f7]">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+              Ürünlerim
+            </a>
+            <a href="/marka-paneli.html?tab=projects" class="flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-[#1d1d1f] hover:bg-[#f5f5f7]">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              Projeler
+            </a>
+            <a href="/marka-paneli.html?tab=profile" class="flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-[#1d1d1f] hover:bg-[#f5f5f7]">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+              Marka Profili
+            </a>
+            <div class="border-t border-black/[0.07] my-1"></div>
+            <button id="brand-logout-btn" type="button" class="w-full flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-[#1d1d1f] hover:bg-[#f5f5f7]">${logoutIcon} Çıkış Yap</button>
+          </div>
+        </div>`
+      : `<a href="/giris.html" class="inline-flex items-center gap-2 h-9 px-3 rounded-full border border-black/[0.12] text-[13px] hover:bg-black/[0.04] transition">
           ${profileIcon} Giriş Yap
-        </a>
-      `;
+        </a>`;
 
     const mobileAuthLinks = architectSession
       ? `
@@ -280,16 +297,29 @@
     const archDropBtn = document.getElementById("arch-dropdown-btn");
     const archDropPanel = document.getElementById("arch-dropdown-panel");
     if (archDropBtn && archDropPanel) {
-      archDropBtn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        archDropPanel.classList.toggle("hidden");
-      });
+      archDropBtn.addEventListener("click", (e) => { e.stopPropagation(); archDropPanel.classList.toggle("hidden"); });
       archDropPanel.addEventListener("click", (e) => e.stopPropagation());
       document.addEventListener("click", () => archDropPanel.classList.add("hidden"));
       const archLogoutBtn = document.getElementById("arch-logout-btn");
       if (archLogoutBtn) {
         archLogoutBtn.addEventListener("click", async () => {
           await AG.logoutArchitect();
+          location.href = "/";
+        });
+      }
+    }
+
+    const brandDropBtn = document.getElementById("brand-dropdown-btn");
+    const brandDropPanel = document.getElementById("brand-dropdown-panel");
+    if (brandDropBtn && brandDropPanel) {
+      brandDropBtn.addEventListener("click", (e) => { e.stopPropagation(); brandDropPanel.classList.toggle("hidden"); });
+      brandDropPanel.addEventListener("click", (e) => e.stopPropagation());
+      document.addEventListener("click", () => brandDropPanel.classList.add("hidden"));
+      const brandLogoutBtn = document.getElementById("brand-logout-btn");
+      if (brandLogoutBtn) {
+        brandLogoutBtn.addEventListener("click", async () => {
+          try { localStorage.removeItem("ag_brand_session_v1"); } catch {}
+          await AG.logoutBrand();
           location.href = "/";
         });
       }
