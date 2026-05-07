@@ -172,6 +172,21 @@
       setSaveMsg("Ürün eklendi. Kaydetmeyi unutma.", false);
     }
 
+    function addItemToCanvasAt(item, dropX, dropY) {
+      if (!board) return;
+      board.items.push({
+        id: `card-${Date.now()}-${Math.random().toString(36).slice(2,6)}`,
+        productId: item.id || null,
+        name: item.name || "Görsel",
+        image: item.image || FALLBACK_IMG,
+        x: Math.max(0, dropX - 110),
+        y: Math.max(0, dropY - 95),
+        w: 220, h: 190
+      });
+      renderCanvas();
+      setSaveMsg("Eklendi. Kaydetmeyi unutma.", false);
+    }
+
     function renderFavList(products) {
       const wrap = document.getElementById("favorites-list");
       if (!products.length) {
@@ -179,17 +194,24 @@
         return;
       }
       wrap.innerHTML = products.map((p) => `
-        <button data-add-product="${p.id}" class="w-full text-left rounded-xl border border-black/10 p-2 hover:border-black/35 hover:bg-[#fafafa] transition">
+        <button draggable="true" data-add-product="${p.id}" class="w-full text-left rounded-xl border border-black/10 p-2 hover:border-black/35 hover:bg-[#fafafa] transition cursor-grab active:cursor-grabbing">
           <div class="flex gap-2 items-center">
-            <img src="${p.image || FALLBACK_IMG}" class="w-12 h-12 rounded-lg object-cover flex-shrink-0" alt="${p.name}">
+            <img src="${p.image || FALLBACK_IMG}" class="w-12 h-12 rounded-lg object-cover flex-shrink-0 pointer-events-none" alt="${p.name}">
             <div>
               <p class="text-[12px] font-medium leading-tight">${p.name}</p>
-              <p class="text-[11px] text-[#6e6e73] mt-0.5">Tıkla → ekle</p>
+              <p class="text-[11px] text-[#6e6e73] mt-0.5">Tıkla veya sürükle → ekle</p>
             </div>
           </div>
         </button>
       `).join("");
       wrap.querySelectorAll("[data-add-product]").forEach((btn) => {
+        btn.addEventListener("dragstart", (e) => {
+          const product = products.find((x) => String(x.id) === String(btn.dataset.addProduct));
+          if (product) {
+            e.dataTransfer.effectAllowed = "copy";
+            e.dataTransfer.setData("application/json", JSON.stringify(product));
+          }
+        });
         btn.addEventListener("click", () => {
           const product = products.find((x) => String(x.id) === String(btn.dataset.addProduct));
           if (product) addItemToCanvas(product);
@@ -241,6 +263,60 @@
         zoomLevel = Math.max(0.4, zoomLevel - 0.1);
         canvas.style.transform = `scale(${zoomLevel})`;
         zoomIndicator.textContent = `${Math.round(zoomLevel * 100)}%`;
+      });
+
+      // ── Drag-drop: dosya sistemi ve favori ürün listesi ──────────────────
+      const canvasWrap = document.getElementById("canvas-wrap");
+
+      canvasWrap.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "copy";
+        canvasWrap.style.outline = "3px solid #3b82f6";
+        canvasWrap.style.outlineOffset = "-3px";
+        canvasWrap.style.borderRadius = "1rem";
+      });
+
+      canvasWrap.addEventListener("dragleave", (e) => {
+        if (!canvasWrap.contains(e.relatedTarget)) {
+          canvasWrap.style.outline = "";
+          canvasWrap.style.outlineOffset = "";
+        }
+      });
+
+      canvasWrap.addEventListener("drop", (e) => {
+        e.preventDefault();
+        canvasWrap.style.outline = "";
+        canvasWrap.style.outlineOffset = "";
+
+        const rect = canvas.getBoundingClientRect();
+        const dropX = Math.round((e.clientX - rect.left) / zoomLevel);
+        const dropY = Math.round((e.clientY - rect.top) / zoomLevel);
+
+        // Dosya sistemi: görsel bırakma
+        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+          const file = e.dataTransfer.files[0];
+          if (file.type.startsWith("image/")) {
+            const reader = new FileReader();
+            reader.onload = (evt) => {
+              addItemToCanvasAt({
+                id: `file-${Date.now()}`,
+                name: file.name.replace(/\.[^.]+$/, ""),
+                image: evt.target.result
+              }, dropX, dropY);
+            };
+            reader.readAsDataURL(file);
+          }
+          return;
+        }
+
+        // Sağ panelden ürün bırakma
+        const raw = e.dataTransfer.getData("application/json");
+        if (raw) {
+          try {
+            const product = JSON.parse(raw);
+            addItemToCanvasAt(product, dropX, dropY);
+          } catch {}
+        }
       });
     }
 

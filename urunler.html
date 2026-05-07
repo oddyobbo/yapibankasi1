@@ -136,13 +136,17 @@
           </a>
           ${
             architectSession
-              ? `<button data-fav-product="${p.id}" class="absolute top-3 left-3 px-2.5 h-8 rounded-full text-[12px] border border-black/15 bg-white/95 hover:bg-black hover:text-white transition">${isFav ? "★ Favoride" : "☆ Favorile"}</button>`
-              : `<a href="/mimar-giris.html" class="absolute top-3 left-3 px-2.5 h-8 inline-flex items-center rounded-full text-[11px] border border-black/15 bg-white/95">Giriş yapıp kaydet</a>`
+              ? `<button data-fav-product="${p.id}" title="${isFav ? "Favorilerden çıkar" : "Favorilere ekle"}" class="absolute top-3 right-3 w-8 h-8 rounded-full border ${isFav ? "border-red-300 bg-red-50 text-red-500" : "border-black/15 bg-white/95 text-[#6e6e73]"} hover:bg-red-50 hover:text-red-500 hover:border-red-300 transition flex items-center justify-center">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="${isFav ? "currentColor" : "none"}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                </button>`
+              : `<a href="/mimar-giris.html" title="Favorilere eklemek için giriş yapın" class="absolute top-3 right-3 w-8 h-8 inline-flex items-center justify-center rounded-full border border-black/15 bg-white/95 text-[#6e6e73]">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                </a>`
           }
           ${
             architectSession
-              ? `<button data-add-board="${p.id}" class="absolute top-3 right-3 px-2.5 h-8 rounded-full text-[12px] border border-black/15 bg-white/95 hover:bg-black hover:text-white transition">Add to Board</button>`
-              : `<a href="/mimar-giris.html" class="absolute top-3 right-3 px-2.5 h-8 inline-flex items-center rounded-full text-[11px] border border-black/15 bg-white/95">Add to Board</a>`
+              ? `<button data-add-board="${p.id}" class="absolute top-3 left-3 px-2.5 h-8 rounded-full text-[12px] border border-black/15 bg-white/95 hover:bg-black hover:text-white transition">+ Board</button>`
+              : `<a href="/mimar-giris.html" class="absolute top-3 left-3 px-2.5 h-8 inline-flex items-center rounded-full text-[11px] border border-black/15 bg-white/95">+ Board</a>`
           }
         </div>`;
     }
@@ -316,10 +320,18 @@
             category: product.category,
             url: `/urun-unica-baffle.html?id=${encodeURIComponent(product.id)}`
           });
-          if (!res?.ok) return;
-          if (res.active) favoriteProductIds.add(id);
-          else favoriteProductIds.delete(id);
-          btn.textContent = res.active ? "★ Favoride" : "☆ Favorile";
+          if (!res?.ok) { showToast(res?.message || "Favorilere eklemek için giriş yapın."); return; }
+          if (res.active) {
+            favoriteProductIds.add(id);
+            showToast("Favorilere eklendi ♥");
+          } else {
+            favoriteProductIds.delete(id);
+            showToast("Favorilerden çıkarıldı");
+          }
+          const heartSvg = `<svg width="15" height="15" viewBox="0 0 24 24" fill="${res.active ? "currentColor" : "none"}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`;
+          btn.innerHTML = heartSvg;
+          btn.className = `absolute top-3 right-3 w-8 h-8 rounded-full border ${res.active ? "border-red-300 bg-red-50 text-red-500" : "border-black/15 bg-white/95 text-[#6e6e73]"} hover:bg-red-50 hover:text-red-500 hover:border-red-300 transition flex items-center justify-center`;
+          btn.title = res.active ? "Favorilerden çıkar" : "Favorilere ekle";
         });
       });
       grid.querySelectorAll("[data-add-board]").forEach((btn) => {
