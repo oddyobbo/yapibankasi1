@@ -7,47 +7,278 @@
   <meta name="description" content="Akustik, aydınlatma, dış cephe, zemin ve daha fazlası. Teknik filtrelerle doğru mimari malzemeyi saniyeler içinde bul.">
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    .filter-chip { cursor: pointer; transition: background .2s, color .2s, border-color .2s; }
-    .filter-chip.active { background: #0b0b0c; color: #fff; border-color: #0b0b0c; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif; }
+
+    /* Card */
     .card-lift { transition: transform .3s cubic-bezier(.2,.7,.2,1), border-color .3s; }
     .card-lift:hover { transform: translateY(-3px); border-color: rgba(0,0,0,.22); }
-    .filter-group-body { max-height: 0; overflow: hidden; transition: max-height .2s ease; }
-    .filter-group.open .filter-group-body { max-height: 280px; overflow-y: auto; }
+
+    /* Sidebar slide */
+    #filter-sidebar {
+      width: 0;
+      overflow: hidden;
+      flex-shrink: 0;
+      transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    #filter-sidebar.open { width: 264px; }
+    #filter-sidebar-inner { width: 264px; }
+
+    /* Category pills scroll */
+    #category-pills {
+      overflow-x: auto;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+    }
+    #category-pills::-webkit-scrollbar { display: none; }
+
+    /* Category pill */
+    .cat-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      height: 34px;
+      padding: 0 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 500;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+      border: 1px solid transparent;
+      background: #f2f2f7;
+      color: #3a3a3c;
+    }
+    .cat-pill:hover { background: #e5e5ea; }
+    .cat-pill.active { background: #0b0b0c; color: #fff; }
+    .cat-pill .pill-count {
+      font-size: 11px;
+      opacity: 0.6;
+      font-weight: 400;
+    }
+    .cat-pill.active .pill-count { opacity: 0.65; }
+
+    /* Toggle switch */
+    .tog-wrap {
+      position: relative;
+      width: 38px;
+      height: 22px;
+      flex-shrink: 0;
+    }
+    .tog-wrap input { position: absolute; opacity: 0; width: 0; height: 0; }
+    .tog-track {
+      position: absolute;
+      inset: 0;
+      background: #d1d1d6;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .tog-track::before {
+      content: '';
+      position: absolute;
+      width: 18px; height: 18px;
+      left: 2px; top: 2px;
+      background: white;
+      border-radius: 50%;
+      transition: transform 0.2s cubic-bezier(0.4,0,0.2,1);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.18);
+    }
+    .tog-wrap input:checked + .tog-track { background: #0b0b0c; }
+    .tog-wrap input:checked + .tog-track::before { transform: translateX(16px); }
+
+    /* Accordion */
+    .acc-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.25s ease;
+    }
+    .acc-group.open .acc-body { max-height: 320px; overflow-y: auto; }
+    .acc-chevron { transition: transform 0.2s ease; }
+    .acc-group.open .acc-chevron { transform: rotate(180deg); }
+
+    /* Scrollbar for acc-body */
+    .acc-body::-webkit-scrollbar { width: 3px; }
+    .acc-body::-webkit-scrollbar-track { background: transparent; }
+    .acc-body::-webkit-scrollbar-thumb { background: #d1d1d6; border-radius: 999px; }
+
+    /* Custom checkbox */
+    input[type="checkbox"].cb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 15px; height: 15px;
+      border: 1.5px solid #c7c7cc;
+      border-radius: 4px;
+      background: white;
+      flex-shrink: 0;
+      cursor: pointer;
+      transition: background 0.12s, border-color 0.12s;
+    }
+    input[type="checkbox"].cb:checked {
+      background: #0b0b0c;
+      border-color: #0b0b0c;
+      background-image: url("data:image/svg+xml,%3Csvg width='10' height='8' viewBox='0 0 10 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 4L3.5 6.5L9 1' stroke='white' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: center;
+    }
+
+    /* Active chips */
+    .a-chip {
+      display: inline-flex; align-items: center; gap: 5px;
+      height: 26px; padding: 0 8px 0 10px;
+      background: #f0f0f5; border-radius: 999px;
+      font-size: 12px; color: #1d1d1f; white-space: nowrap;
+    }
+    .a-chip-x {
+      width: 15px; height: 15px; border-radius: 50%;
+      background: #c7c7cc; color: white;
+      font-size: 9px; line-height: 1;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; flex-shrink: 0;
+    }
+    .a-chip-x:hover { background: #8e8e93; }
+
+    /* Sidebar filter search */
+    #sidebar-search {
+      width: 100%; height: 34px;
+      border: 1px solid #e5e5ea; border-radius: 8px;
+      padding: 0 10px 0 30px;
+      font-size: 12px; outline: none; background: #fafafa;
+    }
+    #sidebar-search:focus { border-color: rgba(0,0,0,.3); background: white; }
+
+    /* Price inputs */
+    .price-inp {
+      flex: 1; height: 32px;
+      border: 1px solid #e5e5ea; border-radius: 8px;
+      padding: 0 8px; font-size: 12px; outline: none;
+      background: white;
+    }
+    .price-inp:focus { border-color: #0b0b0c; }
+
+    /* Top bar search dropdown */
+    #search-dropdown { min-width: 240px; }
+
+    /* Sidebar toggle button active state */
+    #sidebar-toggle.active {
+      background: #0b0b0c;
+      color: white;
+      border-color: #0b0b0c;
+    }
   </style>
 </head>
 <body data-page="products" class="bg-white text-[#0b0b0c] min-h-screen">
   <div id="site-header"></div>
   <div id="toast" class="hidden fixed top-5 right-5 z-50 px-4 py-2 rounded-xl bg-black text-white text-[13px] shadow-lg"></div>
 
-  <main>
-    <section class="border-b border-black/[0.08] px-6 lg:px-10 py-8">
-      <div class="max-w-[1360px] mx-auto">
-        <div class="flex flex-wrap items-center gap-2">
-          <button class="px-4 h-10 rounded-xl border border-black/15 text-[13px] font-medium">Filtreler</button>
-          <div id="quick-chips" class="flex flex-wrap gap-2"></div>
-          <div class="ml-auto w-full lg:w-[320px]">
-            <input id="search-input" type="text" placeholder="Filtre ara / ürün ara" class="w-full h-10 rounded-xl border border-black/15 bg-[#fafafa] px-3 text-[13px] outline-none focus:border-black/40">
+  <div class="pt-[72px] min-h-screen bg-white">
+
+    <!-- ── Top filter bar ── -->
+    <div class="sticky top-[72px] z-20 bg-white border-b border-black/[0.06]">
+      <div class="px-5 py-2.5 flex items-center gap-3">
+
+        <!-- Filtreler toggle -->
+        <button id="sidebar-toggle" class="flex items-center gap-1.5 px-3 h-[34px] rounded-full border border-black/[0.14] text-[13px] font-medium hover:bg-black/[0.04] transition-all flex-shrink-0">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="4" y1="6" x2="20" y2="6"/><circle cx="16" cy="6" r="3" fill="currentColor" stroke="none"/>
+            <line x1="4" y1="12" x2="20" y2="12"/><circle cx="8" cy="12" r="3" fill="currentColor" stroke="none"/>
+            <line x1="4" y1="18" x2="20" y2="18"/><circle cx="16" cy="18" r="3" fill="currentColor" stroke="none"/>
+          </svg>
+          <span>Filtreler</span>
+        </button>
+
+        <!-- Separator -->
+        <div class="w-px h-5 bg-black/[0.1] flex-shrink-0"></div>
+
+        <!-- Category pills -->
+        <div id="category-pills" class="flex items-center gap-2 flex-1 min-w-0 py-1"></div>
+
+        <!-- Right controls -->
+        <div class="flex items-center gap-1.5 flex-shrink-0 ml-1">
+          <div class="relative">
+            <button id="search-toggle" class="w-[34px] h-[34px] rounded-full border border-black/[0.12] flex items-center justify-center hover:bg-black/[0.04] transition" title="Ürün ara">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+            </button>
+            <div id="search-dropdown" class="hidden absolute right-0 top-10 bg-white border border-black/[0.1] rounded-xl shadow-xl p-2 z-30">
+              <input id="search-input" type="text" placeholder="Ürün ara..." autocomplete="off"
+                class="w-[220px] h-9 rounded-lg border border-black/15 bg-[#fafafa] px-3 text-[13px] outline-none focus:border-black/40 focus:bg-white">
+            </div>
+          </div>
+          <button class="flex items-center gap-1.5 px-3 h-[34px] rounded-full border border-black/[0.12] text-[12px] font-medium hover:bg-black/[0.04] transition">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 6h18M7 12h10M10 18h4"/>
+            </svg>
+            Sırala
+          </button>
+          <button class="flex items-center gap-1.5 px-3 h-[34px] rounded-full border border-black/[0.12] text-[12px] font-medium hover:bg-black/[0.04] transition">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="7" height="18" rx="1.5"/><rect x="14" y="3" width="7" height="18" rx="1.5"/>
+            </svg>
+            Karşılaştır
+          </button>
+        </div>
+      </div>
+
+      <!-- Active filter chips -->
+      <div id="chips-row" class="hidden px-5 pb-2.5 flex flex-wrap gap-2 items-center">
+        <span class="text-[11px] text-[#8e8e93] flex-shrink-0">Aktif:</span>
+        <div id="chips-container" class="flex flex-wrap gap-1.5"></div>
+        <button id="clear-all" class="text-[11px] text-[#0b0b0c] font-medium underline ml-0.5 hover:text-[#6e6e73] transition">Tümünü Temizle</button>
+      </div>
+    </div>
+
+    <!-- ── Main content ── -->
+    <div class="flex min-h-[calc(100vh-130px)]">
+
+      <!-- Left sidebar -->
+      <aside id="filter-sidebar">
+        <div id="filter-sidebar-inner" class="border-r border-black/[0.07] sticky top-[120px]" style="height:calc(100vh - 120px); overflow-y:auto;">
+          <div class="p-4">
+
+            <!-- Sidebar search -->
+            <div class="relative mb-4">
+              <svg class="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#8e8e93] pointer-events-none" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+              <input id="sidebar-search" type="text" placeholder="Filtre ara...">
+            </div>
+
+            <!-- Toggle switches -->
+            <div class="mb-3 pb-3 border-b border-black/[0.06] space-y-2.5">
+              <label class="flex items-center justify-between cursor-pointer">
+                <span class="text-[12.5px] text-[#3a3a3c]">Ticari</span>
+                <span class="tog-wrap"><input type="checkbox" id="tog-ticari" data-tog="ticari"><span class="tog-track"></span></span>
+              </label>
+              <label class="flex items-center justify-between cursor-pointer">
+                <span class="text-[12.5px] text-[#3a3a3c]">Konut</span>
+                <span class="tog-wrap"><input type="checkbox" id="tog-konut" data-tog="konut"><span class="tog-track"></span></span>
+              </label>
+              <label class="flex items-center justify-between cursor-pointer">
+                <span class="text-[12.5px] text-[#3a3a3c]">Tüm Renkler</span>
+                <span class="tog-wrap"><input type="checkbox" id="tog-tumrenkler" data-tog="tumRenkler"><span class="tog-track"></span></span>
+              </label>
+            </div>
+
+            <!-- Accordion filter groups -->
+            <div id="acc-groups" class="space-y-0.5"></div>
+
           </div>
         </div>
-      </div>
-    </section>
+      </aside>
 
-    <section class="px-6 lg:px-10 py-6">
-      <div class="max-w-[1360px] mx-auto grid lg:grid-cols-[280px_minmax(0,1fr)] gap-6">
-        <aside class="border border-black/[0.08] rounded-2xl p-4 h-fit sticky top-[84px]">
-          <p class="text-[12px] text-[#6e6e73] mb-2">Filtreler</p>
-          <div id="filters-panel" class="space-y-2"></div>
-        </aside>
-        <div>
-          <div class="mb-3 text-[13px] text-[#6e6e73]" id="result-count"></div>
-          <div id="products-grid" class="grid sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-5"></div>
-          <p id="empty-msg" class="hidden text-center text-[#6e6e73] py-20 text-[15px]">Arama kriterlerine uygun ürün bulunamadı.</p>
-        </div>
+      <!-- Product grid -->
+      <div id="products-grid-wrapper" class="flex-1 min-w-0 px-5 py-5">
+        <p id="result-count" class="text-[13px] text-[#6e6e73] mb-4"></p>
+        <div id="products-grid" class="grid sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-5"></div>
+        <p id="empty-msg" class="hidden text-center text-[#6e6e73] py-20 text-[15px]">Arama kriterlerine uygun ürün bulunamadı.</p>
       </div>
-    </section>
-  </main>
+    </div>
+  </div>
 
   <div id="site-footer"></div>
+
+  <!-- Board modal -->
   <div id="board-modal" class="hidden fixed inset-0 z-50">
     <div class="absolute inset-0 bg-black/35" data-board-close="1"></div>
     <div class="absolute inset-0 flex items-center justify-center p-4">
@@ -80,22 +311,25 @@
       { id: "s8", name: "PET Felt Akustik Bölücü", brandName: "Unica Acoustic", category: "Mobilya ve Donatı > Akustik", spec: "NRC 0.70 · Geri Dönüştürülmüş", image: "https://images.unsplash.com/photo-1493666438817-866a91353ca9?q=80&w=800&auto=format&fit=crop", hasPdf: true, hasCad: false, status: "published", views: 67 },
       { id: "s9", name: "Seramik Zemin Karosu 60x60", brandName: "CeraStone", category: "Malzemeler > Zemin", spec: "R11 · A1 · CE", image: "https://images.unsplash.com/photo-1507089947368-19c1da9775ae?q=80&w=800&auto=format&fit=crop", hasPdf: false, hasCad: false, status: "published", views: 45 },
     ];
+
     let allProducts = [...STATIC];
     let architectSession = null;
     let favoriteProductIds = new Set();
     let moodboards = [];
     let selectedProduct = null;
     let searchQuery = "";
-    let activeQuick = "";
-    const selected = {
+    let activeCategory = ""; // subcategory/main category for top pills
+
+    // Filter state
+    const filters = {
       brand: new Set(),
-      category: new Set(),
-      subcategory: new Set(),
+      fireClass: new Set(),
       hasPdf: new Set(),
       hasCad: new Set(),
-      hasBim: new Set(),
-      fireClass: new Set(),
+      priceMin: null,
+      priceMax: null,
     };
+    const toggles = { ticari: false, konut: false, tumRenkler: false };
 
     AG.ready.then(async () => {
       architectSession = await AG.getSessionArchitect();
@@ -104,17 +338,20 @@
         architectSession ? AG.getFavoriteProducts() : Promise.resolve([])
       ]);
       moodboards = architectSession ? await AG.getMoodboards() : [];
-      favoriteProductIds = new Set((favs || []).map((x) => x.id));
+      favoriteProductIds = new Set((favs || []).map(x => x.id));
       allProducts = [...STATIC, ...dbProds];
+
       const qp = new URLSearchParams(location.search);
       const qpCategory = (qp.get("category") || "").trim();
       const qpSub = (qp.get("sub") || "").trim();
-      activeQuick = qpSub || qpCategory || "";
-      renderQuickChips();
-      renderFilterPanel();
+      activeCategory = qpSub || qpCategory || "";
+
+      renderCategoryPills();
+      buildAccordionGroups();
       render();
     });
 
+    // ── renderCard (keep exactly as original) ──
     function renderCard(p) {
       const isFav = favoriteProductIds.has(p.id);
       return `
@@ -150,6 +387,7 @@
         </div>`;
     }
 
+    // ── Toast ──
     function showToast(text) {
       const t = document.getElementById("toast");
       t.textContent = text;
@@ -157,21 +395,21 @@
       setTimeout(() => t.classList.add("hidden"), 1700);
     }
 
+    // ── Board modal ──
     function closeBoardModal() {
       document.getElementById("board-modal").classList.add("hidden");
       selectedProduct = null;
     }
-
     function renderBoardList() {
       const wrap = document.getElementById("board-list");
       if (!moodboards.length) {
         wrap.innerHTML = `<p class="text-[13px] text-[#6e6e73]">Henüz board yok. Aşağıdan hızlıca oluşturabilirsin.</p>`;
         return;
       }
-      wrap.innerHTML = moodboards.map((m) => `
+      wrap.innerHTML = moodboards.map(m => `
         <button data-board-id="${m.id}" class="w-full h-10 rounded-xl border border-black/15 text-[13px] text-left px-3 hover:border-black/35">${m.name || "Moodboard"}</button>
       `).join("");
-      wrap.querySelectorAll("[data-board-id]").forEach((btn) => {
+      wrap.querySelectorAll("[data-board-id]").forEach(btn => {
         btn.addEventListener("click", async () => {
           if (!selectedProduct) return;
           const res = await AG.addProductToMoodboard({ moodboardId: btn.dataset.boardId, product: selectedProduct });
@@ -182,117 +420,295 @@
         });
       });
     }
-
     function openBoardModal(product) {
-      if (!architectSession) {
-        location.href = "/mimar-giris.html";
-        return;
-      }
+      if (!architectSession) { location.href = "/mimar-giris.html"; return; }
       selectedProduct = product;
       renderBoardList();
       document.getElementById("board-modal").classList.remove("hidden");
     }
 
+    // ── Taxonomy helpers ──
     function getTaxonomy(p) {
       const raw = p.category || "";
-      const [main, sub] = raw.split(">").map((x) => (x || "").trim());
+      const [main, sub] = raw.split(">").map(x => (x || "").trim());
       return { main: main || raw, sub: sub || "" };
-    }
-
-    function matchesBoolean(setValue, boolValue) {
-      if (!setValue.size) return true;
-      return setValue.has(boolValue ? "Var" : "Yok");
-    }
-
-    function filtered() {
-      return allProducts.filter(p => {
-        const tax = getTaxonomy(p);
-        if (activeQuick && tax.sub !== activeQuick && tax.main !== activeQuick) return false;
-        if (selected.brand.size && !selected.brand.has(p.brandName || "")) return false;
-        if (selected.category.size && !selected.category.has(tax.main)) return false;
-        if (selected.subcategory.size && !selected.subcategory.has(tax.sub)) return false;
-        if (!matchesBoolean(selected.hasPdf, Boolean(p.files?.pdfUrl))) return false;
-        if (!matchesBoolean(selected.hasCad, Boolean(p.files?.cadUrl))) return false;
-        if (!matchesBoolean(selected.hasBim, Boolean(p.files?.bimUrl))) return false;
-        const fire = (p.technical?.fireClass || "").trim();
-        if (selected.fireClass.size && !selected.fireClass.has(fire)) return false;
-        if (searchQuery) {
-          const q = searchQuery.toLowerCase();
-          return (p.name + p.category + p.spec + p.brandName + JSON.stringify(p.technical || {})).toLowerCase().includes(q);
-        }
-        return true;
-      });
     }
 
     function distinct(list) {
       return [...new Set(list.filter(Boolean))].sort((a, b) => a.localeCompare(b, "tr"));
     }
 
-    function renderQuickChips() {
-      const quick = document.getElementById("quick-chips");
-      const subs = distinct(allProducts.map((p) => getTaxonomy(p).sub || getTaxonomy(p).main)).slice(0, 10);
+    // ── Category pills ──
+    function renderCategoryPills() {
+      const pills = document.getElementById("category-pills");
+      const subCounts = {};
+      allProducts.forEach(p => {
+        const { sub, main } = getTaxonomy(p);
+        const key = sub || main;
+        subCounts[key] = (subCounts[key] || 0) + 1;
+      });
+      const cats = Object.keys(subCounts).sort((a, b) => a.localeCompare(b, "tr"));
       const total = allProducts.length;
-      quick.innerHTML = `
-        <button data-quick="" class="filter-chip ${!activeQuick ? "active" : ""} px-3 h-10 rounded-xl border border-black/[0.08] text-[13px]">Tümü <span class="ml-1 text-[11px] opacity-70">${total}</span></button>
-        ${subs.map((s) => `<button data-quick="${s}" class="filter-chip ${activeQuick === s ? "active" : ""} px-3 h-10 rounded-xl border border-black/[0.08] text-[13px]">${s}</button>`).join("")}
+      pills.innerHTML = `
+        <button class="cat-pill ${!activeCategory ? "active" : ""}" data-cat="">
+          Tümü <span class="pill-count">${total}</span>
+        </button>
+        ${cats.map(c => `
+          <button class="cat-pill ${activeCategory === c ? "active" : ""}" data-cat="${c}">
+            ${c} <span class="pill-count">${subCounts[c]}</span>
+          </button>
+        `).join("")}
       `;
-      quick.querySelectorAll("[data-quick]").forEach((btn) => {
+      pills.querySelectorAll("[data-cat]").forEach(btn => {
         btn.addEventListener("click", () => {
-          activeQuick = btn.dataset.quick || "";
-          renderQuickChips();
+          activeCategory = btn.dataset.cat;
+          renderCategoryPills();
           render();
         });
       });
     }
 
-    function groupTemplate(id, title, values) {
+    // ── Accordion groups builder ──
+    function buildAccordionGroups() {
+      const brands = distinct(allProducts.map(p => p.brandName || ""));
+      const fires  = distinct(allProducts.map(p => p.technical?.fireClass || "").filter(Boolean));
+
+      const groups = [
+        { id: "brand",     label: "Marka",              type: "checkboxes", values: brands },
+        { id: "price",     label: "Fiyat Aralığı",      type: "price" },
+        { id: "renk",      label: "Renk",               type: "checkboxes", values: [] },
+        { id: "mensei",    label: "Menşei Ülke",        type: "checkboxes", values: [] },
+        { id: "stok",      label: "Stok Durumu",        type: "stok" },
+        { id: "desen",     label: "Desen",              type: "checkboxes", values: [] },
+        { id: "metalik",   label: "Metalik Kaplama",    type: "checkboxes", values: [] },
+        { id: "ozellik",   label: "Özellikler",         type: "checkboxes", values: [] },
+        { id: "uygulama",  label: "Uygulama Alanı",     type: "checkboxes", values: [] },
+        { id: "icerik",    label: "İçerik",             type: "checkboxes", values: [] },
+        { id: "alev",      label: "Alev Geciktiricilik",type: "checkboxes", values: fires },
+        { id: "asinma",    label: "Aşınma Direnci",     type: "checkboxes", values: [] },
+        { id: "surdur",    label: "Sürdürülebilirlik",  type: "checkboxes", values: [] },
+        { id: "hasPdf",    label: "PDF",                type: "checkboxes", values: ["Var", "Yok"] },
+        { id: "hasCad",    label: "CAD",                type: "checkboxes", values: ["Var", "Yok"] },
+      ];
+
+      const container = document.getElementById("acc-groups");
+      container.innerHTML = groups.map(g => buildAccordionHTML(g)).join("");
+
+      container.querySelectorAll("[data-acc-toggle]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          btn.closest(".acc-group").classList.toggle("open");
+        });
+      });
+
+      // Checkbox listeners
+      container.querySelectorAll("input[data-filter-key]").forEach(cb => {
+        cb.addEventListener("change", () => {
+          const key = cb.dataset.filterKey;
+          if (!filters[key]) filters[key] = new Set();
+          cb.checked ? filters[key].add(cb.value) : filters[key].delete(cb.value);
+          renderActiveChips();
+          render();
+        });
+      });
+
+      // Price listeners
+      ["price-min", "price-max"].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener("input", () => {
+          filters.priceMin = document.getElementById("price-min").value ? Number(document.getElementById("price-min").value) : null;
+          filters.priceMax = document.getElementById("price-max").value ? Number(document.getElementById("price-max").value) : null;
+          render();
+        });
+      });
+
+      // Stock toggles
+      ["stok-stokta", "stok-numune"].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener("change", () => {
+          if (!filters.stok) filters.stok = new Set();
+          el.checked ? filters.stok.add(el.value) : filters.stok.delete(el.value);
+          renderActiveChips();
+          render();
+        });
+      });
+    }
+
+    function buildAccordionHTML(g) {
+      let bodyContent = "";
+
+      if (g.type === "checkboxes") {
+        if (!g.values || !g.values.length) {
+          bodyContent = `<p class="text-[11px] text-[#aeaeb2] py-1">Veri yok</p>`;
+        } else {
+          bodyContent = g.values.map(v => `
+            <label class="flex items-center gap-2 cursor-pointer py-0.5 group/cb">
+              <input type="checkbox" class="cb" data-filter-key="${g.id}" value="${v}">
+              <span class="text-[12.5px] text-[#3a3a3c] group-hover/cb:text-black transition">${v}</span>
+            </label>
+          `).join("");
+        }
+      } else if (g.type === "price") {
+        bodyContent = `
+          <div class="flex gap-2 items-center">
+            <input id="price-min" type="number" min="0" placeholder="Min ₺" class="price-inp">
+            <span class="text-[#8e8e93] text-[12px]">–</span>
+            <input id="price-max" type="number" min="0" placeholder="Max ₺" class="price-inp">
+          </div>
+        `;
+      } else if (g.type === "stok") {
+        bodyContent = `
+          <label class="flex items-center gap-2 cursor-pointer py-0.5">
+            <input type="checkbox" id="stok-stokta" class="cb" value="stokta">
+            <span class="text-[12.5px] text-[#3a3a3c]">Stokta Mevcut</span>
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer py-0.5">
+            <input type="checkbox" id="stok-numune" class="cb" value="numune">
+            <span class="text-[12.5px] text-[#3a3a3c]">Numune Mevcut</span>
+          </label>
+        `;
+      }
+
       return `
-        <div class="filter-group border border-black/[0.08] rounded-xl open" data-group="${id}">
-          <button class="w-full px-3 py-2.5 text-left flex items-center justify-between text-[13px] font-semibold" data-toggle="${id}">
-            <span>${title}</span><span>⌄</span>
+        <div class="acc-group" data-group="${g.id}">
+          <button data-acc-toggle="${g.id}" class="w-full flex items-center justify-between px-1 py-2.5 text-left">
+            <span class="text-[12.5px] font-semibold text-[#1d1d1f]">${g.label}</span>
+            <svg class="acc-chevron flex-shrink-0 text-[#8e8e93]" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
           </button>
-          <div class="filter-group-body">
-            <div class="px-3 pb-3 space-y-1">
-              ${values.map((v) => `
-                <label class="flex items-center gap-2 text-[12px] text-[#4a4a4f]">
-                  <input type="checkbox" data-filter="${id}" value="${v}" class="rounded border-black/20">
-                  <span>${v}</span>
-                </label>`).join("")}
+          <div class="acc-body">
+            <div class="pb-3 px-1 space-y-1">
+              ${bodyContent}
             </div>
           </div>
-        </div>`;
+        </div>
+      `;
     }
 
-    function renderFilterPanel() {
-      const panel = document.getElementById("filters-panel");
-      const brands = distinct(allProducts.map((p) => p.brandName || ""));
-      const categories = distinct(allProducts.map((p) => getTaxonomy(p).main));
-      const subcategories = distinct(allProducts.map((p) => getTaxonomy(p).sub));
-      const fires = distinct(allProducts.map((p) => p.technical?.fireClass || ""));
-
-      panel.innerHTML = [
-        groupTemplate("brand", "Marka", brands),
-        groupTemplate("category", "Kategori", categories),
-        groupTemplate("subcategory", "Alt Kategori", subcategories),
-        groupTemplate("hasPdf", "PDF", ["Var", "Yok"]),
-        groupTemplate("hasCad", "CAD", ["Var", "Yok"]),
-        groupTemplate("hasBim", "BIM", ["Var", "Yok"]),
-        groupTemplate("fireClass", "Yanıcılık", fires),
-      ].join("");
-
-      panel.querySelectorAll("[data-toggle]").forEach((btn) => {
-        btn.addEventListener("click", () => btn.closest(".filter-group").classList.toggle("open"));
+    // ── Sidebar search filtering (shows/hides accordion groups) ──
+    document.getElementById("sidebar-search").addEventListener("input", e => {
+      const q = e.target.value.trim().toLowerCase();
+      document.querySelectorAll("#acc-groups .acc-group").forEach(g => {
+        const label = g.querySelector("[data-acc-toggle] span")?.textContent.toLowerCase() || "";
+        g.style.display = !q || label.includes(q) ? "" : "none";
       });
-      panel.querySelectorAll("[data-filter]").forEach((cb) => {
-        cb.addEventListener("change", () => {
-          const key = cb.dataset.filter;
-          if (cb.checked) selected[key].add(cb.value);
-          else selected[key].delete(cb.value);
+    });
+
+    // ── Sidebar toggle ──
+    document.getElementById("sidebar-toggle").addEventListener("click", () => {
+      const sidebar = document.getElementById("filter-sidebar");
+      const btn = document.getElementById("sidebar-toggle");
+      sidebar.classList.toggle("open");
+      btn.classList.toggle("active");
+    });
+
+    // ── Search dropdown toggle ──
+    document.getElementById("search-toggle").addEventListener("click", e => {
+      e.stopPropagation();
+      const dd = document.getElementById("search-dropdown");
+      dd.classList.toggle("hidden");
+      if (!dd.classList.contains("hidden")) document.getElementById("search-input").focus();
+    });
+    document.addEventListener("click", e => {
+      if (!e.target.closest("#search-toggle") && !e.target.closest("#search-dropdown")) {
+        document.getElementById("search-dropdown").classList.add("hidden");
+      }
+    });
+    document.getElementById("search-input").addEventListener("input", e => {
+      searchQuery = e.target.value.trim();
+      render();
+    });
+
+    // ── Toggle switches ──
+    document.querySelectorAll("[data-tog]").forEach(input => {
+      input.addEventListener("change", () => {
+        toggles[input.dataset.tog] = input.checked;
+        render();
+      });
+    });
+
+    // ── Active chips ──
+    function renderActiveChips() {
+      const chips = [];
+      filters.brand?.forEach(v => chips.push({ key: "brand", value: v, label: v }));
+      filters.alev?.forEach(v => chips.push({ key: "alev", label: `Alev: ${v}`, value: v }));
+      filters.hasPdf?.forEach(v => chips.push({ key: "hasPdf", label: `PDF: ${v}`, value: v }));
+      filters.hasCad?.forEach(v => chips.push({ key: "hasCad", label: `CAD: ${v}`, value: v }));
+      filters.stok?.forEach(v => chips.push({ key: "stok", label: v === "stokta" ? "Stokta" : "Numune", value: v }));
+
+      const row = document.getElementById("chips-row");
+      const container = document.getElementById("chips-container");
+
+      if (!chips.length) {
+        row.classList.add("hidden");
+        return;
+      }
+      row.classList.remove("hidden");
+      container.innerHTML = chips.map(c => `
+        <span class="a-chip">
+          ${c.label}
+          <button class="a-chip-x" data-remove-key="${c.key}" data-remove-val="${c.value}" title="Kaldır">✕</button>
+        </span>
+      `).join("");
+
+      container.querySelectorAll("[data-remove-key]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const key = btn.dataset.removeKey;
+          const val = btn.dataset.removeVal;
+          if (filters[key]) filters[key].delete(val);
+          // Uncheck the corresponding checkbox
+          document.querySelectorAll(`input[data-filter-key="${key}"][value="${val}"]`).forEach(cb => cb.checked = false);
+          document.querySelectorAll(`#stok-stokta, #stok-numune`).forEach(cb => {
+            if (cb.value === val) cb.checked = false;
+          });
+          renderActiveChips();
           render();
         });
       });
     }
 
+    // ── Clear all ──
+    document.getElementById("clear-all").addEventListener("click", () => {
+      Object.keys(filters).forEach(k => {
+        if (filters[k] instanceof Set) filters[k].clear();
+        else filters[k] = null;
+      });
+      document.querySelectorAll(".cb").forEach(cb => cb.checked = false);
+      document.querySelectorAll("[data-tog]").forEach(t => { t.checked = false; toggles[t.dataset.tog] = false; });
+      document.querySelectorAll(".price-inp").forEach(inp => inp.value = "");
+      renderActiveChips();
+      render();
+    });
+
+    // ── Filter logic ──
+    function matchBool(set, boolVal) {
+      if (!set || !set.size) return true;
+      return set.has(boolVal ? "Var" : "Yok");
+    }
+
+    function filtered() {
+      return allProducts.filter(p => {
+        const { main, sub } = getTaxonomy(p);
+        const catKey = sub || main;
+
+        if (activeCategory && catKey !== activeCategory && main !== activeCategory) return false;
+        if (filters.brand?.size && !filters.brand.has(p.brandName || "")) return false;
+        if (!matchBool(filters.hasPdf, Boolean(p.files?.pdfUrl || p.hasPdf))) return false;
+        if (!matchBool(filters.hasCad, Boolean(p.files?.cadUrl || p.hasCad))) return false;
+        const fire = (p.technical?.fireClass || "").trim();
+        if (filters.alev?.size && !filters.alev.has(fire)) return false;
+        if (filters.priceMin && p.price < filters.priceMin) return false;
+        if (filters.priceMax && p.price > filters.priceMax) return false;
+
+        if (searchQuery) {
+          const q = searchQuery.toLowerCase();
+          if (!(p.name + p.category + (p.spec || "") + (p.brandName || "") + JSON.stringify(p.technical || {})).toLowerCase().includes(q)) return false;
+        }
+        return true;
+      });
+    }
+
+    // ── Render products ──
     function render() {
       const list = filtered();
       const grid = document.getElementById("products-grid");
@@ -302,31 +718,24 @@
       if (!list.length) { grid.innerHTML = ""; empty.classList.remove("hidden"); return; }
       empty.classList.add("hidden");
       grid.innerHTML = list.map(renderCard).join("");
+
       grid.querySelectorAll("[data-view]").forEach(a =>
         a.addEventListener("click", () => AG.incrementView(a.dataset.view).catch(() => {}))
       );
-      grid.querySelectorAll("[data-fav-product]").forEach((btn) => {
-        btn.addEventListener("click", async (e) => {
-          e.preventDefault();
-          e.stopPropagation();
+      grid.querySelectorAll("[data-fav-product]").forEach(btn => {
+        btn.addEventListener("click", async e => {
+          e.preventDefault(); e.stopPropagation();
           const id = btn.dataset.favProduct;
-          const product = allProducts.find((x) => x.id === id);
+          const product = allProducts.find(x => x.id === id);
           if (!product) return;
           const res = await AG.toggleFavoriteProduct({
-            id: product.id,
-            name: product.name,
-            image: product.image,
+            id: product.id, name: product.name, image: product.image,
             category: product.category,
             url: `/urun-unica-baffle.html?id=${encodeURIComponent(product.id)}`
           });
           if (!res?.ok) { showToast(res?.message || "Favorilere eklemek için giriş yapın."); return; }
-          if (res.active) {
-            favoriteProductIds.add(id);
-            showToast("Favorilere eklendi ♥");
-          } else {
-            favoriteProductIds.delete(id);
-            showToast("Favorilerden çıkarıldı");
-          }
+          if (res.active) { favoriteProductIds.add(id); showToast("Favorilere eklendi ♥"); }
+          else { favoriteProductIds.delete(id); showToast("Favorilerden çıkarıldı"); }
           const fill = res.active ? "#111" : "none";
           const stroke = res.active ? "#111" : "#bbb";
           btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="${fill}" stroke="${stroke}" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`;
@@ -334,24 +743,20 @@
           btn.title = res.active ? "Favorilerden çıkar" : "Favorilere ekle";
         });
       });
-      grid.querySelectorAll("[data-add-board]").forEach((btn) => {
-        btn.addEventListener("click", (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          const product = allProducts.find((x) => x.id === btn.dataset.addBoard);
+      grid.querySelectorAll("[data-add-board]").forEach(btn => {
+        btn.addEventListener("click", e => {
+          e.preventDefault(); e.stopPropagation();
+          const product = allProducts.find(x => x.id === btn.dataset.addBoard);
           if (!product) return;
           openBoardModal({ id: product.id, name: product.name, image: product.image });
         });
       });
     }
 
-    document.getElementById("search-input").addEventListener("input", e => {
-      searchQuery = e.target.value.trim();
-      render();
-    });
+    // Board modal events
     document.getElementById("board-cancel-btn").addEventListener("click", closeBoardModal);
-    document.querySelectorAll("[data-board-close='1']").forEach((el) => el.addEventListener("click", closeBoardModal));
-    document.getElementById("quick-board-form").addEventListener("submit", async (e) => {
+    document.querySelectorAll("[data-board-close='1']").forEach(el => el.addEventListener("click", closeBoardModal));
+    document.getElementById("quick-board-form").addEventListener("submit", async e => {
       e.preventDefault();
       if (!selectedProduct) return;
       const name = document.getElementById("quick-board-name").value.trim();
@@ -364,8 +769,9 @@
       showToast("Board'a eklendi");
     });
 
-    renderQuickChips();
-    renderFilterPanel();
+    // Initial render with static data
+    renderCategoryPills();
+    buildAccordionGroups();
     render();
   </script>
 </body>
