@@ -15,11 +15,10 @@
   const current = document.body.dataset.page || "";
 
   const baseNavItems = [
-    { id: "home", href: "/mvp-taslak-v1.html", label: "Anasayfa" },
-    { id: "products", href: "/urunler.html", label: "Ürünler" },
-    { id: "brands", href: "/markalar.html", label: "Markalar" },
-    { id: "projects", href: "/projeler.html", label: "Projeler" },
-    { id: "how", href: "/nasil-calisir.html", label: "Nasıl Çalışır" },
+    { id: "home",     href: "/mvp-taslak-v1.html", label: "Anasayfa" },
+    { id: "products", href: "/urunler.html",        label: "Ürünler" },
+    { id: "brands",   href: "/markalar.html",       label: "Markalar" },
+    { id: "projects", href: "/projeler.html",       label: "Projeler" },
   ];
 
   const productMegaMenu = [
@@ -171,22 +170,39 @@
       .join("");
 
     const archName = architectSession ? (architectSession.name || "Mimar").slice(0, 14) : "";
+    const profileIcon = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>`;
     const desktopAuthLinks = architectSession
       ? `
-        <a href="/mimar-paneli.html?tab=fav-products" class="inline-flex items-center px-3 py-2 rounded-full text-[13px] text-[#6e6e73] hover:text-black hover:bg-black/[0.04]">Favorilerim</a>
-        <a href="/mimar-paneli.html?tab=moodboards" class="inline-flex items-center px-3 py-2 rounded-full text-[13px] text-[#6e6e73] hover:text-black hover:bg-black/[0.04]">Boardlarım</a>
         <div class="relative" id="arch-dropdown-wrap">
-          <button id="arch-dropdown-btn" type="button" class="inline-flex items-center gap-1 px-3 py-2 rounded-full text-[13px] hover:bg-black/[0.05]">${archName} ▾</button>
-          <div id="arch-dropdown-panel" class="hidden absolute right-0 top-full mt-1 w-44 rounded-xl border border-black/10 bg-white shadow-lg z-50 py-1">
-            <a href="/mimar-paneli.html" class="block px-4 py-2 text-[13px] hover:bg-[#f5f5f7]">Panelim</a>
-            <button id="arch-logout-btn" type="button" class="w-full text-left px-4 py-2 text-[13px] hover:bg-[#f5f5f7]">Çıkış Yap</button>
+          <button id="arch-dropdown-btn" type="button" class="inline-flex items-center gap-2 h-9 px-3 rounded-full border border-black/[0.12] text-[13px] hover:bg-black/[0.04] transition">
+            ${profileIcon}
+            <span class="max-w-[100px] truncate">${archName}</span>
+            <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6l4 4 4-4"/></svg>
+          </button>
+          <div id="arch-dropdown-panel" class="hidden absolute right-0 top-full mt-2 w-52 rounded-2xl border border-black/[0.08] bg-white shadow-[0_8px_40px_rgba(0,0,0,0.14)] z-50 py-1.5 overflow-hidden">
+            <a href="/mimar-paneli.html" class="flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-[#1d1d1f] hover:bg-[#f5f5f7]">
+              ${profileIcon} Panelim
+            </a>
+            <a href="/mimar-paneli.html?tab=fav-products" class="flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-[#1d1d1f] hover:bg-[#f5f5f7]">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l7.78 7.78 7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+              Favorilerim
+            </a>
+            <a href="/mimar-paneli.html?tab=moodboards" class="flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-[#1d1d1f] hover:bg-[#f5f5f7]">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+              Boardlarım
+            </a>
+            <div class="border-t border-black/[0.07] my-1"></div>
+            <button id="arch-logout-btn" type="button" class="w-full flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-[#1d1d1f] hover:bg-[#f5f5f7]">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+              Çıkış Yap
+            </button>
           </div>
         </div>
-        <a href="/marka-basvuru.html" class="px-4 py-2 rounded-full bg-black text-white text-[13px] font-semibold hover:bg-black/85 transition">Marka Başla</a>
       `
       : `
-        <a href="/giris.html" class="inline-flex items-center px-3 py-2 rounded-full text-[13px] hover:bg-black/[0.05]">Giriş Yap</a>
-        <a href="/marka-basvuru.html" class="px-4 py-2 rounded-full bg-black text-white text-[13px] font-semibold hover:bg-black/85 transition">Marka Başla</a>
+        <a href="/giris.html" class="inline-flex items-center gap-2 h-9 px-3 rounded-full border border-black/[0.12] text-[13px] hover:bg-black/[0.04] transition">
+          ${profileIcon} Giriş Yap
+        </a>
       `;
 
     const mobileAuthLinks = architectSession
@@ -202,15 +218,21 @@
 
     headerTarget.innerHTML = `
       <header class="border-b border-black/[0.06] sticky top-0 bg-white/85 backdrop-blur-xl z-30">
-        <div class="h-[72px] px-4 sm:px-6 lg:px-10 flex items-center justify-between">
+        <div class="h-[72px] px-4 sm:px-6 lg:px-10 flex items-center gap-4">
+          <!-- Logo -->
           <a href="/mvp-taslak-v1.html" class="text-[22px] font-semibold tracking-tight flex-shrink-0">Antigravity</a>
-          <nav class="hidden lg:flex items-center gap-1">${nav}</nav>
-          <div class="hidden lg:flex items-center gap-3">
-            <form id="header-search-form" action="/urunler.html" method="get" class="relative">
-              <svg class="absolute left-3 top-1/2 -translate-y-1/2 text-[#8e8e93] pointer-events-none" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-              <input name="q" type="text" placeholder="Ürün ara..." autocomplete="off"
-                class="h-[34px] w-[180px] rounded-full border border-black/[0.12] bg-[#f5f5f7] pl-8 pr-3 text-[13px] outline-none focus:bg-white focus:border-black/30 focus:w-[240px] transition-all duration-200">
-            </form>
+          <!-- Nav -->
+          <nav class="hidden lg:flex items-center gap-1 flex-shrink-0">${nav}</nav>
+          <!-- Search (fills middle) -->
+          <form id="header-search-form" action="/urunler.html" method="get" class="hidden lg:flex flex-1 relative max-w-[520px]">
+            <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8e8e93] pointer-events-none" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input name="q" type="text" placeholder="Ürün ara..." autocomplete="off"
+              class="w-full h-[38px] rounded-full border border-black/[0.12] bg-[#f5f5f7] pl-10 pr-4 text-[13.5px] outline-none focus:bg-white focus:border-black/25 transition-colors">
+          </form>
+          <!-- Spacer -->
+          <div class="flex-1 lg:hidden"></div>
+          <!-- Profile (right) -->
+          <div class="hidden lg:flex items-center gap-2 flex-shrink-0">
             ${desktopAuthLinks}
           </div>
           <button id="mobile-menu-btn" class="lg:hidden inline-flex items-center justify-center w-10 h-10 rounded-full border border-black/[0.08] text-[18px]" aria-label="Menü">☰</button>
