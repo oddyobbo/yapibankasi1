@@ -10,40 +10,51 @@
   <div id="site-header"></div>
   <main class="px-4 lg:px-8 py-6">
     <section class="max-w-[1500px] mx-auto grid lg:grid-cols-[68px_minmax(0,1fr)_300px] gap-4">
+
+      <!-- Sol araç rayı -->
       <aside class="rounded-2xl border border-black/10 bg-white p-2 flex flex-col items-center gap-2 h-fit sticky top-[86px]">
-        <a href="/mimar-paneli.html" class="w-11 h-11 rounded-xl border border-black/10 text-[11px] text-[#6e6e73] flex items-center justify-center hover:border-black/30">←</a>
-        <button class="w-11 h-11 rounded-xl border border-black/10 text-[12px] hover:border-black/30">S</button>
-        <button class="w-11 h-11 rounded-xl border border-black/10 text-[12px] hover:border-black/30">IMG</button>
-        <button class="w-11 h-11 rounded-xl border border-black/10 text-[12px] hover:border-black/30">T</button>
-        <button class="w-11 h-11 rounded-xl border border-black/10 text-[12px] hover:border-black/30">CLR</button>
-        <button class="w-11 h-11 rounded-xl border border-black/10 text-[12px] hover:border-black/30">↶</button>
-        <button class="w-11 h-11 rounded-xl border border-black/10 text-[12px] hover:border-black/30">↷</button>
+        <a href="/mimar-paneli.html" title="Panele dön" class="w-11 h-11 rounded-xl border border-black/10 text-[16px] text-[#6e6e73] flex items-center justify-center hover:border-black/30">←</a>
+        <button title="Seç" class="w-11 h-11 rounded-xl border border-black/10 flex items-center justify-center hover:border-black/30">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 3l14 9-7 1-4 7z"/></svg>
+        </button>
+        <button title="Görsel ekle" class="w-11 h-11 rounded-xl border border-black/10 flex items-center justify-center hover:border-black/30">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+        </button>
+        <button title="Metin" class="w-11 h-11 rounded-xl border border-black/10 flex items-center justify-center hover:border-black/30 text-[13px] font-semibold">T</button>
+        <button title="Renk" class="w-11 h-11 rounded-xl border border-black/10 flex items-center justify-center hover:border-black/30">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18"/></svg>
+        </button>
+        <div class="w-full h-px bg-black/[0.07] my-1"></div>
+        <button id="undo-btn" title="Geri al" class="w-11 h-11 rounded-xl border border-black/10 flex items-center justify-center hover:border-black/30 text-[15px]">↶</button>
+        <button id="redo-btn" title="Yinele" class="w-11 h-11 rounded-xl border border-black/10 flex items-center justify-center hover:border-black/30 text-[15px]">↷</button>
       </aside>
 
+      <!-- Kanvas -->
       <section class="rounded-2xl border border-black/10 bg-white overflow-hidden">
         <div class="h-14 px-4 border-b border-black/10 flex items-center gap-3">
-          <input id="board-name" class="h-9 rounded-lg border border-black/15 px-3 text-[14px] min-w-[220px]">
+          <input id="board-name" class="h-9 rounded-lg border border-black/15 px-3 text-[14px] min-w-[220px]" placeholder="Pano adı">
           <div class="ml-auto flex items-center gap-2">
-            <button id="export-btn" class="h-9 px-3 rounded-lg border border-black/15 text-[12px] hover:border-black/35">Export</button>
-            <button id="download-btn" class="h-9 px-3 rounded-lg border border-black/15 text-[12px] hover:border-black/35">Download</button>
             <div class="h-9 px-3 rounded-lg border border-black/10 text-[12px] text-[#6e6e73] inline-flex items-center gap-2">
-              <button id="zoom-out-btn" class="text-[14px] leading-none">−</button>
+              <button id="zoom-out-btn" class="text-[14px] leading-none hover:text-black">−</button>
               <span id="zoom-indicator">100%</span>
-              <button id="zoom-in-btn" class="text-[14px] leading-none">+</button>
+              <button id="zoom-in-btn" class="text-[14px] leading-none hover:text-black">+</button>
             </div>
             <button id="save-btn" class="h-9 px-4 rounded-lg bg-black text-white text-[12px] font-semibold">Kaydet</button>
           </div>
         </div>
         <div id="canvas-wrap" class="p-4 bg-[#f3f4f6] min-h-[78vh]">
-          <div id="canvas" class="relative rounded-2xl border border-black/10 bg-[#efeff2] min-h-[72vh] overflow-hidden origin-top-left"></div>
+          <div id="canvas" class="relative rounded-2xl border border-black/10 bg-[#ececef] min-h-[72vh] overflow-hidden origin-top-left"></div>
         </div>
         <p id="save-msg" class="text-[12px] text-[#6e6e73] px-4 py-2 border-t border-black/10"></p>
       </section>
 
+      <!-- Sağ: ürün listesi -->
       <aside class="rounded-2xl border border-black/10 bg-white p-4 h-fit sticky top-[86px]">
-        <h2 class="text-[14px] font-semibold">Favori Ürünler</h2>
-        <p class="text-[12px] text-[#6e6e73] mt-1">Ürüne tıklayıp board'a ekle.</p>
-        <div id="favorites-list" class="mt-3 space-y-2 max-h-[74vh] overflow-auto"></div>
+        <h2 class="text-[14px] font-semibold">Ürün Ekle</h2>
+        <p class="text-[12px] text-[#6e6e73] mt-1 mb-3">Favori ürünlerine tıkla, kanvasa eklensin.</p>
+        <input id="product-search" placeholder="Ürün ara..." class="w-full h-9 rounded-xl border border-black/10 px-3 text-[12px] mb-3 outline-none focus:border-black/30">
+        <div id="favorites-list" class="space-y-2 max-h-[72vh] overflow-auto"></div>
+        <p class="text-[11px] text-[#6e6e73] mt-3">Önce <a href="/urunler.html" class="underline hover:text-black">Ürünler</a> sayfasından favorile.</p>
       </aside>
     </section>
   </main>
@@ -60,10 +71,11 @@
     const zoomIndicator = document.getElementById("zoom-indicator");
     let zoomLevel = 1;
     let board = null;
+    let allFavProducts = [];
 
     function setSaveMsg(text, ok) {
       saveMsg.textContent = text || "";
-      saveMsg.className = `text-[12px] mt-2 ${ok ? "text-[#1f6f45]" : "text-[#6e6e73]"}`;
+      saveMsg.className = `text-[12px] px-4 py-2 border-t border-black/10 ${ok ? "text-green-600" : "text-[#6e6e73]"}`;
     }
 
     function renderCanvas() {
@@ -77,7 +89,7 @@
               <p class="text-[12px] font-medium leading-tight">${item.name}</p>
             </div>
           </div>
-          <button data-resize-handle="${item.id}" class="absolute right-1 bottom-1 w-4 h-4 rounded-sm border border-black/15 bg-white/95 text-[10px] leading-none">◢</button>
+          <button data-resize-handle="${item.id}" class="absolute right-1 bottom-1 w-5 h-5 rounded-sm border border-black/15 bg-white/95 text-[10px] leading-none flex items-center justify-center cursor-se-resize">◢</button>
         </article>
       `).join("");
       bindDrag();
@@ -87,33 +99,21 @@
 
     function bindDrag() {
       canvas.querySelectorAll("[data-card-id]").forEach((card) => {
-        let startX = 0;
-        let startY = 0;
-        let origX = 0;
-        let origY = 0;
+        let startX, startY, origX, origY;
         const onMove = (ev) => {
-          const x = origX + (ev.clientX - startX);
-          const y = origY + (ev.clientY - startY);
-          card.style.left = `${Math.max(0, x)}px`;
-          card.style.top = `${Math.max(0, y)}px`;
+          card.style.left = `${Math.max(0, origX + ev.clientX - startX)}px`;
+          card.style.top  = `${Math.max(0, origY + ev.clientY - startY)}px`;
         };
         const onUp = () => {
           document.removeEventListener("pointermove", onMove);
           document.removeEventListener("pointerup", onUp);
-          const id = card.dataset.cardId;
-          const target = board.items.find((x) => x.id === id);
-          if (target) {
-            target.x = parseInt(card.style.left, 10) || 0;
-            target.y = parseInt(card.style.top, 10) || 0;
-          }
+          const t = board.items.find((x) => x.id === card.dataset.cardId);
+          if (t) { t.x = parseInt(card.style.left) || 0; t.y = parseInt(card.style.top) || 0; }
         };
-        const handle = card.querySelector("[data-drag-handle='1']");
-        handle?.addEventListener("pointerdown", (ev) => {
-          if (ev.target.closest("[data-resize-handle], [data-delete-card]")) return;
-          startX = ev.clientX;
-          startY = ev.clientY;
-          origX = parseInt(card.style.left, 10) || 0;
-          origY = parseInt(card.style.top, 10) || 0;
+        card.querySelector("[data-drag-handle='1']")?.addEventListener("pointerdown", (ev) => {
+          if (ev.target.closest("[data-resize-handle],[data-delete-card]")) return;
+          startX = ev.clientX; startY = ev.clientY;
+          origX = parseInt(card.style.left) || 0; origY = parseInt(card.style.top) || 0;
           document.addEventListener("pointermove", onMove);
           document.addEventListener("pointerup", onUp);
         });
@@ -123,8 +123,7 @@
     function bindDelete() {
       canvas.querySelectorAll("[data-delete-card]").forEach((btn) => {
         btn.addEventListener("click", () => {
-          if (!board) return;
-          board.items = (board.items || []).filter((x) => x.id !== btn.dataset.deleteCard);
+          board.items = board.items.filter((x) => x.id !== btn.dataset.deleteCard);
           renderCanvas();
         });
       });
@@ -134,61 +133,76 @@
       canvas.querySelectorAll("[data-resize-handle]").forEach((handle) => {
         const card = handle.closest("[data-card-id]");
         if (!card) return;
-        let startX = 0;
-        let startY = 0;
-        let startW = 0;
-        let startH = 0;
+        let sX, sY, sW, sH;
         const onMove = (ev) => {
-          const w = Math.max(150, startW + (ev.clientX - startX));
-          const h = Math.max(140, startH + (ev.clientY - startY));
-          card.style.width = `${w}px`;
-          card.style.height = `${h}px`;
+          card.style.width  = `${Math.max(150, sW + ev.clientX - sX)}px`;
+          card.style.height = `${Math.max(140, sH + ev.clientY - sY)}px`;
         };
         const onUp = () => {
           document.removeEventListener("pointermove", onMove);
           document.removeEventListener("pointerup", onUp);
-          const id = card.dataset.cardId;
-          const target = board.items.find((x) => x.id === id);
-          if (target) {
-            target.w = parseInt(card.style.width, 10) || 220;
-            target.h = parseInt(card.style.height, 10) || 190;
-          }
+          const t = board.items.find((x) => x.id === card.dataset.cardId);
+          if (t) { t.w = parseInt(card.style.width) || 220; t.h = parseInt(card.style.height) || 190; }
         };
         handle.addEventListener("pointerdown", (ev) => {
-          ev.preventDefault();
-          ev.stopPropagation();
-          startX = ev.clientX;
-          startY = ev.clientY;
-          startW = parseInt(card.style.width, 10) || card.offsetWidth;
-          startH = parseInt(card.style.height, 10) || card.offsetHeight;
+          ev.preventDefault(); ev.stopPropagation();
+          sX = ev.clientX; sY = ev.clientY;
+          sW = parseInt(card.style.width) || card.offsetWidth;
+          sH = parseInt(card.style.height) || card.offsetHeight;
           document.addEventListener("pointermove", onMove);
           document.addEventListener("pointerup", onUp);
         });
       });
     }
 
-    function addFavoriteItem(item) {
+    function addItemToCanvas(item) {
       if (!board) return;
-      const created = {
-        id: `card-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      const cols = 4;
+      const n = board.items.length;
+      board.items.push({
+        id: `card-${Date.now()}-${Math.random().toString(36).slice(2,6)}`,
         productId: item.id,
         name: item.name,
         image: item.image || FALLBACK_IMG,
-        x: 30 + (board.items.length % 4) * 40,
-        y: 30 + (board.items.length % 3) * 50,
-        w: 220,
-        h: 190
-      };
-      board.items.push(created);
+        x: 30 + (n % cols) * 250,
+        y: 30 + Math.floor(n / cols) * 220,
+        w: 220, h: 190
+      });
       renderCanvas();
+      setSaveMsg("Ürün eklendi. Kaydetmeyi unutma.", false);
+    }
+
+    function renderFavList(products) {
+      const wrap = document.getElementById("favorites-list");
+      if (!products.length) {
+        wrap.innerHTML = `<p class="text-[12px] text-[#6e6e73]">Favori ürün yok.</p>`;
+        return;
+      }
+      wrap.innerHTML = products.map((p) => `
+        <button data-add-product="${p.id}" class="w-full text-left rounded-xl border border-black/10 p-2 hover:border-black/35 hover:bg-[#fafafa] transition">
+          <div class="flex gap-2 items-center">
+            <img src="${p.image || FALLBACK_IMG}" class="w-12 h-12 rounded-lg object-cover flex-shrink-0" alt="${p.name}">
+            <div>
+              <p class="text-[12px] font-medium leading-tight">${p.name}</p>
+              <p class="text-[11px] text-[#6e6e73] mt-0.5">Tıkla → ekle</p>
+            </div>
+          </div>
+        </button>
+      `).join("");
+      wrap.querySelectorAll("[data-add-product]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const product = products.find((x) => String(x.id) === String(btn.dataset.addProduct));
+          if (product) addItemToCanvas(product);
+        });
+      });
     }
 
     async function saveBoard() {
       if (!board) return;
       board.name = document.getElementById("board-name").value.trim() || "Tasarım Panosu";
-      const res = await AG.updateTasarım Panosu(board.id, { name: board.name, items: board.items });
+      const res = await AG.updateMoodboard(board.id, { name: board.name, items: board.items });
       if (!res.ok) { setSaveMsg(res.message || "Kaydedilemedi.", false); return; }
-      setSaveMsg("Tasarım Panosu kaydedildi.", true);
+      setSaveMsg("Pano kaydedildi.", true);
     }
 
     async function boot() {
@@ -197,67 +211,34 @@
       if (!session) { location.href = "/mimar-giris.html"; return; }
 
       if (!moodboardId) {
-        const created = await AG.createTasarım Panosu({ name: "Yeni Tasarım Panosu" });
+        const created = await AG.createMoodboard({ name: "Yeni Tasarım Panosu" });
         if (!created.ok) return;
-        location.href = `/moodboard.html?id=${encodeURIComponent(created.moodboard.id)}`;
+        location.href = `/tasarim-panosu.html?id=${encodeURIComponent(created.moodboard.id)}`;
         return;
       }
 
-      board = await AG.getTasarım Panosu(moodboardId);
-      if (!board) {
-        setSaveMsg("Tasarım Panosu bulunamadı.", false);
-        return;
-      }
-      board.items = Array.isArray(board.items) ? board.items : [];
-      board.items = board.items.map((item) => ({
-        ...item,
-        w: item.w || 220,
-        h: item.h || 190
-      }));
+      board = await AG.getMoodboard(moodboardId);
+      if (!board) { setSaveMsg("Pano bulunamadı.", false); return; }
+      board.items = (Array.isArray(board.items) ? board.items : []).map((item) => ({ w: 220, h: 190, ...item }));
       document.getElementById("board-name").value = board.name || "Tasarım Panosu";
       renderCanvas();
 
-      const favProducts = await AG.getFavoriteProducts();
-      const favWrap = document.getElementById("favorites-list");
-      favWrap.innerHTML = favProducts.length
-        ? favProducts.map((p) => `
-            <button data-add-product="${p.id}" class="w-full text-left rounded-xl border border-black/10 p-2 hover:border-black/25">
-              <div class="flex gap-2">
-                <img src="${p.image || FALLBACK_IMG}" class="w-12 h-12 rounded-lg object-cover" alt="${p.name}">
-                <div>
-                  <p class="text-[12px] font-medium leading-tight">${p.name}</p>
-                  <p class="text-[11px] text-[#6e6e73] mt-1">Kanvasa ekle</p>
-                </div>
-              </div>
-            </button>
-          `).join("")
-        : `<p class="text-[12px] text-[#6e6e73]">Önce ürünleri favorilemelisin.</p>`;
+      allFavProducts = await AG.getFavoriteProducts();
+      renderFavList(allFavProducts);
 
-      favWrap.querySelectorAll("[data-add-product]").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          const product = favProducts.find((x) => x.id === btn.dataset.addProduct);
-          if (product) addFavoriteItem(product);
-        });
+      document.getElementById("product-search").addEventListener("input", (e) => {
+        const q = e.target.value.trim().toLowerCase();
+        renderFavList(q ? allFavProducts.filter((p) => p.name.toLowerCase().includes(q)) : allFavProducts);
       });
 
       document.getElementById("save-btn").addEventListener("click", saveBoard);
-      document.getElementById("export-btn").addEventListener("click", saveBoard);
-      document.getElementById("download-btn").addEventListener("click", () => {
-        if (!board) return;
-        const blob = new Blob([JSON.stringify(board, null, 2)], { type: "application/json" });
-        const a = document.createElement("a");
-        a.href = URL.createObjectURL(blob);
-        a.download = `${(board.name || "moodboard").replace(/\s+/g, "-").toLowerCase()}.json`;
-        a.click();
-        URL.revokeObjectURL(a.href);
-      });
       document.getElementById("zoom-in-btn").addEventListener("click", () => {
-        zoomLevel = Math.min(1.6, zoomLevel + 0.1);
+        zoomLevel = Math.min(2, zoomLevel + 0.1);
         canvas.style.transform = `scale(${zoomLevel})`;
         zoomIndicator.textContent = `${Math.round(zoomLevel * 100)}%`;
       });
       document.getElementById("zoom-out-btn").addEventListener("click", () => {
-        zoomLevel = Math.max(0.7, zoomLevel - 0.1);
+        zoomLevel = Math.max(0.4, zoomLevel - 0.1);
         canvas.style.transform = `scale(${zoomLevel})`;
         zoomIndicator.textContent = `${Math.round(zoomLevel * 100)}%`;
       });

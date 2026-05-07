@@ -17,7 +17,7 @@
           <h1 class="text-[30px] font-semibold">Mimar Paneli</h1>
         </div>
         <div class="flex gap-2">
-          <button id="new-moodboard-btn" class="h-10 px-4 rounded-full bg-black text-white text-[13px] font-semibold">Yeni Tasarım Panosu</button>
+          <button id="new-moodboard-btn" class="h-10 px-4 rounded-full bg-black text-white text-[13px] font-semibold">+ Yeni Tasarım Panosu</button>
           <button id="logout-btn" class="h-10 px-4 rounded-full border border-black/15 text-[13px]">Çıkış</button>
         </div>
       </div>
@@ -55,7 +55,7 @@
       "fav-products": "Favori Ürünler",
       "fav-projects": "Favori Projeler",
       "collections": "Koleksiyonlar",
-      "moodboards": "Tasarım Panosu'lar"
+      "moodboards": "Tasarım Panoları"
     };
     let activeTab = "fav-products";
     let moodboards = [];
@@ -109,14 +109,14 @@
         return;
       }
       wrap.innerHTML = moodboards.map((m) => `
-        <button data-board-id="${m.id}" class="w-full h-10 rounded-xl border border-black/15 text-[13px] text-left px-3 hover:border-black/35">${m.name || "Tasarım Panosu"}</button>
+        <button data-board-id="${m.id}" class="w-full h-10 rounded-xl border border-black/15 text-[13px] text-left px-3 hover:border-black/35">${m.name || "Moodboard"}</button>
       `).join("");
       wrap.querySelectorAll("[data-board-id]").forEach((btn) => {
         btn.addEventListener("click", async () => {
           if (!selectedProduct) return;
-          const res = await AG.addProductToTasarım Panosu({ moodboardId: btn.dataset.boardId, product: selectedProduct });
+          const res = await AG.addProductToMoodboard({ moodboardId: btn.dataset.boardId, product: selectedProduct });
           if (!res.ok) return;
-          moodboards = await AG.getTasarım Panosus();
+          moodboards = await AG.getMoodboards();
           closeBoardModal();
           showToast("Board'a eklendi");
         });
@@ -181,23 +181,23 @@
         return;
       }
 
-      const list = await AG.getTasarım Panosus();
+      const list = await AG.getMoodboards();
       content.innerHTML = list.length
         ? `<div class="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">
             ${list.map((m) => `
               <a href="/tasarim-panosu.html?id=${encodeURIComponent(m.id)}" class="rounded-xl border border-black/10 p-4 hover:border-black/25 transition block">
-                <p class="font-medium">${m.name || "Tasarım Panosu"}</p>
+                <p class="font-medium">${m.name || "Moodboard"}</p>
                 <p class="text-[12px] text-[#6e6e73] mt-1">${(m.items || []).length} kart</p>
               </a>`).join("")}
           </div>`
-        : `<p class="text-[14px] text-[#6e6e73]">Henüz moodboard yok. Sağ üstten yeni moodboard oluşturabilirsin.</p>`;
+        : `<p class="text-[14px] text-[#6e6e73]">Henüz tasarım panosu yok. Yukarıdan yeni pano oluşturabilirsin.</p>`;
     }
 
     async function boot() {
       await AG.ready;
       const session = await AG.getSessionArchitect();
       if (!session) { location.href = "/mimar-giris.html"; return; }
-      moodboards = await AG.getTasarım Panosus();
+      moodboards = await AG.getMoodboards();
       document.getElementById("welcome").textContent = `${session.name || "Mimar"} olarak giriş yapıldı`;
       renderTabs();
       renderContent();
@@ -207,7 +207,7 @@
         location.href = "/mimar-giris.html";
       });
       document.getElementById("new-moodboard-btn").addEventListener("click", async () => {
-        const res = await AG.createTasarım Panosu({ name: "Yeni Tasarım Panosu" });
+        const res = await AG.createMoodboard({ name: "Yeni Tasarım Panosu" });
         if (res.ok) location.href = `/tasarim-panosu.html?id=${encodeURIComponent(res.moodboard.id)}`;
       });
 
@@ -218,9 +218,9 @@
         if (!selectedProduct) return;
         const name = document.getElementById("quick-board-name").value.trim();
         if (!name) return;
-        const res = await AG.addProductToTasarım Panosu({ moodboardName: name, product: selectedProduct });
+        const res = await AG.addProductToMoodboard({ moodboardName: name, product: selectedProduct });
         if (!res.ok) return;
-        moodboards = await AG.getTasarım Panosus();
+        moodboards = await AG.getMoodboards();
         document.getElementById("quick-board-name").value = "";
         closeBoardModal();
         showToast("Board'a eklendi");
