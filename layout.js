@@ -95,14 +95,19 @@
             )
             .join("");
           return `
-            <div class="relative group">
-              <a href="${item.href}" class="px-3 py-2 rounded-full text-[13.5px] ${
+            <div class="relative">
+              <button type="button" id="products-mega-toggle" class="px-3 py-2 rounded-full text-[13.5px] ${
                 isActive ? "text-black" : "text-[#1f1f22] hover:text-black"
-              }">${item.label}</a>
-              <div class="hidden group-hover:block absolute left-1/2 -translate-x-1/2 top-full pt-3 z-40">
-                <div class="w-[860px] rounded-2xl border border-black/[0.08] bg-white shadow-[0_20px_60px_rgba(0,0,0,0.14)] p-5">
-                  <p class="text-[12px] font-semibold text-[#6e6e73] mb-3">Kategori yapısı</p>
-                  <div class="grid grid-cols-3 gap-6">
+              }">${item.label}</button>
+              <div id="products-mega-panel" class="hidden fixed left-0 right-0 top-[72px] z-40">
+                <div class="mx-6 lg:mx-10 rounded-b-2xl border border-black/[0.08] border-t-0 bg-white shadow-[0_30px_70px_rgba(0,0,0,0.16)]">
+                  <div class="px-6 pt-4">
+                    <div class="inline-flex rounded-full bg-[#f1f1f3] p-1">
+                      <button data-products-tab="all" class="products-tab-btn h-9 px-4 rounded-full bg-[#2c2d3a] text-white text-[12px] font-semibold">All Products</button>
+                      <button data-products-tab="new" class="products-tab-btn h-9 px-4 rounded-full text-[12px] font-semibold text-[#3a3a40]">See New Collections</button>
+                    </div>
+                  </div>
+                  <div class="px-6 py-5 grid grid-cols-3 gap-6">
                     ${megaCols}
                   </div>
                 </div>
@@ -152,6 +157,27 @@
     if (menuBtn && mobileMenu) {
       menuBtn.addEventListener("click", () => {
         mobileMenu.classList.toggle("hidden");
+      });
+    }
+
+    const megaToggle = document.getElementById("products-mega-toggle");
+    const megaPanel = document.getElementById("products-mega-panel");
+    if (megaToggle && megaPanel) {
+      const closeMega = () => megaPanel.classList.add("hidden");
+      megaToggle.addEventListener("click", (e) => {
+        e.stopPropagation();
+        megaPanel.classList.toggle("hidden");
+      });
+      megaPanel.addEventListener("click", (e) => e.stopPropagation());
+      document.addEventListener("click", closeMega);
+      document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeMega(); });
+
+      const tabs = megaPanel.querySelectorAll(".products-tab-btn");
+      tabs.forEach((t) => {
+        t.addEventListener("click", () => {
+          tabs.forEach((x) => x.className = "products-tab-btn h-9 px-4 rounded-full text-[12px] font-semibold text-[#3a3a40]");
+          t.className = "products-tab-btn h-9 px-4 rounded-full bg-[#2c2d3a] text-white text-[12px] font-semibold";
+        });
       });
     }
   }
