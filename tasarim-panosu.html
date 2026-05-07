@@ -873,7 +873,13 @@ async function boot() {
   // Zoom
   $("zoom-in").addEventListener("click",  () => { zoom=Math.min(5,+(zoom+0.1).toFixed(1)); fc.setZoom(zoom); $("zoom-val").textContent=Math.round(zoom*100)+"%"; });
   $("zoom-out").addEventListener("click", () => { zoom=Math.max(0.1,+(zoom-0.1).toFixed(1)); fc.setZoom(zoom); $("zoom-val").textContent=Math.round(zoom*100)+"%"; });
-  $("fit-btn").addEventListener("click",  () => { fc.setViewportTransform([1,0,0,1,0,0]); fc.setZoom(1); zoom=1; $("zoom-val").textContent="100%"; fc.renderAll(); });
+  $("fit-btn").addEventListener("click",  () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(()=>{});
+    } else {
+      document.exitFullscreen().catch(()=>{});
+    }
+  });
 
   // Settings
   $("settings-btn").addEventListener("click", e => { e.stopPropagation(); toggleDropdown("settings-dd", e.currentTarget); });
