@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Antigravity | Tasarım Panosu</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/6.4.3/fabric.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
@@ -261,17 +261,15 @@
         preserveObjectStacking: true,
       });
 
-      // Global object handle style
-      const proto = (fabric.FabricObject || fabric.Object)?.prototype;
-      if (proto?.set) {
-        proto.set({
-          borderColor:        "#3b82f6",
-          cornerColor:        "#3b82f6",
-          cornerStrokeColor:  "#fff",
-          cornerSize:         10,
-          transparentCorners: false,
-        });
-      }
+      // Global object handle style (v5)
+      fabric.Object.prototype.set({
+        borderColor:        "#3b82f6",
+        cornerColor:        "#3b82f6",
+        cornerStrokeColor:  "#fff",
+        cornerSize:         10,
+        transparentCorners: false,
+        borderScaleFactor:  1.5,
+      });
 
       // Drawing tool: mouse:down
       fc.on("mouse:down", (opt) => {
@@ -279,7 +277,7 @@
         // Only draw on empty area (no target)
         if (opt.target) return;
 
-        const pointer = opt.scenePoint || opt.absolutePointer || fc.getPointer(opt.e);
+        const pointer = fc.getPointer(opt.e);
 
         if (activeTool === "text") {
           const text = new fabric.IText("Metin gir...", {
@@ -335,17 +333,13 @@
     // ── Image helpers ─────────────────────────────────────────────────────────
 
     function addImageFromURL(url, overrides = {}) {
-      const opts = { crossOrigin: "anonymous" };
-      const doAdd = (img) => {
+      fabric.Image.fromURL(url, (img) => {
         img.scaleToWidth(220);
         img.set({ left: fc.width / 2 - 110, top: fc.height / 2 - 110, ...overrides });
         fc.add(img);
         fc.setActiveObject(img);
         fc.renderAll();
-      };
-      return fabric.Image.fromURL(url, opts)
-        .then(doAdd)
-        .catch(() => fabric.Image.fromURL(url).then(doAdd));
+      }, { crossOrigin: "anonymous" });
     }
 
     // ── Favorites list ────────────────────────────────────────────────────────
@@ -431,25 +425,21 @@
       // Board yükle: canvas_json önce, sonra eski items[] fallback
       if (boardData.canvas_json) {
         try {
-          await fc.loadFromJSON(JSON.parse(boardData.canvas_json));
-          fc.renderAll();
+          fc.loadFromJSON(JSON.parse(boardData.canvas_json), () => fc.renderAll());
         } catch (err) {
           console.warn("canvas_json yüklenemedi:", err);
         }
       } else if (Array.isArray(boardData.items) && boardData.items.length > 0) {
-        // eski format: items[] → fabric.Image
-        for (const item of boardData.items) {
+        boardData.items.forEach((item) => {
           if (item.image) {
-            await fabric.Image.fromURL(item.image, { crossOrigin: "anonymous" })
-              .then((img) => {
-                img.scaleToWidth(item.w || 220);
-                img.set({ left: item.x || 50, top: item.y || 50 });
-                fc.add(img);
-              })
-              .catch(() => {});
+            fabric.Image.fromURL(item.image, (img) => {
+              img.scaleToWidth(item.w || 220);
+              img.set({ left: item.x || 50, top: item.y || 50 });
+              fc.add(img);
+              fc.renderAll();
+            }, { crossOrigin: "anonymous" });
           }
-        }
-        fc.renderAll();
+        });
       }
 
       // Arkaplan rengi
@@ -499,7 +489,7 @@
           if (!file.type.startsWith("image/")) return;
           const reader = new FileReader();
           reader.onload = (ev) => {
-            fabric.Image.fromURL(ev.target.result).then((img) => {
+            fabric.Image.fromURL(ev.target.result, (img) => {
               img.scaleToWidth(220);
               img.set({ left: fc.width / 2 - 110, top: fc.height / 2 - 110 });
               fc.add(img);
@@ -516,11 +506,11 @@
       // Z-order
       $id("tool-front").addEventListener("click", () => {
         const obj = fc.getActiveObject();
-        if (obj) { fc.bringObjectToFront(obj); fc.renderAll(); }
+        if (obj) { fc.bringToFront(obj); fc.renderAll(); }
       });
       $id("tool-back").addEventListener("click", () => {
         const obj = fc.getActiveObject();
-        if (obj) { fc.sendObjectToBack(obj); fc.renderAll(); }
+        if (obj) { fc.sendToBack(obj); fc.renderAll(); }
       });
 
       // Sil butonu
@@ -619,7 +609,7 @@
         e.preventDefault();
         canvasWrap.style.outline = "";
 
-        const fcEl = fc.getElement ? fc.getElement() : document.getElementById("fc");
+        const fcEl = fc.getElement();
         const rect  = fcEl.getBoundingClientRect();
         const dropX = (e.clientX - rect.left)  / zoomLevel;
         const dropY = (e.clientY - rect.top)   / zoomLevel;
@@ -649,16 +639,14 @@
         if (raw) {
           try {
             const product = JSON.parse(raw);
-            fabric.Image.fromURL(product.image || FALLBACK_IMG, { crossOrigin: "anonymous" })
-              .then((img) => {
-                img.scaleToWidth(220);
-                img.set({ left: Math.max(0, dropX - 110), top: Math.max(0, dropY - 110) });
-                fc.add(img);
-                fc.setActiveObject(img);
-                fc.renderAll();
-                setSaveMsg("Ürün eklendi. Kaydetmeyi unutma.", false);
-              })
-              .catch(() => {});
+            fabric.Image.fromURL(product.image || FALLBACK_IMG, (img) => {
+              img.scaleToWidth(220);
+              img.set({ left: Math.max(0, dropX - 110), top: Math.max(0, dropY - 110) });
+              fc.add(img);
+              fc.setActiveObject(img);
+              fc.renderAll();
+              setSaveMsg("Ürün eklendi. Kaydetmeyi unutma.", false);
+            }, { crossOrigin: "anonymous" });
           } catch {}
         }
       });
