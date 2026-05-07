@@ -19,14 +19,9 @@
   ];
 
   const productMegaMenu = [
-    { name: "Zemin", subs: ["LVT", "Modüler Halı", "Rulo Halı", "Ahşap Zemin"] },
-    { name: "Duvar Kaplama", subs: ["Vinil Duvar", "Tekstil Duvar", "Akustik Duvar"] },
-    { name: "Tekstil", subs: ["Döşemelik", "Perdelik", "Akustik Tekstil", "Dış Mekan Tekstil"] },
-    { name: "Tavan ve Akustik", subs: ["Baffle", "Cloud", "Akustik Panel", "Tavan Karosu"] },
-    { name: "Yüzey", subs: ["Solid Surface", "Kuvars", "Doğal Taş", "Terrazzo"] },
-    { name: "Aydınlatma", subs: ["Sarkıt", "Lineer", "Aplik", "Akustik Aydınlatma"] },
-    { name: "Seramik", subs: ["İç Mekan Zemin", "Dış Mekan Zemin", "Duvar Seramiği"] },
-    { name: "Mimari", subs: ["Profil ve Trim", "Decking", "Peyzaj Kaplama"] },
+    { name: "Materials", subs: ["Flooring", "Glass", "Leather", "Masonry & Stone", "Metal", "Paints", "Paneling", "Product Finish", "Resin", "Surfaces", "Textiles", "Tile", "Wallcovering"] },
+    { name: "FF&E", subs: ["Acoustical", "Appliances", "Bathroom", "Decor & Accessories", "Furniture", "Hardware", "Kitchen", "Lighting", "Outdoor", "Window Treatments"] },
+    { name: "Architectural", subs: ["Ceiling", "Decking", "Doors", "Facade", "Moulding & Trim", "Paving & Landscape"] },
   ];
 
   const headerTarget = document.getElementById("site-header");
@@ -60,8 +55,8 @@
               }">${item.label}</a>
               <div class="hidden group-hover:block absolute left-1/2 -translate-x-1/2 top-full pt-3 z-40">
                 <div class="w-[860px] rounded-2xl border border-black/[0.08] bg-white shadow-[0_20px_60px_rgba(0,0,0,0.14)] p-5">
-                  <p class="text-[12px] font-semibold text-[#6e6e73] mb-3">Kategori ve alt kategoriler</p>
-                  <div class="grid grid-cols-4 gap-4">
+                  <p class="text-[12px] font-semibold text-[#6e6e73] mb-3">Kategori yapısı</p>
+                  <div class="grid grid-cols-3 gap-6">
                     ${megaCols}
                   </div>
                 </div>

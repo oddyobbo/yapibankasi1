@@ -270,14 +270,9 @@
 
     let session = null;
     const PRODUCT_TAXONOMY = {
-      "Zemin": ["LVT", "Modüler Halı", "Rulo Halı", "Ahşap Zemin", "Kauçuk Zemin"],
-      "Duvar Kaplama": ["Vinil Duvar", "Tekstil Duvar", "Akustik Duvar", "Doğal Duvar"],
-      "Tekstil": ["Döşemelik", "Perdelik", "Akustik Tekstil", "Performans Tekstil"],
-      "Tavan ve Akustik": ["Baffle", "Cloud", "Akustik Panel", "Tavan Karosu", "Akustik Bölücü"],
-      "Yüzey": ["Solid Surface", "Kuvars", "Doğal Taş", "Terrazzo", "Dekoratif Yüzey"],
-      "Aydınlatma": ["Sarkıt", "Lineer", "Aplik", "Akustik Aydınlatma"],
-      "Seramik": ["İç Mekan Zemin", "Dış Mekan Zemin", "Duvar Seramiği", "Porselen"],
-      "Mimari": ["Profil ve Trim", "Decking", "Peyzaj Kaplama", "Cephe Kaplama"],
+      "Materials": ["Flooring", "Glass", "Leather", "Masonry & Stone", "Metal", "Paints", "Paneling", "Product Finish", "Resin", "Surfaces", "Textiles", "Tile", "Wallcovering"],
+      "FF&E": ["Acoustical", "Appliances", "Bathroom", "Decor & Accessories", "Furniture", "Hardware", "Kitchen", "Lighting", "Outdoor", "Window Treatments"],
+      "Architectural": ["Ceiling", "Decking", "Doors", "Facade", "Moulding & Trim", "Paving & Landscape"],
     };
 
     async function init() {
@@ -658,7 +653,7 @@
     document.getElementById("download-template").addEventListener("click", () => {
       const sample = [
         "name,sku,category,subcategory,description,fireClass,acoustic,dimensions,thickness,certificates,image,pdfUrl,cadUrl,bimUrl",
-        "\"Unica Baffle Tavan\",\"UNI-BAF-1200\",\"Tavan ve Akustik\",\"Baffle\",\"Yüksek akustik performanslı tavan paneli\",\"B-s1,d0\",\"NRC 0.85\",\"40x1200 mm\",\"40 mm\",\"EPD;CE\",\"https://images.unsplash.com/photo-1615874959474-d609969a20ed?q=80&w=1200&auto=format&fit=crop\",\"https://example.com/datasheet.pdf\",\"https://example.com/detail.dwg\",\"https://example.com/revit.rfa\"",
+        "\"Unica Baffle Ceiling\",\"UNI-BAF-1200\",\"FF&E\",\"Acoustical\",\"High acoustic performance ceiling panel\",\"B-s1,d0\",\"NRC 0.85\",\"40x1200 mm\",\"40 mm\",\"EPD;CE\",\"https://images.unsplash.com/photo-1615874959474-d609969a20ed?q=80&w=1200&auto=format&fit=crop\",\"https://example.com/datasheet.pdf\",\"https://example.com/detail.dwg\",\"https://example.com/revit.rfa\"",
       ].join("\n");
       const blob = new Blob([sample], { type: "text/csv;charset=utf-8;" });
       const a = document.createElement("a");
@@ -800,7 +795,7 @@
         document.getElementById("prev-certs").value = certMatches.join(", ");
         document.getElementById("prev-image").value = pageImages[0] || "";
         document.getElementById("prev-source-url").value = rawUrl;
-        document.getElementById("prev-category").value = "Tavan ve Akustik";
+        document.getElementById("prev-category").value = "FF&E";
 
         const imgPreview = document.getElementById("prev-img-preview");
         const imgStrip = document.getElementById("prev-img-strip");
@@ -890,7 +885,7 @@
           brandName:   session.name || session.email,
           name,
           sku:         `URL-${Date.now()}`,
-          category:    document.getElementById("prev-category").value.trim() || "Tavan ve Akustik",
+          category:    document.getElementById("prev-category").value.trim() || "FF&E",
           description,
           technical,
           spec:  buildSpec(technical),
