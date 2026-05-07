@@ -93,16 +93,15 @@
           `;
         }
         return `
-          <article data-card-id="${item.id}" class="group absolute rounded-xl border border-black/15 bg-white shadow-sm overflow-hidden" style="left:${item.x || 20}px; top:${item.y || 20}px; width:${item.w || 220}px; height:${item.h || 190}px;">
-            <button data-delete-card="${item.id}" class="absolute top-2 right-2 z-20 w-6 h-6 rounded-md bg-white/95 border border-black/15 text-[12px] hover:bg-black hover:text-white opacity-0 group-hover:opacity-100 transition-opacity">×</button>
-            <div data-drag-handle="1" class="cursor-move w-full h-full flex flex-col">
-              <img src="${item.image || FALLBACK_IMG}" class="w-full h-[70%] object-cover pointer-events-none" alt="${item.name}">
-              <div class="p-2 flex-1 relative">
-                <button data-delete-label="${item.id}" class="absolute top-1 right-1 w-4 h-4 rounded text-[10px] bg-white/95 border border-black/15 hover:bg-black hover:text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity leading-none">×</button>
-                <p class="text-[12px] font-medium leading-tight pr-5">${item.name}</p>
-              </div>
+          <article data-card-id="${item.id}" class="group absolute rounded-xl border border-black/15 shadow-sm overflow-hidden" style="left:${item.x || 20}px; top:${item.y || 20}px; width:${item.w || 220}px; height:${item.h || 190}px;">
+            <button data-delete-card="${item.id}" class="absolute top-2 right-2 z-20 w-6 h-6 rounded-md bg-black/60 text-white text-[12px] hover:bg-black opacity-0 group-hover:opacity-100 transition-opacity">×</button>
+            <div data-drag-handle="1" class="cursor-move w-full h-full">
+              <img src="${item.image || FALLBACK_IMG}" class="w-full h-full object-cover pointer-events-none" alt="${item.name}">
             </div>
-            <button data-resize-handle="${item.id}" class="absolute right-1 bottom-1 w-5 h-5 rounded-sm border border-black/15 bg-white/95 text-[10px] leading-none flex items-center justify-center cursor-se-resize">◢</button>
+            ${item.name ? `<div class="absolute bottom-0 left-0 right-0 px-2.5 py-2 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+              <p class="text-[12px] font-medium text-white leading-tight">${item.name}</p>
+            </div>` : ""}
+            <button data-resize-handle="${item.id}" class="absolute right-1 bottom-1 w-5 h-5 rounded-sm border border-white/40 bg-black/30 text-white text-[10px] leading-none flex items-center justify-center cursor-se-resize opacity-0 group-hover:opacity-100 transition-opacity">◢</button>
           </article>
         `;
       }).join("");
