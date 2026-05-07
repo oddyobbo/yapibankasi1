@@ -4,31 +4,33 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Antigravity | Tasarım Panosu</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     * { box-sizing: border-box; }
-    body { font-family: 'Inter', sans-serif; background: #161616; color: #e5e5e5; margin: 0; overflow: hidden; }
-    .tool-btn { width:40px; height:40px; display:flex; align-items:center; justify-content:center; border-radius:8px; color:#999; cursor:pointer; transition:all .12s; border:none; background:transparent; margin:1px auto; }
-    .tool-btn:hover { background:rgba(255,255,255,.1); color:#fff; }
-    .tool-btn.active { background:rgba(59,130,246,.25); color:#60a5fa; }
-    .tool-btn.danger:hover { background:rgba(239,68,68,.15); color:#f87171; }
-    .sep { height:1px; background:rgba(255,255,255,.06); margin:6px 8px; }
-    .panel-label { font-size:10px; font-weight:600; color:#666; text-transform:uppercase; letter-spacing:.08em; padding:0 12px; margin-bottom:4px; margin-top:12px; display:block; }
-    .prop-input { background:#2a2a2a; border:1px solid rgba(255,255,255,.1); color:#e5e5e5; border-radius:6px; font-size:12px; padding:0 8px; height:28px; width:100%; outline:none; font-family:inherit; }
-    .prop-input:focus { border-color:rgba(59,130,246,.6); }
-    .prop-btn { height:28px; padding:0 10px; border-radius:6px; border:1px solid rgba(255,255,255,.1); background:transparent; color:#ccc; font-size:12px; cursor:pointer; font-family:inherit; transition:all .12s; }
-    .prop-btn:hover { background:rgba(255,255,255,.08); color:#fff; }
-    .prop-btn.active { background:rgba(59,130,246,.2); border-color:rgba(59,130,246,.5); color:#60a5fa; }
-    .color-chip { width:22px; height:22px; border-radius:5px; cursor:pointer; border:2px solid transparent; transition:border .1s; flex-shrink:0; }
-    .color-chip:hover, .color-chip.active { border-color:#3b82f6; }
-    .range-input { -webkit-appearance:none; width:100%; height:4px; border-radius:2px; background:#333; outline:none; }
-    .range-input::-webkit-slider-thumb { -webkit-appearance:none; width:14px; height:14px; border-radius:50%; background:#3b82f6; cursor:pointer; }
-    #canvas-area canvas { display:block; }
-    .dl-item { display:block; width:100%; text-align:left; padding:8px 14px; font-size:13px; color:#ccc; background:transparent; border:none; cursor:pointer; font-family:inherit; transition:background .1s; }
-    .dl-item:hover { background:rgba(255,255,255,.07); color:#fff; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif; background: #f5f5f7; color: #111; margin: 0; overflow: hidden; }
+    .tool-btn { width:40px; height:40px; display:flex; align-items:center; justify-content:center; border-radius:10px; color:#6e6e73; cursor:pointer; transition:all .12s; border:none; background:transparent; margin:1px auto; }
+    .tool-btn:hover { background:rgba(0,0,0,.06); color:#111; }
+    .tool-btn.active { background:#111; color:#fff; }
+    .tool-btn.danger:hover { background:rgba(220,38,38,.08); color:#dc2626; }
+    .sep { height:1px; background:rgba(0,0,0,.07); margin:5px 8px; }
+    .panel-label { font-size:10px; font-weight:600; color:#6e6e73; text-transform:uppercase; letter-spacing:.08em; padding:0 12px; margin-bottom:4px; margin-top:12px; display:block; }
+    .prop-input { background:#fff; border:1px solid rgba(0,0,0,.12); color:#111; border-radius:7px; font-size:12px; padding:0 8px; height:28px; width:100%; outline:none; font-family:inherit; }
+    .prop-input:focus { border-color:rgba(0,0,0,.35); }
+    .prop-btn { height:28px; padding:0 10px; border-radius:7px; border:1px solid rgba(0,0,0,.12); background:#fff; color:#4a4a4f; font-size:12px; cursor:pointer; font-family:inherit; transition:all .12s; }
+    .prop-btn:hover { background:#f5f5f7; color:#111; }
+    .prop-btn.active { background:#111; border-color:#111; color:#fff; }
+    .color-chip { width:22px; height:22px; border-radius:6px; cursor:pointer; border:2px solid transparent; transition:border .1s; flex-shrink:0; }
+    .color-chip:hover, .color-chip.active { border-color:#111; }
+    .range-input { -webkit-appearance:none; width:100%; height:4px; border-radius:2px; background:#e5e5ea; outline:none; }
+    .range-input::-webkit-slider-thumb { -webkit-appearance:none; width:14px; height:14px; border-radius:50%; background:#111; cursor:pointer; }
+    #canvas-area canvas { display:block; box-shadow:0 4px 32px rgba(0,0,0,.13); border-radius:4px; }
+    .dl-item { display:block; width:100%; text-align:left; padding:8px 14px; font-size:13px; color:#333; background:transparent; border:none; cursor:pointer; font-family:inherit; transition:background .1s; }
+    .dl-item:hover { background:#f5f5f7; color:#111; }
+    .ratio-btn { padding:4px 10px; border-radius:6px; border:1px solid rgba(0,0,0,.12); background:#fff; color:#4a4a4f; font-size:11px; cursor:pointer; font-family:inherit; transition:all .12s; white-space:nowrap; }
+    .ratio-btn:hover { border-color:rgba(0,0,0,.3); color:#111; }
+    .ratio-btn.active { background:#111; border-color:#111; color:#fff; }
   </style>
 </head>
 <body>
@@ -37,7 +39,7 @@
 <div style="display:flex; height:calc(100vh - 56px);">
 
   <!-- ═══ SOL ARAÇ RAYI ═══ -->
-  <div style="width:52px; background:#1e1e1e; border-right:1px solid rgba(255,255,255,.06); display:flex; flex-direction:column; padding:6px 0; overflow-y:auto; flex-shrink:0;">
+  <div style="width:52px; background:#fff; border-right:1px solid rgba(0,0,0,.08); display:flex; flex-direction:column; padding:6px 0; overflow-y:auto; flex-shrink:0;">
     <a href="/mimar-paneli.html" title="Panele dön" class="tool-btn">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M15 18l-6-6 6-6"/></svg>
     </a>
@@ -89,21 +91,31 @@
   <div style="flex:1; display:flex; flex-direction:column; min-width:0; overflow:hidden;">
 
     <!-- Üst bar -->
-    <div style="height:44px; background:#1e1e1e; border-bottom:1px solid rgba(255,255,255,.06); display:flex; align-items:center; padding:0 14px; gap:10px; flex-shrink:0;">
-      <input id="board-name" placeholder="Pano adı" style="background:#2a2a2a; border:1px solid rgba(255,255,255,.1); color:#e5e5e5; border-radius:7px; font-size:13px; padding:0 10px; height:28px; outline:none; font-family:inherit; min-width:180px; max-width:280px;">
+    <div style="height:50px; background:#fff; border-bottom:1px solid rgba(0,0,0,.08); display:flex; align-items:center; padding:0 14px; gap:8px; flex-shrink:0;">
+      <input id="board-name" placeholder="Pano adı" style="background:transparent; border:1px solid rgba(0,0,0,.1); color:#111; border-radius:8px; font-size:13px; padding:0 10px; height:30px; outline:none; font-family:inherit; min-width:160px; max-width:240px;">
+      <!-- Ratio seçici -->
+      <div style="display:flex; align-items:center; gap:4px; margin-left:8px;">
+        <button class="ratio-btn active" data-ratio="free">Serbest</button>
+        <button class="ratio-btn" data-ratio="16:9">16:9</button>
+        <button class="ratio-btn" data-ratio="4:3">4:3</button>
+        <button class="ratio-btn" data-ratio="1:1">Kare</button>
+        <button class="ratio-btn" data-ratio="a4-l">A4 Yatay</button>
+        <button class="ratio-btn" data-ratio="a4-p">A4 Dikey</button>
+        <button class="ratio-btn" data-ratio="story">Story</button>
+      </div>
       <div style="margin-left:auto; display:flex; align-items:center; gap:8px;">
-        <span id="save-msg" style="font-size:11px; color:#666;"></span>
-        <div style="display:flex; align-items:center; gap:4px; background:#2a2a2a; border:1px solid rgba(255,255,255,.1); border-radius:7px; padding:0 8px; height:28px;">
-          <button id="zoom-out" style="color:#aaa; background:none; border:none; cursor:pointer; font-size:16px; padding:0; line-height:1;">−</button>
-          <span id="zoom-val" style="font-size:12px; color:#aaa; width:40px; text-align:center; user-select:none;">100%</span>
-          <button id="zoom-in" style="color:#aaa; background:none; border:none; cursor:pointer; font-size:16px; padding:0; line-height:1;">+</button>
+        <span id="save-msg" style="font-size:11px; color:#6e6e73;"></span>
+        <div style="display:flex; align-items:center; gap:3px; background:#f5f5f7; border:1px solid rgba(0,0,0,.1); border-radius:8px; padding:0 8px; height:30px;">
+          <button id="zoom-out" style="color:#6e6e73; background:none; border:none; cursor:pointer; font-size:16px; padding:0; line-height:1;">−</button>
+          <span id="zoom-val" style="font-size:12px; color:#6e6e73; width:40px; text-align:center; user-select:none;">100%</span>
+          <button id="zoom-in" style="color:#6e6e73; background:none; border:none; cursor:pointer; font-size:16px; padding:0; line-height:1;">+</button>
         </div>
-        <button id="save-btn" style="height:28px; padding:0 14px; background:#3b82f6; color:#fff; border:none; border-radius:7px; font-size:13px; font-weight:600; cursor:pointer; font-family:inherit; transition:background .12s;" onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3b82f6'">Kaydet</button>
+        <button id="save-btn" style="height:30px; padding:0 16px; background:#111; color:#fff; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; font-family:inherit; transition:background .12s;" onmouseover="this.style.background='#333'" onmouseout="this.style.background='#111'">Kaydet</button>
         <div style="position:relative;">
-          <button id="dl-btn" style="height:28px; padding:0 12px; background:#2a2a2a; color:#ccc; border:1px solid rgba(255,255,255,.1); border-radius:7px; font-size:13px; cursor:pointer; font-family:inherit; display:flex; align-items:center; gap:4px;">
+          <button id="dl-btn" style="height:30px; padding:0 12px; background:#f5f5f7; color:#333; border:1px solid rgba(0,0,0,.1); border-radius:8px; font-size:13px; cursor:pointer; font-family:inherit; display:flex; align-items:center; gap:4px;">
             İndir <svg width="10" height="6" viewBox="0 0 10 6" fill="currentColor"><path d="M0 0l5 6 5-6z"/></svg>
           </button>
-          <div id="dl-menu" style="display:none; position:absolute; right:0; top:34px; background:#2a2a2a; border:1px solid rgba(255,255,255,.12); border-radius:8px; overflow:hidden; z-index:999; min-width:150px; box-shadow:0 8px 24px rgba(0,0,0,.5);">
+          <div id="dl-menu" style="display:none; position:absolute; right:0; top:36px; background:#fff; border:1px solid rgba(0,0,0,.1); border-radius:10px; overflow:hidden; z-index:999; min-width:150px; box-shadow:0 8px 24px rgba(0,0,0,.12);">
             <button class="dl-item" id="dl-jpg">JPG olarak indir</button>
             <button class="dl-item" id="dl-pdf">PDF olarak indir</button>
           </div>
@@ -112,24 +124,24 @@
     </div>
 
     <!-- Kanvas -->
-    <div id="canvas-area" style="flex:1; overflow:hidden; display:flex; align-items:center; justify-content:center; background:#161616; position:relative;">
+    <div id="canvas-area" style="flex:1; overflow:hidden; display:flex; align-items:center; justify-content:center; background:#f0f0f2; position:relative;">
       <canvas id="fc"></canvas>
     </div>
   </div>
 
   <!-- ═══ SAĞ PANEL ═══ -->
-  <div style="width:248px; background:#1e1e1e; border-left:1px solid rgba(255,255,255,.06); display:flex; flex-direction:column; overflow:hidden; flex-shrink:0;">
+  <div style="width:260px; background:#fff; border-left:1px solid rgba(0,0,0,.08); display:flex; flex-direction:column; overflow:hidden; flex-shrink:0;">
 
-    <!-- Özellikler -->
-    <div id="props-panel" style="flex:1; overflow-y:auto; padding-bottom:8px;">
+    <!-- Özellikler (üst yarı) -->
+    <div id="props-panel" style="flex:1; overflow-y:auto; min-height:0; padding-bottom:8px;">
       <!-- JS ile doldurulacak -->
     </div>
 
-    <!-- Alt: Ürün ekle -->
-    <div style="border-top:1px solid rgba(255,255,255,.06); padding:10px 12px 12px;">
-      <div style="font-size:11px; font-weight:600; color:#666; text-transform:uppercase; letter-spacing:.08em; margin-bottom:8px;">Ürün Ekle</div>
-      <input id="product-search" placeholder="Ara..." style="width:100%; background:#2a2a2a; border:1px solid rgba(255,255,255,.1); color:#e5e5e5; border-radius:6px; font-size:12px; padding:0 8px; height:28px; outline:none; font-family:inherit; margin-bottom:6px;">
-      <div id="fav-list" style="max-height:220px; overflow-y:auto; display:flex; flex-direction:column; gap:4px;"></div>
+    <!-- Ürün ekle (alt yarı, sabit) -->
+    <div style="border-top:1px solid rgba(0,0,0,.07); padding:12px; flex-shrink:0; display:flex; flex-direction:column; height:300px;">
+      <div style="font-size:11px; font-weight:600; color:#6e6e73; text-transform:uppercase; letter-spacing:.08em; margin-bottom:8px;">Ürün Ekle</div>
+      <input id="product-search" placeholder="Favorilerde ara..." style="width:100%; background:#f5f5f7; border:1px solid rgba(0,0,0,.1); color:#111; border-radius:8px; font-size:12px; padding:0 10px; height:30px; outline:none; font-family:inherit; margin-bottom:8px; flex-shrink:0;">
+      <div id="fav-list" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:5px; min-height:0;"></div>
     </div>
   </div>
 </div>
@@ -218,12 +230,12 @@ function initCanvas() {
 
   // Global handle style
   fabric.Object.prototype.set({
-    borderColor: "#3b82f6",
-    cornerColor: "#3b82f6",
+    borderColor: "#111",
+    cornerColor: "#111",
     cornerStrokeColor: "#fff",
-    cornerSize: 9,
+    cornerSize: 8,
     transparentCorners: false,
-    borderScaleFactor: 1.5,
+    borderScaleFactor: 1,
     padding: 4,
   });
 
@@ -490,7 +502,7 @@ function updateProps() {
 
   html += `
     <div style="padding:12px; margin-top:8px;">
-      <button id="p-delete" style="width:100%;height:30px;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.25);color:#f87171;border-radius:7px;font-size:12px;cursor:pointer;font-family:inherit;transition:background .12s;" onmouseover="this.style.background='rgba(239,68,68,.22)'" onmouseout="this.style.background='rgba(239,68,68,.12)'">Sil</button>
+      <button id="p-delete" style="width:100%;height:30px;background:rgba(220,38,38,.06);border:1px solid rgba(220,38,38,.18);color:#dc2626;border-radius:8px;font-size:12px;cursor:pointer;font-family:inherit;transition:background .12s;" onmouseover="this.style.background='rgba(220,38,38,.12)'" onmouseout="this.style.background='rgba(220,38,38,.06)'">Sil</button>
     </div>
   `;
 
@@ -603,11 +615,11 @@ function renderFavs(list) {
     return;
   }
   wrap.innerHTML = list.map(p=>`
-    <button draggable="true" data-pid="${p.id}" style="width:100%;display:flex;align-items:center;gap:8px;background:#2a2a2a;border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:6px;cursor:grab;text-align:left;transition:border .12s;" onmouseover="this.style.borderColor='rgba(59,130,246,.5)'" onmouseout="this.style.borderColor='rgba(255,255,255,.08)'">
-      <img src="${p.image||FALLBACK}" style="width:40px;height:40px;border-radius:6px;object-fit:cover;flex-shrink:0;" crossorigin="anonymous">
+    <button draggable="true" data-pid="${p.id}" style="width:100%;display:flex;align-items:center;gap:8px;background:#f5f5f7;border:1px solid rgba(0,0,0,.08);border-radius:9px;padding:7px;cursor:grab;text-align:left;transition:border .12s;" onmouseover="this.style.borderColor='rgba(0,0,0,.25)'" onmouseout="this.style.borderColor='rgba(0,0,0,.08)'">
+      <img src="${p.image||FALLBACK}" style="width:40px;height:40px;border-radius:7px;object-fit:cover;flex-shrink:0;" crossorigin="anonymous">
       <div style="min-width:0;">
-        <div style="font-size:12px;font-weight:500;color:#e5e5e5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.name}</div>
-        <div style="font-size:11px;color:#666;margin-top:1px;">Tıkla veya sürükle</div>
+        <div style="font-size:12px;font-weight:500;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.name}</div>
+        <div style="font-size:11px;color:#6e6e73;margin-top:1px;">Tıkla veya sürükle</div>
       </div>
     </button>
   `).join("");
@@ -767,6 +779,34 @@ async function boot() {
     pdf.addImage(url,"JPEG",0,0,W,H);
     pdf.save(($("board-name").value||"pano")+".pdf");
     setSaveMsg("PDF indirildi ✓", true);
+  });
+
+  // ── Ratio seçici ──
+  const RATIOS = {
+    "free":  null,
+    "16:9":  [16,9],
+    "4:3":   [4,3],
+    "1:1":   [1,1],
+    "a4-l":  [297,210],
+    "a4-p":  [210,297],
+    "story": [9,16],
+  };
+  document.querySelectorAll("[data-ratio]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll("[data-ratio]").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      const ratio = RATIOS[btn.dataset.ratio];
+      if (!ratio || !fc) return;
+      const area = $("canvas-area");
+      const maxW = area.clientWidth - 32;
+      const maxH = area.clientHeight - 32;
+      const [rw, rh] = ratio;
+      let cw = maxW, ch = Math.round(maxW * rh / rw);
+      if (ch > maxH) { ch = maxH; cw = Math.round(maxH * rw / rh); }
+      fc.setDimensions({ width: cw, height: ch });
+      fc.setZoom(1); zoom = 1; $("zoom-val").textContent = "100%";
+      fc.renderAll();
+    });
   });
 
   // Product search
