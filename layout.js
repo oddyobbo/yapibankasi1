@@ -18,11 +18,56 @@
     { id: "apply", href: "/marka-basvuru.html", label: "Marka Başvuru" },
   ];
 
+  const productMegaMenu = [
+    { name: "Flooring", subs: ["LVT", "Modular Carpet", "Broadloom Carpet", "Wood Flooring"] },
+    { name: "Wallcovering", subs: ["Vinyl Wallcovering", "Textile Wallcovering", "Acoustic Wall"] },
+    { name: "Textile", subs: ["Upholstery", "Drapery", "Acoustic Textile", "Outdoor Textile"] },
+    { name: "Ceiling & Acoustic", subs: ["Baffle", "Cloud", "Acoustic Panel", "Ceiling Tile"] },
+    { name: "Surfaces", subs: ["Solid Surface", "Quartz", "Natural Stone", "Terrazzo"] },
+    { name: "Lighting", subs: ["Pendant", "Linear", "Wall Sconce", "Acoustic Lighting"] },
+    { name: "Tile", subs: ["Interior Floor Tile", "Exterior Floor Tile", "Wall Tile"] },
+    { name: "Architectural", subs: ["Moulding & Trim", "Decking", "Paving & Landscape"] },
+  ];
+
   const headerTarget = document.getElementById("site-header");
   if (headerTarget) {
     const nav = navItems
       .map((item) => {
         const isActive = item.id === current;
+        if (item.id === "products") {
+          const megaCols = productMegaMenu
+            .map(
+              (col) => `
+                <div>
+                  <p class="text-[12px] font-semibold text-black">${col.name}</p>
+                  <div class="mt-2 space-y-1">
+                    ${col.subs
+                      .map(
+                        (sub) =>
+                          `<a href="/urunler.html?category=${encodeURIComponent(col.name)}&sub=${encodeURIComponent(
+                            sub
+                          )}" class="block text-[12px] text-[#4a4a4f] hover:text-black">${sub}</a>`
+                      )
+                      .join("")}
+                  </div>
+                </div>`
+            )
+            .join("");
+          return `
+            <div class="relative group">
+              <a href="${item.href}" class="px-3 py-2 rounded-full text-[13.5px] ${
+                isActive ? "text-black" : "text-[#1f1f22] hover:text-black"
+              }">${item.label}</a>
+              <div class="hidden group-hover:block absolute left-1/2 -translate-x-1/2 top-full pt-3 z-40">
+                <div class="w-[860px] rounded-2xl border border-black/[0.08] bg-white shadow-[0_20px_60px_rgba(0,0,0,0.14)] p-5">
+                  <p class="text-[12px] font-semibold text-[#6e6e73] mb-3">Material Bank referanslı kategori yapısı</p>
+                  <div class="grid grid-cols-4 gap-4">
+                    ${megaCols}
+                  </div>
+                </div>
+              </div>
+            </div>`;
+        }
         return `<a href="${item.href}" class="px-3 py-2 rounded-full text-[13.5px] ${
           isActive ? "text-black" : "text-[#1f1f22] hover:text-black"
         }">${item.label}</a>`;

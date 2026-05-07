@@ -35,16 +35,38 @@
           <form id="product-form" class="grid md:grid-cols-2 gap-3 text-[14px]">
             <input required name="name" class="h-11 rounded-xl border border-black/10 px-4" placeholder="Ürün adı *">
             <input required name="sku" class="h-11 rounded-xl border border-black/10 px-4" placeholder="SKU / Ürün kodu *">
-            <input required name="category" class="h-11 rounded-xl border border-black/10 px-4" placeholder="Kategori *">
-            <input required name="brand" class="h-11 rounded-xl border border-black/10 px-4" placeholder="Marka adı *">
+            <select required name="category" id="manual-category" class="h-11 rounded-xl border border-black/10 px-4 bg-white">
+              <option value="">Ana kategori seç *</option>
+            </select>
+            <select required name="subcategory" id="manual-subcategory" class="h-11 rounded-xl border border-black/10 px-4 bg-white">
+              <option value="">Alt kategori seç *</option>
+            </select>
             <input required name="description" class="h-11 rounded-xl border border-black/10 px-4 md:col-span-2" placeholder="Kısa ürün açıklaması *">
 
             <h3 class="md:col-span-2 text-[15px] font-semibold mt-2">Teknik Bilgi Başlıkları</h3>
-            <input name="fireClass" class="h-11 rounded-xl border border-black/10 px-4" placeholder="Yangın sınıfı (örn. B-s1,d0)">
-            <input name="acoustic" class="h-11 rounded-xl border border-black/10 px-4" placeholder="Akustik değer (örn. NRC 0.85)">
-            <input name="dimensions" class="h-11 rounded-xl border border-black/10 px-4" placeholder="Ölçü (örn. 60x120 cm)">
-            <input name="thickness" class="h-11 rounded-xl border border-black/10 px-4" placeholder="Kalınlık (örn. 12 mm)">
-            <input name="certificates" class="h-11 rounded-xl border border-black/10 px-4 md:col-span-2" placeholder="Sertifikalar (EPD, CE, ISO...)">
+            <label class="text-[12px] text-[#6e6e73]">Yangın Sınıfı
+              <input name="fireClass" class="mt-1 h-11 w-full rounded-xl border border-black/10 px-4" placeholder="Örn: EN 13501-1 / B-s1,d0">
+            </label>
+            <label class="text-[12px] text-[#6e6e73]">Akustik Performans
+              <input name="acoustic" class="mt-1 h-11 w-full rounded-xl border border-black/10 px-4" placeholder="Örn: NRC 0.85">
+            </label>
+            <label class="text-[12px] text-[#6e6e73]">Ölçü
+              <input name="dimensions" class="mt-1 h-11 w-full rounded-xl border border-black/10 px-4" placeholder="Örn: 60x120 cm">
+            </label>
+            <label class="text-[12px] text-[#6e6e73]">Kalınlık
+              <input name="thickness" class="mt-1 h-11 w-full rounded-xl border border-black/10 px-4" placeholder="Örn: 12 mm">
+            </label>
+            <label class="md:col-span-2 text-[12px] text-[#6e6e73]">Sertifikalar
+              <input name="certificates" class="mt-1 h-11 w-full rounded-xl border border-black/10 px-4" placeholder="Örn: EPD, CE, ISO 9001">
+            </label>
+            <div class="md:col-span-2 rounded-xl border border-black/10 bg-white p-3">
+              <div class="flex items-center justify-between gap-3">
+                <p class="text-[13px] font-semibold">Özel Teknik Başlıklar</p>
+                <button type="button" id="add-tech-row" class="px-3 py-1.5 rounded-full border border-black/15 text-[12px]">Başlık Ekle</button>
+              </div>
+              <p class="text-[12px] text-[#6e6e73] mt-1">Markana özel teknik alanları ekleyebilirsin (örn: Işık Yansıtma, Montaj Aralığı).</p>
+              <div id="custom-tech-rows" class="mt-3 space-y-2"></div>
+            </div>
 
             <h3 class="md:col-span-2 text-[15px] font-semibold mt-2">Dosya ve Medya</h3>
             <input name="image" class="h-11 rounded-xl border border-black/10 px-4 md:col-span-2" placeholder="Görsel URL (opsiyonel)">
@@ -74,7 +96,7 @@
             </article>
             <article class="rounded-xl border border-black/10 bg-white p-4">
               <h4 class="text-[15px] font-semibold">Beklenen başlıklar</h4>
-              <p class="text-[13px] text-[#6e6e73] mt-2">name, sku, category, description, fireClass, acoustic, dimensions, thickness, certificates, image, pdfUrl, cadUrl, bimUrl</p>
+              <p class="text-[13px] text-[#6e6e73] mt-2">name, sku, category, subcategory, description, fireClass, acoustic, dimensions, thickness, certificates, image, pdfUrl, cadUrl, bimUrl</p>
               <div class="mt-4 rounded-lg bg-[#fbfbfd] border border-black/10 p-3 text-[12px] text-[#3a3a3c]">
                 <p class="font-semibold">Not:</p>
                 <p>- İlk 4 alan (name, sku, category, description) zorunlu.</p>
@@ -151,7 +173,9 @@
                 </div>
                 <div>
                   <label class="block text-[11px] text-[#6e6e73] mb-1">Kategori</label>
-                  <input id="prev-category" class="w-full h-10 rounded-xl border border-black/10 px-3 outline-none focus:border-black/30" placeholder="Akustik" list="category-list">
+                  <select id="prev-category" class="w-full h-10 rounded-xl border border-black/10 px-3 bg-white outline-none focus:border-black/30">
+                    <option value="">Kategori seç</option>
+                  </select>
                 </div>
                 <div>
                   <label class="block text-[11px] text-[#6e6e73] mb-1">Akustik Değer</label>
@@ -217,6 +241,16 @@
     const countViews    = document.getElementById("count-views");
 
     let session = null;
+    const PRODUCT_TAXONOMY = {
+      "Flooring": ["LVT", "Modular Carpet", "Broadloom Carpet", "Wood Flooring", "Resilient Sheet", "Rubber Flooring"],
+      "Wallcovering": ["Vinyl Wallcovering", "Textile Wallcovering", "Acoustic Wallcovering", "Natural Wallcovering"],
+      "Textile": ["Upholstery", "Drapery", "Acoustic Textile", "Performance Textile"],
+      "Ceiling & Acoustic": ["Baffle", "Cloud", "Acoustic Panel", "Ceiling Tile", "Acoustic Divider"],
+      "Surfaces": ["Solid Surface", "Quartz", "Natural Stone", "Terrazzo", "Decorative Surface"],
+      "Lighting": ["Pendant", "Linear", "Wall Sconce", "Acoustic Lighting"],
+      "Tile": ["Interior Floor Tile", "Exterior Floor Tile", "Wall Tile", "Porcelain Tile"],
+      "Architectural": ["Moulding & Trim", "Decking", "Paving & Landscape", "Facade Cladding"],
+    };
 
     async function init() {
       await AG.ready;
@@ -232,14 +266,7 @@
         return;
       }
 
-      const categoryInput = document.querySelector('input[name="category"]');
-      if (categoryInput) {
-        const list = document.createElement("datalist");
-        list.id = "category-list";
-        list.innerHTML = AG.CATEGORIES.map((c) => `<option value="${c}"></option>`).join("");
-        document.body.appendChild(list);
-        categoryInput.setAttribute("list", "category-list");
-      }
+      setupCategorySelectors();
 
       const logoutBtn = document.createElement("button");
       logoutBtn.className = "px-4 py-2 rounded-full border border-black/15 text-[13px]";
@@ -262,20 +289,55 @@
       return parts.join(" · ");
     }
 
+    function setupCategorySelectors() {
+      const categorySel = document.getElementById("manual-category");
+      const subSel = document.getElementById("manual-subcategory");
+      const previewCategorySel = document.getElementById("prev-category");
+      const categoryOptions = Object.keys(PRODUCT_TAXONOMY).map((c) => `<option value="${c}">${c}</option>`).join("");
+      categorySel.innerHTML =
+        '<option value="">Ana kategori seç *</option>' + categoryOptions;
+      subSel.innerHTML = '<option value="">Alt kategori seç *</option>';
+      if (previewCategorySel) {
+        previewCategorySel.innerHTML = '<option value="">Kategori seç</option>' + categoryOptions;
+      }
+
+      categorySel.addEventListener("change", () => {
+        const list = PRODUCT_TAXONOMY[categorySel.value] || [];
+        subSel.innerHTML =
+          '<option value="">Alt kategori seç *</option>' +
+          list.map((s) => `<option value="${s}">${s}</option>`).join("");
+      });
+    }
+
+    function collectCustomTechnical(fd) {
+      const rows = document.querySelectorAll(".custom-tech-row");
+      const extras = {};
+      rows.forEach((row) => {
+        const k = row.querySelector('input[name="customTechKey"]')?.value?.trim();
+        const v = row.querySelector('input[name="customTechValue"]')?.value?.trim();
+        if (k && v) extras[k] = v;
+      });
+      return extras;
+    }
+
     function createProductFromForm(fd) {
+      const mainCategory = fd.get("category")?.trim() || "";
+      const subCategory = fd.get("subcategory")?.trim() || "";
+      const customTechnical = collectCustomTechnical(fd);
       const technical = {
         fireClass:    fd.get("fireClass")?.trim()    || "",
         acoustic:     fd.get("acoustic")?.trim()     || "",
         dimensions:   fd.get("dimensions")?.trim()   || "",
         thickness:    fd.get("thickness")?.trim()    || "",
         certificates: fd.get("certificates")?.trim() || "",
+        ...customTechnical,
       };
       return {
         brandId:     session.id,
         brandName:   session.name || session.email,
         name:        fd.get("name")?.trim(),
         sku:         fd.get("sku")?.trim(),
-        category:    fd.get("category")?.trim(),
+        category:    subCategory ? `${mainCategory} > ${subCategory}` : mainCategory,
         description: fd.get("description")?.trim(),
         technical,
         spec:  buildSpec(technical),
@@ -341,6 +403,19 @@
     }
 
     function attachHandlers() {
+      const customRowsWrap = document.getElementById("custom-tech-rows");
+      const addTechBtn = document.getElementById("add-tech-row");
+      addTechBtn?.addEventListener("click", () => {
+        const row = document.createElement("div");
+        row.className = "custom-tech-row grid md:grid-cols-[1fr_1fr_auto] gap-2";
+        row.innerHTML = `
+          <input name="customTechKey" class="h-10 rounded-lg border border-black/10 px-3 text-[13px]" placeholder="Teknik başlık (örn: Işık Yansıtma)">
+          <input name="customTechValue" class="h-10 rounded-lg border border-black/10 px-3 text-[13px]" placeholder="Değer (örn: %78)">
+          <button type="button" class="remove-tech-row h-10 px-3 rounded-lg border border-black/15 text-[12px]">Sil</button>`;
+        row.querySelector(".remove-tech-row").addEventListener("click", () => row.remove());
+        customRowsWrap.appendChild(row);
+      });
+
       const uploadBtn = document.getElementById("upload-image-btn");
       const uploadMsg = document.getElementById("upload-image-msg");
       const imageInput = document.querySelector('input[name="image"]');
@@ -375,12 +450,14 @@
       document.getElementById("product-form").addEventListener("submit", async (e) => {
         e.preventDefault();
         const fd = new FormData(e.currentTarget);
-        const required = ["name", "sku", "category", "description"];
+        const required = ["name", "sku", "category", "subcategory", "description"];
         if (required.some((k) => !fd.get(k)?.toString().trim())) return;
         const btn = e.currentTarget.querySelector("button[type=submit], button:last-of-type");
         if (btn) { btn.disabled = true; btn.textContent = "Kaydediliyor…"; }
         await AG.addProduct(createProductFromForm(fd));
         e.currentTarget.reset();
+        document.getElementById("custom-tech-rows").innerHTML = "";
+        document.getElementById("manual-subcategory").innerHTML = '<option value="">Alt kategori seç *</option>';
         if (btn) { btn.disabled = false; btn.textContent = "Ürünü Kaydet (Taslak)"; }
         await render();
       });
@@ -412,7 +489,7 @@
       if (lines.length < 2) return { ok: false, message: "CSV boş görünüyor." };
       const headers = parseCsvLine(lines[0]);
       const idx = (name) => headers.indexOf(name);
-      const required = ["name", "sku", "category", "description"];
+        const required = ["name", "sku", "category", "description"];
       for (const field of required) {
         if (idx(field) === -1) return { ok: false, message: `Eksik başlık: ${field}` };
       }
@@ -424,6 +501,7 @@
         const name = get("name").trim();
         const sku = get("sku").trim();
         const category = get("category").trim();
+        const subcategory = get("subcategory").trim();
         const description = get("description").trim();
         if (!name || !sku || !category || !description) continue;
         const technical = {
@@ -436,7 +514,7 @@
         products.push({
           brandId:     session.id,
           brandName:   session.name || session.email,
-          name, sku, category, description,
+          name, sku, category: subcategory ? `${category} > ${subcategory}` : category, description,
           technical,
           spec:  buildSpec(technical),
           image: get("image").trim(),
@@ -451,8 +529,8 @@
 
     document.getElementById("download-template").addEventListener("click", () => {
       const sample = [
-        "name,sku,category,description,fireClass,acoustic,dimensions,thickness,certificates,image,pdfUrl,cadUrl,bimUrl",
-        "\"Unica Baffle Tavan\",\"UNI-BAF-1200\",\"Akustik\",\"Yüksek akustik performanslı tavan paneli\",\"B-s1,d0\",\"NRC 0.85\",\"40x1200 mm\",\"40 mm\",\"EPD;CE\",\"https://images.unsplash.com/photo-1615874959474-d609969a20ed?q=80&w=1200&auto=format&fit=crop\",\"https://example.com/datasheet.pdf\",\"https://example.com/detail.dwg\",\"https://example.com/revit.rfa\"",
+        "name,sku,category,subcategory,description,fireClass,acoustic,dimensions,thickness,certificates,image,pdfUrl,cadUrl,bimUrl",
+        "\"Unica Baffle Tavan\",\"UNI-BAF-1200\",\"Ceiling & Acoustic\",\"Baffle\",\"Yüksek akustik performanslı tavan paneli\",\"B-s1,d0\",\"NRC 0.85\",\"40x1200 mm\",\"40 mm\",\"EPD;CE\",\"https://images.unsplash.com/photo-1615874959474-d609969a20ed?q=80&w=1200&auto=format&fit=crop\",\"https://example.com/datasheet.pdf\",\"https://example.com/detail.dwg\",\"https://example.com/revit.rfa\"",
       ].join("\n");
       const blob = new Blob([sample], { type: "text/csv;charset=utf-8;" });
       const a = document.createElement("a");
@@ -594,7 +672,7 @@
         document.getElementById("prev-certs").value = certMatches.join(", ");
         document.getElementById("prev-image").value = pageImages[0] || "";
         document.getElementById("prev-source-url").value = rawUrl;
-        document.getElementById("prev-category").value = "Akustik";
+        document.getElementById("prev-category").value = "Ceiling & Acoustic";
 
         const imgPreview = document.getElementById("prev-img-preview");
         const imgStrip = document.getElementById("prev-img-strip");
@@ -684,7 +762,7 @@
           brandName:   session.name || session.email,
           name,
           sku:         `URL-${Date.now()}`,
-          category:    document.getElementById("prev-category").value.trim() || "Akustik",
+          category:    document.getElementById("prev-category").value.trim() || "Ceiling & Acoustic",
           description,
           technical,
           spec:  buildSpec(technical),
