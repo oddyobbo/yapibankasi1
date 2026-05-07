@@ -24,6 +24,38 @@
     { name: "Mimari", subs: ["Tavan", "Decking", "Kapı", "Cephe", "Profil ve Trim", "Peyzaj Kaplama"] },
   ];
 
+  const subCategoryIcons = {
+    "Zemin": "▦",
+    "Cam": "◇",
+    "Deri": "◍",
+    "Yığma ve Taş": "▧",
+    "Metal": "▣",
+    "Boya": "◌",
+    "Panel": "▤",
+    "Yüzey Bitişi": "◍",
+    "Reçine": "◈",
+    "Yüzey": "⬒",
+    "Tekstil": "▥",
+    "Seramik": "◫",
+    "Duvar Kaplama": "▭",
+    "Akustik": "◉",
+    "Elektrikli Cihaz": "⌁",
+    "Banyo": "◔",
+    "Dekor ve Aksesuar": "✦",
+    "Mobilya": "▤",
+    "Donanım": "⛭",
+    "Mutfak": "⌂",
+    "Aydınlatma": "◐",
+    "Dış Mekan": "◒",
+    "Pencere Sistemleri": "◧",
+    "Tavan": "▔",
+    "Decking": "▥",
+    "Kapı": "▯",
+    "Cephe": "▣",
+    "Profil ve Trim": "▱",
+    "Peyzaj Kaplama": "▨",
+  };
+
   const headerTarget = document.getElementById("site-header");
   if (headerTarget) {
     const nav = navItems
@@ -41,7 +73,10 @@
                         (sub) =>
                           `<a href="/urunler.html?category=${encodeURIComponent(col.name)}&sub=${encodeURIComponent(
                             sub
-                          )}" class="block text-[12px] text-[#4a4a4f] hover:text-black">${sub}</a>`
+                          )}" class="flex items-center gap-2 text-[12px] text-[#4a4a4f] hover:text-black">
+                            <span class="w-4 inline-flex justify-center text-[#8a8a8f]">${subCategoryIcons[sub] || "•"}</span>
+                            <span>${sub}</span>
+                          </a>`
                       )
                       .join("")}
                   </div>
