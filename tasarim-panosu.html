@@ -3,100 +3,108 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tasarım Panosu</title>
+  <title>Antigravity | Tasarım Panosu</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     *{box-sizing:border-box;margin:0;padding:0;}
     html,body{height:100%;overflow:hidden;}
-    body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue",Arial,sans-serif;display:flex;background:#1c1c1e;color:#fff;}
+    body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue",Arial,sans-serif;display:flex;flex-direction:column;background:#fff;color:#111;}
 
-    /* ── LEFT DARK SIDEBAR ── */
-    #left-nav{width:130px;background:#1c1c1e;display:flex;flex-direction:column;flex-shrink:0;padding:14px 10px;border-right:1px solid rgba(255,255,255,.08);}
-    #left-nav .project-name{font-size:13px;font-weight:600;color:#fff;padding:6px 8px;border-radius:8px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;margin-bottom:10px;}
-    #left-nav .project-name svg{opacity:.5;}
-    #new-board-btn{width:100%;height:34px;background:#3a3a3c;border:none;border-radius:8px;color:#fff;font-size:12px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-family:inherit;transition:background .12s;margin-bottom:12px;}
-    #new-board-btn:hover{background:#4a4a4c;}
-    .nav-item{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:7px;font-size:12px;color:rgba(255,255,255,.65);cursor:pointer;transition:all .12s;text-decoration:none;border:none;background:transparent;width:100%;font-family:inherit;}
-    .nav-item:hover{background:rgba(255,255,255,.08);color:#fff;}
-    .nav-item.active{background:rgba(255,255,255,.12);color:#fff;}
-    .nav-section{font-size:10px;font-weight:600;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.08em;padding:0 8px;margin:12px 0 4px;}
+    /* ── EDITOR WRAP ── */
+    #editor-wrap{flex:1;display:flex;min-height:0;overflow:hidden;}
+
+    /* ── LEFT SIDEBAR (white) ── */
+    #left-nav{width:180px;background:#fff;border-right:1px solid rgba(0,0,0,.08);display:flex;flex-direction:column;flex-shrink:0;padding:14px 10px;}
+    .ln-label{font-size:11px;font-weight:600;color:#6e6e73;text-transform:uppercase;letter-spacing:.07em;padding:0 8px;margin-bottom:6px;}
+    #new-board-btn{width:100%;height:32px;background:#f5f5f7;border:1px solid rgba(0,0,0,.1);border-radius:8px;color:#111;font-size:12px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-family:inherit;transition:all .12s;margin-bottom:10px;}
+    #new-board-btn:hover{background:#ebebef;border-color:rgba(0,0,0,.18);}
     #board-list{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:2px;}
     #board-list::-webkit-scrollbar{width:3px;}
-    #board-list::-webkit-scrollbar-thumb{background:rgba(255,255,255,.2);border-radius:2px;}
-    .board-nav-item{display:flex;align-items:center;gap:7px;padding:6px 8px;border-radius:7px;font-size:12px;color:rgba(255,255,255,.6);cursor:pointer;transition:all .12s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border:none;background:transparent;width:100%;font-family:inherit;text-align:left;}
-    .board-nav-item:hover{background:rgba(255,255,255,.08);color:#fff;}
-    .board-nav-item.active{background:rgba(255,255,255,.15);color:#fff;}
-    .nav-bottom{margin-top:auto;padding-top:10px;border-top:1px solid rgba(255,255,255,.08);}
+    #board-list::-webkit-scrollbar-thumb{background:rgba(0,0,0,.12);border-radius:2px;}
+    .board-nav-item{display:flex;align-items:center;gap:7px;padding:6px 8px;border-radius:7px;font-size:12px;color:#4a4a4f;cursor:pointer;transition:all .12s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border:none;background:transparent;width:100%;font-family:inherit;text-align:left;}
+    .board-nav-item:hover{background:#f5f5f7;color:#111;}
+    .board-nav-item.active{background:#f0f0f2;color:#111;font-weight:500;}
 
     /* ── MAIN AREA ── */
-    #main-area{flex:1;display:flex;flex-direction:column;background:#fff;min-width:0;}
+    #main-area{flex:1;display:flex;flex-direction:column;min-width:0;background:#fff;}
 
     /* ── BOARD HEADER ── */
-    #board-header{height:54px;background:#fff;border-bottom:1px solid rgba(0,0,0,.09);display:flex;align-items:center;padding:0 18px;flex-shrink:0;gap:12px;}
-    .board-title-wrap{display:flex;flex-direction:column;background:#f5f5f7;border-radius:10px;padding:5px 10px;cursor:text;min-width:120px;}
-    #board-name-el{font-size:13px;font-weight:600;color:#111;outline:none;background:transparent;border:none;font-family:inherit;}
+    #board-header{background:#fff;border-bottom:1px solid rgba(0,0,0,.08);display:flex;align-items:center;padding:0 16px;flex-shrink:0;gap:10px;height:52px;}
+    .board-title-wrap{display:flex;flex-direction:column;background:#f5f5f7;border-radius:9px;padding:5px 10px;min-width:110px;max-width:200px;}
+    #board-name-el{font-size:13px;font-weight:600;color:#111;outline:none;background:transparent;border:none;font-family:inherit;width:100%;}
     #board-name-el::placeholder{color:#aaa;}
-    #board-desc-el{font-size:11px;color:#9a9a9f;outline:none;background:transparent;border:none;font-family:inherit;margin-top:1px;}
-    #board-desc-el::placeholder{color:#c0c0c5;}
-    .tabs{display:flex;align-items:center;gap:0;}
+    #board-desc-el{font-size:11px;color:#9a9a9f;outline:none;background:transparent;border:none;font-family:inherit;margin-top:1px;width:100%;}
+    #board-desc-el::placeholder{color:#c5c5ca;}
+
+    /* Board tabs */
+    #board-tabs{display:flex;align-items:center;gap:3px;overflow-x:auto;flex:1;scrollbar-width:none;}
     #board-tabs::-webkit-scrollbar{display:none;}
-    .board-tab{height:30px;padding:0 12px;background:rgba(0,0,0,.05);border:none;font-size:12px;color:#6e6e73;cursor:pointer;font-family:inherit;border-radius:7px;transition:all .12s;white-space:nowrap;display:flex;align-items:center;gap:6px;flex-shrink:0;}
-    .board-tab:hover{background:rgba(0,0,0,.08);color:#333;}
-    .board-tab.active{background:#1c1c1e;color:#fff;}
-    .board-tab-new{height:30px;width:30px;background:transparent;border:none;font-size:18px;color:#9a9a9f;cursor:pointer;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .12s;}
-    .board-tab-new:hover{background:rgba(0,0,0,.06);color:#333;}
-    .header-right{margin-left:auto;display:flex;align-items:center;gap:8px;}
-    .hdr-icon-btn{width:34px;height:34px;border-radius:8px;border:none;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#6e6e73;transition:all .12s;}
-    .hdr-icon-btn:hover{background:rgba(0,0,0,.06);color:#111;}
-    .dl-pill{height:34px;padding:0 14px;background:#1c1c1e;color:#fff;border:none;border-radius:20px;font-size:13px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:6px;font-family:inherit;transition:background .12s;}
-    .dl-pill:hover{background:#3a3a3c;}
+    .board-tab{height:28px;padding:0 10px;background:transparent;border:1px solid rgba(0,0,0,.1);font-size:12px;color:#6e6e73;cursor:pointer;font-family:inherit;border-radius:7px;white-space:nowrap;display:flex;align-items:center;gap:5px;flex-shrink:0;transition:all .12s;}
+    .board-tab:hover{background:#f5f5f7;color:#333;border-color:rgba(0,0,0,.18);}
+    .board-tab.active{background:#111;color:#fff;border-color:#111;}
+    .board-tab-new{height:28px;width:28px;background:transparent;border:1px solid rgba(0,0,0,.1);border-radius:7px;font-size:16px;color:#9a9a9f;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .12s;}
+    .board-tab-new:hover{background:#f5f5f7;color:#333;}
+
+    /* Ratio buttons */
+    #ratio-bar{display:flex;align-items:center;gap:3px;flex-shrink:0;}
+    .ratio-btn{height:26px;padding:0 8px;background:#f5f5f7;border:1px solid rgba(0,0,0,.1);border-radius:6px;font-size:11px;font-weight:500;color:#6e6e73;cursor:pointer;font-family:inherit;white-space:nowrap;transition:all .12s;}
+    .ratio-btn:hover{border-color:rgba(0,0,0,.2);color:#333;}
+    .ratio-btn.active{background:#111;color:#fff;border-color:#111;}
+
+    /* Header right */
+    .header-right{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+    .hdr-icon-btn{width:32px;height:32px;border-radius:8px;border:1px solid rgba(0,0,0,.1);background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#6e6e73;transition:all .12s;}
+    .hdr-icon-btn:hover{background:#f5f5f7;color:#111;}
+    .dl-pill{height:32px;padding:0 14px;background:#111;color:#fff;border:none;border-radius:20px;font-size:13px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:6px;font-family:inherit;transition:background .12s;}
+    .dl-pill:hover{background:#333;}
 
     /* ── EDITOR BODY ── */
-    #editor-body{flex:1;display:flex;min-height:0;position:relative;}
+    #editor-body{flex:1;display:flex;min-height:0;}
 
     /* ── CANVAS AREA ── */
     #canvas-area{flex:1;overflow:hidden;display:flex;align-items:center;justify-content:center;background:#f0f0f2;position:relative;}
     #canvas-area canvas{display:block;}
+    #grid-overlay{position:absolute;inset:0;pointer-events:none;display:none;background-image:linear-gradient(rgba(0,0,0,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(0,0,0,.06) 1px,transparent 1px);background-size:20px 20px;}
 
     /* ── FLOATING TOOLBAR ── */
-    #toolbar{position:absolute;left:12px;top:50%;transform:translateY(-50%);background:#fff;border:1px solid rgba(0,0,0,.1);border-radius:14px;box-shadow:0 4px 20px rgba(0,0,0,.1);display:flex;flex-direction:column;align-items:center;padding:8px 0;gap:2px;z-index:100;width:44px;}
-    .tool-btn{width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:9px;color:#6e6e73;cursor:pointer;transition:all .12s;border:none;background:transparent;}
-    .tool-btn:hover{background:rgba(0,0,0,.07);color:#111;}
-    .tool-btn.active{background:#1c1c1e;color:#fff;}
-    .tool-btn.danger:hover{background:rgba(220,38,38,.08);color:#dc2626;}
-    .tsep{width:24px;height:1px;background:rgba(0,0,0,.08);margin:3px 0;flex-shrink:0;}
+    #toolbar{position:absolute;left:14px;top:50%;transform:translateY(-50%);background:#fff;border:1px solid rgba(0,0,0,.1);border-radius:14px;box-shadow:0 4px 20px rgba(0,0,0,.09);display:flex;flex-direction:column;align-items:center;padding:8px 0;gap:2px;z-index:100;width:44px;}
+    .tool-btn{width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:9px;color:#6e6e73;cursor:pointer;transition:all .12s;border:none;background:transparent;font-family:inherit;}
+    .tool-btn:hover{background:rgba(0,0,0,.06);color:#111;}
+    .tool-btn.active{background:#111;color:#fff;}
+    .tsep{width:26px;height:1px;background:rgba(0,0,0,.08);margin:3px 0;flex-shrink:0;}
 
     /* ── RIGHT PANEL ── */
     #right-panel{width:240px;background:#fff;border-left:1px solid rgba(0,0,0,.08);display:flex;flex-direction:column;flex-shrink:0;}
     .rp-head{padding:14px 14px 10px;border-bottom:1px solid rgba(0,0,0,.07);flex-shrink:0;}
-    .rp-head h3{font-size:13px;font-weight:600;color:#111;}
-    #fav-search{width:100%;background:#f5f5f7;border:1px solid rgba(0,0,0,.1);color:#111;border-radius:8px;font-size:12px;padding:0 10px;height:30px;outline:none;font-family:inherit;margin-top:8px;}
+    .rp-head h3{font-size:13px;font-weight:600;color:#111;margin-bottom:8px;}
+    #fav-search{width:100%;background:#f5f5f7;border:1px solid rgba(0,0,0,.1);color:#111;border-radius:8px;font-size:13px;padding:0 10px;height:32px;outline:none;font-family:inherit;}
     #fav-list{flex:1;overflow-y:auto;padding:8px 10px;display:flex;flex-direction:column;gap:6px;min-height:0;}
     #fav-list::-webkit-scrollbar{width:3px;}
-    #fav-list::-webkit-scrollbar-thumb{background:rgba(0,0,0,.15);border-radius:2px;}
+    #fav-list::-webkit-scrollbar-thumb{background:rgba(0,0,0,.12);border-radius:2px;}
     .rp-bottom{padding:10px;border-top:1px solid rgba(0,0,0,.07);flex-shrink:0;}
-    .upload-btn{width:100%;height:36px;background:#f5f5f7;border:1.5px dashed rgba(0,0,0,.2);border-radius:9px;font-size:12px;font-weight:500;color:#4a4a4f;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:7px;transition:all .12s;}
-    .upload-btn:hover{background:#ebebef;border-color:rgba(0,0,0,.35);}
+    .upload-btn{width:100%;height:36px;background:#f5f5f7;border:1.5px dashed rgba(0,0,0,.18);border-radius:9px;font-size:13px;font-weight:400;color:#4a4a4f;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:7px;transition:all .12s;}
+    .upload-btn:hover{background:#ebebef;border-color:rgba(0,0,0,.3);}
 
     /* ── BOTTOM BAR ── */
     #bottom-bar{height:38px;background:#fff;border-top:1px solid rgba(0,0,0,.08);display:flex;align-items:center;justify-content:space-between;padding:0 14px;flex-shrink:0;}
-    .page-pill{display:flex;align-items:center;gap:6px;font-size:12px;color:#6e6e73;}
-    .zoom-ctrl{display:flex;align-items:center;gap:4px;background:#f5f5f7;border:1px solid rgba(0,0,0,.1);border-radius:20px;padding:0 10px;height:26px;}
-    .zoom-btn{background:none;border:none;cursor:pointer;color:#6e6e73;font-size:15px;line-height:1;padding:0 2px;}
+    .page-pill{display:flex;align-items:center;gap:5px;font-size:12px;color:#6e6e73;}
+    .zoom-ctrl{display:flex;align-items:center;gap:3px;background:#f5f5f7;border:1px solid rgba(0,0,0,.1);border-radius:20px;padding:0 10px;height:26px;}
+    .zoom-btn{background:none;border:none;cursor:pointer;color:#6e6e73;font-size:15px;line-height:1;padding:0 2px;font-family:inherit;}
     .zoom-btn:hover{color:#111;}
     #zoom-val{font-size:12px;color:#6e6e73;width:34px;text-align:center;user-select:none;}
 
     /* ── PROPS PANEL ── */
-    #props-panel{display:none;position:fixed;bottom:48px;left:50%;transform:translateX(-50%);background:#fff;border:1px solid rgba(0,0,0,.09);border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,.1),0 1px 4px rgba(0,0,0,.06);padding:10px 16px;z-index:500;width:max-content;max-width:calc(100vw - 200px);}
-    .prop-input{background:#fff;border:1px solid rgba(0,0,0,.12);color:#111;border-radius:7px;font-size:12px;padding:0 8px;height:28px;width:100%;outline:none;font-family:inherit;}
+    #props-panel{display:none;position:fixed;bottom:50px;left:50%;transform:translateX(-50%);background:#fff;border:1px solid rgba(0,0,0,.09);border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,.1),0 1px 4px rgba(0,0,0,.06);padding:10px 16px;z-index:500;width:max-content;max-width:calc(100vw - 240px);}
+    .prop-input{background:#fff;border:1px solid rgba(0,0,0,.12);color:#111;border-radius:7px;font-size:13px;padding:0 8px;height:28px;width:100%;outline:none;font-family:inherit;}
     .prop-input:focus{border-color:rgba(0,0,0,.35);}
     .prop-btn{height:28px;padding:0 10px;border-radius:7px;border:1px solid rgba(0,0,0,.12);background:#fff;color:#4a4a4f;font-size:12px;cursor:pointer;font-family:inherit;transition:all .12s;}
     .prop-btn:hover{background:#f5f5f7;}
     .prop-btn.active{background:#111;border-color:#111;color:#fff;}
 
     /* ── DROPDOWNS ── */
-    .dropdown{display:none;position:fixed;background:#fff;border:1px solid rgba(0,0,0,.1);border-radius:13px;box-shadow:0 8px 32px rgba(0,0,0,.13);z-index:9999;overflow:hidden;}
+    .dropdown{display:none;position:fixed;background:#fff;border:1px solid rgba(0,0,0,.1);border-radius:13px;box-shadow:0 8px 32px rgba(0,0,0,.12);z-index:9999;overflow:hidden;}
     #settings-dd{padding:6px 0;min-width:210px;}
     .sd-item{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;font-size:13px;color:#111;cursor:pointer;transition:background .1s;}
     .sd-item:hover{background:#f5f5f7;}
@@ -104,252 +112,229 @@
     .sd-fs{padding:10px 16px;font-size:13px;color:#111;cursor:pointer;display:flex;align-items:center;gap:8px;}
     .sd-fs:hover{background:#f5f5f7;}
     .toggle{width:34px;height:20px;background:#d1d1d6;border-radius:10px;position:relative;transition:background .2s;flex-shrink:0;}
-    .toggle.on{background:#1c1c1e;}
-    .toggle::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.25);}
+    .toggle.on{background:#111;}
+    .toggle::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.2);}
     .toggle.on::after{left:16px;}
     #dl-menu{padding:4px 0;min-width:160px;}
     .dl-item{display:block;width:100%;text-align:left;padding:9px 16px;font-size:13px;color:#333;background:transparent;border:none;cursor:pointer;font-family:inherit;transition:background .1s;}
     .dl-item:hover{background:#f5f5f7;}
-    #frame-picker{padding:10px 12px;min-width:190px;}
-    .ratio-opt{width:100%;text-align:left;padding:7px 10px;border-radius:7px;border:none;background:transparent;font-size:13px;color:#333;cursor:pointer;font-family:inherit;transition:background .1s;display:block;}
-    .ratio-opt:hover{background:#f5f5f7;}
-    .ratio-opt.active{background:#1c1c1e;color:#fff;}
     #bg-palette-dd{padding:12px;}
 
-    /* ── GRID OVERLAY ── */
-    #grid-overlay{position:absolute;inset:0;pointer-events:none;display:none;background-image:linear-gradient(rgba(0,0,0,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(0,0,0,.06) 1px,transparent 1px);background-size:20px 20px;}
-
-    /* ── SAVE MSG ── */
-    #save-msg{font-size:11px;color:#9a9a9f;}
-
     /* ── FAV ITEM ── */
-    .fav-item{width:100%;display:flex;align-items:center;gap:8px;background:#f5f5f7;border:1px solid rgba(0,0,0,.08);border-radius:10px;padding:7px;cursor:grab;text-align:left;transition:all .12s;border:none;font-family:inherit;}
-    .fav-item:hover{background:#ebebef;box-shadow:0 2px 8px rgba(0,0,0,.08);}
+    .fav-item{width:100%;display:flex;align-items:center;gap:8px;background:#f5f5f7;border:1px solid rgba(0,0,0,.07);border-radius:10px;padding:7px;cursor:grab;text-align:left;transition:all .12s;font-family:inherit;}
+    .fav-item:hover{background:#ebebef;box-shadow:0 2px 8px rgba(0,0,0,.07);}
+
+    #save-msg{font-size:11px;color:#9a9a9f;}
   </style>
 </head>
 <body>
 
-<!-- ══════════════════════════════════════════════════════ LEFT NAV SIDEBAR -->
-<div id="left-nav">
-  <div class="project-name">
-    <span id="project-label">Panolarım</span>
-    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
-  </div>
+<!-- Site header injected by layout.js -->
+<div id="site-header"></div>
 
-  <button id="new-board-btn">
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-    Yeni Pano
-  </button>
+<!-- ════════════════ EDITOR WRAP ════════════════ -->
+<div id="editor-wrap">
 
-  <div class="nav-section">Panolar</div>
-  <div id="board-list">
-    <div style="font-size:11px;color:rgba(255,255,255,.35);padding:6px 8px;">Yükleniyor...</div>
-  </div>
-
-  <div class="nav-bottom">
-    <a href="/mimar-paneli.html" class="nav-item">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-      Mimar Paneli
-    </a>
-  </div>
-</div>
-
-<!-- ══════════════════════════════════════════════════════ MAIN AREA -->
-<div id="main-area">
-
-  <!-- BOARD HEADER -->
-  <div id="board-header">
-    <div class="board-title-wrap">
-      <input id="board-name-el" type="text" placeholder="Pano adı" value="Yeni Pano">
-      <input id="board-desc-el" type="text" placeholder="Açıklama ekle...">
+  <!-- ── LEFT NAV SIDEBAR (white) ── -->
+  <div id="left-nav">
+    <div class="ln-label">Panolarım</div>
+    <button id="new-board-btn">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Yeni Pano
+    </button>
+    <div id="board-list">
+      <div style="font-size:12px;color:#9a9a9f;padding:6px 8px;">Yükleniyor...</div>
     </div>
+  </div>
 
-    <!-- Board tabs -->
-    <div id="board-tabs" style="display:flex;align-items:center;gap:2px;overflow-x:auto;flex:1;margin:0 12px;scrollbar-width:none;"></div>
+  <!-- ── MAIN AREA ── -->
+  <div id="main-area">
 
-    <div class="header-right">
-      <!-- Settings -->
-      <div style="position:relative;">
-        <button id="settings-btn" class="hdr-icon-btn" title="Ayarlar">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
-        </button>
-        <div id="settings-dd" class="dropdown">
-          <div class="sd-item" data-setting="grid"><span>Izgara göster</span><div class="toggle" id="tog-grid"></div></div>
-          <div class="sd-item" data-setting="snap"><span>Izgaraya yapıştır</span><div class="toggle" id="tog-snap"></div></div>
-          <div class="sd-item" data-setting="details"><span>Ürün bilgileri</span><div class="toggle" id="tog-details"></div></div>
-          <div class="sd-item" data-setting="frames"><span>Çerçeve göster</span><div class="toggle on" id="tog-frames"></div></div>
-          <div class="sd-sep"></div>
-          <div class="sd-fs" id="fullscreen-btn">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"/></svg>
-            Tam ekran
+    <!-- BOARD HEADER -->
+    <div id="board-header">
+      <!-- Board name -->
+      <div class="board-title-wrap">
+        <input id="board-name-el" type="text" placeholder="Pano adı" value="Yeni Pano">
+        <input id="board-desc-el" type="text" placeholder="Açıklama ekle...">
+      </div>
+
+      <!-- Board tabs -->
+      <div id="board-tabs"></div>
+
+      <!-- Ratio selector -->
+      <div id="ratio-bar">
+        <button class="ratio-btn active" data-ratio="free">Serbest</button>
+        <button class="ratio-btn" data-ratio="16:9">16:9</button>
+        <button class="ratio-btn" data-ratio="4:3">4:3</button>
+        <button class="ratio-btn" data-ratio="1:1">1:1</button>
+        <button class="ratio-btn" data-ratio="a4-p">A4</button>
+        <button class="ratio-btn" data-ratio="story">Story</button>
+      </div>
+
+      <!-- Right actions -->
+      <div class="header-right">
+        <!-- Settings -->
+        <div style="position:relative;">
+          <button id="settings-btn" class="hdr-icon-btn" title="Ayarlar">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+          </button>
+          <div id="settings-dd" class="dropdown">
+            <div class="sd-item" data-setting="grid"><span>Izgara göster</span><div class="toggle" id="tog-grid"></div></div>
+            <div class="sd-item" data-setting="snap"><span>Izgaraya yapıştır</span><div class="toggle" id="tog-snap"></div></div>
+            <div class="sd-item" data-setting="frames"><span>Çerçeve göster</span><div class="toggle on" id="tog-frames"></div></div>
+            <div class="sd-sep"></div>
+            <div class="sd-fs" id="fullscreen-btn">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"/></svg>
+              Tam ekran
+            </div>
+          </div>
+        </div>
+        <!-- Download -->
+        <div style="position:relative;">
+          <button id="dl-btn" class="dl-pill">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            İndir
+          </button>
+          <div id="dl-menu" class="dropdown">
+            <button class="dl-item" id="dl-jpg">JPG olarak indir</button>
+            <button class="dl-item" id="dl-pdf">PDF olarak indir</button>
           </div>
         </div>
       </div>
-      <!-- Download -->
-      <div style="position:relative;">
-        <button id="dl-btn" class="dl-pill">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          İndir
+    </div>
+
+    <!-- EDITOR BODY -->
+    <div id="editor-body">
+
+      <!-- CANVAS AREA -->
+      <div id="canvas-area">
+        <div id="grid-overlay"></div>
+        <canvas id="fc"></canvas>
+
+        <!-- FLOATING TOOLBAR -->
+        <div id="toolbar">
+          <!-- Select -->
+          <button id="t-select" class="tool-btn active" data-tool="select" title="Seçim (V)">
+            <svg width="13" height="14" viewBox="0 0 13 15" fill="currentColor"><path d="M1 1l10.5 6.5L8 9 5.5 14 1 1z"/></svg>
+          </button>
+          <!-- Text -->
+          <button id="t-text" class="tool-btn" data-tool="text" title="Metin (T)" style="font-size:14px;font-weight:700;">T</button>
+          <!-- Image (opens right panel) -->
+          <button id="t-image" class="tool-btn" title="Görsel ekle">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+          </button>
+          <!-- Background color -->
+          <button id="t-bg" class="tool-btn" title="Arkaplan rengi" style="padding:1px;">
+            <svg width="18" height="18" viewBox="0 0 24 24"><defs><radialGradient id="cg"><stop offset="0%" stop-color="#ff6b6b"/><stop offset="33%" stop-color="#ffd93d"/><stop offset="66%" stop-color="#6bcb77"/><stop offset="100%" stop-color="#4d96ff"/></radialGradient></defs><circle cx="12" cy="12" r="9" fill="url(#cg)"/></svg>
+          </button>
+
+          <div class="tsep"></div>
+
+          <!-- Undo -->
+          <button id="t-undo" class="tool-btn" title="Geri al (Ctrl+Z)">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v6h6"/><path d="M3 13A9 9 0 1012 3"/></svg>
+          </button>
+          <!-- Redo -->
+          <button id="t-redo" class="tool-btn" title="İleri al">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 7v6h-6"/><path d="M21 13A9 9 0 1112 3"/></svg>
+          </button>
+
+          <div class="tsep"></div>
+
+          <!-- Duplicate -->
+          <button id="t-dup" class="tool-btn" title="Çoğalt (Ctrl+D)">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          </button>
+          <!-- Front -->
+          <button id="t-front" class="tool-btn" title="Öne getir">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+          </button>
+          <!-- Back -->
+          <button id="t-back" class="tool-btn" title="Arkaya gönder">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+          </button>
+
+          <div class="tsep"></div>
+
+          <!-- Delete -->
+          <button id="t-delete" class="tool-btn" title="Sil (Delete)" style="color:#dc2626;" onmouseover="this.style.background='rgba(220,38,38,.08)'" onmouseout="this.style.background='transparent'">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>
+          </button>
+        </div>
+
+        <!-- BG Palette dropdown -->
+        <div id="bg-palette-dd" class="dropdown">
+          <div style="font-size:10px;font-weight:600;color:#9a9a9f;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;">Arkaplan Rengi</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;width:166px;">
+            <div class="bg-chip" data-color="#ffffff" style="width:28px;height:28px;border-radius:7px;border:1.5px solid rgba(0,0,0,.15);background:#fff;cursor:pointer;" title="#ffffff"></div>
+            <div class="bg-chip" data-color="#f5f5f7" style="width:28px;height:28px;border-radius:7px;background:#f5f5f7;cursor:pointer;border:1px solid rgba(0,0,0,.08);"></div>
+            <div class="bg-chip" data-color="#1c1c1e" style="width:28px;height:28px;border-radius:7px;background:#1c1c1e;cursor:pointer;"></div>
+            <div class="bg-chip" data-color="#f0ede8" style="width:28px;height:28px;border-radius:7px;background:#f0ede8;cursor:pointer;"></div>
+            <div class="bg-chip" data-color="#e8f0f0" style="width:28px;height:28px;border-radius:7px;background:#e8f0f0;cursor:pointer;"></div>
+            <div class="bg-chip" data-color="#f5f0e8" style="width:28px;height:28px;border-radius:7px;background:#f5f0e8;cursor:pointer;"></div>
+            <div class="bg-chip" data-color="#e8eaf5" style="width:28px;height:28px;border-radius:7px;background:#e8eaf5;cursor:pointer;"></div>
+            <div class="bg-chip" data-color="#f5e8e8" style="width:28px;height:28px;border-radius:7px;background:#f5e8e8;cursor:pointer;"></div>
+            <div class="bg-chip" data-color="#e8f5ea" style="width:28px;height:28px;border-radius:7px;background:#e8f5ea;cursor:pointer;"></div>
+            <div class="bg-chip" data-color="#2c2c2e" style="width:28px;height:28px;border-radius:7px;background:#2c2c2e;cursor:pointer;"></div>
+            <div class="bg-chip" data-color="#d4b896" style="width:28px;height:28px;border-radius:7px;background:#d4b896;cursor:pointer;"></div>
+            <div class="bg-chip" data-color="#b8ccd4" style="width:28px;height:28px;border-radius:7px;background:#b8ccd4;cursor:pointer;"></div>
+            <div class="bg-chip" data-color="#c4d4b8" style="width:28px;height:28px;border-radius:7px;background:#c4d4b8;cursor:pointer;"></div>
+            <div class="bg-chip" data-color="#e8d5c4" style="width:28px;height:28px;border-radius:7px;background:#e8d5c4;cursor:pointer;"></div>
+            <div class="bg-chip" data-color="#c4c8e8" style="width:28px;height:28px;border-radius:7px;background:#c4c8e8;cursor:pointer;"></div>
+          </div>
+          <div style="margin-top:10px;display:flex;align-items:center;gap:8px;">
+            <input type="color" id="bg-custom" value="#ffffff" style="width:28px;height:28px;border-radius:7px;border:1px solid rgba(0,0,0,.1);cursor:pointer;padding:2px;">
+            <span style="font-size:11px;color:#6e6e73;">Özel renk</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT PANEL: Favori Ürünler -->
+      <div id="right-panel">
+        <div class="rp-head">
+          <h3>Favori Ürünler</h3>
+          <input id="fav-search" type="text" placeholder="Ürünlerde ara...">
+        </div>
+        <div id="fav-list"></div>
+        <div class="rp-bottom">
+          <input id="file-input" type="file" accept="image/*" style="display:none;" multiple>
+          <button id="upload-btn" class="upload-btn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            Bilgisayardan yükle
+          </button>
+        </div>
+      </div>
+
+    </div><!-- end editor-body -->
+
+    <!-- BOTTOM BAR -->
+    <div id="bottom-bar">
+      <div class="page-pill">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/></svg>
+        Sayfa 1
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span id="save-msg"></span>
+        <button id="fit-btn" style="width:28px;height:28px;border-radius:7px;background:transparent;border:1px solid rgba(0,0,0,.1);cursor:pointer;display:flex;align-items:center;justify-content:center;color:#6e6e73;" title="Sığdır">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"/></svg>
         </button>
-        <div id="dl-menu" class="dropdown">
-          <button class="dl-item" id="dl-jpg">JPG olarak indir</button>
-          <button class="dl-item" id="dl-pdf">PDF olarak indir</button>
+        <div class="zoom-ctrl">
+          <button id="zoom-out" class="zoom-btn">−</button>
+          <span id="zoom-val">100%</span>
+          <button id="zoom-in" class="zoom-btn">+</button>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- EDITOR BODY -->
-  <div id="editor-body">
-
-    <!-- CANVAS AREA -->
-    <div id="canvas-area">
-      <div id="grid-overlay"></div>
-      <canvas id="fc"></canvas>
-
-      <!-- FLOATING TOOLBAR -->
-      <div id="toolbar">
-        <!-- Select -->
-        <button id="t-select" class="tool-btn active" data-tool="select" title="Seçim (V)">
-          <svg width="13" height="14" viewBox="0 0 13 15" fill="currentColor"><path d="M1 1l10.5 6.5L8 9 5.5 14 1 1z"/></svg>
-        </button>
-        <!-- Text -->
-        <button id="t-text" class="tool-btn" data-tool="text" title="Metin (T)" style="font-size:14px;font-weight:700;">T</button>
-        <!-- Frame/Ratio -->
-        <button id="t-frame" class="tool-btn" title="Tuval boyutu">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
-        </button>
-        <!-- Color/BG -->
-        <button id="t-bg" class="tool-btn" title="Arkaplan rengi" style="padding:0;">
-          <svg width="18" height="18" viewBox="0 0 24 24"><defs><radialGradient id="cg" cx="50%" cy="50%"><stop offset="0%" stop-color="#ff6b6b"/><stop offset="33%" stop-color="#ffd93d"/><stop offset="66%" stop-color="#6bcb77"/><stop offset="100%" stop-color="#4d96ff"/></radialGradient></defs><circle cx="12" cy="12" r="9" fill="url(#cg)"/></svg>
-        </button>
-        <!-- Rect -->
-        <button id="t-rect" class="tool-btn" data-tool="rect" title="Dikdörtgen (R)">
-          <svg width="14" height="11" viewBox="0 0 15 12" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="1" y="1" width="13" height="10" rx="2"/></svg>
-        </button>
-        <!-- Circle -->
-        <button id="t-circle" class="tool-btn" data-tool="circle" title="Daire (C)">
-          <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="7" cy="7" r="6"/></svg>
-        </button>
-        <!-- Line -->
-        <button id="t-line" class="tool-btn" data-tool="line" title="Çizgi (L)">
-          <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="2" y1="12" x2="12" y2="2"/></svg>
-        </button>
-        <div class="tsep"></div>
-        <!-- Undo -->
-        <button id="t-undo" class="tool-btn" title="Geri al (Ctrl+Z)">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v6h6"/><path d="M3 13A9 9 0 1012 3"/></svg>
-        </button>
-        <!-- Redo -->
-        <button id="t-redo" class="tool-btn" title="İleri al">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 7v6h-6"/><path d="M21 13A9 9 0 1112 3"/></svg>
-        </button>
-        <div class="tsep"></div>
-        <!-- Duplicate -->
-        <button id="t-dup" class="tool-btn" title="Çoğalt (Ctrl+D)">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
-        </button>
-        <!-- Lock -->
-        <button id="t-lock" class="tool-btn" title="Kilitle/Aç">
-          <svg width="12" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
-        </button>
-        <!-- Front/Back -->
-        <button id="t-front" class="tool-btn" title="Öne getir">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
-        </button>
-        <button id="t-back" class="tool-btn" title="Arkaya gönder">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
-        </button>
-        <div class="tsep"></div>
-        <!-- Delete -->
-        <button id="t-delete" class="tool-btn danger" title="Sil (Delete)">
-          <svg width="12" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>
-        </button>
-      </div>
-
-      <!-- Frame / Ratio picker -->
-      <div id="frame-picker" class="dropdown">
-        <div style="font-size:10px;font-weight:600;color:#9a9a9f;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;">Tuval Boyutu</div>
-        <button class="ratio-opt active" data-ratio="free">Serbest</button>
-        <button class="ratio-opt" data-ratio="16:9">16:9 Geniş Ekran</button>
-        <button class="ratio-opt" data-ratio="4:3">4:3</button>
-        <button class="ratio-opt" data-ratio="1:1">1:1 Kare</button>
-        <button class="ratio-opt" data-ratio="a4-l">A4 Yatay</button>
-        <button class="ratio-opt" data-ratio="a4-p">A4 Dikey</button>
-        <button class="ratio-opt" data-ratio="story">9:16 Story</button>
-      </div>
-
-      <!-- BG Palette -->
-      <div id="bg-palette-dd" class="dropdown">
-        <div style="font-size:10px;font-weight:600;color:#9a9a9f;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;">Arkaplan Rengi</div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap;width:164px;">
-          <div class="bg-chip" data-color="#ffffff" style="width:28px;height:28px;border-radius:7px;border:1.5px solid rgba(0,0,0,.15);background:#fff;cursor:pointer;"></div>
-          <div class="bg-chip" data-color="#f5f5f7" style="width:28px;height:28px;border-radius:7px;background:#f5f5f7;cursor:pointer;border:1px solid rgba(0,0,0,.08);"></div>
-          <div class="bg-chip" data-color="#1c1c1e" style="width:28px;height:28px;border-radius:7px;background:#1c1c1e;cursor:pointer;"></div>
-          <div class="bg-chip" data-color="#f0ede8" style="width:28px;height:28px;border-radius:7px;background:#f0ede8;cursor:pointer;"></div>
-          <div class="bg-chip" data-color="#e8f0f0" style="width:28px;height:28px;border-radius:7px;background:#e8f0f0;cursor:pointer;"></div>
-          <div class="bg-chip" data-color="#f5f0e8" style="width:28px;height:28px;border-radius:7px;background:#f5f0e8;cursor:pointer;"></div>
-          <div class="bg-chip" data-color="#e8eaf5" style="width:28px;height:28px;border-radius:7px;background:#e8eaf5;cursor:pointer;"></div>
-          <div class="bg-chip" data-color="#f5e8e8" style="width:28px;height:28px;border-radius:7px;background:#f5e8e8;cursor:pointer;"></div>
-          <div class="bg-chip" data-color="#e8f5ea" style="width:28px;height:28px;border-radius:7px;background:#e8f5ea;cursor:pointer;"></div>
-          <div class="bg-chip" data-color="#2c2c2e" style="width:28px;height:28px;border-radius:7px;background:#2c2c2e;cursor:pointer;"></div>
-          <div class="bg-chip" data-color="#d4b896" style="width:28px;height:28px;border-radius:7px;background:#d4b896;cursor:pointer;"></div>
-          <div class="bg-chip" data-color="#b8ccd4" style="width:28px;height:28px;border-radius:7px;background:#b8ccd4;cursor:pointer;"></div>
-          <div class="bg-chip" data-color="#c4d4b8" style="width:28px;height:28px;border-radius:7px;background:#c4d4b8;cursor:pointer;"></div>
-          <div class="bg-chip" data-color="#e8d5c4" style="width:28px;height:28px;border-radius:7px;background:#e8d5c4;cursor:pointer;"></div>
-          <div class="bg-chip" data-color="#c4c8e8" style="width:28px;height:28px;border-radius:7px;background:#c4c8e8;cursor:pointer;"></div>
-        </div>
-        <div style="margin-top:10px;display:flex;align-items:center;gap:8px;">
-          <input type="color" id="bg-custom" value="#ffffff" style="width:28px;height:28px;border-radius:7px;border:1px solid rgba(0,0,0,.1);cursor:pointer;padding:2px;">
-          <span style="font-size:11px;color:#6e6e73;">Özel renk</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- RIGHT PANEL: Favori Ürünler -->
-    <div id="right-panel">
-      <div class="rp-head">
-        <h3>Favori Ürünler</h3>
-        <input id="fav-search" type="text" placeholder="Ürünlerde ara...">
-      </div>
-      <div id="fav-list"></div>
-      <div class="rp-bottom">
-        <input id="file-input" type="file" accept="image/*" style="display:none;" multiple>
-        <button id="upload-btn" class="upload-btn">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-          Bilgisayardan yükle
-        </button>
-      </div>
-    </div>
-
-  </div><!-- end editor-body -->
-
-  <!-- BOTTOM BAR -->
-  <div id="bottom-bar">
-    <div class="page-pill">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/></svg>
-      Sayfa 1
-      <svg width="10" height="10" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 1l4 4 4-4"/></svg>
-    </div>
-    <div style="display:flex;align-items:center;gap:8px;">
-      <span id="save-msg" style="font-size:11px;color:#9a9a9f;"></span>
-      <button id="fit-btn" style="width:28px;height:28px;border-radius:7px;background:transparent;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#6e6e73;" title="Sığdır">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"/></svg>
-      </button>
-      <div class="zoom-ctrl">
-        <button id="zoom-out" class="zoom-btn">−</button>
-        <span id="zoom-val">100%</span>
-        <button id="zoom-in" class="zoom-btn">+</button>
-      </div>
-    </div>
-  </div>
-
-</div><!-- end main-area -->
+  </div><!-- end main-area -->
+</div><!-- end editor-wrap -->
 
 <!-- FLOATING PROPS PANEL -->
 <div id="props-panel"></div>
 
-<div id="site-footer" style="display:none;"></div>
+<!-- Site footer -->
+<div id="site-footer"></div>
+
 <script src="/core.js"></script>
 <script src="/layout.js"></script>
 <script>
@@ -360,17 +345,25 @@ let zoom = 1;
 let history = [], histIdx = -1, _histBusy = false;
 let _autoSaveTimer = null;
 let _snapEnabled = false;
-let _showFrames = true;
-const SNAP_SIZE = 20;
-
 const $ = id => document.getElementById(id);
+
+// Adjust editor height to account for actual header + footer heights
+function adjustEditorHeight() {
+  const header = $("site-header");
+  const footer = $("site-footer");
+  const wrap = $("editor-wrap");
+  if (!wrap) return;
+  const hh = header ? header.offsetHeight : 0;
+  const fh = footer ? footer.offsetHeight : 0;
+  wrap.style.height = `calc(100vh - ${hh + fh}px)`;
+}
 
 function setSaveMsg(t, ok) {
   const el = $("save-msg");
   if (!el) return;
   el.textContent = t;
   el.style.color = ok ? "#34c759" : "#9a9a9f";
-  if (ok) setTimeout(() => { el.textContent = ""; }, 3000);
+  if (ok) setTimeout(() => { el.textContent = ""; }, 2500);
 }
 
 // ─── Tool selection ──────────────────────────────────────────────────────────
@@ -381,17 +374,12 @@ function setTool(name) {
   if (btn) btn.classList.add("active");
   if (!fc) return;
   if (name === "select") {
-    fc.isDrawingMode = false;
-    fc.defaultCursor = "default";
-    fc.selection = true;
+    fc.isDrawingMode = false; fc.defaultCursor = "default"; fc.selection = true;
     fc.forEachObject(o => { if (!o._locked) { o.selectable = true; o.evented = true; } });
   } else {
-    fc.isDrawingMode = false;
-    fc.defaultCursor = "crosshair";
-    fc.selection = false;
+    fc.isDrawingMode = false; fc.defaultCursor = "crosshair"; fc.selection = false;
     fc.forEachObject(o => { o.selectable = false; o.evented = false; });
-    fc.discardActiveObject();
-    fc.renderAll();
+    fc.discardActiveObject(); fc.renderAll();
   }
 }
 
@@ -421,55 +409,34 @@ function redo() {
 function initCanvas() {
   const area = $("canvas-area");
   fc = new fabric.Canvas("fc", {
-    width: area.clientWidth,
-    height: area.clientHeight,
-    backgroundColor: "#ffffff",
-    preserveObjectStacking: true,
-    selection: true,
+    width: area.clientWidth, height: area.clientHeight,
+    backgroundColor: "#ffffff", preserveObjectStacking: true, selection: true,
   });
   fabric.Object.prototype.set({
-    borderColor: "#1c1c1e",
-    cornerColor: "#1c1c1e",
-    cornerStrokeColor: "#fff",
-    cornerSize: 8,
-    transparentCorners: false,
-    borderScaleFactor: 1,
-    padding: 4,
-    hasBorders: true,
-    hasControls: true,
+    borderColor: "#111", cornerColor: "#111", cornerStrokeColor: "#fff",
+    cornerSize: 8, transparentCorners: false, borderScaleFactor: 1, padding: 4,
   });
 
   fc.on("mouse:down", opt => {
     if (activeTool === "select") return;
     if (opt.target) { setTool("select"); return; }
     const p = fc.getPointer(opt.e);
-    let obj;
     if (activeTool === "text") {
-      obj = new fabric.IText("Metin gir...", {
+      const obj = new fabric.IText("Metin gir...", {
         left: p.x, top: p.y,
         fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif",
         fontSize: 28, fill: "#111", editable: true,
       });
       fc.add(obj); fc.setActiveObject(obj);
       obj.enterEditing(); obj.selectAll();
-    } else if (activeTool === "rect") {
-      obj = new fabric.Rect({ left:p.x-80, top:p.y-50, width:160, height:100, fill:"#e5e7eb", rx:8, ry:8, stroke:"transparent", strokeWidth:0 });
-      fc.add(obj); fc.setActiveObject(obj);
-    } else if (activeTool === "circle") {
-      obj = new fabric.Circle({ left:p.x-60, top:p.y-60, radius:60, fill:"#e5e7eb", stroke:"transparent", strokeWidth:0 });
-      fc.add(obj); fc.setActiveObject(obj);
-    } else if (activeTool === "line") {
-      obj = new fabric.Line([p.x-60, p.y, p.x+60, p.y], { stroke:"#6b7280", strokeWidth:2 });
-      fc.add(obj); fc.setActiveObject(obj);
     }
-    setTool("select");
-    fc.renderAll(); pushHistory(); updateProps();
+    setTool("select"); fc.renderAll(); pushHistory(); updateProps();
   });
 
   fc.on("object:moving", opt => {
     if (!_snapEnabled) return;
     const o = opt.target;
-    o.set({ left: Math.round(o.left/SNAP_SIZE)*SNAP_SIZE, top: Math.round(o.top/SNAP_SIZE)*SNAP_SIZE });
+    o.set({ left: Math.round(o.left/20)*20, top: Math.round(o.top/20)*20 });
   });
   fc.on("object:modified", () => { pushHistory(); updateProps(); scheduleAutoSave(); });
   fc.on("object:added", () => { if (!_histBusy) scheduleAutoSave(); });
@@ -482,30 +449,38 @@ function initCanvas() {
     opt.e.preventDefault();
     let z = fc.getZoom() * (0.999 ** opt.e.deltaY);
     z = Math.min(Math.max(z, 0.1), 5);
-    fc.zoomToPoint({ x:opt.e.offsetX, y:opt.e.offsetY }, z);
+    fc.zoomToPoint({ x: opt.e.offsetX, y: opt.e.offsetY }, z);
     zoom = z;
-    $("zoom-val").textContent = Math.round(z*100)+"%";
+    $("zoom-val").textContent = Math.round(z * 100) + "%";
   });
 
-  // Pan
+  // Pan (space+drag or middle mouse)
   let isPanning = false, lastPan = null, spaceDown = false;
-  document.addEventListener("keydown", e => { if (e.code==="Space"&&!["INPUT","TEXTAREA","SELECT"].includes(document.activeElement.tagName)) { spaceDown=true; $("canvas-area").style.cursor="grab"; } });
-  document.addEventListener("keyup", e => { if (e.code==="Space") { spaceDown=false; $("canvas-area").style.cursor=""; } });
+  document.addEventListener("keydown", e => {
+    if (e.code === "Space" && !["INPUT","TEXTAREA","SELECT"].includes(document.activeElement.tagName)) {
+      spaceDown = true; $("canvas-area").style.cursor = "grab";
+    }
+  });
+  document.addEventListener("keyup", e => {
+    if (e.code === "Space") { spaceDown = false; $("canvas-area").style.cursor = ""; }
+  });
   fc.on("mouse:down", opt => {
-    if (opt.e.button===1||spaceDown||opt.e.altKey) { isPanning=true; lastPan={x:opt.e.clientX,y:opt.e.clientY}; fc.defaultCursor="grabbing"; }
+    if (opt.e.button === 1 || spaceDown || opt.e.altKey) {
+      isPanning = true; lastPan = { x: opt.e.clientX, y: opt.e.clientY }; fc.defaultCursor = "grabbing";
+    }
   });
   fc.on("mouse:move", opt => {
-    if (!isPanning||!lastPan) return;
-    const vp=fc.viewportTransform.slice();
-    vp[4]+=opt.e.clientX-lastPan.x; vp[5]+=opt.e.clientY-lastPan.y;
-    fc.setViewportTransform(vp); lastPan={x:opt.e.clientX,y:opt.e.clientY};
+    if (!isPanning || !lastPan) return;
+    const vp = fc.viewportTransform.slice();
+    vp[4] += opt.e.clientX - lastPan.x; vp[5] += opt.e.clientY - lastPan.y;
+    fc.setViewportTransform(vp); lastPan = { x: opt.e.clientX, y: opt.e.clientY };
   });
-  fc.on("mouse:up", () => { isPanning=false; lastPan=null; if(activeTool==="select")fc.defaultCursor="default"; });
+  fc.on("mouse:up", () => { isPanning = false; lastPan = null; if (activeTool === "select") fc.defaultCursor = "default"; });
 
   window.addEventListener("resize", () => {
     if (!fc) return;
-    fc.setDimensions({ width:$("canvas-area").clientWidth, height:$("canvas-area").clientHeight });
-    fc.renderAll();
+    fc.setDimensions({ width: $("canvas-area").clientWidth, height: $("canvas-area").clientHeight });
+    fc.renderAll(); adjustEditorHeight();
   });
 
   pushHistory();
@@ -525,86 +500,55 @@ function removeImageBg(fabricImg, tolerance) {
   const data = imgData.data;
   const visited = new Uint8Array(w * h);
   const queue = [];
-
-  function getPixel(x, y) {
-    const i = (y*w+x)*4;
-    return [data[i], data[i+1], data[i+2], data[i+3]];
-  }
-  function colorDist(a, b) {
-    return Math.abs(a[0]-b[0]) + Math.abs(a[1]-b[1]) + Math.abs(a[2]-b[2]);
-  }
+  function getPixel(x, y) { const i=(y*w+x)*4; return [data[i],data[i+1],data[i+2],data[i+3]]; }
+  function colorDist(a, b) { return Math.abs(a[0]-b[0])+Math.abs(a[1]-b[1])+Math.abs(a[2]-b[2]); }
   function enqueue(x, y, bg) {
     if (x<0||x>=w||y<0||y>=h||visited[y*w+x]) return;
-    const nc = getPixel(x, y);
-    if (nc[3]===0 || colorDist(nc, bg) <= tolerance*3) {
-      visited[y*w+x] = 1;
-      queue.push([x, y, bg]);
-    }
+    const nc=getPixel(x,y);
+    if (nc[3]===0||colorDist(nc,bg)<=tolerance*3) { visited[y*w+x]=1; queue.push([x,y,bg]); }
   }
-  // Start from all 4 corners
-  [[0,0],[w-1,0],[0,h-1],[w-1,h-1]].forEach(([x,y]) => {
-    const c = getPixel(x, y);
-    visited[y*w+x] = 1;
-    queue.push([x, y, c]);
-  });
+  [[0,0],[w-1,0],[0,h-1],[w-1,h-1]].forEach(([x,y])=>{ const c=getPixel(x,y); visited[y*w+x]=1; queue.push([x,y,c]); });
   while (queue.length) {
-    const [x, y, bg] = queue.shift();
-    const idx = (y*w+x)*4;
-    data[idx+3] = 0;
-    enqueue(x-1, y, bg); enqueue(x+1, y, bg);
-    enqueue(x, y-1, bg); enqueue(x, y+1, bg);
+    const [x,y,bg]=queue.shift();
+    const idx=(y*w+x)*4; data[idx+3]=0;
+    enqueue(x-1,y,bg); enqueue(x+1,y,bg); enqueue(x,y-1,bg); enqueue(x,y+1,bg);
   }
-  ctx.putImageData(imgData, 0, 0);
+  ctx.putImageData(imgData,0,0);
   return tmp.toDataURL("image/png");
 }
 
-// ─── Props panel ─────────────────────────────────────────────────────────────
+// ─── Props panel (simplified — no X/Y/W/H/Rotation) ─────────────────────────
 function updateProps() {
   const panel = $("props-panel");
   const obj = fc?.getActiveObject();
-  if (!obj) { panel.style.display="none"; return; }
+  if (!obj) { panel.style.display = "none"; return; }
   panel.style.display = "block";
 
   const type = obj.type;
-  const isText = type==="i-text"||type==="textbox";
-  const isShape = type==="rect"||type==="circle"||type==="polygon";
-  const isImg = type==="image";
-  const isLine = type==="line";
+  const isText = type === "i-text" || type === "textbox";
+  const isImg = type === "image";
 
   const lbl = (label, inputHtml) => `<div style="display:flex;flex-direction:column;gap:3px;"><span style="font-size:10px;color:#9a9a9f;font-weight:500;">${label}</span>${inputHtml}</div>`;
-  const numInput = (id, val, w=52) => `<input class="prop-input" id="${id}" type="number" value="${val}" style="width:${w}px;">`;
-  const colorInput = (id, val) => `<input type="color" id="${id}" value="${val||'#000000'}" style="width:32px;height:30px;border-radius:7px;border:1px solid rgba(0,0,0,.1);cursor:pointer;padding:2px;background:#fff;">`;
-  const vdiv = `<div style="width:1px;height:30px;background:rgba(0,0,0,.08);flex-shrink:0;"></div>`;
+  const colorInput = (id, val) => `<input type="color" id="${id}" value="${val||'#000000'}" style="width:32px;height:28px;border-radius:7px;border:1px solid rgba(0,0,0,.1);cursor:pointer;padding:2px;background:#fff;">`;
+  const vdiv = `<div style="width:1px;height:28px;background:rgba(0,0,0,.08);flex-shrink:0;"></div>`;
+  const numInput = (id, val, w) => `<input class="prop-input" id="${id}" type="number" value="${val}" style="width:${w||52}px;">`;
 
   let html = `<div style="display:flex;align-items:flex-end;gap:10px;flex-wrap:nowrap;">`;
 
-  if (isImg) {
-    html += lbl("Opaklık %", numInput("p-opacity-num", Math.round((obj.opacity||1)*100)));
-    html += lbl("Köşe", numInput("p-imgrx", obj._rx||0));
-    html += vdiv;
-    html += `<div style="align-self:flex-end;display:flex;gap:6px;">
-      <button class="prop-btn" id="p-rmbg" title="Beyaz/açık arka planı sil" style="white-space:nowrap;">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="display:inline;vertical-align:-1px;margin-right:3px;"><path d="M3 6h18M8 6V4h8v2"/><path d="M10 11v6M14 11v6M5 6l1 14h12l1-14"/></svg>
-        Arka planı sil
-      </button>
-      <button class="prop-btn" id="p-replace">Değiştir</button>
-    </div>`;
-  } else {
-    html += lbl("X", numInput("p-x", Math.round(obj.left)));
-    html += lbl("Y", numInput("p-y", Math.round(obj.top)));
-    html += vdiv;
-    html += lbl("G", numInput("p-w", Math.round(obj.getScaledWidth())));
-    html += lbl("Y", numInput("p-h", Math.round(obj.getScaledHeight())));
-    html += vdiv;
-    html += lbl("°", numInput("p-rot", Math.round(obj.angle||0), 46));
-    html += lbl("Opaklık %", numInput("p-opacity-num", Math.round((obj.opacity||1)*100)));
-    html += vdiv;
-  }
+  // Opacity (all types)
+  html += lbl("Opaklık %", numInput("p-opacity", Math.round((obj.opacity||1)*100)));
+  html += vdiv;
 
   if (isText) {
-    const fonts = ["-apple-system, BlinkMacSystemFont, sans-serif","Georgia, serif","Courier New, monospace","Impact, sans-serif","Arial Black, sans-serif","Trebuchet MS, sans-serif"];
+    const fonts = [
+      "-apple-system, BlinkMacSystemFont, sans-serif",
+      "Georgia, serif",
+      "Courier New, monospace",
+      "Arial Black, sans-serif",
+      "Trebuchet MS, sans-serif",
+    ];
     html += lbl("Font", `<select class="prop-input" id="p-font" style="width:130px;">${fonts.map(f=>`<option value="${f}" ${obj.fontFamily===f?"selected":""}>${f.split(",")[0].replace(/['"]/g,"")}</option>`).join("")}</select>`);
-    html += lbl("Boyut", `<select class="prop-input" id="p-fsize" style="width:58px;">${[10,12,14,16,18,20,24,28,32,40,48,56,72,96].map(s=>`<option value="${s}" ${obj.fontSize==s?"selected":""}>${s}</option>`).join("")}</select>`);
+    html += lbl("Boyut", `<select class="prop-input" id="p-fsize" style="width:60px;">${[10,12,14,16,18,20,24,28,32,40,48,56,72,96].map(s=>`<option value="${s}" ${obj.fontSize==s?"selected":""}>${s}</option>`).join("")}</select>`);
     html += lbl("Renk", colorInput("p-fcolor", obj.fill||"#111111"));
     html += vdiv;
     html += `<div style="display:flex;gap:4px;align-self:flex-end;">
@@ -620,23 +564,18 @@ function updateProps() {
     html += vdiv;
   }
 
-  if (isShape) {
-    html += lbl("Dolgu", colorInput("p-fill", obj.fill==='transparent'||!obj.fill?'#e5e7eb':obj.fill));
-    html += lbl("Kenar", colorInput("p-stroke", obj.stroke&&obj.stroke!=='transparent'?obj.stroke:'#000000'));
-    html += lbl("Kalınlık", numInput("p-sw", obj.strokeWidth||0));
-    if (type==="rect") html += lbl("Köşe", numInput("p-rx", obj.rx||0));
+  if (isImg) {
+    html += lbl("Köşe", numInput("p-imgrx", obj._rx||0, 48));
     html += vdiv;
-  }
-  if (isLine) {
-    html += lbl("Renk", colorInput("p-stroke", obj.stroke||'#6b7280'));
-    html += lbl("Kalınlık", numInput("p-sw", obj.strokeWidth||2));
+    html += `<div style="align-self:flex-end;display:flex;gap:6px;">
+      <button class="prop-btn" id="p-rmbg">Arka planı sil</button>
+      <button class="prop-btn" id="p-replace">Değiştir</button>
+    </div>`;
     html += vdiv;
   }
 
   html += `<div style="align-self:flex-end;">
-    <button id="p-delete" style="height:30px;padding:0 12px;background:rgba(220,38,38,.06);border:1px solid rgba(220,38,38,.18);color:#dc2626;border-radius:8px;font-size:12px;cursor:pointer;font-family:inherit;">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" style="display:inline;vertical-align:-1px;margin-right:3px;"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>Sil
-    </button>
+    <button id="p-delete" style="height:28px;padding:0 12px;background:rgba(220,38,38,.06);border:1px solid rgba(220,38,38,.18);color:#dc2626;border-radius:8px;font-size:12px;cursor:pointer;font-family:inherit;">Sil</button>
   </div>`;
   html += `</div>`;
   panel.innerHTML = html;
@@ -645,106 +584,84 @@ function updateProps() {
   function bindClick(id, fn) { const el=$(id); if(el) el.addEventListener("click", fn); }
   function rerender() { fc.requestRenderAll(); updateProps(); pushHistory(); scheduleAutoSave(); }
 
-  bind("p-x", e => { obj.set("left",+e.target.value); fc.renderAll(); });
-  bind("p-y", e => { obj.set("top",+e.target.value); fc.renderAll(); });
-  bind("p-w", e => { obj.scaleToWidth(+e.target.value); fc.renderAll(); });
-  bind("p-h", e => { obj.scaleToHeight(+e.target.value); fc.renderAll(); });
-  bind("p-rot", e => { obj.set("angle",+e.target.value); fc.renderAll(); });
-  bind("p-opacity-num", e => { obj.set("opacity",Math.min(100,Math.max(0,+e.target.value))/100); fc.renderAll(); });
+  bind("p-opacity", e => { obj.set("opacity", Math.min(100, Math.max(0, +e.target.value)) / 100); fc.renderAll(); });
 
   if (isText) {
-    bind("p-font", e => { obj.set("fontFamily",e.target.value); rerender(); });
-    bind("p-fsize", e => { obj.set("fontSize",+e.target.value); rerender(); });
-    bind("p-fcolor", e => { obj.set("fill",e.target.value); fc.renderAll(); });
-    bindClick("p-bold", () => { obj.set("fontWeight",obj.fontWeight==="bold"?"normal":"bold"); rerender(); });
-    bindClick("p-italic", () => { obj.set("fontStyle",obj.fontStyle==="italic"?"normal":"italic"); rerender(); });
-    bindClick("p-under", () => { obj.set("underline",!obj.underline); rerender(); });
-    bindClick("p-al", () => { obj.set("textAlign","left"); rerender(); });
-    bindClick("p-ac", () => { obj.set("textAlign","center"); rerender(); });
-    bindClick("p-ar", () => { obj.set("textAlign","right"); rerender(); });
+    bind("p-font", e => { obj.set("fontFamily", e.target.value); rerender(); });
+    bind("p-fsize", e => { obj.set("fontSize", +e.target.value); rerender(); });
+    bind("p-fcolor", e => { obj.set("fill", e.target.value); fc.renderAll(); });
+    bindClick("p-bold", () => { obj.set("fontWeight", obj.fontWeight === "bold" ? "normal" : "bold"); rerender(); });
+    bindClick("p-italic", () => { obj.set("fontStyle", obj.fontStyle === "italic" ? "normal" : "italic"); rerender(); });
+    bindClick("p-under", () => { obj.set("underline", !obj.underline); rerender(); });
+    bindClick("p-al", () => { obj.set("textAlign", "left"); rerender(); });
+    bindClick("p-ac", () => { obj.set("textAlign", "center"); rerender(); });
+    bindClick("p-ar", () => { obj.set("textAlign", "right"); rerender(); });
   }
-  if (isShape||isLine) {
-    bind("p-fill", e => { obj.set("fill",e.target.value); fc.renderAll(); });
-    bind("p-stroke", e => { obj.set("stroke",e.target.value); fc.renderAll(); });
-    bind("p-sw", e => { obj.set("strokeWidth",+e.target.value); fc.renderAll(); });
-    if (type==="rect") bind("p-rx", e => { obj.set({rx:+e.target.value,ry:+e.target.value}); fc.renderAll(); });
-  }
+
   if (isImg) {
     bind("p-imgrx", e => {
-      const r=+e.target.value; obj._rx=r;
-      const w=obj.getScaledWidth(), h=obj.getScaledHeight();
-      obj.clipPath = r>0 ? new fabric.Rect({width:w/obj.scaleX,height:h/obj.scaleY,rx:r*(w/obj.scaleX)/100,ry:r*(h/obj.scaleY)/100,originX:"center",originY:"center"}) : null;
+      const r = +e.target.value; obj._rx = r;
+      const w = obj.getScaledWidth(), h = obj.getScaledHeight();
+      obj.clipPath = r > 0 ? new fabric.Rect({ width:w/obj.scaleX, height:h/obj.scaleY, rx:r*(w/obj.scaleX)/100, ry:r*(h/obj.scaleY)/100, originX:"center", originY:"center" }) : null;
       fc.renderAll();
     });
-    // Replace
     const replaceInput = document.createElement("input");
-    replaceInput.type="file"; replaceInput.accept="image/*";
+    replaceInput.type = "file"; replaceInput.accept = "image/*";
     replaceInput.addEventListener("change", () => {
-      const f=replaceInput.files[0]; if(!f) return;
-      const reader=new FileReader();
-      reader.onload=ev=>{
+      const f = replaceInput.files[0]; if (!f) return;
+      const reader = new FileReader();
+      reader.onload = ev => {
         fabric.Image.fromURL(ev.target.result, img => {
           img.scaleToWidth(obj.getScaledWidth());
-          img.set({left:obj.left,top:obj.top,angle:obj.angle});
-          fc.remove(obj); fc.add(img); fc.setActiveObject(img); fc.renderAll();
-          pushHistory(); updateProps();
+          img.set({ left:obj.left, top:obj.top, angle:obj.angle });
+          fc.remove(obj); fc.add(img); fc.setActiveObject(img); fc.renderAll(); pushHistory(); updateProps();
         });
       };
       reader.readAsDataURL(f);
     });
     bindClick("p-replace", () => replaceInput.click());
-    // Remove bg
     bindClick("p-rmbg", () => {
-      setSaveMsg("Arka plan siliniyor...", false);
+      setSaveMsg("İşleniyor...", false);
       setTimeout(() => {
         try {
-          const newDataUrl = removeImageBg(obj);
-          fabric.Image.fromURL(newDataUrl, newImg => {
-            newImg.set({
-              left: obj.left, top: obj.top,
-              scaleX: obj.scaleX, scaleY: obj.scaleY,
-              angle: obj.angle, opacity: obj.opacity,
-            });
+          const newUrl = removeImageBg(obj);
+          fabric.Image.fromURL(newUrl, newImg => {
+            newImg.set({ left:obj.left, top:obj.top, scaleX:obj.scaleX, scaleY:obj.scaleY, angle:obj.angle, opacity:obj.opacity });
             fc.remove(obj); fc.add(newImg); fc.setActiveObject(newImg); fc.renderAll();
-            pushHistory(); updateProps();
-            setSaveMsg("Arka plan silindi ✓", true);
+            pushHistory(); updateProps(); setSaveMsg("Arka plan silindi ✓", true);
           });
         } catch(e) { setSaveMsg("Hata oluştu", false); }
       }, 50);
     });
   }
+
   bindClick("p-delete", deleteSelected);
 }
 
 // ─── Add image ───────────────────────────────────────────────────────────────
-function addImgFromURL(url, opts={}) {
+function addImgFromURL(url, opts) {
+  opts = opts || {};
   fabric.Image.fromURL(url, img => {
     const maxW = fc.width * 0.4;
     if (img.width > maxW) img.scaleToWidth(maxW);
-    img.set({ left:fc.width/2-img.getScaledWidth()/2, top:fc.height/2-img.getScaledHeight()/2, ...opts });
+    img.set({ left: fc.width/2 - img.getScaledWidth()/2, top: fc.height/2 - img.getScaledHeight()/2, ...opts });
     fc.add(img); fc.setActiveObject(img); fc.renderAll();
     pushHistory(); updateProps(); scheduleAutoSave();
-  }, { crossOrigin:"anonymous" });
+  }, { crossOrigin: "anonymous" });
 }
 
-// ─── Delete ──────────────────────────────────────────────────────────────────
+// ─── Delete / Duplicate ──────────────────────────────────────────────────────
 function deleteSelected() {
-  const obj = fc?.getActiveObject();
-  if (!obj) return;
-  if (obj.type==="activeSelection") obj.getObjects().forEach(o=>fc.remove(o));
+  const obj = fc?.getActiveObject(); if (!obj) return;
+  if (obj.type === "activeSelection") obj.getObjects().forEach(o => fc.remove(o));
   else fc.remove(obj);
-  fc.discardActiveObject(); fc.renderAll();
-  pushHistory(); updateProps(); scheduleAutoSave();
+  fc.discardActiveObject(); fc.renderAll(); pushHistory(); updateProps(); scheduleAutoSave();
 }
-
-// ─── Duplicate ───────────────────────────────────────────────────────────────
 function duplicate() {
-  const obj = fc?.getActiveObject();
-  if (!obj) return;
+  const obj = fc?.getActiveObject(); if (!obj) return;
   obj.clone(cloned => {
     cloned.set({ left:(obj.left||0)+24, top:(obj.top||0)+24 });
-    fc.add(cloned); fc.setActiveObject(cloned); fc.renderAll();
-    pushHistory(); updateProps();
+    fc.add(cloned); fc.setActiveObject(cloned); fc.renderAll(); pushHistory(); updateProps();
   });
 }
 
@@ -752,23 +669,20 @@ function duplicate() {
 function renderFavs(list) {
   const wrap = $("fav-list");
   if (!list.length) {
-    wrap.innerHTML = `<p style="font-size:11px;color:#9a9a9f;padding:8px 0;">Favori ürün yok.<br><a href="/urunler.html" style="color:#3b82f6;">Ürünler sayfasından</a> favorilere ekle.</p>`;
+    wrap.innerHTML = `<p style="font-size:12px;color:#9a9a9f;padding:8px 0;line-height:1.5;">Favori ürün yok.<br><a href="/urunler.html" style="color:#3b82f6;">Ürünler sayfasından</a> favorilere ekle.</p>`;
     return;
   }
   wrap.innerHTML = list.map(p=>`
     <button draggable="true" data-pid="${p.id}" class="fav-item">
       <img src="${p.image||FALLBACK}" style="width:44px;height:44px;border-radius:8px;object-fit:cover;flex-shrink:0;" crossorigin="anonymous">
       <div style="min-width:0;flex:1;">
-        <div style="font-size:12px;font-weight:500;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.name||"Ürün"}</div>
-        <div style="font-size:11px;color:#9a9a9f;margin-top:1px;">${p.brand_name||"Marka"}</div>
+        <div style="font-size:13px;font-weight:500;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.name||"Ürün"}</div>
+        <div style="font-size:11px;color:#9a9a9f;margin-top:1px;">${p.brand_name||""}</div>
       </div>
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9a9a9f" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
     </button>
   `).join("");
-
   wrap.querySelectorAll("[data-pid]").forEach(btn => {
-    const p = list.find(x=>String(x.id)===btn.dataset.pid);
-    if (!p) return;
+    const p = list.find(x => String(x.id) === btn.dataset.pid); if (!p) return;
     btn.addEventListener("click", () => addImgFromURL(p.image||FALLBACK));
     btn.addEventListener("dragstart", e => {
       e.dataTransfer.effectAllowed = "copy";
@@ -780,20 +694,15 @@ function renderFavs(list) {
 // ─── Drag-drop onto canvas ────────────────────────────────────────────────────
 function initDragDrop() {
   const area = $("canvas-area");
-  area.addEventListener("dragover", e => { e.preventDefault(); e.dataTransfer.dropEffect="copy"; area.style.boxShadow="inset 0 0 0 2px #3b82f6"; });
-  area.addEventListener("dragleave", e => { if(!area.contains(e.relatedTarget)) area.style.boxShadow=""; });
+  area.addEventListener("dragover", e => { e.preventDefault(); area.style.boxShadow="inset 0 0 0 2px #3b82f6"; });
+  area.addEventListener("dragleave", e => { if (!area.contains(e.relatedTarget)) area.style.boxShadow=""; });
   area.addEventListener("drop", e => {
     e.preventDefault(); area.style.boxShadow="";
-    const rect=fc.getElement().getBoundingClientRect();
-    const vp=fc.viewportTransform;
-    const dropX=(e.clientX-rect.left-vp[4])/vp[0];
-    const dropY=(e.clientY-rect.top-vp[5])/vp[3];
+    const rect=fc.getElement().getBoundingClientRect(), vp=fc.viewportTransform;
+    const dropX=(e.clientX-rect.left-vp[4])/vp[0], dropY=(e.clientY-rect.top-vp[5])/vp[3];
     if (e.dataTransfer.files?.length) {
-      const file=e.dataTransfer.files[0];
-      if (!file.type.startsWith("image/")) return;
-      const reader=new FileReader();
-      reader.onload=ev=>addImgFromURL(ev.target.result,{left:dropX-110,top:dropY-110});
-      reader.readAsDataURL(file); return;
+      const file=e.dataTransfer.files[0]; if (!file.type.startsWith("image/")) return;
+      const r=new FileReader(); r.onload=ev=>addImgFromURL(ev.target.result,{left:dropX-110,top:dropY-110}); r.readAsDataURL(file); return;
     }
     const raw=e.dataTransfer.getData("application/json");
     if (raw) { try { const p=JSON.parse(raw); addImgFromURL(p.image||FALLBACK,{left:dropX-110,top:dropY-110}); } catch{} }
@@ -801,121 +710,104 @@ function initDragDrop() {
 }
 
 // ─── Save ────────────────────────────────────────────────────────────────────
-function scheduleAutoSave() {
-  clearTimeout(_autoSaveTimer);
-  _autoSaveTimer = setTimeout(saveBoard, 4000);
-}
+function scheduleAutoSave() { clearTimeout(_autoSaveTimer); _autoSaveTimer = setTimeout(saveBoard, 4000); }
 async function saveBoard() {
-  if (!fc||!boardId) return;
-  const name = $("board-name-el").value.trim()||"Tasarım Panosu";
+  if (!fc || !boardId) return;
+  const name = $("board-name-el").value.trim() || "Tasarım Panosu";
   const canvas_json = JSON.stringify(fc.toJSON(["_locked","_rx"]));
   setSaveMsg("Kaydediliyor...", false);
   const res = await AG.updateMoodboard(boardId, { name, canvas_json });
-  setSaveMsg(res.ok?"Kaydedildi ✓":"Kaydedilemedi", res.ok);
+  setSaveMsg(res.ok ? "Kaydedildi ✓" : "Kaydedilemedi", res.ok);
 }
 
 // ─── Ratio ───────────────────────────────────────────────────────────────────
-const RATIOS = { "free":null, "16:9":[16,9], "4:3":[4,3], "1:1":[1,1], "a4-l":[297,210], "a4-p":[210,297], "story":[9,16] };
+const RATIOS = { "16:9":[16,9], "4:3":[4,3], "1:1":[1,1], "a4-l":[297,210], "a4-p":[210,297], "story":[9,16] };
 function applyRatio(key) {
-  document.querySelectorAll(".ratio-opt").forEach(b=>b.classList.remove("active"));
-  const btn=document.querySelector(`.ratio-opt[data-ratio="${key}"]`);
+  document.querySelectorAll(".ratio-btn").forEach(b => b.classList.remove("active"));
+  const btn = document.querySelector(`.ratio-btn[data-ratio="${key}"]`);
   if (btn) btn.classList.add("active");
-  const ratio=RATIOS[key];
-  if (!ratio||!fc) return;
-  const area=$("canvas-area");
-  const maxW=area.clientWidth-60, maxH=area.clientHeight-60;
-  const [rw,rh]=ratio;
-  let cw=maxW, ch=Math.round(maxW*rh/rw);
-  if (ch>maxH) { ch=maxH; cw=Math.round(maxH*rw/rh); }
-  fc.setDimensions({width:cw,height:ch});
-  fc.setZoom(1); zoom=1; $("zoom-val").textContent="100%";
+  if (key === "free") { return; }
+  const ratio = RATIOS[key]; if (!ratio || !fc) return;
+  const area = $("canvas-area");
+  const maxW = area.clientWidth - 60, maxH = area.clientHeight - 60;
+  const [rw,rh] = ratio;
+  let cw = maxW, ch = Math.round(maxW * rh / rw);
+  if (ch > maxH) { ch = maxH; cw = Math.round(maxH * rw / rh); }
+  fc.setDimensions({ width:cw, height:ch });
+  fc.setZoom(1); zoom = 1; $("zoom-val").textContent = "100%";
   fc.renderAll();
 }
 
 // ─── Dropdown helper ──────────────────────────────────────────────────────────
 function toggleDropdown(id, anchorEl) {
   const dd = $(id);
-  const open = dd.style.display==="block";
-  document.querySelectorAll(".dropdown").forEach(d=>d.style.display="none");
+  const open = dd.style.display === "block";
+  document.querySelectorAll(".dropdown").forEach(d => d.style.display = "none");
   if (!open) {
     dd.style.display = "block";
     const rect = anchorEl.getBoundingClientRect();
-    // Position below anchor, aligned to right if near right edge
-    let left = rect.left;
-    let top = rect.bottom + 6;
-    dd.style.left = left + "px";
-    dd.style.top = top + "px";
-    // Adjust if overflows right edge
-    const ddRect = dd.getBoundingClientRect();
-    if (left + dd.offsetWidth > window.innerWidth - 10) {
-      dd.style.left = (rect.right - dd.offsetWidth) + "px";
-    }
+    let left = rect.left, top = rect.bottom + 6;
+    dd.style.left = left + "px"; dd.style.top = top + "px";
+    requestAnimationFrame(() => {
+      if (left + dd.offsetWidth > window.innerWidth - 10)
+        dd.style.left = (rect.right - dd.offsetWidth) + "px";
+    });
   }
 }
 
-// ─── Load boards (sidebar + header tabs) ────────────────────────────────────
+// ─── Board list (sidebar + tabs) ─────────────────────────────────────────────
 async function loadBoardList() {
-  const sideList = $("board-list");
-  const tabsEl = $("board-tabs");
+  const sideList = $("board-list"), tabsEl = $("board-tabs");
   try {
     const boards = await AG.getMoodboards() || [];
-
     // Sidebar
-    if (!boards.length) {
-      sideList.innerHTML = `<div style="font-size:11px;color:rgba(255,255,255,.3);padding:6px 8px;">Henüz pano yok</div>`;
-    } else {
-      sideList.innerHTML = boards.map(b=>`
-        <button class="board-nav-item ${String(b.id)===String(boardId)?'active':''}" data-bid="${b.id}">
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
-          <span style="overflow:hidden;text-overflow:ellipsis;">${(b.name||"Pano").substring(0,13)}</span>
-        </button>
-      `).join("");
-      sideList.querySelectorAll("[data-bid]").forEach(btn=>{
-        btn.addEventListener("click",()=>{ location.href=`/tasarim-panosu.html?id=${btn.dataset.bid}`; });
-      });
-    }
-
+    sideList.innerHTML = boards.length
+      ? boards.map(b=>`<button class="board-nav-item ${String(b.id)===String(boardId)?'active':''}" data-bid="${b.id}">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;opacity:.5;"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+          <span style="overflow:hidden;text-overflow:ellipsis;">${(b.name||"Pano").substring(0,16)}</span>
+        </button>`).join("")
+      : `<div style="font-size:12px;color:#9a9a9f;padding:6px 8px;">Henüz pano yok</div>`;
+    sideList.querySelectorAll("[data-bid]").forEach(btn=>{
+      btn.addEventListener("click", () => location.href=`/tasarim-panosu.html?id=${btn.dataset.bid}`);
+    });
     // Header tabs
-    if (tabsEl) {
-      tabsEl.innerHTML = boards.map(b=>`
-        <button class="board-tab ${String(b.id)===String(boardId)?'active':''}" data-bid="${b.id}">
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
-          ${(b.name||"Pano").substring(0,16)}
-        </button>
-      `).join("") + `<button class="board-tab-new" id="tab-new-btn" title="Yeni pano">+</button>`;
-      tabsEl.querySelectorAll(".board-tab[data-bid]").forEach(btn=>{
-        btn.addEventListener("click",()=>{ location.href=`/tasarim-panosu.html?id=${btn.dataset.bid}`; });
-      });
-      const tabNew = $("tab-new-btn");
-      if (tabNew) tabNew.addEventListener("click", createNewBoard);
-    }
+    tabsEl.innerHTML = boards.map(b=>`
+      <button class="board-tab ${String(b.id)===String(boardId)?'active':''}" data-bid="${b.id}">${(b.name||"Pano").substring(0,14)}</button>
+    `).join("") + `<button class="board-tab-new" id="tab-new-btn" title="Yeni pano">+</button>`;
+    tabsEl.querySelectorAll(".board-tab[data-bid]").forEach(btn=>{
+      btn.addEventListener("click", () => location.href=`/tasarim-panosu.html?id=${btn.dataset.bid}`);
+    });
+    const tnb = $("tab-new-btn");
+    if (tnb) tnb.addEventListener("click", createNewBoard);
   } catch(e) {
-    sideList.innerHTML = `<div style="font-size:11px;color:rgba(255,255,255,.3);padding:6px 8px;">Yüklenemedi</div>`;
+    sideList.innerHTML = `<div style="font-size:12px;color:#9a9a9f;padding:6px 8px;">Yüklenemedi</div>`;
   }
 }
-
 async function createNewBoard() {
   const r = await AG.createMoodboard({ name:"Yeni Pano" });
-  if (r.ok) location.href=`/tasarim-panosu.html?id=${encodeURIComponent(r.moodboard.id)}`;
+  if (r.ok) location.href = `/tasarim-panosu.html?id=${encodeURIComponent(r.moodboard.id)}`;
 }
 
 // ─── Boot ────────────────────────────────────────────────────────────────────
 async function boot() {
   await AG.ready;
   const session = await AG.getSessionArchitect();
-  if (!session) { location.href="/mimar-giris.html"; return; }
+  if (!session) { location.href = "/mimar-giris.html"; return; }
 
   const qp = new URLSearchParams(location.search);
   boardId = qp.get("id");
   if (!boardId) {
     const r = await AG.createMoodboard({ name:"Yeni Tasarım Panosu" });
-    if (r.ok) location.href=`/tasarim-panosu.html?id=${encodeURIComponent(r.moodboard.id)}`;
+    if (r.ok) location.href = `/tasarim-panosu.html?id=${encodeURIComponent(r.moodboard.id)}`;
     return;
   }
 
   boardData = await AG.getMoodboard(boardId);
-  if (!boardData) { setSaveMsg("Pano bulunamadı",false); return; }
-  $("board-name-el").value = boardData.name||"Yeni Pano";
+  if (!boardData) { setSaveMsg("Pano bulunamadı", false); return; }
+  $("board-name-el").value = boardData.name || "Yeni Pano";
+
+  // Adjust height once header/footer are rendered
+  setTimeout(adjustEditorHeight, 200);
 
   loadBoardList();
   initCanvas();
@@ -924,9 +816,8 @@ async function boot() {
   if (boardData.canvas_json) {
     _histBusy = true;
     fc.loadFromJSON(JSON.parse(boardData.canvas_json), () => {
-      fc.renderAll(); _histBusy=false;
-      history=[JSON.stringify(fc.toJSON(["_locked","_rx"]))];
-      histIdx=0; updateProps();
+      fc.renderAll(); _histBusy = false;
+      history = [JSON.stringify(fc.toJSON(["_locked","_rx"]))]; histIdx = 0; updateProps();
     });
   } else { updateProps(); }
 
@@ -934,130 +825,108 @@ async function boot() {
   renderFavs(allFavs);
   initDragDrop();
 
-  // ── Tool buttons ──
-  $("t-select").addEventListener("click", ()=>setTool("select"));
-  $("t-text").addEventListener("click",   ()=>setTool("text"));
-  $("t-rect").addEventListener("click",   ()=>setTool("rect"));
-  $("t-circle").addEventListener("click", ()=>setTool("circle"));
-  $("t-line").addEventListener("click",   ()=>setTool("line"));
-
-  // Frame picker
-  $("t-frame").addEventListener("click", e=>{ e.stopPropagation(); toggleDropdown("frame-picker", e.currentTarget); });
-  document.querySelectorAll(".ratio-opt").forEach(btn=>{
-    btn.addEventListener("click",()=>{ applyRatio(btn.dataset.ratio); $("frame-picker").style.display="none"; });
-  });
+  // Tool buttons
+  $("t-select").addEventListener("click", () => setTool("select"));
+  $("t-text").addEventListener("click",   () => setTool("text"));
+  $("t-image").addEventListener("click",  () => $("file-input").click());
 
   // BG palette
-  $("t-bg").addEventListener("click", e=>{ e.stopPropagation(); toggleDropdown("bg-palette-dd", e.currentTarget); });
-  document.querySelectorAll(".bg-chip").forEach(chip=>{
-    chip.addEventListener("click",()=>{ fc?.set("backgroundColor",chip.dataset.color); fc?.renderAll(); scheduleAutoSave(); });
+  $("t-bg").addEventListener("click", e => { e.stopPropagation(); toggleDropdown("bg-palette-dd", e.currentTarget); });
+  document.querySelectorAll(".bg-chip").forEach(chip => {
+    chip.addEventListener("click", () => { fc?.set("backgroundColor", chip.dataset.color); fc?.renderAll(); scheduleAutoSave(); });
   });
-  $("bg-custom").addEventListener("input", e=>{ fc?.set("backgroundColor",e.target.value); fc?.renderAll(); scheduleAutoSave(); });
+  $("bg-custom").addEventListener("input", e => { fc?.set("backgroundColor", e.target.value); fc?.renderAll(); scheduleAutoSave(); });
 
-  // Upload buttons
-  $("upload-btn").addEventListener("click", ()=>$("file-input").click());
-  $("file-input").addEventListener("change", ()=>{
-    Array.from($("file-input").files).forEach(file=>{
+  // Ratio bar
+  document.querySelectorAll(".ratio-btn").forEach(btn => {
+    btn.addEventListener("click", () => applyRatio(btn.dataset.ratio));
+  });
+
+  // Upload
+  $("upload-btn").addEventListener("click", () => $("file-input").click());
+  $("file-input").addEventListener("change", () => {
+    Array.from($("file-input").files).forEach(file => {
       if (!file.type.startsWith("image/")) return;
-      const r=new FileReader();
-      r.onload=ev=>addImgFromURL(ev.target.result);
-      r.readAsDataURL(file);
+      const r = new FileReader(); r.onload = ev => addImgFromURL(ev.target.result); r.readAsDataURL(file);
     });
-    $("file-input").value="";
+    $("file-input").value = "";
   });
 
-  // Search
-  $("fav-search").addEventListener("input", e=>{
-    const q=e.target.value.trim().toLowerCase();
-    renderFavs(q?allFavs.filter(p=>(p.name||"").toLowerCase().includes(q)):allFavs);
+  // Fav search
+  $("fav-search").addEventListener("input", e => {
+    const q = e.target.value.trim().toLowerCase();
+    renderFavs(q ? allFavs.filter(p => (p.name||"").toLowerCase().includes(q)) : allFavs);
   });
 
   // Action buttons
-  $("t-front").addEventListener("click",()=>{const o=fc.getActiveObject();if(o){fc.bringToFront(o);fc.renderAll();pushHistory();}});
-  $("t-back").addEventListener("click",()=>{const o=fc.getActiveObject();if(o){fc.sendToBack(o);fc.renderAll();pushHistory();}});
-  $("t-dup").addEventListener("click",duplicate);
-  $("t-lock").addEventListener("click",()=>{
-    const o=fc.getActiveObject();if(!o)return;
-    o._locked=!o._locked;
-    o.set({selectable:!o._locked,evented:!o._locked,lockMovementX:o._locked,lockMovementY:o._locked,lockScalingX:o._locked,lockScalingY:o._locked,lockRotation:o._locked});
-    fc.renderAll();pushHistory();
-  });
-  $("t-undo").addEventListener("click",undo);
-  $("t-redo").addEventListener("click",redo);
-  $("t-delete").addEventListener("click",deleteSelected);
+  $("t-front").addEventListener("click", () => { const o=fc.getActiveObject(); if(o){fc.bringToFront(o);fc.renderAll();pushHistory();} });
+  $("t-back").addEventListener("click",  () => { const o=fc.getActiveObject(); if(o){fc.sendToBack(o);fc.renderAll();pushHistory();} });
+  $("t-dup").addEventListener("click",   duplicate);
+  $("t-undo").addEventListener("click",  undo);
+  $("t-redo").addEventListener("click",  redo);
+  $("t-delete").addEventListener("click", deleteSelected);
 
-  // Save (Ctrl+S only, no button)
-  $("board-name-el").addEventListener("blur",scheduleAutoSave);
-  $("board-desc-el").addEventListener("blur",scheduleAutoSave);
+  // Board name autosave
+  $("board-name-el").addEventListener("blur", scheduleAutoSave);
+  $("board-desc-el").addEventListener("blur", scheduleAutoSave);
 
   // Zoom
-  $("zoom-in").addEventListener("click",()=>{ zoom=Math.min(5,+(zoom+0.1).toFixed(1)); fc.setZoom(zoom); $("zoom-val").textContent=Math.round(zoom*100)+"%"; });
-  $("zoom-out").addEventListener("click",()=>{ zoom=Math.max(0.1,+(zoom-0.1).toFixed(1)); fc.setZoom(zoom); $("zoom-val").textContent=Math.round(zoom*100)+"%"; });
-  $("fit-btn").addEventListener("click",()=>{ fc.setViewportTransform([1,0,0,1,0,0]); fc.setZoom(1); zoom=1; $("zoom-val").textContent="100%"; fc.renderAll(); });
+  $("zoom-in").addEventListener("click",  () => { zoom=Math.min(5,+(zoom+0.1).toFixed(1)); fc.setZoom(zoom); $("zoom-val").textContent=Math.round(zoom*100)+"%"; });
+  $("zoom-out").addEventListener("click", () => { zoom=Math.max(0.1,+(zoom-0.1).toFixed(1)); fc.setZoom(zoom); $("zoom-val").textContent=Math.round(zoom*100)+"%"; });
+  $("fit-btn").addEventListener("click",  () => { fc.setViewportTransform([1,0,0,1,0,0]); fc.setZoom(1); zoom=1; $("zoom-val").textContent="100%"; fc.renderAll(); });
 
   // Settings
-  $("settings-btn").addEventListener("click", e=>{ e.stopPropagation(); toggleDropdown("settings-dd", e.currentTarget); });
-  document.querySelectorAll("[data-setting]").forEach(item=>{
-    item.addEventListener("click",()=>{
-      const key=item.dataset.setting;
-      const tog=item.querySelector(".toggle");
-      tog.classList.toggle("on");
-      const on=tog.classList.contains("on");
-      if (key==="grid") $("grid-overlay").style.display=on?"block":"none";
-      if (key==="snap") _snapEnabled=on;
-      if (key==="frames") {
-        _showFrames=on;
-        if (fc) { fc.forEachObject(o=>{o.hasBorders=on;o.hasControls=on;}); fc.renderAll(); }
-      }
+  $("settings-btn").addEventListener("click", e => { e.stopPropagation(); toggleDropdown("settings-dd", e.currentTarget); });
+  document.querySelectorAll("[data-setting]").forEach(item => {
+    item.addEventListener("click", () => {
+      const tog = item.querySelector(".toggle"); tog.classList.toggle("on");
+      const on = tog.classList.contains("on"), key = item.dataset.setting;
+      if (key === "grid")   $("grid-overlay").style.display = on ? "block" : "none";
+      if (key === "snap")   _snapEnabled = on;
+      if (key === "frames") { if (fc) { fc.forEachObject(o=>{o.hasBorders=on;o.hasControls=on;}); fc.renderAll(); } }
     });
   });
-  $("fullscreen-btn").addEventListener("click",()=>{
-    $("settings-dd").style.display="none";
+  $("fullscreen-btn").addEventListener("click", () => {
+    $("settings-dd").style.display = "none";
     if (!document.fullscreenElement) document.documentElement.requestFullscreen?.();
     else document.exitFullscreen?.();
   });
 
   // Download
-  $("dl-btn").addEventListener("click",e=>{ e.stopPropagation(); toggleDropdown("dl-menu",$("dl-btn")); });
-  $("dl-jpg").addEventListener("click",()=>{
-    $("dl-menu").style.display="none";
-    const url=fc.toDataURL({format:"jpeg",quality:0.95,multiplier:2});
-    const a=document.createElement("a"); a.href=url; a.download=($("board-name-el").value||"pano")+".jpg"; a.click();
-    setSaveMsg("JPG indirildi ✓",true);
+  $("dl-btn").addEventListener("click", e => { e.stopPropagation(); toggleDropdown("dl-menu", $("dl-btn")); });
+  $("dl-jpg").addEventListener("click", () => {
+    $("dl-menu").style.display = "none";
+    const url = fc.toDataURL({ format:"jpeg", quality:0.95, multiplier:2 });
+    const a = document.createElement("a"); a.href=url; a.download=($("board-name-el").value||"pano")+".jpg"; a.click();
+    setSaveMsg("JPG indirildi ✓", true);
   });
-  $("dl-pdf").addEventListener("click",()=>{
-    $("dl-menu").style.display="none";
-    const url=fc.toDataURL({format:"jpeg",quality:0.92,multiplier:2});
-    const {jsPDF}=window.jspdf;
-    const W=fc.width*2, H=fc.height*2;
-    const pdf=new jsPDF({orientation:W>H?"landscape":"portrait",unit:"px",format:[W,H]});
-    pdf.addImage(url,"JPEG",0,0,W,H);
-    pdf.save(($("board-name-el").value||"pano")+".pdf");
-    setSaveMsg("PDF indirildi ✓",true);
+  $("dl-pdf").addEventListener("click", () => {
+    $("dl-menu").style.display = "none";
+    const url = fc.toDataURL({ format:"jpeg", quality:0.92, multiplier:2 });
+    const { jsPDF } = window.jspdf;
+    const W = fc.width*2, H = fc.height*2;
+    const pdf = new jsPDF({ orientation:W>H?"landscape":"portrait", unit:"px", format:[W,H] });
+    pdf.addImage(url,"JPEG",0,0,W,H); pdf.save(($("board-name-el").value||"pano")+".pdf");
+    setSaveMsg("PDF indirildi ✓", true);
   });
 
-  // New board
+  // New board (sidebar button)
   $("new-board-btn").addEventListener("click", createNewBoard);
 
   // Close dropdowns on outside click
-  document.addEventListener("click",()=>{
-    document.querySelectorAll(".dropdown").forEach(d=>d.style.display="none");
-  });
+  document.addEventListener("click", () => document.querySelectorAll(".dropdown").forEach(d => d.style.display="none"));
 
   // Keyboard shortcuts
-  document.addEventListener("keydown", e=>{
-    const tag=document.activeElement.tagName;
+  document.addEventListener("keydown", e => {
+    const tag = document.activeElement.tagName;
     if (["INPUT","TEXTAREA","SELECT"].includes(tag)) return;
-    if ((e.ctrlKey||e.metaKey)&&e.key==="z") { e.preventDefault(); undo(); }
-    if ((e.ctrlKey||e.metaKey)&&(e.key==="y"||(e.shiftKey&&e.key==="z"))) { e.preventDefault(); redo(); }
-    if ((e.ctrlKey||e.metaKey)&&e.key==="d") { e.preventDefault(); duplicate(); }
-    if ((e.ctrlKey||e.metaKey)&&e.key==="s") { e.preventDefault(); saveBoard(); }
+    if ((e.ctrlKey||e.metaKey) && e.key==="z") { e.preventDefault(); undo(); }
+    if ((e.ctrlKey||e.metaKey) && (e.key==="y"||(e.shiftKey&&e.key==="z"))) { e.preventDefault(); redo(); }
+    if ((e.ctrlKey||e.metaKey) && e.key==="d") { e.preventDefault(); duplicate(); }
+    if ((e.ctrlKey||e.metaKey) && e.key==="s") { e.preventDefault(); saveBoard(); }
     if (e.key==="Delete"||e.key==="Backspace") deleteSelected();
     if (e.key==="v"||e.key==="V") setTool("select");
     if (e.key==="t"||e.key==="T") setTool("text");
-    if (e.key==="r"||e.key==="R") setTool("rect");
-    if (e.key==="c"||e.key==="C") setTool("circle");
-    if (e.key==="l"||e.key==="L") setTool("line");
     if (e.key==="Escape") { setTool("select"); fc.discardActiveObject(); fc.renderAll(); document.querySelectorAll(".dropdown").forEach(d=>d.style.display="none"); }
   });
 }
