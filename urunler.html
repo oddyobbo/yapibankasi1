@@ -344,7 +344,13 @@
       const qp = new URLSearchParams(location.search);
       const qpCategory = (qp.get("category") || "").trim();
       const qpSub = (qp.get("sub") || "").trim();
+      const qpQ = (qp.get("q") || "").trim();
       activeCategory = qpSub || qpCategory || "";
+      if (qpQ) {
+        searchQuery = qpQ;
+        const si = document.getElementById("search-input");
+        if (si) si.value = qpQ;
+      }
 
       renderCategoryPills();
       buildAccordionGroups();
@@ -559,16 +565,11 @@
       } else if (g.type === "colors") {
         bodyContent = `<div class="flex flex-wrap gap-2 py-1">` +
           g.values.map(c => `
-            <label class="cursor-pointer group/col" title="${c.label}">
+            <label class="cursor-pointer" title="${c.label}">
               <input type="checkbox" class="sr-only peer" data-filter-key="${g.id}" value="${c.label}">
               <span class="block w-6 h-6 rounded-full ring-1 ring-black/10 peer-checked:ring-2 peer-checked:ring-black peer-checked:scale-110 transition-all"
                 style="background:${c.hex}"></span>
             </label>
-          `).join("") +
-        `</div>
-        <div class="flex flex-wrap gap-x-2 gap-y-0.5 mt-1">` +
-          g.values.map(c => `
-            <span class="text-[11px] text-[#8e8e93] peer-checked:text-black" data-color-label="${c.label}">${c.label}</span>
           `).join("") +
         `</div>`;
       }
@@ -702,8 +703,9 @@
         if (filters.priceMax && p.price > filters.priceMax) return false;
 
         if (searchQuery) {
-          const q = searchQuery.toLowerCase();
-          if (!(p.name + p.category + (p.spec || "") + (p.brandName || "") + JSON.stringify(p.technical || {})).toLowerCase().includes(q)) return false;
+          const haystack = (p.name + " " + p.category + " " + (p.spec || "") + " " + (p.brandName || "") + " " + JSON.stringify(p.technical || {})).toLowerCase();
+          const words = searchQuery.toLowerCase().trim().split(/\s+/);
+          if (!words.every(w => haystack.includes(w))) return false;
         }
         return true;
       });

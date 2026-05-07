@@ -203,9 +203,14 @@
     headerTarget.innerHTML = `
       <header class="border-b border-black/[0.06] sticky top-0 bg-white/85 backdrop-blur-xl z-30">
         <div class="h-[72px] px-4 sm:px-6 lg:px-10 flex items-center justify-between">
-          <a href="/mvp-taslak-v1.html" class="text-[22px] font-semibold tracking-tight">Antigravity</a>
+          <a href="/mvp-taslak-v1.html" class="text-[22px] font-semibold tracking-tight flex-shrink-0">Antigravity</a>
           <nav class="hidden lg:flex items-center gap-1">${nav}</nav>
-          <div class="hidden lg:flex items-center gap-2">
+          <div class="hidden lg:flex items-center gap-3">
+            <form id="header-search-form" action="/urunler.html" method="get" class="relative">
+              <svg class="absolute left-3 top-1/2 -translate-y-1/2 text-[#8e8e93] pointer-events-none" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input name="q" type="text" placeholder="Ürün ara..." autocomplete="off"
+                class="h-[34px] w-[180px] rounded-full border border-black/[0.12] bg-[#f5f5f7] pl-8 pr-3 text-[13px] outline-none focus:bg-white focus:border-black/30 focus:w-[240px] transition-all duration-200">
+            </form>
             ${desktopAuthLinks}
           </div>
           <button id="mobile-menu-btn" class="lg:hidden inline-flex items-center justify-center w-10 h-10 rounded-full border border-black/[0.08] text-[18px]" aria-label="Menü">☰</button>
