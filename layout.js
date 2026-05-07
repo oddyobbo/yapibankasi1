@@ -24,36 +24,45 @@
     { name: "Mimari", subs: ["Tavan", "Decking", "Kapı", "Cephe", "Profil ve Trim", "Peyzaj Kaplama"] },
   ];
 
+  const iconStroke = "stroke=\"#8a8a8f\" stroke-width=\"1.5\" fill=\"none\" stroke-linecap=\"round\" stroke-linejoin=\"round\"";
+  const iconFloor = `<svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path ${iconStroke} d="M2 13h12M2 10h12M2 7h12M3 4h10"/></svg>`;
+  const iconSquare = `<svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><rect x="2.5" y="2.5" width="11" height="11" rx="1.5" ${iconStroke}/></svg>`;
+  const iconCircle = `<svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="5.5" ${iconStroke}/></svg>`;
+  const iconGrid = `<svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path ${iconStroke} d="M2.5 5.5h11M2.5 10.5h11M5.5 2.5v11M10.5 2.5v11"/><rect x="2.5" y="2.5" width="11" height="11" rx="1.5" ${iconStroke}/></svg>`;
+  const iconLight = `<svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path ${iconStroke} d="M8 2.5v7M5.5 12h5M6.5 13.5h3"/></svg>`;
+  const iconDoor = `<svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path ${iconStroke} d="M4 2.5h8v11H4zM9.7 8h.01"/></svg>`;
+  const iconFacade = `<svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path ${iconStroke} d="M3 13.5V2.5h10v11M3 6.5h10M3 10h10M6.3 2.5V13.5M9.7 2.5V13.5"/></svg>`;
+  const iconTrim = `<svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path ${iconStroke} d="M2.5 12.5h11M2.5 8h11M2.5 3.5h11"/></svg>`;
   const subCategoryIcons = {
-    "Zemin": "▦",
-    "Cam": "◇",
-    "Deri": "◍",
-    "Yığma ve Taş": "▧",
-    "Metal": "▣",
-    "Boya": "◌",
-    "Panel": "▤",
-    "Yüzey Bitişi": "◍",
-    "Reçine": "◈",
-    "Yüzey": "⬒",
-    "Tekstil": "▥",
-    "Seramik": "◫",
-    "Duvar Kaplama": "▭",
-    "Akustik": "◉",
-    "Elektrikli Cihaz": "⌁",
-    "Banyo": "◔",
-    "Dekor ve Aksesuar": "✦",
-    "Mobilya": "▤",
-    "Donanım": "⛭",
-    "Mutfak": "⌂",
-    "Aydınlatma": "◐",
-    "Dış Mekan": "◒",
-    "Pencere Sistemleri": "◧",
-    "Tavan": "▔",
-    "Decking": "▥",
-    "Kapı": "▯",
-    "Cephe": "▣",
-    "Profil ve Trim": "▱",
-    "Peyzaj Kaplama": "▨",
+    "Zemin": iconFloor,
+    "Cam": iconSquare,
+    "Deri": iconCircle,
+    "Yığma ve Taş": iconGrid,
+    "Metal": iconSquare,
+    "Boya": iconCircle,
+    "Panel": iconGrid,
+    "Yüzey Bitişi": iconCircle,
+    "Reçine": iconCircle,
+    "Yüzey": iconSquare,
+    "Tekstil": iconGrid,
+    "Seramik": iconGrid,
+    "Duvar Kaplama": iconSquare,
+    "Akustik": iconCircle,
+    "Elektrikli Cihaz": iconSquare,
+    "Banyo": iconCircle,
+    "Dekor ve Aksesuar": iconCircle,
+    "Mobilya": iconGrid,
+    "Donanım": iconSquare,
+    "Mutfak": iconSquare,
+    "Aydınlatma": iconLight,
+    "Dış Mekan": iconCircle,
+    "Pencere Sistemleri": iconSquare,
+    "Tavan": iconFloor,
+    "Decking": iconFloor,
+    "Kapı": iconDoor,
+    "Cephe": iconFacade,
+    "Profil ve Trim": iconTrim,
+    "Peyzaj Kaplama": iconGrid,
   };
 
   const headerTarget = document.getElementById("site-header");
@@ -74,7 +83,7 @@
                           `<a href="/urunler.html?category=${encodeURIComponent(col.name)}&sub=${encodeURIComponent(
                             sub
                           )}" class="flex items-center gap-2 text-[12px] text-[#4a4a4f] hover:text-black">
-                            <span class="w-4 inline-flex justify-center text-[#8a8a8f]">${subCategoryIcons[sub] || "•"}</span>
+                            <span class="w-4 h-4 inline-flex items-center justify-center">${subCategoryIcons[sub] || iconSquare}</span>
                             <span>${sub}</span>
                           </a>`
                       )
