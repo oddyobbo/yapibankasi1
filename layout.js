@@ -144,7 +144,7 @@
                 <div class="w-full border-y border-black/[0.08] bg-white shadow-[0_30px_70px_rgba(0,0,0,0.16)]">
                   <div class="px-6 pt-4">
                     <div class="inline-flex rounded-full bg-[#f1f1f3] p-1">
-                      <a href="/urunler.html" data-products-tab="all" class="products-tab-btn h-9 px-4 rounded-full bg-[#2c2d3a] text-white text-[12px] font-semibold">Tüm Ürünler</a>
+                      <a href="/urunler.html" data-products-tab="all" class="products-tab-btn inline-flex items-center h-9 px-4 rounded-full bg-[#2c2d3a] text-white text-[12px] font-semibold">Tüm Ürünler</a>
                       <button data-products-tab="new" class="products-tab-btn h-9 px-4 rounded-full text-[12px] font-semibold text-[#3a3a40]">Yeni Koleksiyonlar</button>
                     </div>
                   </div>
