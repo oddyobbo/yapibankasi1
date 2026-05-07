@@ -472,23 +472,42 @@
     function buildAccordionGroups() {
       const brands = distinct(allProducts.map(p => p.brandName || ""));
       const fires  = distinct(allProducts.map(p => p.technical?.fireClass || "").filter(Boolean));
+      const patterns = distinct(allProducts.map(p => p.pattern || "").filter(Boolean));
+      const applications = distinct(allProducts.map(p => p.application || "").filter(Boolean));
+      const contents = distinct(allProducts.map(p => p.content || "").filter(Boolean));
+
+      const COLORS = [
+        { label: "Beyaz",     hex: "#F5F5F0" },
+        { label: "Krem",      hex: "#EDE8DC" },
+        { label: "Bej",       hex: "#C9B89A" },
+        { label: "Kahverengi",hex: "#8B6355" },
+        { label: "Antrasit",  hex: "#3C3C3C" },
+        { label: "Siyah",     hex: "#1A1A1A" },
+        { label: "Gri",       hex: "#9E9E9E" },
+        { label: "Yeşil",     hex: "#7CB87A" },
+        { label: "Mavi",      hex: "#5B89B4" },
+        { label: "Kırmızı",   hex: "#C94040" },
+        { label: "Sarı",      hex: "#D4B84A" },
+        { label: "Ahşap",     hex: "#A0704A" },
+      ];
+
+      const SURFACE_FINISHES = ["Mat", "Parlak", "Saten", "Dokulu", "Ahşap Görünüm", "Metal Görünüm", "Taş Görünüm", "Beton Görünüm", "Çimento Görünüm"];
+      const FEATURES = ["Akustik", "Yangın Dirençli", "Su Geçirmez", "UV Dirençli", "Isı Yalıtımı", "Geri Dönüştürülmüş", "Anti-Bakteriyel", "Nefes Alabilir", "Koku Giderici"];
+      const CERTS = ["LEED Uyumlu", "BREEAM Uyumlu", "Cradle to Cradle", "EPD Belgeli", "Greenguard Gold", "FSC Sertifikalı", "ISO 14001", "Düşük VOC"];
+      const APPLICATIONS_DEFAULT = ["İç Mekan Duvar", "İç Mekan Tavan", "Dış Cephe", "Zemin", "Ofis", "Konut", "Eğitim", "Sağlık", "Otelcilik", "Perakende"];
 
       const groups = [
-        { id: "brand",     label: "Marka",              type: "checkboxes", values: brands },
-        { id: "price",     label: "Fiyat Aralığı",      type: "price" },
-        { id: "renk",      label: "Renk",               type: "checkboxes", values: [] },
-        { id: "mensei",    label: "Menşei Ülke",        type: "checkboxes", values: [] },
-        { id: "stok",      label: "Stok Durumu",        type: "stok" },
-        { id: "desen",     label: "Desen",              type: "checkboxes", values: [] },
-        { id: "metalik",   label: "Metalik Kaplama",    type: "checkboxes", values: [] },
-        { id: "ozellik",   label: "Özellikler",         type: "checkboxes", values: [] },
-        { id: "uygulama",  label: "Uygulama Alanı",     type: "checkboxes", values: [] },
-        { id: "icerik",    label: "İçerik",             type: "checkboxes", values: [] },
-        { id: "alev",      label: "Alev Geciktiricilik",type: "checkboxes", values: fires },
-        { id: "asinma",    label: "Aşınma Direnci",     type: "checkboxes", values: [] },
-        { id: "surdur",    label: "Sürdürülebilirlik",  type: "checkboxes", values: [] },
-        { id: "hasPdf",    label: "PDF",                type: "checkboxes", values: ["Var", "Yok"] },
-        { id: "hasCad",    label: "CAD",                type: "checkboxes", values: ["Var", "Yok"] },
+        { id: "brand",    label: "Marka",           type: "checkboxes", values: brands },
+        { id: "renk",     label: "Renk",            type: "colors",     values: COLORS },
+        { id: "desen",    label: "Desen",           type: "checkboxes", values: patterns.length ? patterns : [] },
+        { id: "yuzey",    label: "Yüzey Bitişi",    type: "checkboxes", values: SURFACE_FINISHES },
+        { id: "ozellik",  label: "Özellikler",      type: "checkboxes", values: FEATURES },
+        { id: "uygulama", label: "Uygulama Alanı",  type: "checkboxes", values: applications.length ? applications : APPLICATIONS_DEFAULT },
+        { id: "icerik",   label: "İçerik",          type: "checkboxes", values: contents },
+        { id: "alev",     label: "Yangın Sınıfı",   type: "checkboxes", values: fires.length ? fires : ["A1", "A2-s1,d0", "B-s1,d0", "C-s2,d0", "D-s3,d0"] },
+        { id: "sertifika",label: "Sertifikalar",    type: "checkboxes", values: CERTS },
+        { id: "hasPdf",   label: "PDF",             type: "checkboxes", values: ["Var", "Yok"] },
+        { id: "hasCad",   label: "CAD",             type: "checkboxes", values: ["Var", "Yok"] },
       ];
 
       const container = document.getElementById("acc-groups");
@@ -521,16 +540,6 @@
         });
       });
 
-      // Stock toggles
-      ["stok-stokta", "stok-numune"].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.addEventListener("change", () => {
-          if (!filters.stok) filters.stok = new Set();
-          el.checked ? filters.stok.add(el.value) : filters.stok.delete(el.value);
-          renderActiveChips();
-          render();
-        });
-      });
     }
 
     function buildAccordionHTML(g) {
@@ -538,7 +547,7 @@
 
       if (g.type === "checkboxes") {
         if (!g.values || !g.values.length) {
-          bodyContent = `<p class="text-[11px] text-[#aeaeb2] py-1">Veri yok</p>`;
+          bodyContent = `<p class="text-[11px] text-[#aeaeb2] py-1">Henüz veri eklenmedi</p>`;
         } else {
           bodyContent = g.values.map(v => `
             <label class="flex items-center gap-2 cursor-pointer py-0.5 group/cb">
@@ -547,25 +556,21 @@
             </label>
           `).join("");
         }
-      } else if (g.type === "price") {
-        bodyContent = `
-          <div class="flex gap-2 items-center">
-            <input id="price-min" type="number" min="0" placeholder="Min ₺" class="price-inp">
-            <span class="text-[#8e8e93] text-[12px]">–</span>
-            <input id="price-max" type="number" min="0" placeholder="Max ₺" class="price-inp">
-          </div>
-        `;
-      } else if (g.type === "stok") {
-        bodyContent = `
-          <label class="flex items-center gap-2 cursor-pointer py-0.5">
-            <input type="checkbox" id="stok-stokta" class="cb" value="stokta">
-            <span class="text-[12.5px] text-[#3a3a3c]">Stokta Mevcut</span>
-          </label>
-          <label class="flex items-center gap-2 cursor-pointer py-0.5">
-            <input type="checkbox" id="stok-numune" class="cb" value="numune">
-            <span class="text-[12.5px] text-[#3a3a3c]">Numune Mevcut</span>
-          </label>
-        `;
+      } else if (g.type === "colors") {
+        bodyContent = `<div class="flex flex-wrap gap-2 py-1">` +
+          g.values.map(c => `
+            <label class="cursor-pointer group/col" title="${c.label}">
+              <input type="checkbox" class="sr-only peer" data-filter-key="${g.id}" value="${c.label}">
+              <span class="block w-6 h-6 rounded-full ring-1 ring-black/10 peer-checked:ring-2 peer-checked:ring-black peer-checked:scale-110 transition-all"
+                style="background:${c.hex}"></span>
+            </label>
+          `).join("") +
+        `</div>
+        <div class="flex flex-wrap gap-x-2 gap-y-0.5 mt-1">` +
+          g.values.map(c => `
+            <span class="text-[11px] text-[#8e8e93] peer-checked:text-black" data-color-label="${c.label}">${c.label}</span>
+          `).join("") +
+        `</div>`;
       }
 
       return `
@@ -630,11 +635,10 @@
     // ── Active chips ──
     function renderActiveChips() {
       const chips = [];
-      filters.brand?.forEach(v => chips.push({ key: "brand", value: v, label: v }));
-      filters.alev?.forEach(v => chips.push({ key: "alev", label: `Alev: ${v}`, value: v }));
-      filters.hasPdf?.forEach(v => chips.push({ key: "hasPdf", label: `PDF: ${v}`, value: v }));
-      filters.hasCad?.forEach(v => chips.push({ key: "hasCad", label: `CAD: ${v}`, value: v }));
-      filters.stok?.forEach(v => chips.push({ key: "stok", label: v === "stokta" ? "Stokta" : "Numune", value: v }));
+      const LABELS = { brand: "Marka", renk: "Renk", desen: "Desen", yuzey: "Yüzey", ozellik: "Özellik", uygulama: "Uygulama", icerik: "İçerik", alev: "Yangın", sertifika: "Sertifika", hasPdf: "PDF", hasCad: "CAD" };
+      ["brand","renk","desen","yuzey","ozellik","uygulama","icerik","alev","sertifika","hasPdf","hasCad"].forEach(key => {
+        filters[key]?.forEach(v => chips.push({ key, value: v, label: `${LABELS[key]}: ${v}` }));
+      });
 
       const row = document.getElementById("chips-row");
       const container = document.getElementById("chips-container");
@@ -658,9 +662,6 @@
           if (filters[key]) filters[key].delete(val);
           // Uncheck the corresponding checkbox
           document.querySelectorAll(`input[data-filter-key="${key}"][value="${val}"]`).forEach(cb => cb.checked = false);
-          document.querySelectorAll(`#stok-stokta, #stok-numune`).forEach(cb => {
-            if (cb.value === val) cb.checked = false;
-          });
           renderActiveChips();
           render();
         });
