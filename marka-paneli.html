@@ -316,7 +316,8 @@
       const categorySel = document.getElementById("manual-category");
       const subSel = document.getElementById("manual-subcategory");
       const previewCategorySel = document.getElementById("prev-category");
-      const categoryOptions = Object.keys(PRODUCT_TAXONOMY).map((c) => `<option value="${c}">${c}</option>`).join("");
+      const sortedCategories = Object.keys(PRODUCT_TAXONOMY).sort((a, b) => a.localeCompare(b, "tr"));
+      const categoryOptions = sortedCategories.map((c) => `<option value="${c}">${c}</option>`).join("");
       categorySel.innerHTML =
         '<option value="">Ana kategori seç *</option>' + categoryOptions;
       subSel.innerHTML = '<option value="">Alt kategori seç *</option>';
@@ -325,7 +326,7 @@
       }
 
       categorySel.addEventListener("change", () => {
-        const list = PRODUCT_TAXONOMY[categorySel.value] || [];
+        const list = [...(PRODUCT_TAXONOMY[categorySel.value] || [])].sort((a, b) => a.localeCompare(b, "tr"));
         subSel.innerHTML =
           '<option value="">Alt kategori seç *</option>' +
           list.map((s) => `<option value="${s}">${s}</option>`).join("");

@@ -71,13 +71,15 @@
       .map((item) => {
         const isActive = item.id === current;
         if (item.id === "products") {
-          const megaCols = productMegaMenu
+          const megaCols = [...productMegaMenu]
+            .sort((a, b) => a.name.localeCompare(b.name, "tr"))
             .map(
               (col) => `
                 <div>
                   <p class="text-[12px] font-semibold text-black">${col.name}</p>
                   <div class="mt-2 space-y-1">
-                    ${col.subs
+                    ${[...col.subs]
+                      .sort((a, b) => a.localeCompare(b, "tr"))
                       .map(
                         (sub) =>
                           `<a href="/urunler.html?category=${encodeURIComponent(col.name)}&sub=${encodeURIComponent(
