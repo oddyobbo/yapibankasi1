@@ -5,610 +5,639 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Antigravity | Tasarım Panosu</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/6.4.3/fabric.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    .tool-btn { transition: all .12s ease; }
+    .tool-btn.active { background:#111; color:#fff; border-color:#111; }
+    #canvas-wrap canvas { display:block; border-radius:12px; box-shadow:0 1px 8px rgba(0,0,0,.08); }
+  </style>
 </head>
 <body data-page="moodboard" class="bg-[#f5f5f7] text-[#111] min-h-screen">
   <div id="site-header"></div>
-  <main class="px-4 lg:px-8 py-6">
-    <section class="max-w-[1500px] mx-auto grid lg:grid-cols-[68px_minmax(0,1fr)_300px] gap-4">
+
+  <main class="px-4 lg:px-6 py-4">
+    <section class="max-w-[1600px] mx-auto flex gap-3">
 
       <!-- Sol araç rayı -->
-      <aside class="rounded-2xl border border-black/10 bg-white p-2 flex flex-col items-center gap-2 h-fit sticky top-[86px]">
-        <a href="/mimar-paneli.html" title="Panele dön" class="w-11 h-11 rounded-xl border border-black/10 text-[16px] text-[#6e6e73] flex items-center justify-center hover:border-black/30">←</a>
+      <aside class="rounded-2xl border border-black/10 bg-white p-2 flex flex-col items-center gap-1.5 w-[68px] flex-shrink-0 sticky top-[86px] h-fit">
+
+        <!-- Geri -->
+        <a href="/mimar-paneli.html" title="Panele dön"
+           class="w-11 h-11 rounded-xl border border-black/10 flex items-center justify-center text-[#6e6e73] hover:border-black/30 hover:bg-[#f5f5f7] transition">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+        </a>
+
         <div class="w-full h-px bg-black/[0.07]"></div>
 
-        <!-- Görsel ekle -->
-        <button id="tool-image" title="Görsel ekle (bilgisayardan)" class="w-11 h-11 rounded-xl border border-black/10 flex items-center justify-center hover:border-black/30 hover:bg-[#f5f5f7]">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+        <!-- Seçim aracı -->
+        <button id="tool-select" data-tool="select" title="Seçim aracı"
+                class="tool-btn w-11 h-11 rounded-xl border border-black/10 flex items-center justify-center hover:border-black/30 hover:bg-[#f5f5f7]">
+          <svg width="13" height="15" viewBox="0 0 13 15" fill="currentColor">
+            <path d="M0 0v14.5l3.5-3.5H7L0 0z"/>
+            <path d="M5 8.5l2 5 1-.4-2-5 2.5-.1L1 .5 5 8.5z" fill="currentColor"/>
+          </svg>
+        </button>
+
+        <!-- Metin ekle -->
+        <button id="tool-text" data-tool="text" title="Metin ekle (T)"
+                class="tool-btn w-11 h-11 rounded-xl border border-black/10 flex items-center justify-center hover:border-black/30 hover:bg-[#f5f5f7] text-[15px] font-bold leading-none">
+          T
+        </button>
+
+        <!-- Dikdörtgen -->
+        <button id="tool-rect" data-tool="rect" title="Dikdörtgen ekle"
+                class="tool-btn w-11 h-11 rounded-xl border border-black/10 flex items-center justify-center hover:border-black/30 hover:bg-[#f5f5f7]">
+          <svg width="17" height="14" viewBox="0 0 17 14" fill="none" stroke="currentColor" stroke-width="1.8">
+            <rect x="1" y="1" width="15" height="12" rx="2"/>
+          </svg>
+        </button>
+
+        <!-- Daire -->
+        <button id="tool-circle" data-tool="circle" title="Daire ekle"
+                class="tool-btn w-11 h-11 rounded-xl border border-black/10 flex items-center justify-center hover:border-black/30 hover:bg-[#f5f5f7]">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8">
+            <circle cx="8" cy="8" r="7"/>
+          </svg>
+        </button>
+
+        <!-- Görsel yükle -->
+        <button id="tool-image" title="Görsel yükle (bilgisayardan)"
+                class="w-11 h-11 rounded-xl border border-black/10 flex items-center justify-center hover:border-black/30 hover:bg-[#f5f5f7] transition">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <rect x="3" y="3" width="18" height="18" rx="2"/>
+            <circle cx="8.5" cy="8.5" r="1.5"/>
+            <path d="M21 15l-5-5L5 21"/>
+          </svg>
         </button>
         <input id="file-input" type="file" accept="image/*" class="hidden" multiple>
 
-        <!-- Metin -->
-        <button id="tool-text" title="Metin ekle" class="w-11 h-11 rounded-xl border border-black/10 flex items-center justify-center hover:border-black/30 hover:bg-[#f5f5f7] text-[14px] font-bold">T</button>
-
         <!-- Arkaplan rengi -->
-        <button id="tool-bg" title="Kanvas arkaplan rengi" class="w-11 h-11 rounded-xl border border-black/10 flex items-center justify-center hover:border-black/30 hover:bg-[#f5f5f7]">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22C6.48 22 2 17.52 2 12S6.48 2 12 2s10 4.48 10 10-4.48 10-10 10z"/><path d="M12 2v20"/></svg>
+        <button id="tool-bg" title="Arkaplan rengi"
+                class="w-11 h-11 rounded-xl border border-black/10 flex items-center justify-center hover:border-black/30 hover:bg-[#f5f5f7] transition">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/>
+            <path d="M12 2v20M2 12h20" stroke-opacity=".4"/>
+          </svg>
+        </button>
+
+        <div class="w-full h-px bg-black/[0.07]"></div>
+
+        <!-- Öne getir -->
+        <button id="tool-front" title="Öne getir"
+                class="w-11 h-11 rounded-xl border border-black/10 flex items-center justify-center hover:border-black/30 hover:bg-[#f5f5f7] transition">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M12 19V5M5 12l7-7 7 7"/>
+          </svg>
+        </button>
+
+        <!-- Arkaya gönder -->
+        <button id="tool-back" title="Arkaya gönder"
+                class="w-11 h-11 rounded-xl border border-black/10 flex items-center justify-center hover:border-black/30 hover:bg-[#f5f5f7] transition">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M12 5v14M5 12l7 7 7-7"/>
+          </svg>
+        </button>
+
+        <!-- Sil -->
+        <button id="tool-delete" title="Seçiliyi sil (Delete)"
+                class="w-11 h-11 rounded-xl border border-black/10 flex items-center justify-center hover:border-red-200 hover:text-red-500 hover:bg-red-50 transition">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/>
+          </svg>
         </button>
 
         <div class="w-full h-px bg-black/[0.07]"></div>
 
         <!-- İndir -->
-        <button id="tool-download" title="İndir" class="w-11 h-11 rounded-xl border border-black/10 flex items-center justify-center hover:border-black/30 hover:bg-[#f5f5f7]">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v13M5 16l7 7 7-7"/><path d="M3 21h18"/></svg>
+        <button id="tool-download" title="İndir"
+                class="w-11 h-11 rounded-xl border border-black/10 flex items-center justify-center hover:border-black/30 hover:bg-[#f5f5f7] transition">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M12 3v13M5 16l7 7 7-7"/>
+            <path d="M3 21h18"/>
+          </svg>
         </button>
+
       </aside>
 
-      <!-- Floating popups (body-level stacking) -->
-      <div id="bg-palette" class="hidden fixed z-[9999] bg-white rounded-2xl border border-black/10 shadow-xl p-3" style="min-width:148px">
-        <p class="text-[11px] text-[#6e6e73] mb-2 font-medium">Arkaplan rengi</p>
-        <div class="grid grid-cols-5 gap-1.5">
-          <button data-bg="#ececef" class="w-6 h-6 rounded-md border border-black/15" style="background:#ececef" title="Gri"></button>
-          <button data-bg="#ffffff" class="w-6 h-6 rounded-md border border-black/15" style="background:#ffffff" title="Beyaz"></button>
-          <button data-bg="#111111" class="w-6 h-6 rounded-md border border-black/15" style="background:#111111" title="Siyah"></button>
-          <button data-bg="#f5e6d3" class="w-6 h-6 rounded-md border border-black/15" style="background:#f5e6d3" title="Bej"></button>
-          <button data-bg="#ddeeff" class="w-6 h-6 rounded-md border border-black/15" style="background:#ddeeff" title="Mavi"></button>
-          <button data-bg="#e8f5e9" class="w-6 h-6 rounded-md border border-black/15" style="background:#e8f5e9" title="Yeşil"></button>
-          <button data-bg="#fce4ec" class="w-6 h-6 rounded-md border border-black/15" style="background:#fce4ec" title="Pembe"></button>
-          <button data-bg="#fff9c4" class="w-6 h-6 rounded-md border border-black/15" style="background:#fff9c4" title="Sarı"></button>
-          <button data-bg="#ede7f6" class="w-6 h-6 rounded-md border border-black/15" style="background:#ede7f6" title="Mor"></button>
-          <button data-bg="#efebe9" class="w-6 h-6 rounded-md border border-black/15" style="background:#efebe9" title="Kahve"></button>
-        </div>
-      </div>
+      <!-- Kanvas bölümü -->
+      <section class="rounded-2xl border border-black/10 bg-white overflow-hidden flex flex-col flex-1 min-w-0">
 
-      <div id="download-menu" class="hidden fixed z-[9999] bg-white rounded-xl border border-black/10 shadow-xl overflow-hidden" style="min-width:150px">
-        <button id="dl-jpg" class="w-full text-left px-4 py-2.5 text-[13px] hover:bg-[#f5f5f7]">JPG olarak indir</button>
-        <div class="h-px bg-black/[0.06]"></div>
-        <button id="dl-pdf" class="w-full text-left px-4 py-2.5 text-[13px] hover:bg-[#f5f5f7]">PDF olarak indir</button>
-      </div>
-
-      <!-- Metin kartı floating toolbar -->
-      <div id="text-toolbar" class="hidden fixed z-[9999] bg-white rounded-xl border border-black/10 shadow-xl px-2 py-1.5 flex items-center gap-1.5">
-        <select id="txt-font" class="h-7 rounded-lg border border-black/10 px-1.5 text-[12px] bg-white">
-          <option value="sans-serif">Sans-serif</option>
-          <option value="Georgia, serif">Serif</option>
-          <option value="'Courier New', monospace">Monospace</option>
-          <option value="'Playfair Display', Georgia, serif">Playfair</option>
-          <option value="Impact, sans-serif">Impact</option>
-        </select>
-        <select id="txt-size" class="h-7 rounded-lg border border-black/10 px-1.5 text-[12px] bg-white w-[58px]">
-          <option value="12">12</option>
-          <option value="14">14</option>
-          <option value="16" selected>16</option>
-          <option value="20">20</option>
-          <option value="24">24</option>
-          <option value="32">32</option>
-          <option value="48">48</option>
-          <option value="64">64</option>
-        </select>
-        <input id="txt-color" type="color" value="#111111" class="w-7 h-7 rounded-lg border border-black/10 cursor-pointer p-0.5" title="Yazı rengi">
-        <div class="w-px h-5 bg-black/[0.08]"></div>
-        <button id="txt-bold" class="w-7 h-7 rounded-lg border border-black/10 text-[13px] font-bold hover:bg-[#f5f5f7]">B</button>
-        <button id="txt-italic" class="w-7 h-7 rounded-lg border border-black/10 text-[13px] italic hover:bg-[#f5f5f7]">I</button>
-      </div>
-
-      <!-- Kanvas -->
-      <section class="rounded-2xl border border-black/10 bg-white overflow-hidden">
-        <div class="h-14 px-4 border-b border-black/10 flex items-center gap-3">
-          <input id="board-name" class="h-9 rounded-lg border border-black/15 px-3 text-[14px] min-w-[220px]" placeholder="Pano adı">
+        <!-- Üst bar -->
+        <div class="h-14 px-4 border-b border-black/10 flex items-center gap-3 flex-shrink-0">
+          <input id="board-name"
+                 class="h-9 rounded-lg border border-black/15 px-3 text-[14px] min-w-[200px] outline-none focus:border-black/30 transition"
+                 placeholder="Pano adı">
           <div class="ml-auto flex items-center gap-2">
-            <div class="h-9 px-3 rounded-lg border border-black/10 text-[12px] text-[#6e6e73] inline-flex items-center gap-2">
-              <button id="zoom-out-btn" class="text-[14px] leading-none hover:text-black">−</button>
-              <span id="zoom-indicator">100%</span>
-              <button id="zoom-in-btn" class="text-[14px] leading-none hover:text-black">+</button>
+            <div class="h-9 px-3 rounded-lg border border-black/10 text-[12px] text-[#6e6e73] inline-flex items-center gap-1.5">
+              <button id="zoom-out-btn" class="w-5 h-5 flex items-center justify-center text-[16px] leading-none hover:text-black">−</button>
+              <span id="zoom-indicator" class="w-10 text-center tabular-nums">100%</span>
+              <button id="zoom-in-btn" class="w-5 h-5 flex items-center justify-center text-[16px] leading-none hover:text-black">+</button>
             </div>
-            <button id="save-btn" class="h-9 px-4 rounded-lg bg-black text-white text-[12px] font-semibold">Kaydet</button>
+            <button id="save-btn"
+                    class="h-9 px-4 rounded-lg bg-black text-white text-[13px] font-semibold hover:bg-[#222] transition">
+              Kaydet
+            </button>
+            <span id="save-msg" class="text-[11px] text-[#6e6e73] hidden ml-1"></span>
           </div>
-          <span id="saving-indicator" class="text-[11px] text-[#6e6e73] ml-1 hidden">Kaydediliyor...</span>
         </div>
-        <div id="canvas-wrap" class="p-4 bg-[#f3f4f6] min-h-[78vh]">
-          <div id="canvas" class="relative rounded-2xl border border-black/10 bg-[#ececef] min-h-[72vh] overflow-hidden origin-top-left"></div>
+
+        <!-- Kanvas wrap -->
+        <div id="canvas-wrap" class="flex-1 bg-[#f3f4f6] p-4 relative overflow-hidden">
+          <canvas id="fc"></canvas>
         </div>
-        <p id="save-msg" class="text-[12px] text-[#6e6e73] px-4 py-2 border-t border-black/10"></p>
+
       </section>
 
-      <!-- Sağ: ürün listesi -->
-      <aside class="rounded-2xl border border-black/10 bg-white p-4 h-fit sticky top-[86px]">
-        <h2 class="text-[14px] font-semibold">Ürün Ekle</h2>
-        <p class="text-[12px] text-[#6e6e73] mt-1 mb-3">Favori ürünlerine tıkla, kanvasa eklensin.</p>
-        <input id="product-search" placeholder="Ürün ara..." class="w-full h-9 rounded-xl border border-black/10 px-3 text-[12px] mb-3 outline-none focus:border-black/30">
-        <div id="favorites-list" class="space-y-2 max-h-[72vh] overflow-auto"></div>
-        <p class="text-[11px] text-[#6e6e73] mt-3">Önce <a href="/urunler.html" class="underline hover:text-black">Ürünler</a> sayfasından favorile.</p>
+      <!-- Sağ panel -->
+      <aside class="rounded-2xl border border-black/10 bg-white p-4 w-[280px] flex-shrink-0 overflow-hidden flex flex-col sticky top-[86px] h-[calc(100vh-112px)]">
+        <h2 class="text-[14px] font-semibold mb-1">Ürün Ekle</h2>
+        <p class="text-[12px] text-[#6e6e73] mb-3 flex-shrink-0">Favorilerinizden ürün seçin ya da bilgisayarınızdan görsel sürükleyin.</p>
+        <input id="product-search"
+               placeholder="Ürün ara..."
+               class="w-full h-9 rounded-xl border border-black/10 px-3 text-[12px] mb-3 outline-none focus:border-black/30 flex-shrink-0 transition">
+        <div id="favorites-list" class="space-y-2 flex-1 overflow-auto"></div>
+        <p class="text-[11px] text-[#6e6e73] mt-3 flex-shrink-0">
+          Önce <a href="/urunler.html" class="underline hover:text-black">Ürünler</a> sayfasından favorile.
+        </p>
       </aside>
+
     </section>
   </main>
+
   <div id="site-footer"></div>
+
+  <!-- Floating popup: arkaplan rengi -->
+  <div id="bg-palette" class="hidden fixed z-[9999] bg-white rounded-2xl border border-black/10 shadow-xl p-3" style="min-width:148px">
+    <p class="text-[11px] text-[#6e6e73] mb-2 font-medium">Arkaplan rengi</p>
+    <div class="grid grid-cols-5 gap-1.5">
+      <button data-bg="#f5f5f5"  class="w-6 h-6 rounded-md border border-black/15" style="background:#f5f5f5"  title="Açık gri"></button>
+      <button data-bg="#ffffff"  class="w-6 h-6 rounded-md border border-black/15" style="background:#ffffff"  title="Beyaz"></button>
+      <button data-bg="#111111"  class="w-6 h-6 rounded-md border border-black/15" style="background:#111111"  title="Siyah"></button>
+      <button data-bg="#f5e6d3"  class="w-6 h-6 rounded-md border border-black/15" style="background:#f5e6d3"  title="Bej"></button>
+      <button data-bg="#ddeeff"  class="w-6 h-6 rounded-md border border-black/15" style="background:#ddeeff"  title="Mavi"></button>
+      <button data-bg="#e8f5e9"  class="w-6 h-6 rounded-md border border-black/15" style="background:#e8f5e9"  title="Yeşil"></button>
+      <button data-bg="#fce4ec"  class="w-6 h-6 rounded-md border border-black/15" style="background:#fce4ec"  title="Pembe"></button>
+      <button data-bg="#fff9c4"  class="w-6 h-6 rounded-md border border-black/15" style="background:#fff9c4"  title="Sarı"></button>
+      <button data-bg="#ede7f6"  class="w-6 h-6 rounded-md border border-black/15" style="background:#ede7f6"  title="Mor"></button>
+      <button data-bg="#efebe9"  class="w-6 h-6 rounded-md border border-black/15" style="background:#efebe9"  title="Kahve"></button>
+    </div>
+  </div>
+
+  <!-- Floating popup: indir -->
+  <div id="download-menu" class="hidden fixed z-[9999] bg-white rounded-xl border border-black/10 shadow-xl overflow-hidden" style="min-width:160px">
+    <button id="dl-jpg" class="w-full text-left px-4 py-2.5 text-[13px] hover:bg-[#f5f5f7]">JPG olarak indir</button>
+    <div class="h-px bg-black/[0.06]"></div>
+    <button id="dl-pdf" class="w-full text-left px-4 py-2.5 text-[13px] hover:bg-[#f5f5f7]">PDF olarak indir</button>
+  </div>
 
   <script src="/core.js"></script>
   <script src="/layout.js"></script>
   <script>
     const FALLBACK_IMG = "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?q=80&w=1200&auto=format&fit=crop";
-    const qp = new URLSearchParams(location.search);
-    const moodboardId = qp.get("id");
-    const saveMsg = document.getElementById("save-msg");
-    const canvas = document.getElementById("canvas");
-    const zoomIndicator = document.getElementById("zoom-indicator");
-    let zoomLevel = 1;
-    let board = null;
+
+    let fc = null;
+    let boardId = null;
+    let boardData = null;
     let allFavProducts = [];
+    let activeTool = "select";
+    let zoomLevel = 1;
+
+    const $id = (id) => document.getElementById(id);
+    const saveMsgEl = $id("save-msg");
+    const zoomEl = $id("zoom-indicator");
+
+    // ── Helpers ──────────────────────────────────────────────────────────────
 
     function setSaveMsg(text, ok) {
-      saveMsg.textContent = text || "";
-      saveMsg.className = `text-[12px] px-4 py-2 border-t border-black/10 ${ok ? "text-green-600" : "text-[#6e6e73]"}`;
+      if (!text) { saveMsgEl.classList.add("hidden"); return; }
+      saveMsgEl.textContent = text;
+      saveMsgEl.className = `text-[11px] ml-1 ${ok ? "text-green-600" : "text-[#6e6e73]"}`;
+      saveMsgEl.classList.remove("hidden");
+      if (ok) setTimeout(() => saveMsgEl.classList.add("hidden"), 3000);
     }
 
-    function renderCanvas() {
-      if (!board) return;
-      canvas.innerHTML = (board.items || []).map((item) => {
-        if (item.type === "text") {
-          const fw = item.bold ? "bold" : (item.fontWeight || "normal");
-          const fs = item.italic ? "italic" : "normal";
-          return `
-            <article data-card-id="${item.id}" data-text-card="1" class="group absolute rounded-xl overflow-visible text-card-idle" style="left:${item.x || 20}px; top:${item.y || 20}px; width:${item.w || 200}px; height:${item.h || 80}px; border: 1.5px dashed transparent; background: transparent;">
-              <button data-delete-card="${item.id}" class="absolute -top-3 -right-3 z-20 w-6 h-6 rounded-full bg-white border border-black/15 text-[12px] shadow-sm hover:bg-black hover:text-white opacity-0 group-hover:opacity-100 transition-opacity">×</button>
-              <div data-drag-handle="1" class="w-full flex flex-col h-full">
-                <div class="flex items-center justify-center h-5 flex-shrink-0 cursor-move opacity-0 group-hover:opacity-100 transition-opacity" style="touch-action:none;">
-                  <svg width="20" height="8" viewBox="0 0 20 8" fill="none"><circle cx="4" cy="2" r="1.2" fill="#999"/><circle cx="10" cy="2" r="1.2" fill="#999"/><circle cx="16" cy="2" r="1.2" fill="#999"/><circle cx="4" cy="6" r="1.2" fill="#999"/><circle cx="10" cy="6" r="1.2" fill="#999"/><circle cx="16" cy="6" r="1.2" fill="#999"/></svg>
-                </div>
-                <textarea data-text-id="${item.id}" class="w-full flex-1 resize-none bg-transparent border-none outline-none leading-snug px-2 pb-2" style="font-family:${item.fontFamily || 'sans-serif'};font-size:${item.fontSize || 16}px;color:${item.color || '#111111'};font-weight:${fw};font-style:${fs};" placeholder="Metin gir...">${item.text || ""}</textarea>
-              </div>
-              <div data-resize-handle="${item.id}" class="absolute right-0 bottom-0 w-4 h-4 cursor-se-resize opacity-0 transition-opacity" style="border-right:2px solid rgba(0,0,0,0.25);border-bottom:2px solid rgba(0,0,0,0.25);border-bottom-right-radius:10px;"></div>
-            </article>
-          `;
+    function setActiveTool(name) {
+      activeTool = name;
+      document.querySelectorAll(".tool-btn").forEach((btn) => {
+        const on = btn.dataset.tool === name;
+        btn.classList.toggle("active", on);
+      });
+      if (!fc) return;
+      fc.defaultCursor = name === "select" ? "default" : "crosshair";
+      fc.selection = name === "select";
+      fc.forEachObject((o) => { o.selectable = name === "select"; o.evented = name === "select"; });
+    }
+
+    function showPopup(popup, anchor) {
+      const r = anchor.getBoundingClientRect();
+      popup.style.top  = `${r.top}px`;
+      popup.style.left = `${r.right + 8}px`;
+      popup.classList.remove("hidden");
+    }
+
+    function hideAllPopups() {
+      $id("bg-palette").classList.add("hidden");
+      $id("download-menu").classList.add("hidden");
+    }
+
+    function boardLabel() {
+      return ($id("board-name").value.trim() || "tasarim-panosu")
+        .replace(/\s+/g, "-").toLowerCase();
+    }
+
+    // ── Fabric canvas init ────────────────────────────────────────────────────
+
+    function initCanvas() {
+      const wrap = $id("canvas-wrap");
+      const w = Math.max(500, wrap.clientWidth  - 32);
+      const h = Math.max(400, window.innerHeight - 180);
+
+      fc = new fabric.Canvas("fc", {
+        width: w,
+        height: h,
+        backgroundColor: "#f5f5f5",
+        preserveObjectStacking: true,
+      });
+
+      // Global object handle style
+      const proto = (fabric.FabricObject || fabric.Object)?.prototype;
+      if (proto?.set) {
+        proto.set({
+          borderColor:        "#3b82f6",
+          cornerColor:        "#3b82f6",
+          cornerStrokeColor:  "#fff",
+          cornerSize:         10,
+          transparentCorners: false,
+        });
+      }
+
+      // Drawing tool: mouse:down
+      fc.on("mouse:down", (opt) => {
+        if (activeTool === "select") return;
+        // Only draw on empty area (no target)
+        if (opt.target) return;
+
+        const pointer = opt.scenePoint || opt.absolutePointer || fc.getPointer(opt.e);
+
+        if (activeTool === "text") {
+          const text = new fabric.IText("Metin gir...", {
+            left: pointer.x,
+            top:  pointer.y,
+            fontFamily: "sans-serif",
+            fontSize: 24,
+            fill: "#111",
+            editable: true,
+          });
+          fc.add(text);
+          fc.setActiveObject(text);
+          text.enterEditing();
+          setActiveTool("select");
+
+        } else if (activeTool === "rect") {
+          const rect = new fabric.Rect({
+            left: pointer.x - 100,
+            top:  pointer.y - 60,
+            width: 200, height: 120,
+            fill: "#e5e7eb",
+            rx: 8, ry: 8,
+          });
+          fc.add(rect);
+          fc.setActiveObject(rect);
+          setActiveTool("select");
+
+        } else if (activeTool === "circle") {
+          const circle = new fabric.Circle({
+            left:   pointer.x - 60,
+            top:    pointer.y - 60,
+            radius: 60,
+            fill: "#e5e7eb",
+          });
+          fc.add(circle);
+          fc.setActiveObject(circle);
+          setActiveTool("select");
         }
-        return `
-          <article data-card-id="${item.id}" class="group absolute rounded-xl border border-black/15 shadow-sm overflow-hidden" style="left:${item.x || 20}px; top:${item.y || 20}px; width:${item.w || 220}px; height:${item.h || 190}px;">
-            <button data-delete-card="${item.id}" class="absolute top-2 right-2 z-20 w-6 h-6 rounded-md bg-black/60 text-white text-[12px] hover:bg-black opacity-0 group-hover:opacity-100 transition-opacity">×</button>
-            <div data-drag-handle="1" class="cursor-move w-full h-full">
-              <img src="${item.image || FALLBACK_IMG}" class="w-full h-full object-cover pointer-events-none" alt="${item.name}">
-            </div>
-            ${item.name ? `<div class="absolute bottom-0 left-0 right-0 px-2.5 py-2 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-              <p class="text-[12px] font-medium text-white leading-tight">${item.name}</p>
-            </div>` : ""}
-            <button data-resize-handle="${item.id}" class="absolute right-1 bottom-1 w-5 h-5 rounded-sm border border-white/40 bg-black/30 text-white text-[10px] leading-none flex items-center justify-center cursor-se-resize opacity-0 group-hover:opacity-100 transition-opacity">◢</button>
-          </article>
-        `;
-      }).join("");
-      bindDrag();
-      bindDelete();
-      bindDeleteLabel();
-      bindResize();
-      bindTextEdit();
-    }
 
-    function bindDrag() {
-      canvas.querySelectorAll("[data-card-id]").forEach((card) => {
-        let startX, startY, origX, origY;
-        const onMove = (ev) => {
-          card.style.left = `${Math.max(0, origX + ev.clientX - startX)}px`;
-          card.style.top  = `${Math.max(0, origY + ev.clientY - startY)}px`;
-        };
-        const onUp = () => {
-          document.removeEventListener("pointermove", onMove);
-          document.removeEventListener("pointerup", onUp);
-          const t = board.items.find((x) => x.id === card.dataset.cardId);
-          if (t) { t.x = parseInt(card.style.left) || 0; t.y = parseInt(card.style.top) || 0; }
-        };
-        card.querySelector("[data-drag-handle='1']")?.addEventListener("pointerdown", (ev) => {
-          if (ev.target.closest("[data-resize-handle],[data-delete-card],[data-delete-label]")) return;
-          // text kartlarında sadece grip bar'dan sürükle, textarea'dan değil
-          if (card.dataset.textCard && ev.target.tagName === "TEXTAREA") return;
-          startX = ev.clientX; startY = ev.clientY;
-          origX = parseInt(card.style.left) || 0; origY = parseInt(card.style.top) || 0;
-          document.addEventListener("pointermove", onMove);
-          document.addEventListener("pointerup", onUp);
-        });
+        fc.renderAll();
+      });
+
+      // Window resize
+      window.addEventListener("resize", () => {
+        if (!fc) return;
+        const newW = Math.max(500, wrap.clientWidth  - 32);
+        const newH = Math.max(400, window.innerHeight - 180);
+        fc.setDimensions({ width: newW, height: newH });
+        fc.renderAll();
       });
     }
 
-    function bindDelete() {
-      canvas.querySelectorAll("[data-delete-card]").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          board.items = board.items.filter((x) => x.id !== btn.dataset.deleteCard);
-          renderCanvas();
-        });
-      });
+    // ── Image helpers ─────────────────────────────────────────────────────────
+
+    function addImageFromURL(url, overrides = {}) {
+      const opts = { crossOrigin: "anonymous" };
+      const doAdd = (img) => {
+        img.scaleToWidth(220);
+        img.set({ left: fc.width / 2 - 110, top: fc.height / 2 - 110, ...overrides });
+        fc.add(img);
+        fc.setActiveObject(img);
+        fc.renderAll();
+      };
+      return fabric.Image.fromURL(url, opts)
+        .then(doAdd)
+        .catch(() => fabric.Image.fromURL(url).then(doAdd));
     }
 
-    function bindDeleteLabel() {
-      canvas.querySelectorAll("[data-delete-label]").forEach((btn) => {
-        btn.addEventListener("click", (ev) => {
-          ev.stopPropagation();
-          const t = board.items.find((x) => x.id === btn.dataset.deleteLabel);
-          if (t) { t.name = ""; renderCanvas(); }
-        });
-      });
-    }
-
-    let activeTextId = null;
-    const txtToolbar = document.getElementById("text-toolbar");
-    const txtFont = document.getElementById("txt-font");
-    const txtSize = document.getElementById("txt-size");
-    const txtColor = document.getElementById("txt-color");
-    const txtBold = document.getElementById("txt-bold");
-    const txtItalic = document.getElementById("txt-italic");
-
-    function updateTextItem(id, patch) {
-      const t = board.items.find((x) => x.id === id);
-      if (!t) return;
-      Object.assign(t, patch);
-      // live update the textarea style without full re-render
-      const ta = canvas.querySelector(`[data-text-id="${id}"]`);
-      if (ta) {
-        if (patch.fontFamily !== undefined) ta.style.fontFamily = patch.fontFamily;
-        if (patch.fontSize !== undefined) ta.style.fontSize = patch.fontSize + "px";
-        if (patch.color !== undefined) ta.style.color = patch.color;
-        if (patch.bold !== undefined) ta.style.fontWeight = patch.bold ? "bold" : "normal";
-        if (patch.italic !== undefined) ta.style.fontStyle = patch.italic ? "italic" : "normal";
-      }
-    }
-
-    function showTextToolbar(itemId, anchorEl) {
-      activeTextId = itemId;
-      const t = board.items.find((x) => x.id === itemId);
-      if (!t) return;
-      txtFont.value = t.fontFamily || "sans-serif";
-      txtSize.value = String(t.fontSize || 16);
-      txtColor.value = t.color || "#111111";
-      txtBold.classList.toggle("bg-black", !!t.bold);
-      txtBold.classList.toggle("text-white", !!t.bold);
-      txtItalic.classList.toggle("bg-black", !!t.italic);
-      txtItalic.classList.toggle("text-white", !!t.italic);
-      const r = anchorEl.getBoundingClientRect();
-      txtToolbar.style.left = `${r.left}px`;
-      txtToolbar.style.top = `${r.top - 52}px`;
-      txtToolbar.classList.remove("hidden");
-    }
-
-    function bindTextEdit() {
-      canvas.querySelectorAll("[data-text-id]").forEach((ta) => {
-        ta.addEventListener("input", () => {
-          const t = board.items.find((x) => x.id === ta.dataset.textId);
-          if (t) t.text = ta.value;
-        });
-        ta.addEventListener("focus", () => {
-          const card = ta.closest("[data-card-id]");
-          card.style.border = "1.5px dashed rgba(0,0,0,0.22)";
-          card.style.background = "rgba(255,255,255,0.55)";
-          card.querySelector("[data-resize-handle]").style.opacity = "1";
-          ta.style.cursor = "text";
-          showTextToolbar(ta.dataset.textId, card);
-        });
-        ta.addEventListener("blur", () => {
-          const card = ta.closest("[data-card-id]");
-          if (!card) return;
-          card.style.border = "1.5px dashed transparent";
-          card.style.background = "transparent";
-          card.querySelector("[data-resize-handle]").style.opacity = "0";
-          ta.style.cursor = "move";
-        });
-      });
-    }
-
-    // text toolbar controls
-    if (txtFont) {
-      txtFont.addEventListener("change", () => { if (activeTextId) updateTextItem(activeTextId, { fontFamily: txtFont.value }); });
-      txtSize.addEventListener("change", () => { if (activeTextId) updateTextItem(activeTextId, { fontSize: parseInt(txtSize.value) }); });
-      txtColor.addEventListener("input", () => { if (activeTextId) updateTextItem(activeTextId, { color: txtColor.value }); });
-      txtBold.addEventListener("click", (e) => {
-        e.stopPropagation();
-        if (!activeTextId) return;
-        const t = board.items.find((x) => x.id === activeTextId);
-        if (!t) return;
-        t.bold = !t.bold;
-        txtBold.classList.toggle("bg-black", t.bold); txtBold.classList.toggle("text-white", t.bold);
-        updateTextItem(activeTextId, { bold: t.bold });
-      });
-      txtItalic.addEventListener("click", (e) => {
-        e.stopPropagation();
-        if (!activeTextId) return;
-        const t = board.items.find((x) => x.id === activeTextId);
-        if (!t) return;
-        t.italic = !t.italic;
-        txtItalic.classList.toggle("bg-black", t.italic); txtItalic.classList.toggle("text-white", t.italic);
-        updateTextItem(activeTextId, { italic: t.italic });
-      });
-    }
-
-    document.addEventListener("pointerdown", (e) => {
-      if (!e.target.closest("[data-text-card],[data-text-id]") && !e.target.closest("#text-toolbar")) {
-        txtToolbar.classList.add("hidden");
-        activeTextId = null;
-      }
-    });
-
-    function addTextItem() {
-      if (!board) return;
-      const canvasRect = canvas.getBoundingClientRect();
-      board.items.push({
-        id: `text-${Date.now()}-${Math.random().toString(36).slice(2,6)}`,
-        type: "text",
-        text: "Metin gir...",
-        fontFamily: "sans-serif",
-        fontSize: 16,
-        color: "#111111",
-        x: Math.max(0, Math.round((canvasRect.width / 2 / zoomLevel) - 100)),
-        y: Math.max(0, Math.round((canvasRect.height / 2 / zoomLevel) - 40)),
-        w: 200, h: 80
-      });
-      renderCanvas();
-      setSaveMsg("Metin eklendi. Kaydetmeyi unutma.", false);
-    }
-
-    function bindResize() {
-      canvas.querySelectorAll("[data-resize-handle]").forEach((handle) => {
-        const card = handle.closest("[data-card-id]");
-        if (!card) return;
-        let sX, sY, sW, sH;
-        const onMove = (ev) => {
-          card.style.width  = `${Math.max(150, sW + ev.clientX - sX)}px`;
-          card.style.height = `${Math.max(140, sH + ev.clientY - sY)}px`;
-        };
-        const onUp = () => {
-          document.removeEventListener("pointermove", onMove);
-          document.removeEventListener("pointerup", onUp);
-          const t = board.items.find((x) => x.id === card.dataset.cardId);
-          if (t) { t.w = parseInt(card.style.width) || 220; t.h = parseInt(card.style.height) || 190; }
-        };
-        handle.addEventListener("pointerdown", (ev) => {
-          ev.preventDefault(); ev.stopPropagation();
-          sX = ev.clientX; sY = ev.clientY;
-          sW = parseInt(card.style.width) || card.offsetWidth;
-          sH = parseInt(card.style.height) || card.offsetHeight;
-          document.addEventListener("pointermove", onMove);
-          document.addEventListener("pointerup", onUp);
-        });
-      });
-    }
-
-    function addItemToCanvas(item) {
-      if (!board) return;
-      const cols = 4;
-      const n = board.items.length;
-      board.items.push({
-        id: `card-${Date.now()}-${Math.random().toString(36).slice(2,6)}`,
-        productId: item.id,
-        name: item.name,
-        image: item.image || FALLBACK_IMG,
-        x: 30 + (n % cols) * 250,
-        y: 30 + Math.floor(n / cols) * 220,
-        w: 220, h: 190
-      });
-      renderCanvas();
-      setSaveMsg("Ürün eklendi. Kaydetmeyi unutma.", false);
-    }
-
-    function addItemToCanvasAt(item, dropX, dropY) {
-      if (!board) return;
-      board.items.push({
-        id: `card-${Date.now()}-${Math.random().toString(36).slice(2,6)}`,
-        productId: item.id || null,
-        name: item.name || "Görsel",
-        image: item.image || FALLBACK_IMG,
-        x: Math.max(0, dropX - 110),
-        y: Math.max(0, dropY - 95),
-        w: 220, h: 190
-      });
-      renderCanvas();
-      setSaveMsg("Eklendi. Kaydetmeyi unutma.", false);
-    }
+    // ── Favorites list ────────────────────────────────────────────────────────
 
     function renderFavList(products) {
-      const wrap = document.getElementById("favorites-list");
+      const wrap = $id("favorites-list");
       if (!products.length) {
-        wrap.innerHTML = `<p class="text-[12px] text-[#6e6e73]">Favori ürün yok.</p>`;
+        wrap.innerHTML = `<p class="text-[12px] text-[#6e6e73] py-6 text-center">Favori ürün bulunamadı.</p>`;
         return;
       }
       wrap.innerHTML = products.map((p) => `
-        <button draggable="true" data-add-product="${p.id}" class="w-full text-left rounded-xl border border-black/10 p-2 hover:border-black/35 hover:bg-[#fafafa] transition cursor-grab active:cursor-grabbing">
+        <button draggable="true" data-product-id="${p.id}"
+                class="w-full text-left rounded-xl border border-black/10 p-2 hover:border-black/35 hover:bg-[#fafafa] transition cursor-grab active:cursor-grabbing">
           <div class="flex gap-2 items-center">
-            <img src="${p.image || FALLBACK_IMG}" class="w-12 h-12 rounded-lg object-cover flex-shrink-0 pointer-events-none" alt="${p.name}">
-            <div>
-              <p class="text-[12px] font-medium leading-tight">${p.name}</p>
-              <p class="text-[11px] text-[#6e6e73] mt-0.5">Tıkla veya sürükle → ekle</p>
+            <img src="${p.image || FALLBACK_IMG}"
+                 class="w-12 h-12 rounded-lg object-cover flex-shrink-0 pointer-events-none"
+                 alt="${p.name}">
+            <div class="min-w-0">
+              <p class="text-[12px] font-medium leading-tight truncate">${p.name}</p>
+              <p class="text-[11px] text-[#6e6e73] mt-0.5">Tıkla veya sürükle</p>
             </div>
           </div>
         </button>
       `).join("");
-      wrap.querySelectorAll("[data-add-product]").forEach((btn) => {
-        btn.addEventListener("dragstart", (e) => {
-          const product = products.find((x) => String(x.id) === String(btn.dataset.addProduct));
-          if (product) {
-            e.dataTransfer.effectAllowed = "copy";
-            e.dataTransfer.setData("application/json", JSON.stringify(product));
-          }
-        });
+
+      wrap.querySelectorAll("[data-product-id]").forEach((btn) => {
+        const product = products.find((x) => String(x.id) === btn.dataset.productId);
+        if (!product) return;
+
         btn.addEventListener("click", () => {
-          const product = products.find((x) => String(x.id) === String(btn.dataset.addProduct));
-          if (product) addItemToCanvas(product);
+          addImageFromURL(product.image || FALLBACK_IMG);
+          setSaveMsg("Ürün eklendi. Kaydetmeyi unutma.", false);
+        });
+
+        btn.addEventListener("dragstart", (e) => {
+          e.dataTransfer.effectAllowed = "copy";
+          e.dataTransfer.setData("application/json", JSON.stringify(product));
         });
       });
     }
 
+    // ── Save ──────────────────────────────────────────────────────────────────
+
     async function saveBoard() {
-      if (!board) return;
-      board.name = document.getElementById("board-name").value.trim() || "Tasarım Panosu";
-      const res = await AG.updateMoodboard(board.id, { name: board.name, items: board.items });
+      if (!fc || !boardId) return;
+      const name = $id("board-name").value.trim() || "Tasarım Panosu";
+      setSaveMsg("Kaydediliyor...", false);
+      const canvasJSON = fc.toJSON(["id", "productId", "name"]);
+      const res = await AG.updateMoodboard(boardId, {
+        name,
+        canvas_json: JSON.stringify(canvasJSON),
+      });
       if (!res.ok) { setSaveMsg(res.message || "Kaydedilemedi.", false); return; }
       setSaveMsg("Pano kaydedildi.", true);
     }
+
+    // ── Boot ──────────────────────────────────────────────────────────────────
 
     async function boot() {
       await AG.ready;
       const session = await AG.getSessionArchitect();
       if (!session) { location.href = "/mimar-giris.html"; return; }
 
-      if (!moodboardId) {
+      const qp = new URLSearchParams(location.search);
+      boardId = qp.get("id");
+
+      if (!boardId) {
         const created = await AG.createMoodboard({ name: "Yeni Tasarım Panosu" });
-        if (!created.ok) return;
+        if (!created.ok) { setSaveMsg("Pano oluşturulamadı.", false); return; }
         location.href = `/tasarim-panosu.html?id=${encodeURIComponent(created.moodboard.id)}`;
         return;
       }
 
-      board = await AG.getMoodboard(moodboardId);
-      if (!board) { setSaveMsg("Pano bulunamadı.", false); return; }
-      board.items = (Array.isArray(board.items) ? board.items : []).map((item) => ({ w: 220, h: 190, ...item }));
-      document.getElementById("board-name").value = board.name || "Tasarım Panosu";
-      if (board.bgColor) canvas.style.backgroundColor = board.bgColor;
-      renderCanvas();
+      boardData = await AG.getMoodboard(boardId);
+      if (!boardData) { setSaveMsg("Pano bulunamadı.", false); return; }
 
+      $id("board-name").value = boardData.name || "Tasarım Panosu";
+
+      // Fabric canvas başlat
+      initCanvas();
+      setActiveTool("select");
+
+      // Board yükle: canvas_json önce, sonra eski items[] fallback
+      if (boardData.canvas_json) {
+        try {
+          await fc.loadFromJSON(JSON.parse(boardData.canvas_json));
+          fc.renderAll();
+        } catch (err) {
+          console.warn("canvas_json yüklenemedi:", err);
+        }
+      } else if (Array.isArray(boardData.items) && boardData.items.length > 0) {
+        // eski format: items[] → fabric.Image
+        for (const item of boardData.items) {
+          if (item.image) {
+            await fabric.Image.fromURL(item.image, { crossOrigin: "anonymous" })
+              .then((img) => {
+                img.scaleToWidth(item.w || 220);
+                img.set({ left: item.x || 50, top: item.y || 50 });
+                fc.add(img);
+              })
+              .catch(() => {});
+          }
+        }
+        fc.renderAll();
+      }
+
+      // Arkaplan rengi
+      if (boardData.bgColor) {
+        fc.backgroundColor = boardData.bgColor;
+        fc.renderAll();
+      }
+
+      // Favori ürünler
       allFavProducts = await AG.getFavoriteProducts();
       renderFavList(allFavProducts);
 
-      document.getElementById("product-search").addEventListener("input", (e) => {
+      // ── Event listeners ──────────────────────────────────────────────────
+
+      // Ürün arama
+      $id("product-search").addEventListener("input", (e) => {
         const q = e.target.value.trim().toLowerCase();
         renderFavList(q ? allFavProducts.filter((p) => p.name.toLowerCase().includes(q)) : allFavProducts);
       });
 
-      document.getElementById("save-btn").addEventListener("click", saveBoard);
-      document.getElementById("zoom-in-btn").addEventListener("click", () => {
-        zoomLevel = Math.min(2, zoomLevel + 0.1);
-        canvas.style.transform = `scale(${zoomLevel})`;
-        zoomIndicator.textContent = `${Math.round(zoomLevel * 100)}%`;
-      });
-      document.getElementById("zoom-out-btn").addEventListener("click", () => {
-        zoomLevel = Math.max(0.4, zoomLevel - 0.1);
-        canvas.style.transform = `scale(${zoomLevel})`;
-        zoomIndicator.textContent = `${Math.round(zoomLevel * 100)}%`;
+      // Kaydet
+      $id("save-btn").addEventListener("click", saveBoard);
+      document.addEventListener("keydown", (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === "s") { e.preventDefault(); saveBoard(); }
       });
 
-      // ── Sol araç rayı ──────────────────────────────────────────────────────
-      document.getElementById("tool-text").addEventListener("click", addTextItem);
+      // Delete tuşu
+      document.addEventListener("keydown", (e) => {
+        if ((e.key === "Delete" || e.key === "Backspace") &&
+            !["INPUT", "TEXTAREA"].includes(document.activeElement.tagName)) {
+          const obj = fc.getActiveObject();
+          if (obj) { fc.remove(obj); fc.discardActiveObject(); fc.renderAll(); }
+        }
+      });
 
-      // Görsel ekle aracı → dosya seçici
-      const fileInput = document.getElementById("file-input");
-      document.getElementById("tool-image").addEventListener("click", () => fileInput.click());
+      // Araç butonları
+      $id("tool-select").addEventListener("click", () => setActiveTool("select"));
+      $id("tool-text"  ).addEventListener("click", () => setActiveTool("text"));
+      $id("tool-rect"  ).addEventListener("click", () => setActiveTool("rect"));
+      $id("tool-circle").addEventListener("click", () => setActiveTool("circle"));
+
+      // Görsel yükle (file input)
+      const fileInput = $id("file-input");
+      $id("tool-image").addEventListener("click", () => fileInput.click());
       fileInput.addEventListener("change", () => {
         Array.from(fileInput.files).forEach((file) => {
           if (!file.type.startsWith("image/")) return;
           const reader = new FileReader();
           reader.onload = (ev) => {
-            const n = board.items.length;
-            board.items.push({
-              id: `file-${Date.now()}-${Math.random().toString(36).slice(2,6)}`,
-              name: file.name.replace(/\.[^.]+$/, ""),
-              image: ev.target.result,
-              x: 30 + (n % 4) * 250,
-              y: 30 + Math.floor(n / 4) * 220,
-              w: 220, h: 190
+            fabric.Image.fromURL(ev.target.result).then((img) => {
+              img.scaleToWidth(220);
+              img.set({ left: fc.width / 2 - 110, top: fc.height / 2 - 110 });
+              fc.add(img);
+              fc.setActiveObject(img);
+              fc.renderAll();
             });
-            renderCanvas();
-            setSaveMsg("Görsel eklendi. Kaydetmeyi unutma.", false);
           };
           reader.readAsDataURL(file);
         });
         fileInput.value = "";
+        setSaveMsg("Görsel eklendi. Kaydetmeyi unutma.", false);
       });
 
-      // ── Floating popup helper ──────────────────────────────────────────────
-      function showPopup(popup, anchorEl) {
-        const r = anchorEl.getBoundingClientRect();
-        popup.style.top = `${r.top}px`;
-        popup.style.left = `${r.right + 8}px`;
-        popup.classList.remove("hidden");
-      }
-      function hideAllPopups() {
-        ["bg-palette","download-menu"].forEach((id) => document.getElementById(id).classList.add("hidden"));
-      }
-      document.addEventListener("click", hideAllPopups);
+      // Z-order
+      $id("tool-front").addEventListener("click", () => {
+        const obj = fc.getActiveObject();
+        if (obj) { fc.bringObjectToFront(obj); fc.renderAll(); }
+      });
+      $id("tool-back").addEventListener("click", () => {
+        const obj = fc.getActiveObject();
+        if (obj) { fc.sendObjectToBack(obj); fc.renderAll(); }
+      });
 
-      // Arkaplan renk paleti
-      const bgBtn = document.getElementById("tool-bg");
-      const bgPalette = document.getElementById("bg-palette");
+      // Sil butonu
+      $id("tool-delete").addEventListener("click", () => {
+        const obj = fc.getActiveObject();
+        if (obj) { fc.remove(obj); fc.discardActiveObject(); fc.renderAll(); }
+      });
+
+      // Zoom
+      $id("zoom-in-btn").addEventListener("click", () => {
+        zoomLevel = Math.min(3, +(zoomLevel + 0.1).toFixed(1));
+        fc.setZoom(zoomLevel);
+        zoomEl.textContent = `${Math.round(zoomLevel * 100)}%`;
+      });
+      $id("zoom-out-btn").addEventListener("click", () => {
+        zoomLevel = Math.max(0.2, +(zoomLevel - 0.1).toFixed(1));
+        fc.setZoom(zoomLevel);
+        zoomEl.textContent = `${Math.round(zoomLevel * 100)}%`;
+      });
+
+      // Arkaplan rengi popup
+      const bgBtn = $id("tool-bg");
+      const bgPalette = $id("bg-palette");
       bgBtn.addEventListener("click", (e) => {
         e.stopPropagation();
-        const visible = !bgPalette.classList.contains("hidden");
+        const vis = !bgPalette.classList.contains("hidden");
         hideAllPopups();
-        if (!visible) showPopup(bgPalette, bgBtn);
+        if (!vis) showPopup(bgPalette, bgBtn);
       });
       bgPalette.addEventListener("click", (e) => e.stopPropagation());
       bgPalette.querySelectorAll("[data-bg]").forEach((btn) => {
         btn.addEventListener("click", () => {
-          canvas.style.backgroundColor = btn.dataset.bg;
+          fc.backgroundColor = btn.dataset.bg;
+          fc.renderAll();
           bgPalette.classList.add("hidden");
-          if (board) board.bgColor = btn.dataset.bg;
+          if (boardData) boardData.bgColor = btn.dataset.bg;
         });
       });
 
-      // İndir menüsü
-      const dlBtn = document.getElementById("tool-download");
-      const dlMenu = document.getElementById("download-menu");
+      // İndir popup
+      const dlBtn = $id("tool-download");
+      const dlMenu = $id("download-menu");
       dlBtn.addEventListener("click", (e) => {
         e.stopPropagation();
-        const visible = !dlMenu.classList.contains("hidden");
+        const vis = !dlMenu.classList.contains("hidden");
         hideAllPopups();
-        if (!visible) showPopup(dlMenu, dlBtn);
+        if (!vis) showPopup(dlMenu, dlBtn);
       });
       dlMenu.addEventListener("click", (e) => e.stopPropagation());
 
-      const boardLabel = () => (document.getElementById("board-name").value.trim() || "tasarim-panosu").replace(/\s+/g, "-").toLowerCase();
-
-      document.getElementById("dl-jpg").addEventListener("click", async () => {
+      $id("dl-jpg").addEventListener("click", () => {
         dlMenu.classList.add("hidden");
-        setSaveMsg("JPG hazırlanıyor...", false);
-        try {
-          const cvs = await html2canvas(canvas, { useCORS: true, allowTaint: true, scale: 2, backgroundColor: canvas.style.backgroundColor || "#ececef" });
-          const a = document.createElement("a");
-          a.href = cvs.toDataURL("image/jpeg", 0.92);
-          a.download = `${boardLabel()}.jpg`;
-          a.click();
-          setSaveMsg("JPG indirildi.", true);
-        } catch(e) { setSaveMsg("İndirme başarısız: " + e.message, false); }
+        const dataURL = fc.toDataURL({ format: "jpeg", quality: 0.92, multiplier: 2 });
+        const a = document.createElement("a");
+        a.href = dataURL;
+        a.download = `${boardLabel()}.jpg`;
+        a.click();
+        setSaveMsg("JPG indirildi.", true);
       });
 
-      document.getElementById("dl-pdf").addEventListener("click", async () => {
+      $id("dl-pdf").addEventListener("click", () => {
         dlMenu.classList.add("hidden");
-        setSaveMsg("PDF hazırlanıyor...", false);
-        try {
-          const { jsPDF } = window.jspdf;
-          const cvs = await html2canvas(canvas, { useCORS: true, allowTaint: true, scale: 2, backgroundColor: canvas.style.backgroundColor || "#ececef" });
-          const imgData = cvs.toDataURL("image/jpeg", 0.92);
-          const pdf = new jsPDF({ orientation: cvs.width > cvs.height ? "landscape" : "portrait", unit: "px", format: [cvs.width, cvs.height] });
-          pdf.addImage(imgData, "JPEG", 0, 0, cvs.width, cvs.height);
-          pdf.save(`${boardLabel()}.pdf`);
-          setSaveMsg("PDF indirildi.", true);
-        } catch(e) { setSaveMsg("İndirme başarısız: " + e.message, false); }
+        const dataURL = fc.toDataURL({ format: "jpeg", quality: 0.92, multiplier: 2 });
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF({
+          orientation: fc.width > fc.height ? "landscape" : "portrait",
+          unit: "px",
+          format: [fc.width * 2, fc.height * 2],
+        });
+        pdf.addImage(dataURL, "JPEG", 0, 0, fc.width * 2, fc.height * 2);
+        pdf.save(`${boardLabel()}.pdf`);
+        setSaveMsg("PDF indirildi.", true);
       });
 
-      // ── Drag-drop: dosya sistemi ve favori ürün listesi ──────────────────
-      const canvasWrap = document.getElementById("canvas-wrap");
+      // Popup kapat (dışarı tıklayınca)
+      document.addEventListener("click", hideAllPopups);
+
+      // ── Drag-drop: kanvasa bırakma ───────────────────────────────────────
+      const canvasWrap = $id("canvas-wrap");
 
       canvasWrap.addEventListener("dragover", (e) => {
         e.preventDefault();
         e.dataTransfer.dropEffect = "copy";
-        canvasWrap.style.outline = "3px solid #3b82f6";
+        canvasWrap.style.outline       = "3px solid #3b82f6";
         canvasWrap.style.outlineOffset = "-3px";
-        canvasWrap.style.borderRadius = "1rem";
+        canvasWrap.style.borderRadius  = "1rem";
       });
 
       canvasWrap.addEventListener("dragleave", (e) => {
         if (!canvasWrap.contains(e.relatedTarget)) {
           canvasWrap.style.outline = "";
-          canvasWrap.style.outlineOffset = "";
         }
       });
 
       canvasWrap.addEventListener("drop", (e) => {
         e.preventDefault();
         canvasWrap.style.outline = "";
-        canvasWrap.style.outlineOffset = "";
 
-        const rect = canvas.getBoundingClientRect();
-        const dropX = Math.round((e.clientX - rect.left) / zoomLevel);
-        const dropY = Math.round((e.clientY - rect.top) / zoomLevel);
+        const fcEl = fc.getElement ? fc.getElement() : document.getElementById("fc");
+        const rect  = fcEl.getBoundingClientRect();
+        const dropX = (e.clientX - rect.left)  / zoomLevel;
+        const dropY = (e.clientY - rect.top)   / zoomLevel;
 
-        // Dosya sistemi: görsel bırakma
+        // Bilgisayardan dosya bırakma
         if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
           const file = e.dataTransfer.files[0];
           if (file.type.startsWith("image/")) {
             const reader = new FileReader();
             reader.onload = (evt) => {
-              addItemToCanvasAt({
-                id: `file-${Date.now()}`,
-                name: file.name.replace(/\.[^.]+$/, ""),
-                image: evt.target.result
-              }, dropX, dropY);
+              fabric.Image.fromURL(evt.target.result).then((img) => {
+                img.scaleToWidth(220);
+                img.set({ left: Math.max(0, dropX - 110), top: Math.max(0, dropY - 110) });
+                fc.add(img);
+                fc.setActiveObject(img);
+                fc.renderAll();
+                setSaveMsg("Görsel eklendi. Kaydetmeyi unutma.", false);
+              });
             };
             reader.readAsDataURL(file);
           }
@@ -620,7 +649,16 @@
         if (raw) {
           try {
             const product = JSON.parse(raw);
-            addItemToCanvasAt(product, dropX, dropY);
+            fabric.Image.fromURL(product.image || FALLBACK_IMG, { crossOrigin: "anonymous" })
+              .then((img) => {
+                img.scaleToWidth(220);
+                img.set({ left: Math.max(0, dropX - 110), top: Math.max(0, dropY - 110) });
+                fc.add(img);
+                fc.setActiveObject(img);
+                fc.renderAll();
+                setSaveMsg("Ürün eklendi. Kaydetmeyi unutma.", false);
+              })
+              .catch(() => {});
           } catch {}
         }
       });
