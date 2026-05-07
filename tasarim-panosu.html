@@ -129,21 +129,17 @@
     </div>
   </div>
 
-  <!-- ═══ SAĞ PANEL ═══ -->
+  <!-- ═══ SAĞ PANEL: Sadece ürünler ═══ -->
   <div style="width:260px; background:#fff; border-left:1px solid rgba(0,0,0,.08); display:flex; flex-direction:column; overflow:hidden; flex-shrink:0;">
-
-    <!-- Özellikler (üst yarı) -->
-    <div id="props-panel" style="flex:1; overflow-y:auto; min-height:0; padding-bottom:8px;">
-      <!-- JS ile doldurulacak -->
+    <div style="padding:12px 12px 8px; flex-shrink:0;">
+      <div style="font-size:13px; font-weight:600; color:#111; margin-bottom:8px;">Ürün Ekle</div>
+      <input id="product-search" placeholder="Favorilerde ara..." style="width:100%; background:#f5f5f7; border:1px solid rgba(0,0,0,.1); color:#111; border-radius:8px; font-size:12px; padding:0 10px; height:30px; outline:none; font-family:inherit;">
     </div>
-
-    <!-- Ürün ekle (alt yarı, sabit) -->
-    <div style="border-top:1px solid rgba(0,0,0,.07); padding:12px; flex-shrink:0; display:flex; flex-direction:column; height:300px;">
-      <div style="font-size:11px; font-weight:600; color:#6e6e73; text-transform:uppercase; letter-spacing:.08em; margin-bottom:8px;">Ürün Ekle</div>
-      <input id="product-search" placeholder="Favorilerde ara..." style="width:100%; background:#f5f5f7; border:1px solid rgba(0,0,0,.1); color:#111; border-radius:8px; font-size:12px; padding:0 10px; height:30px; outline:none; font-family:inherit; margin-bottom:8px; flex-shrink:0;">
-      <div id="fav-list" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:5px; min-height:0;"></div>
-    </div>
+    <div id="fav-list" style="flex:1; overflow-y:auto; padding:0 12px 12px; display:flex; flex-direction:column; gap:5px; min-height:0;"></div>
   </div>
+
+  <!-- ═══ Floating props panel (obje seçince çıkar) ═══ -->
+  <div id="props-panel" style="display:none; position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#fff; border:1px solid rgba(0,0,0,.1); border-radius:14px; box-shadow:0 8px 32px rgba(0,0,0,.14); padding:12px 16px; z-index:500; max-width:680px; width:calc(100vw - 120px); max-height:260px; overflow-y:auto;"></div>
 </div>
 
 <div id="site-footer" style="display:none;"></div>
@@ -349,162 +345,109 @@ function updateProps() {
   const obj = fc?.getActiveObject();
 
   if (!obj) {
-    // Arkaplan renk paneli
-    const bgColors = ["#ffffff","#f5f5f5","#111111","#1a1a2e","#f5e6d3","#ddeeff","#e8f5e9","#fce4ec","#fff9c4","#ede7f6","#ffedd5","#e0f2fe"];
-    panel.innerHTML = `
-      <span class="panel-label" style="margin-top:14px;">Arkaplan Rengi</span>
-      <div style="display:flex; flex-wrap:wrap; gap:6px; padding:0 12px;">
-        ${bgColors.map(c=>`<div class="color-chip" data-bg="${c}" style="background:${c}; ${c==="#ffffff"?"border:2px solid #444;":""}"></div>`).join("")}
-        <label title="Özel renk" style="width:22px;height:22px;border-radius:5px;border:2px solid rgba(255,255,255,.15);background:conic-gradient(red,yellow,lime,cyan,blue,magenta,red);cursor:pointer;overflow:hidden;flex-shrink:0;">
-          <input type="color" id="bg-custom" style="opacity:0;width:1px;height:1px;position:absolute;">
-        </label>
-      </div>
-    `;
-    panel.querySelectorAll("[data-bg]").forEach(el => {
-      el.addEventListener("click", () => {
-        fc.setBackgroundColor(el.dataset.bg, () => fc.renderAll());
-        panel.querySelectorAll("[data-bg]").forEach(e => e.classList.remove("active"));
-        el.classList.add("active");
-      });
-    });
-    const bgCustom = $("bg-custom");
-    if (bgCustom) bgCustom.addEventListener("input", e => {
-      fc.setBackgroundColor(e.target.value, () => fc.renderAll());
-    });
+    panel.style.display = "none";
     return;
   }
+  panel.style.display = "block";
 
-  const type = obj.type; // 'i-text','textbox','rect','circle','line','image'
+  const type = obj.type;
   const isText = type === "i-text" || type === "textbox";
   const isShape = type === "rect" || type === "circle" || type === "polygon";
   const isImg = type === "image";
 
-  let html = `
-    <span class="panel-label" style="margin-top:14px;">
-      ${ isText?"Metin":isShape?"Şekil":isImg?"Görsel":type==="line"?"Çizgi":"Obje" }
-    </span>
+  // Compact yatay layout
+  let html = `<div style="display:flex; align-items:flex-start; gap:16px; flex-wrap:wrap;">`;
 
-    <div style="padding:0 12px; display:grid; grid-template-columns:1fr 1fr; gap:6px;">
-      <div>
-        <div style="font-size:10px;color:#555;margin-bottom:2px;">X</div>
-        <input class="prop-input" id="p-x" type="number" value="${Math.round(obj.left)}">
-      </div>
-      <div>
-        <div style="font-size:10px;color:#555;margin-bottom:2px;">Y</div>
-        <input class="prop-input" id="p-y" type="number" value="${Math.round(obj.top)}">
-      </div>
-      <div>
-        <div style="font-size:10px;color:#555;margin-bottom:2px;">Genişlik</div>
-        <input class="prop-input" id="p-w" type="number" value="${Math.round(obj.getScaledWidth())}">
-      </div>
-      <div>
-        <div style="font-size:10px;color:#555;margin-bottom:2px;">Yükseklik</div>
-        <input class="prop-input" id="p-h" type="number" value="${Math.round(obj.getScaledHeight())}">
-      </div>
+  // Konum/boyut grubu
+  html += `<div>
+    <div style="font-size:10px;font-weight:600;color:#6e6e73;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;">${isText?"Metin":isShape?"Şekil":isImg?"Görsel":type==="line"?"Çizgi":"Obje"}</div>
+    <div style="display:flex;gap:5px;flex-wrap:wrap;">
+      <div style="display:flex;flex-direction:column;gap:1px;"><span style="font-size:10px;color:#999;">X</span><input class="prop-input" id="p-x" type="number" value="${Math.round(obj.left)}" style="width:54px;"></div>
+      <div style="display:flex;flex-direction:column;gap:1px;"><span style="font-size:10px;color:#999;">Y</span><input class="prop-input" id="p-y" type="number" value="${Math.round(obj.top)}" style="width:54px;"></div>
+      <div style="display:flex;flex-direction:column;gap:1px;"><span style="font-size:10px;color:#999;">W</span><input class="prop-input" id="p-w" type="number" value="${Math.round(obj.getScaledWidth())}" style="width:54px;"></div>
+      <div style="display:flex;flex-direction:column;gap:1px;"><span style="font-size:10px;color:#999;">H</span><input class="prop-input" id="p-h" type="number" value="${Math.round(obj.getScaledHeight())}" style="width:54px;"></div>
+      <div style="display:flex;flex-direction:column;gap:1px;"><span style="font-size:10px;color:#999;">°</span><input class="prop-input" id="p-rot" type="number" min="0" max="360" value="${Math.round(obj.angle||0)}" style="width:46px;"></div>
+      <div style="display:flex;flex-direction:column;gap:1px;"><span style="font-size:10px;color:#999;">Opaklık</span><input class="prop-input" id="p-opacity-num" type="number" min="0" max="100" value="${Math.round((obj.opacity||1)*100)}" style="width:52px;"></div>
     </div>
-
-    <span class="panel-label">Döndürme</span>
-    <div style="padding:0 12px;">
-      <input class="prop-input" id="p-rot" type="number" min="0" max="360" value="${Math.round(obj.angle||0)}">
-    </div>
-
-    <span class="panel-label">Opaklık</span>
-    <div style="padding:0 12px; display:flex; align-items:center; gap:8px;">
-      <input type="range" class="range-input" id="p-opacity" min="0" max="100" value="${Math.round((obj.opacity||1)*100)}" style="flex:1;">
-      <input class="prop-input" id="p-opacity-num" type="number" min="0" max="100" value="${Math.round((obj.opacity||1)*100)}" style="width:46px;">
-    </div>
-  `;
+  </div>`;
 
   if (isText) {
-    const fonts = ["Inter, sans-serif","Georgia, serif","Courier New, monospace","Impact, sans-serif","Arial Black, sans-serif"];
-    html += `
-      <span class="panel-label">Font</span>
-      <div style="padding:0 12px;">
-        <select class="prop-input" id="p-font">
-          ${fonts.map(f=>`<option value="${f}" ${obj.fontFamily===f?"selected":""}>${f.split(",")[0]}</option>`).join("")}
-        </select>
+    const fonts = ["-apple-system, BlinkMacSystemFont, sans-serif","Georgia, serif","Courier New, monospace","Impact, sans-serif","Arial Black, sans-serif"];
+    html += `<div>
+      <div style="font-size:10px;font-weight:600;color:#6e6e73;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;">Metin Stili</div>
+      <div style="display:flex;gap:5px;flex-wrap:wrap;align-items:flex-end;">
+        <div style="display:flex;flex-direction:column;gap:1px;"><span style="font-size:10px;color:#999;">Font</span>
+          <select class="prop-input" id="p-font" style="width:110px;">${fonts.map(f=>`<option value="${f}" ${obj.fontFamily===f?"selected":""}>${f.split(",")[0].replace(/['"]/g,"")}</option>`).join("")}</select>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:1px;"><span style="font-size:10px;color:#999;">Boyut</span>
+          <select class="prop-input" id="p-fsize" style="width:60px;">${[10,12,14,16,18,20,24,28,32,40,48,56,72,96].map(s=>`<option value="${s}" ${obj.fontSize==s?"selected":""}>${s}</option>`).join("")}</select>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:1px;"><span style="font-size:10px;color:#999;">Renk</span>
+          <input type="color" id="p-fcolor" value="${obj.fill||'#111111'}" style="width:36px;height:28px;border-radius:7px;border:1px solid rgba(0,0,0,.12);cursor:pointer;padding:2px;">
+        </div>
+        <div style="display:flex;gap:3px;">
+          <button class="prop-btn ${obj.fontWeight==='bold'?'active':''}" id="p-bold" style="font-weight:700;">B</button>
+          <button class="prop-btn ${obj.fontStyle==='italic'?'active':''}" id="p-italic" style="font-style:italic;">I</button>
+          <button class="prop-btn ${obj.underline?'active':''}" id="p-under" style="text-decoration:underline;">U</button>
+        </div>
+        <div style="display:flex;gap:3px;">
+          <button class="prop-btn ${!obj.textAlign||obj.textAlign==='left'?'active':''}" id="p-align-l" title="Sola">⬛</button>
+          <button class="prop-btn ${obj.textAlign==='center'?'active':''}" id="p-align-c" title="Orta">≡</button>
+          <button class="prop-btn ${obj.textAlign==='right'?'active':''}" id="p-align-r" title="Sağa">▶</button>
+        </div>
       </div>
-      <span class="panel-label">Boyut</span>
-      <div style="padding:0 12px;">
-        <select class="prop-input" id="p-fsize">
-          ${[10,12,14,16,18,20,24,28,32,40,48,56,72,96].map(s=>`<option value="${s}" ${obj.fontSize==s?"selected":""}>${s}</option>`).join("")}
-        </select>
-      </div>
-      <span class="panel-label">Stil & Hizalama</span>
-      <div style="padding:0 12px; display:flex; gap:4px; flex-wrap:wrap;">
-        <button class="prop-btn ${obj.fontWeight==='bold'?'active':''}" id="p-bold">B</button>
-        <button class="prop-btn ${obj.fontStyle==='italic'?'active':''}" id="p-italic" style="font-style:italic;">I</button>
-        <button class="prop-btn ${obj.underline?'active':''}" id="p-under" style="text-decoration:underline;">U</button>
-        <button class="prop-btn ${obj.textAlign==='left'||!obj.textAlign?'active':''}" id="p-align-l">⬛</button>
-        <button class="prop-btn ${obj.textAlign==='center'?'active':''}" id="p-align-c">≡</button>
-        <button class="prop-btn ${obj.textAlign==='right'?'active':''}" id="p-align-r">▶</button>
-      </div>
-      <span class="panel-label">Renk</span>
-      <div style="padding:0 12px;">
-        <input type="color" id="p-fcolor" value="${obj.fill||'#111111'}" style="width:100%;height:32px;border-radius:6px;border:1px solid rgba(255,255,255,.1);cursor:pointer;background:#2a2a2a;">
-      </div>
-    `;
+    </div>`;
   }
 
   if (isShape) {
-    html += `
-      <span class="panel-label">Dolgu Rengi</span>
-      <div style="padding:0 12px;">
-        <input type="color" id="p-fill" value="${obj.fill==='transparent'||!obj.fill?'#e5e7eb':obj.fill}" style="width:100%;height:32px;border-radius:6px;border:1px solid rgba(255,255,255,.1);cursor:pointer;background:#2a2a2a;">
+    html += `<div>
+      <div style="font-size:10px;font-weight:600;color:#6e6e73;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;">Şekil</div>
+      <div style="display:flex;gap:5px;flex-wrap:wrap;align-items:flex-end;">
+        <div style="display:flex;flex-direction:column;gap:1px;"><span style="font-size:10px;color:#999;">Dolgu</span>
+          <input type="color" id="p-fill" value="${obj.fill==='transparent'||!obj.fill?'#e5e7eb':obj.fill}" style="width:36px;height:28px;border-radius:7px;border:1px solid rgba(0,0,0,.12);cursor:pointer;padding:2px;">
+        </div>
+        <div style="display:flex;flex-direction:column;gap:1px;"><span style="font-size:10px;color:#999;">Kenar</span>
+          <input type="color" id="p-stroke" value="${obj.stroke&&obj.stroke!=='transparent'?obj.stroke:'#000000'}" style="width:36px;height:28px;border-radius:7px;border:1px solid rgba(0,0,0,.12);cursor:pointer;padding:2px;">
+        </div>
+        <div style="display:flex;flex-direction:column;gap:1px;"><span style="font-size:10px;color:#999;">Kalınlık</span>
+          <input class="prop-input" id="p-sw" type="number" min="0" max="40" value="${obj.strokeWidth||0}" style="width:52px;">
+        </div>
+        ${type==="rect"?`<div style="display:flex;flex-direction:column;gap:1px;"><span style="font-size:10px;color:#999;">Köşe r</span><input class="prop-input" id="p-rx" type="number" min="0" max="200" value="${obj.rx||0}" style="width:52px;"></div>`:""}
       </div>
-      <span class="panel-label">Kenar</span>
-      <div style="padding:0 12px; display:grid; grid-template-columns:1fr 1fr; gap:6px;">
-        <div>
-          <div style="font-size:10px;color:#555;margin-bottom:2px;">Renk</div>
-          <input type="color" id="p-stroke" value="${obj.stroke&&obj.stroke!=='transparent'?obj.stroke:'#000000'}" style="width:100%;height:28px;border-radius:6px;border:1px solid rgba(255,255,255,.1);cursor:pointer;">
-        </div>
-        <div>
-          <div style="font-size:10px;color:#555;margin-bottom:2px;">Kalınlık</div>
-          <input class="prop-input" id="p-sw" type="number" min="0" max="40" value="${obj.strokeWidth||0}">
-        </div>
-      </div>
-    `;
-    if (type === "rect") {
-      html += `
-        <span class="panel-label">Köşe Yarıçapı</span>
-        <div style="padding:0 12px;">
-          <input type="range" class="range-input" id="p-rx" min="0" max="100" value="${obj.rx||0}">
-        </div>
-      `;
-    }
+    </div>`;
   }
 
   if (type === "line") {
-    html += `
-      <span class="panel-label">Çizgi Rengi</span>
-      <div style="padding:0 12px;">
-        <input type="color" id="p-stroke" value="${obj.stroke||'#6b7280'}" style="width:100%;height:32px;border-radius:6px;border:1px solid rgba(255,255,255,.1);cursor:pointer;">
+    html += `<div>
+      <div style="font-size:10px;font-weight:600;color:#6e6e73;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;">Çizgi</div>
+      <div style="display:flex;gap:5px;align-items:flex-end;">
+        <div style="display:flex;flex-direction:column;gap:1px;"><span style="font-size:10px;color:#999;">Renk</span>
+          <input type="color" id="p-stroke" value="${obj.stroke||'#6b7280'}" style="width:36px;height:28px;border-radius:7px;border:1px solid rgba(0,0,0,.12);cursor:pointer;padding:2px;">
+        </div>
+        <div style="display:flex;flex-direction:column;gap:1px;"><span style="font-size:10px;color:#999;">Kalınlık</span>
+          <input class="prop-input" id="p-sw" type="number" min="1" max="40" value="${obj.strokeWidth||2}" style="width:52px;">
+        </div>
       </div>
-      <span class="panel-label">Kalınlık</span>
-      <div style="padding:0 12px;">
-        <input class="prop-input" id="p-sw" type="number" min="1" max="40" value="${obj.strokeWidth||2}">
-      </div>
-    `;
+    </div>`;
   }
 
   if (isImg) {
-    html += `
-      <span class="panel-label">Görsel</span>
-      <div style="padding:0 12px;">
-        <button class="prop-btn" id="p-replace" style="width:100%;">Görseli Değiştir</button>
+    html += `<div>
+      <div style="font-size:10px;font-weight:600;color:#6e6e73;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;">Görsel</div>
+      <div style="display:flex;gap:5px;align-items:flex-end;flex-wrap:wrap;">
+        <button class="prop-btn" id="p-replace">Değiştir</button>
+        <div style="display:flex;flex-direction:column;gap:1px;"><span style="font-size:10px;color:#999;">Köşe yuvarlama</span>
+          <input class="prop-input" id="p-imgrx" type="number" min="0" max="50" value="${obj._rx||0}" style="width:60px;">
+        </div>
       </div>
-      <span class="panel-label">Köşe Yuvarlama</span>
-      <div style="padding:0 12px;">
-        <input type="range" class="range-input" id="p-imgrx" min="0" max="50" value="${obj._rx||0}">
-      </div>
-    `;
+    </div>`;
   }
 
-  html += `
-    <div style="padding:12px; margin-top:8px;">
-      <button id="p-delete" style="width:100%;height:30px;background:rgba(220,38,38,.06);border:1px solid rgba(220,38,38,.18);color:#dc2626;border-radius:8px;font-size:12px;cursor:pointer;font-family:inherit;transition:background .12s;" onmouseover="this.style.background='rgba(220,38,38,.12)'" onmouseout="this.style.background='rgba(220,38,38,.06)'">Sil</button>
-    </div>
-  `;
+  html += `<div style="display:flex;align-items:flex-end;">
+    <button id="p-delete" style="height:28px;padding:0 12px;background:rgba(220,38,38,.06);border:1px solid rgba(220,38,38,.2);color:#dc2626;border-radius:7px;font-size:12px;cursor:pointer;font-family:inherit;" onmouseover="this.style.background='rgba(220,38,38,.12)'" onmouseout="this.style.background='rgba(220,38,38,.06)'">Sil</button>
+  </div>`;
+
+  html += `</div>`; // flex wrap container
 
   panel.innerHTML = html;
 
@@ -518,15 +461,8 @@ function updateProps() {
   bind("p-w", e => { obj.scaleToWidth(+e.target.value); fc.renderAll(); });
   bind("p-h", e => { obj.scaleToHeight(+e.target.value); fc.renderAll(); });
   bind("p-rot", e => { obj.set("angle", +e.target.value); fc.renderAll(); });
-  bind("p-opacity", e => {
-    const v = +e.target.value/100;
-    obj.set("opacity", v); fc.renderAll();
-    const n = $("p-opacity-num"); if(n) n.value = e.target.value;
-  });
   bind("p-opacity-num", e => {
-    const v = Math.min(100,Math.max(0,+e.target.value))/100;
-    obj.set("opacity", v); fc.renderAll();
-    const r = $("p-opacity"); if(r) r.value = Math.round(v*100);
+    obj.set("opacity", Math.min(100,Math.max(0,+e.target.value))/100); fc.renderAll();
   });
 
   if (isText) {
@@ -544,7 +480,7 @@ function updateProps() {
     bind("p-fill", e => { obj.set("fill", e.target.value); fc.renderAll(); });
     bind("p-stroke", e => { obj.set("stroke", e.target.value); fc.renderAll(); });
     bind("p-sw", e => { obj.set("strokeWidth", +e.target.value); fc.renderAll(); });
-    if (type==="rect") bind("p-rx", e => { obj.set({rx:+e.target.value,ry:+e.target.value}); fc.renderAll(); });
+    if (type==="rect") bind("p-rx", e => { obj.set({ rx: +e.target.value, ry: +e.target.value }); fc.renderAll(); });
   }
   if (isImg) {
     const replaceInput = document.createElement("input");
