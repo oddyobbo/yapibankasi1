@@ -115,7 +115,8 @@
                     <span class="text-[15px] text-[#7a7a80]">›</span>
                   </a>
                   <div class="mt-2 space-y-1">
-                    ${col.subs
+                    ${[...col.subs]
+                      .sort((a, b) => a.localeCompare(b, "tr"))
                       .map(
                         (sub) =>
                           `<a href="/urunler.html?category=${encodeURIComponent(col.name)}&sub=${encodeURIComponent(
