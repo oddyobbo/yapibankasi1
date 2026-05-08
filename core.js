@@ -7,6 +7,7 @@
   const LS_PROJECTS_KEY = "ag_projects_v1";
   const LS_ARCHITECT_ACCOUNTS_KEY = "ag_architect_accounts_v1";
   const LS_ARCHITECT_SESSION_KEY = "ag_architect_session_v1";
+  const LS_BRAND_SESSION_KEY = "ag_brand_session_v1";
 
   // ── localStorage cache helpers ──────────────────────────────────────────
   const lsRead  = (k, fb) => { try { const r = localStorage.getItem(k); return r ? JSON.parse(r) : fb; } catch { return fb; } };
@@ -63,6 +64,9 @@
       await sb.auth.signOut();
       return { ok: false, message: "Marka hesabıyla giriş yapın. Admin paneli için /admin-giris.html adresini kullanın." };
     }
+    // Brand ve architect oturumları aynı anda aktif olmasın.
+    setArchitectSession(null);
+    lsWrite(LS_BRAND_SESSION_KEY, null);
     const { data: profile } = await sb.from("profiles").select("*").eq("id", data.user.id).single();
     return { ok: true, brand: { id: data.user.id, email: data.user.email, ...(profile || {}) } };
   };
@@ -84,6 +88,7 @@
     await ready;
     const sb = getSB();
     if (sb) await sb.auth.signOut();
+    lsWrite(LS_BRAND_SESSION_KEY, null);
   };
 
   const getSessionBrand = async () => {
@@ -312,10 +317,17 @@
   };
 
   const loginArchitect = async ({ email, password }) => {
+    await ready;
     const safeEmail = (email || "").trim().toLowerCase();
     const accounts = getArchitectAccounts();
     const found = accounts.find((x) => x.email === safeEmail && x.password === password);
     if (!found) return { ok: false, message: "E-posta veya şifre hatalı." };
+    // Architect ve brand oturumları aynı anda aktif olmasın.
+    const sb = getSB();
+    if (sb) {
+      try { await sb.auth.signOut(); } catch {}
+    }
+    lsWrite(LS_BRAND_SESSION_KEY, null);
     const session = { id: found.id, name: found.name, email: found.email, office: found.office || "" };
     setArchitectSession(session);
     return { ok: true, architect: session };
