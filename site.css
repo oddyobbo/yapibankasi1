@@ -21,8 +21,8 @@ body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter"
 ───────────────────────────────────────────────────────────── */
 html.ag-dark,
 html.ag-dark body {
-  background: #0f1115 !important;
-  color: #e7e9ee !important;
+  background: #111214 !important;
+  color: #eceef2 !important;
 }
 
 html.ag-dark body {
@@ -30,11 +30,13 @@ html.ag-dark body {
 }
 
 /* common utility overrides used across pages */
-html.ag-dark .bg-white { background-color: #12151c !important; }
+html.ag-dark .bg-white { background-color: #17181b !important; }
 html.ag-dark .bg-\[\#fafafa\],
 html.ag-dark .bg-\[\#fbfbfd\],
 html.ag-dark .bg-\[\#f5f5f7\],
-html.ag-dark .bg-\[\#f1f1f3\] { background-color: #181c25 !important; }
+html.ag-dark .bg-\[\#f1f1f3\],
+html.ag-dark .bg-white\/95,
+html.ag-dark .bg-white\/85 { background-color: #1e2024 !important; }
 
 html.ag-dark .text-black,
 html.ag-dark .text-\[\#0b0b0c\],
@@ -45,7 +47,7 @@ html.ag-dark .text-\[\#6e6e73\],
 html.ag-dark .text-\[\#8e8e93\],
 html.ag-dark .text-\[\#3a3a3c\],
 html.ag-dark .text-\[\#4a4a4f\],
-html.ag-dark .text-\[\#7a7a80\] { color: #a8b0bf !important; }
+html.ag-dark .text-\[\#7a7a80\] { color: #a9adb6 !important; }
 
 html.ag-dark .border-black\/\[0\.06\],
 html.ag-dark .border-black\/\[0\.07\],
@@ -63,14 +65,20 @@ html.ag-dark textarea {
 }
 
 html.ag-dark header {
-  background: rgba(16, 19, 26, 0.86) !important;
+  background: rgba(18, 19, 22, 0.9) !important;
   border-color: rgba(255,255,255,.12) !important;
 }
 
 html.ag-dark footer {
-  background: #11151d !important;
+  background: #15171a !important;
   border-color: rgba(255,255,255,.12) !important;
 }
+
+html.ag-dark .bg-black,
+html.ag-dark .bg-\[\#0b0b0c\],
+html.ag-dark .bg-\[\#1d1d1f\] { background-color: #2a2d33 !important; }
+
+html.ag-dark .text-white { color: #f7f8fa !important; }
 
 html.ag-dark .shadow-\[0_30px_70px_rgba\(0\,0\,0\,0\.16\)\] {
   box-shadow: 0 30px 70px rgba(0,0,0,.45) !important;
