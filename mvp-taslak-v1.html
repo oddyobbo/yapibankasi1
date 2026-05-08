@@ -102,89 +102,94 @@
   <div id="site-header"></div>
 
   <main>
-    <!-- HERO – animated bands (GPU-only transforms) -->
-    <section id="hero-anim" style="background:#fff;height:88vh;display:flex;overflow:hidden;position:relative">
+    <!-- HERO – bands over full-bleed photo -->
+    <section id="hero-anim" style="position:relative;background:#fff;height:88vh;overflow:hidden">
 
-      <div id="hero-left" style="flex-shrink:0;width:100%;display:flex;flex-direction:column;will-change:width;transition:width 1.1s cubic-bezier(.77,0,.18,1)">
-
-        <div class="hband" style="flex:1;position:relative;overflow:hidden">
-          <div class="hline" style="position:absolute;bottom:0;left:0;width:100%;height:1px;background:rgba(0,0,0,.13);transform:scaleX(0);transform-origin:left;will-change:transform;transition:transform .8s cubic-bezier(.4,0,.2,1)"></div>
-          <span class="hbt" style="position:absolute;top:50%;left:0;white-space:nowrap;font-size:clamp(26px,5.2vw,82px);font-weight:200;letter-spacing:-.03em;color:#0b0b0c;will-change:transform;transform:translateX(-110vw) translateY(-50%);transition:transform .85s cubic-bezier(.22,1,.36,1)">Türkiye'nin mimari</span>
-        </div>
-
-        <div class="hband" style="flex:1;position:relative;overflow:hidden">
-          <div class="hline" style="position:absolute;bottom:0;left:0;width:100%;height:1px;background:rgba(0,0,0,.13);transform:scaleX(0);transform-origin:left;will-change:transform;transition:transform .8s cubic-bezier(.4,0,.2,1)"></div>
-          <span class="hbt" style="position:absolute;top:50%;left:0;white-space:nowrap;font-size:clamp(26px,5.2vw,82px);font-weight:200;letter-spacing:-.03em;color:#0b0b0c;will-change:transform;transform:translateX(-110vw) translateY(-50%);transition:transform .85s cubic-bezier(.22,1,.36,1)">malzeme platformu.</span>
-        </div>
-
-        <div class="hband" style="flex:1;position:relative;overflow:hidden">
-          <div class="hline" style="position:absolute;bottom:0;left:0;width:100%;height:1px;background:rgba(0,0,0,.13);transform:scaleX(0);transform-origin:left;will-change:transform;transition:transform .8s cubic-bezier(.4,0,.2,1)"></div>
-          <span class="hbt" style="position:absolute;top:50%;left:0;white-space:nowrap;font-size:clamp(26px,5.2vw,82px);font-weight:200;letter-spacing:-.03em;color:#0b0b0c;will-change:transform;transform:translateX(-110vw) translateY(-50%);transition:transform .85s cubic-bezier(.22,1,.36,1)">100+ marka · binlerce ürün</span>
-        </div>
-
-        <div class="hband" style="flex:1;position:relative;overflow:hidden">
-          <span class="hbt" style="position:absolute;top:50%;left:0;white-space:nowrap;font-size:clamp(26px,5.2vw,82px);font-weight:200;letter-spacing:-.03em;color:#0b0b0c;will-change:transform;transform:translateX(-110vw) translateY(-50%);transition:transform .85s cubic-bezier(.22,1,.36,1)">NRC · EPD · BIM · teknik veri</span>
-        </div>
-
+      <!-- Background photo – fades in behind everything -->
+      <div id="hero-bg" style="position:absolute;inset:0;z-index:0;opacity:0;will-change:opacity,transform;transform:scale(1.06);transition:opacity 1.2s ease,transform 7s ease">
+        <img src="https://images.unsplash.com/photo-1497366811353-6870744d04b2?q=80&w=1974&auto=format&fit=crop" alt="" style="width:100%;height:100%;object-fit:cover">
+        <div style="position:absolute;inset:0;background:linear-gradient(105deg,rgba(0,0,0,.72) 0%,rgba(0,0,0,.45) 55%,rgba(0,0,0,.25) 100%)"></div>
       </div>
 
-      <div id="hero-right" style="flex-shrink:0;width:0%;overflow:hidden;will-change:width;transition:width 1.1s cubic-bezier(.77,0,.18,1);padding:20px 20px 20px 0;box-sizing:border-box">
-        <div style="border-radius:22px;overflow:hidden;height:100%;position:relative">
-          <img id="hero-right-img" src="https://images.unsplash.com/photo-1497366811353-6870744d04b2?q=80&w=1974&auto=format&fit=crop" alt="Mimari çalışma alanı" style="width:100%;height:100%;object-fit:cover;will-change:transform;transform:translateX(100%);transition:transform 1.1s cubic-bezier(.77,0,.18,1)">
-          <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.38) 0%,transparent 55%)"></div>
-          <div id="hero-cta" style="position:absolute;bottom:24px;left:24px;right:24px;opacity:0;transform:translateY(10px);transition:opacity .65s ease,transform .65s ease">
-            <p style="color:rgba(255,255,255,.75);font-size:13px;margin:0 0 12px">Mimari proje için doğru malzemeyi saniyeler içinde bul.</p>
-            <div style="display:flex;gap:10px;flex-wrap:wrap">
-              <a href="/urunler.html" style="display:inline-flex;align-items:center;padding:10px 22px;border-radius:999px;background:#fff;color:#0b0b0c;font-size:13px;font-weight:600;text-decoration:none">Ürünleri Keşfet &#8594;</a>
-              <a href="/marka-basvuru.html" style="display:inline-flex;align-items:center;padding:10px 22px;border-radius:999px;border:1.5px solid rgba(255,255,255,.35);color:#fff;font-size:13px;font-weight:600;text-decoration:none">Marka Başvurusu</a>
-            </div>
-          </div>
+      <!-- CTA – appears last -->
+      <div id="hero-cta" style="position:absolute;bottom:36px;left:clamp(24px,4vw,64px);z-index:3;opacity:0;transform:translateY(14px);transition:opacity .7s ease,transform .7s ease">
+        <p style="color:rgba(255,255,255,.65);font-size:14px;margin:0 0 14px;font-weight:300">Mimari proje için doğru malzemeyi saniyeler içinde bul.</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <a href="/urunler.html" style="display:inline-flex;align-items:center;padding:11px 24px;border-radius:999px;background:#fff;color:#0b0b0c;font-size:13px;font-weight:600;text-decoration:none">Ürünleri Keşfet &#8594;</a>
+          <a href="/marka-basvuru.html" style="display:inline-flex;align-items:center;padding:11px 24px;border-radius:999px;border:1.5px solid rgba(255,255,255,.35);color:#fff;font-size:13px;font-weight:600;text-decoration:none">Marka Başvurusu</a>
         </div>
       </div>
 
+      <!-- Text bands (above photo) -->
+      <div style="position:relative;z-index:2;height:100%;display:flex;flex-direction:column">
+
+        <div class="hband" style="flex:1;position:relative;overflow:hidden;background:#fff;transition:background-color .95s ease">
+          <div class="hline" style="position:absolute;bottom:0;left:0;width:100%;height:1px;background:rgba(0,0,0,.13);will-change:transform;transform:scaleX(0);transform-origin:left;transition:transform .8s cubic-bezier(.4,0,.2,1)"></div>
+          <span class="hbt" style="position:absolute;top:50%;left:0;white-space:nowrap;font-size:clamp(26px,5.2vw,82px);font-weight:200;letter-spacing:-.03em;color:#0b0b0c;will-change:transform;transform:translateX(-110vw) translateY(-50%);transition:transform .85s cubic-bezier(.22,1,.36,1),color .8s ease">Türkiye'nin mimari</span>
+        </div>
+
+        <div class="hband" style="flex:1;position:relative;overflow:hidden;background:#fff;transition:background-color .95s ease">
+          <div class="hline" style="position:absolute;bottom:0;left:0;width:100%;height:1px;background:rgba(0,0,0,.13);will-change:transform;transform:scaleX(0);transform-origin:left;transition:transform .8s cubic-bezier(.4,0,.2,1)"></div>
+          <span class="hbt" style="position:absolute;top:50%;left:0;white-space:nowrap;font-size:clamp(26px,5.2vw,82px);font-weight:200;letter-spacing:-.03em;color:#0b0b0c;will-change:transform;transform:translateX(-110vw) translateY(-50%);transition:transform .85s cubic-bezier(.22,1,.36,1),color .8s ease">malzeme platformu.</span>
+        </div>
+
+        <div class="hband" style="flex:1;position:relative;overflow:hidden;background:#fff;transition:background-color .95s ease">
+          <div class="hline" style="position:absolute;bottom:0;left:0;width:100%;height:1px;background:rgba(0,0,0,.13);will-change:transform;transform:scaleX(0);transform-origin:left;transition:transform .8s cubic-bezier(.4,0,.2,1)"></div>
+          <span class="hbt" style="position:absolute;top:50%;left:0;white-space:nowrap;font-size:clamp(26px,5.2vw,82px);font-weight:200;letter-spacing:-.03em;color:#0b0b0c;will-change:transform;transform:translateX(-110vw) translateY(-50%);transition:transform .85s cubic-bezier(.22,1,.36,1),color .8s ease">100+ marka · binlerce ürün</span>
+        </div>
+
+        <div class="hband" style="flex:1;position:relative;overflow:hidden;background:#fff;transition:background-color .95s ease">
+          <span class="hbt" style="position:absolute;top:50%;left:0;white-space:nowrap;font-size:clamp(26px,5.2vw,82px);font-weight:200;letter-spacing:-.03em;color:#0b0b0c;will-change:transform;transform:translateX(-110vw) translateY(-50%);transition:transform .85s cubic-bezier(.22,1,.36,1),color .8s ease">NRC · EPD · BIM · teknik veri</span>
+        </div>
+
+      </div>
     </section>
+
     <script>
     (function(){
       var texts = document.querySelectorAll(".hbt");
       var lines  = document.querySelectorAll(".hline");
-      var heroLeft  = document.getElementById("hero-left");
-      var heroRight = document.getElementById("hero-right");
-      var heroImg   = document.getElementById("hero-right-img");
-      var heroCta   = document.getElementById("hero-cta");
-      var vw = window.innerWidth;
+      var bands  = document.querySelectorAll(".hband");
+      var heroBg  = document.getElementById("hero-bg");
+      var heroCta = document.getElementById("hero-cta");
 
-      // Centered X offset for each text (only transform, no left change)
-      function centerX(el) {
-        return "translateX(calc(50vw - " + (el.offsetWidth / 2) + "px)) translateY(-50%)";
+      function centerTransform(el) {
+        var hw = el.offsetWidth / 2;
+        return "translateX(calc(50vw - " + hw + "px)) translateY(-50%)";
       }
-      function leftX() {
-        return "translateX(clamp(24px, 4vw, 64px)) translateY(-50%)";
+      function leftTransform() {
+        var lx = Math.max(24, Math.min(64, window.innerWidth * 0.04));
+        return "translateX(" + lx + "px) translateY(-50%) scale(0.9)";
       }
 
-      // Phase 1: line scaleX + text slides to center, staggered
+      // Phase 1: lines draw + texts slide to center, staggered
       texts.forEach(function(t, i) {
         setTimeout(function() {
           if (lines[i]) lines[i].style.transform = "scaleX(1)";
-          t.style.transform = centerX(t);
-        }, 260 + i * 200);
+          t.style.transform = centerTransform(t);
+        }, 260 + i * 210);
       });
 
-      // Phase 2: split (desktop only) — only transform changes, no left/width on text
-      if (vw >= 768) {
-        setTimeout(function() {
-          heroLeft.style.width  = "54%";
-          heroRight.style.width = "46%";
-          heroImg.style.transform = "translateX(0)";
-          texts.forEach(function(t) {
-            t.style.transition = "transform 1s cubic-bezier(.77,0,.18,1)";
-            t.style.transform  = leftX();
-          });
-          setTimeout(function() {
-            heroCta.style.opacity   = "1";
-            heroCta.style.transform = "translateY(0)";
-          }, 680);
-        }, 1900);
-      }
+      // Phase 2: photo fills hero, bands go transparent, text → white + shifts left
+      setTimeout(function() {
+        heroBg.style.opacity   = "1";
+        heroBg.style.transform = "scale(1)";
+
+        bands.forEach(function(b) { b.style.backgroundColor = "transparent"; });
+        lines.forEach(function(l) { l.style.background = "rgba(255,255,255,.18)"; });
+
+        texts.forEach(function(t) {
+          t.style.color = "#fff";
+          t.style.transition = "transform 1.05s cubic-bezier(.77,0,.18,1), color .9s ease";
+          t.style.transform  = leftTransform();
+        });
+      }, 1800);
+
+      // Phase 3: CTA fades in
+      setTimeout(function() {
+        heroCta.style.opacity   = "1";
+        heroCta.style.transform = "translateY(0)";
+      }, 2700);
     })();
     </script>
 
