@@ -123,6 +123,13 @@
   const headerTarget = document.getElementById("site-header");
   if (headerTarget) {
     const navItems = [...baseNavItems];
+    const isDarkTheme = getTheme() === "dark";
+    const activeNavClass = isDarkTheme
+      ? "text-[#0f1115] bg-[#d6dbe4]"
+      : "text-black bg-[#eef0f4]";
+    const inactiveNavClass = isDarkTheme
+      ? "text-[#d7dce6] hover:text-white hover:bg-white/[0.08]"
+      : "text-[#1f1f22] hover:text-black hover:bg-[#f1f1f3]";
 
     const nav = navItems
       .map((item) => {
@@ -155,7 +162,7 @@
           return `
             <div class="relative">
               <button type="button" id="products-mega-toggle" class="px-3 py-2 rounded-full text-[15.5px] transition-colors ${
-                isActive ? "text-black bg-[#eef0f4]" : "text-[#1f1f22] hover:text-black hover:bg-[#f1f1f3]"
+                isActive ? activeNavClass : inactiveNavClass
               }">${item.label}
                 <span class="inline-flex align-middle ml-1 -mt-[1px]">
                   <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6.5l4 4 4-4" stroke="currentColor" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -184,7 +191,7 @@
             </div>`;
         }
         return `<a href="${item.href}" class="px-3 py-2 rounded-full text-[15px] transition-colors ${
-          isActive ? "text-black bg-[#eef0f4]" : "text-[#1f1f22] hover:text-black hover:bg-[#f1f1f3]"
+          isActive ? activeNavClass : inactiveNavClass
         }">${item.label}</a>`;
       })
       .join("");
@@ -193,7 +200,9 @@
       .map((item) => {
         const isActive = item.id === current;
         return `<a href="${item.href}" class="block px-1 py-3 text-[15px] border-b border-black/[0.06] ${
-          isActive ? "text-black font-semibold" : "text-[#1f1f22]"
+          isActive
+            ? (isDarkTheme ? "text-white font-semibold" : "text-black font-semibold")
+            : (isDarkTheme ? "text-[#d7dce6]" : "text-[#1f1f22]")
         }">${item.label}</a>`;
       })
       .join("");
