@@ -491,19 +491,33 @@
     `;
   }
 
-  // Floating ask pill (site-wide), hide on admin/login pages
+  // Scroll-to-top button (site-wide), hide on admin/login pages
   const noPillPages = new Set(["admin-login", "admin", "brand-login", "brand-panel", "architect-login", "architect-panel", "moodboard"]);
   if (!noPillPages.has(current)) {
-    const pill = document.createElement("a");
-    pill.href = "/urunler.html";
-    pill.setAttribute("aria-label", "Ürün ara");
-    pill.className =
-      "fixed bottom-5 right-5 z-40 flex items-center gap-2 rounded-full bg-black text-white px-4 py-2.5 shadow-[0_10px_30px_rgba(0,0,0,0.18)] hover:scale-[1.02] transition";
-    pill.innerHTML = `
-      <span class="w-6 h-6 rounded-full bg-white text-black text-[12px] font-bold flex items-center justify-center">↑</span>
-      <span class="text-[13px] font-semibold">Ürün ara</span>
-    `;
-    document.body.appendChild(pill);
+    const btn = document.createElement("button");
+    btn.setAttribute("aria-label", "Yukarı çık");
+    btn.setAttribute("type", "button");
+    btn.style.cssText = [
+      "position:fixed", "bottom:24px", "right:24px", "z-index:40",
+      "width:44px", "height:44px", "border-radius:50%",
+      "background:#0b0b0c", "color:#fff", "border:none", "cursor:pointer",
+      "display:flex", "align-items:center", "justify-content:center",
+      "box-shadow:0 6px 24px rgba(0,0,0,.20)",
+      "opacity:0", "transform:translateY(12px)",
+      "transition:opacity .25s, transform .25s",
+      "pointer-events:none"
+    ].join(";");
+    btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>`;
+    document.body.appendChild(btn);
+
+    const toggleBtn = () => {
+      const visible = window.scrollY > 300;
+      btn.style.opacity = visible ? "1" : "0";
+      btn.style.transform = visible ? "translateY(0)" : "translateY(12px)";
+      btn.style.pointerEvents = visible ? "auto" : "none";
+    };
+    window.addEventListener("scroll", toggleBtn, { passive: true });
+    btn.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
   }
 
   // Home brand strip hardening:
