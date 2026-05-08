@@ -8,6 +8,15 @@
     if (!root) return;
     root.classList.toggle("ag-dark", theme === "dark");
   };
+  const syncLogoThemeColor = (theme) => {
+    const c = theme === "dark" ? "#f2f4f8" : "#1d1d1f";
+    document.querySelectorAll("[data-ag-logo='1']").forEach((el) => {
+      el.style.color = c;
+    });
+    document.querySelectorAll("[data-ag-logo-path='1']").forEach((el) => {
+      el.setAttribute("stroke", c);
+    });
+  };
   applyTheme(getTheme());
 
   let architectSession = null;
@@ -288,8 +297,8 @@
       <header class="border-b border-black/[0.06] sticky top-0 bg-white/85 backdrop-blur-xl z-30">
         <div class="h-[72px] px-4 sm:px-6 lg:px-10 flex items-center">
           <!-- Logo -->
-          <a href="/mvp-taslak-v1.html" class="flex-shrink-0 mr-8 inline-flex items-baseline gap-0 leading-none select-none" style="font-size:22px;font-weight:600;letter-spacing:-0.3px;color:${logoColor};text-decoration:none;" aria-label="Archilink">
-            <span>Arch</span><span style="position:relative;display:inline-block;"><span>il</span><svg style="position:absolute;bottom:-5px;left:-1px;right:-1px;width:calc(100% + 2px);overflow:visible;" height="6" viewBox="0 0 20 6" preserveAspectRatio="none"><path d="M0,1 Q10,6 20,1" stroke="${logoColor}" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg></span><span>ink</span>
+          <a href="/mvp-taslak-v1.html" data-ag-logo="1" class="flex-shrink-0 mr-8 inline-flex items-baseline gap-0 leading-none select-none" style="font-size:22px;font-weight:600;letter-spacing:-0.3px;color:${logoColor};text-decoration:none;" aria-label="Archilink">
+            <span>Arch</span><span style="position:relative;display:inline-block;"><span>il</span><svg style="position:absolute;bottom:-5px;left:-1px;right:-1px;width:calc(100% + 2px);overflow:visible;" height="6" viewBox="0 0 20 6" preserveAspectRatio="none"><path data-ag-logo-path="1" d="M0,1 Q10,6 20,1" stroke="${logoColor}" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg></span><span>ink</span>
           </a>
           <!-- Nav -->
           <nav class="hidden lg:flex items-center gap-1 flex-shrink-0">${nav}</nav>
@@ -331,6 +340,7 @@
       themeToggle.addEventListener("click", () => {
         const next = document.documentElement.classList.contains("ag-dark") ? "light" : "dark";
         applyTheme(next);
+        syncLogoThemeColor(next);
         try { localStorage.setItem(THEME_KEY, next); } catch {}
         document.querySelectorAll("[data-theme-toggle='1']").forEach((btn) => {
           btn.innerHTML = next === "dark" ? sunIcon : moonIcon;
@@ -390,8 +400,8 @@
       <footer class="border-t border-black/[0.06] bg-white w-full">
         <div class="w-full px-6 lg:px-10 pt-16 pb-10 grid md:grid-cols-5 gap-10 text-[14px]">
           <div class="md:col-span-2">
-            <p class="inline-flex items-baseline gap-0 leading-none" style="font-size:24px;font-weight:600;letter-spacing:-0.3px;color:${logoColor};">
-              <span>Arch</span><span style="position:relative;display:inline-block;"><span>il</span><svg style="position:absolute;bottom:-5px;left:-1px;width:calc(100% + 2px);overflow:visible;" height="6" viewBox="0 0 20 6" preserveAspectRatio="none"><path d="M0,1 Q10,6 20,1" stroke="${logoColor}" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg></span><span>ink</span>
+            <p data-ag-logo="1" class="inline-flex items-baseline gap-0 leading-none" style="font-size:24px;font-weight:600;letter-spacing:-0.3px;color:${logoColor};">
+              <span>Arch</span><span style="position:relative;display:inline-block;"><span>il</span><svg style="position:absolute;bottom:-5px;left:-1px;width:calc(100% + 2px);overflow:visible;" height="6" viewBox="0 0 20 6" preserveAspectRatio="none"><path data-ag-logo-path="1" d="M0,1 Q10,6 20,1" stroke="${logoColor}" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg></span><span>ink</span>
             </p>
             <p class="text-[#6e6e73] mt-4 max-w-[42ch] leading-relaxed">Mimarların doğru ürünü bulduğu, markaların gerçek talebe ulaştığı Türkiye odaklı mimari malzeme platformu.</p>
             <div class="mt-5 flex gap-2">
