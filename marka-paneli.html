@@ -351,15 +351,6 @@
 
       setupCategorySelectors();
 
-      const logoutBtn = document.createElement("button");
-      logoutBtn.className = "px-4 py-2 rounded-full border border-black/15 text-[13px]";
-      logoutBtn.textContent = `${session.name || session.email} · Çıkış`;
-      logoutBtn.onclick = async () => {
-        await AG.logoutBrand();
-        window.location.href = "/marka-giris.html";
-      };
-      document.querySelector("main > section").appendChild(logoutBtn);
-
       attachHandlers();
       await render();
       await hydrateProjectMaterialOptions();
