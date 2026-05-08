@@ -407,6 +407,20 @@
     function closeCompareResult() {
       document.getElementById("compare-result-modal").classList.add("hidden");
     }
+    function toggleComparePickFromCard(id) {
+      const ix = comparePickOrder.indexOf(id);
+      if (ix >= 0) comparePickOrder.splice(ix, 1);
+      else {
+        if (comparePickOrder.length >= 5) {
+          showToast("En fazla 5 ürün seçebilirsin.");
+          return;
+        }
+        comparePickOrder.push(id);
+      }
+      updateCompareBar();
+      render();
+    }
+
     function updateCompareBar() {
       const bar = document.getElementById("compare-bar");
       const headBtn = document.getElementById("compare-open-btn");
@@ -599,12 +613,12 @@
       const imgSrc = esc(p.image || fb);
       const inCompare = comparePickOrder.includes(p.id);
       const compareLabel = compareMode
-        ? `<label onclick="event.stopPropagation()" class="absolute bottom-2 left-2 z-20 flex items-center gap-1.5 rounded-lg bg-white/95 border border-black/12 px-2 py-1 shadow-sm cursor-pointer text-[11px] font-medium text-[#1d1d1f]">
-             <input type="checkbox" class="w-3.5 h-3.5 rounded border-black/20 accent-black" data-compare-card="${encodeURIComponent(p.id)}" ${inCompare ? "checked" : ""}>
+        ? `<label data-compare-label class="absolute bottom-2 left-2 z-20 flex items-center gap-1.5 rounded-lg bg-white/95 border border-black/12 px-2 py-1 shadow-sm cursor-pointer text-[11px] font-medium text-[#1d1d1f]">
+             <input type="checkbox" class="w-3.5 h-3.5 rounded border-black/20 accent-black pointer-events-none" data-compare-card="${encodeURIComponent(p.id)}" ${inCompare ? "checked" : ""}>
              Seç</label>`
         : "";
       return `
-        <div class="card-lift group rounded-2xl overflow-hidden border border-black/[0.08] bg-white flex flex-col relative ${inCompare ? "ring-2 ring-black/75" : ""}">
+        <div data-product-id="${encodeURIComponent(p.id)}" class="card-lift group rounded-2xl overflow-hidden border border-black/[0.08] bg-white flex flex-col relative ${inCompare ? "ring-2 ring-black/75" : ""} ${compareMode ? "cursor-pointer" : ""}">
           <div class="relative h-48 bg-[#f5f5f7] overflow-hidden">
           <a href="/urun-unica-baffle.html?id=${encodeURIComponent(p.id)}" data-view="${p.id}" class="block h-full w-full">
             <img src="${imgSrc}"
@@ -616,7 +630,7 @@
           <div class="p-4 flex flex-col flex-1">
             <h3 class="text-[14px] font-semibold leading-snug">${p.name}</h3>
             <p class="text-[12px] text-[#6e6e73] mt-1">${p.brandName || ""}</p>
-            <a href="/urun-unica-baffle.html?id=${encodeURIComponent(p.id)}" class="mt-3 w-full h-8 flex items-center justify-center bg-[#1d1d1f] text-white text-[12px] font-medium rounded-lg hover:bg-[#3a3a3c] transition">Ürün Detayı</a>
+            <a href="/urun-unica-baffle.html?id=${encodeURIComponent(p.id)}" class="product-detail-link mt-3 w-full h-8 flex items-center justify-center bg-[#1d1d1f] text-white text-[12px] font-medium rounded-lg hover:bg-[#3a3a3c] transition relative z-[1]">Ürün Detayı</a>
           </div>
           ${
             architectSession
@@ -915,12 +929,27 @@
       openCompareResult();
     });
 
+    document.getElementById("products-grid").addEventListener("click", e => {
+      if (!compareMode) return;
+      if (e.target.closest("[data-fav-product], [data-add-board]")) return;
+      if (e.target.closest("[data-compare-label], [data-compare-card]")) return;
+      if (e.target.closest("a.product-detail-link")) return;
+      const card = e.target.closest("[data-product-id]");
+      if (!card) return;
+      const Enc = card.getAttribute("data-product-id") || "";
+      let id = Enc;
+      try { id = decodeURIComponent(Enc); } catch (_) {}
+      toggleComparePickFromCard(id);
+      e.preventDefault();
+      e.stopPropagation();
+    }, true);
+
     document.getElementById("products-grid").addEventListener("change", e => {
       const cb = e.target.closest("[data-compare-card]");
       if (!cb || !compareMode) return;
       const id = decodeURIComponent(cb.getAttribute("data-compare-card") || "");
       if (cb.checked) {
-        if (comparePickOrder.length >= 5) {
+        if (comparePickOrder.length >= 5 && !comparePickOrder.includes(id)) {
           cb.checked = false;
           showToast("En fazla 5 ürün seçebilirsin.");
           return;
