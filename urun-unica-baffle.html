@@ -16,7 +16,7 @@
       } catch (_) {}
     })();
   </script>
-  <title>Unica Baffle Tavan Paneli | Archilink</title>
+  <title>Ürün Detayı | Archilink</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body data-page="products" class="bg-[#f5f5f7] text-[#111] font-sans min-h-screen">
@@ -27,17 +27,17 @@
       <main class="p-6 lg:p-8 space-y-6">
         <section class="grid lg:grid-cols-[1fr_420px] gap-6">
           <div class="rounded-2xl overflow-hidden border border-black/10">
-            <img src="https://images.unsplash.com/photo-1615874959474-d609969a20ed?q=80&w=1932&auto=format&fit=crop" alt="Unica Baffle Tavan Paneli" class="w-full h-[420px] object-cover">
+            <img id="product-image" src="https://images.unsplash.com/photo-1615874959474-d609969a20ed?q=80&w=1932&auto=format&fit=crop" alt="Ürün görseli" class="w-full h-[420px] object-cover">
           </div>
           <aside class="rounded-2xl border border-black/10 p-5 bg-[#fbfbfd]">
-            <p class="text-[12px] text-[#6e6e73]">Akustik / Tavan Sistemleri</p>
-            <h1 class="text-[30px] leading-[1.1] font-semibold mt-2">Unica Baffle Tavan Paneli</h1>
-            <p class="text-[14px] text-[#6e6e73] mt-3">Ofis, eğitim ve konferans alanları için yüksek ses yutumu sağlayan lineer akustik panel sistemi.</p>
+            <p id="product-category" class="text-[12px] text-[#6e6e73]">Kategori</p>
+            <h1 id="product-name" class="text-[30px] leading-[1.1] font-semibold mt-2">Ürün Adı</h1>
+            <p id="product-description" class="text-[14px] text-[#6e6e73] mt-3">Ürün açıklaması.</p>
             <div class="mt-4 space-y-2 text-[14px]">
-              <p><span class="font-medium">Marka:</span> Unica Acoustic</p>
-              <p><span class="font-medium">NRC:</span> 0.85</p>
-              <p><span class="font-medium">Yangın:</span> B-s1,d0</p>
-              <p><span class="font-medium">Kalınlık:</span> 12 mm</p>
+              <p><span class="font-medium">Marka:</span> <span id="detail-brand">—</span></p>
+              <p><span class="font-medium">NRC:</span> <span id="detail-acoustic">—</span></p>
+              <p><span class="font-medium">Yangın:</span> <span id="detail-fire">—</span></p>
+              <p><span class="font-medium">Kalınlık:</span> <span id="detail-thickness">—</span></p>
             </div>
             <div class="mt-5 flex flex-wrap gap-2">
               <a href="/iletisim-v2.html" class="px-4 py-2 rounded-full bg-black text-white text-[13px] font-semibold">Teklif İste</a>
@@ -49,20 +49,14 @@
         <section class="grid lg:grid-cols-2 gap-4">
           <article class="rounded-2xl border border-black/10 p-5">
             <h2 class="text-[20px] font-semibold">Teknik Dokümanlar</h2>
-            <div class="mt-3 space-y-2 text-[14px]">
-              <a href="/iletisim-v2.html" class="block rounded-xl bg-[#fbfbfd] border border-black/10 p-3">Ürün Teknik Föyü (PDF)</a>
-              <a href="/iletisim-v2.html" class="block rounded-xl bg-[#fbfbfd] border border-black/10 p-3">Kesit Detayı (DWG)</a>
-              <a href="/iletisim-v2.html" class="block rounded-xl bg-[#fbfbfd] border border-black/10 p-3">Revit Ailesi (RFA)</a>
-              <a href="/iletisim-v2.html" class="block rounded-xl bg-[#fbfbfd] border border-black/10 p-3">Yangın Sertifikası (PDF)</a>
+            <div id="product-docs" class="mt-3 space-y-2 text-[14px]">
+              <p class="text-[#6e6e73]">Doküman bilgisi yükleniyor…</p>
             </div>
           </article>
           <article class="rounded-2xl border border-black/10 p-5">
             <h2 class="text-[20px] font-semibold">Kullanım Alanları</h2>
-            <ul class="mt-3 space-y-2 text-[14px] text-[#333]">
-              <li>• Açık ofis ve ortak çalışma alanları</li>
-              <li>• Toplantı odaları ve konferans salonları</li>
-              <li>• Eğitim yapıları ve amfiler</li>
-              <li>• Otel lobi ve sosyal alanları</li>
+            <ul id="usage-list" class="mt-3 space-y-2 text-[14px] text-[#333]">
+              <li>• Kullanım alanları yükleniyor…</li>
             </ul>
           </article>
         </section>
@@ -72,5 +66,59 @@
   </div>
   <script src="/core.js"></script>
   <script src="/layout.js"></script>
+  <script>
+    const STATIC = [
+      { id: "s1", name: "Unica Baffle Tavan Paneli", brandName: "Unica Acoustic", category: "Mobilya ve Donatı > Akustik", description: "Ofis, eğitim ve konferans alanları için yüksek ses yutumu sağlayan lineer akustik panel sistemi.", image: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=800&auto=format&fit=crop", technical: { acoustic: "NRC 0.85", fireClass: "B-s1,d0", thickness: "12 mm" }, files: { pdfUrl: "", cadUrl: "", bimUrl: "" } },
+      { id: "s2", name: "Akustik Keçe Duvar Paneli", brandName: "Unica Acoustic", category: "Malzemeler > Duvar Kaplama", description: "Duvar yüzeylerinde ses emilimi ve estetik çözüm sağlar.", image: "https://images.unsplash.com/photo-1616594039964-3f7f89d7a5d8?q=80&w=800&auto=format&fit=crop", technical: { acoustic: "NRC 0.75", fireClass: "A2-s1,d0", thickness: "10 mm" }, files: { pdfUrl: "", cadUrl: "", bimUrl: "" } },
+      { id: "s3", name: "V-Cut Akustik Bulut Panel", brandName: "Unica Acoustic", category: "Mimari > Tavan", description: "Asma tavan için yüksek performanslı bulut akustik panel.", image: "https://images.unsplash.com/photo-1617104551722-3b2d51366443?q=80&w=800&auto=format&fit=crop", technical: { acoustic: "NRC 0.90", fireClass: "B-s1,d0", thickness: "20 mm" }, files: { pdfUrl: "", cadUrl: "", bimUrl: "" } },
+    ];
+
+    function usageByCategory(category) {
+      const c = (category || "").toLowerCase();
+      if (c.includes("akustik")) return ["Açık ofis", "Toplantı odaları", "Eğitim yapıları", "Otel ortak alanları"];
+      if (c.includes("cephe")) return ["Dış cephe kaplama", "Kurumsal binalar", "Ticari projeler", "Karma kullanım yapıları"];
+      if (c.includes("zemin")) return ["Konut projeleri", "Perakende alanları", "Lobi ve geçiş alanları", "Eğitim yapıları"];
+      return ["Konut projeleri", "Ticari projeler", "Ofis alanları", "Karma kullanım yapıları"];
+    }
+
+    function docLinks(p) {
+      const docs = [];
+      if (p.files?.pdfUrl || p.hasPdf) docs.push({ label: "Ürün Teknik Föyü (PDF)", href: p.files?.pdfUrl || "/iletisim-v2.html" });
+      if (p.files?.cadUrl || p.hasCad) docs.push({ label: "Kesit Detayı (DWG)", href: p.files?.cadUrl || "/iletisim-v2.html" });
+      if (p.files?.bimUrl) docs.push({ label: "Revit Ailesi (RFA)", href: p.files.bimUrl });
+      if (!docs.length) docs.push({ label: "Doküman talebi için markayla iletişime geçin", href: "/iletisim-v2.html" });
+      return docs;
+    }
+
+    function setText(id, value) {
+      const el = document.getElementById(id);
+      if (el) el.textContent = value || "—";
+    }
+
+    AG.ready.then(async () => {
+      const params = new URLSearchParams(location.search);
+      const id = params.get("id");
+      const dbProducts = await AG.getProducts();
+      const product = [...dbProducts, ...STATIC].find((x) => String(x.id) === String(id)) || STATIC[0];
+
+      document.title = `${product.name || "Ürün Detayı"} | Archilink`;
+      document.getElementById("product-image").src = product.image || "https://images.unsplash.com/photo-1600607686527-6fb886090705?q=80&w=1200&auto=format&fit=crop";
+      document.getElementById("product-image").alt = product.name || "Ürün";
+
+      setText("product-category", product.category || "Kategori");
+      setText("product-name", product.name || "Ürün Adı");
+      setText("product-description", product.description || "Bu ürün için açıklama henüz eklenmedi.");
+      setText("detail-brand", product.brandName || "—");
+      setText("detail-acoustic", product.technical?.acoustic || "—");
+      setText("detail-fire", product.technical?.fireClass || "—");
+      setText("detail-thickness", product.technical?.thickness || "—");
+
+      const docsEl = document.getElementById("product-docs");
+      docsEl.innerHTML = docLinks(product).map((d) => `<a href="${d.href}" target="${d.href.startsWith('http') ? '_blank' : '_self'}" class="block rounded-xl bg-[#fbfbfd] border border-black/10 p-3 hover:border-black/20 transition">${d.label}</a>`).join("");
+
+      const usageEl = document.getElementById("usage-list");
+      usageEl.innerHTML = usageByCategory(product.category).map((u) => `<li>• ${u}</li>`).join("");
+    });
+  </script>
 </body>
 </html>
