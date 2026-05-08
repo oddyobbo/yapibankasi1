@@ -145,7 +145,14 @@
       if (activeTab === "fav-products") {
         const list = await AG.getFavoriteProducts();
         content.innerHTML = list.length
-          ? `<div class="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">${list.map((x) => cardTemplate(x, x.url || "/urunler.html", true)).join("")}</div>`
+          ? `<div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+              <p class="text-[13px] text-[#6e6e73]">Seçtiğin ürünleri yan yana teknik özelliklerle karşılaştır.</p>
+              <a href="/urunler.html?compare=favorites" class="inline-flex h-9 items-center gap-2 px-4 rounded-full border border-black/15 text-[13px] font-medium hover:bg-black/[0.04] transition">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="3" y="3" width="7" height="18" rx="1.5"/><rect x="14" y="3" width="7" height="18" rx="1.5"/></svg>
+                Karşılaştır
+              </a>
+            </div>
+            <div class="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">${list.map((x) => cardTemplate(x, x.url || "/urunler.html", true)).join("")}</div>`
           : `<p class="text-[14px] text-[#6e6e73]">Henüz favori ürün yok. Ürünler sayfasından yıldız ile ekleyebilirsin.</p>`;
         bindBoardButtons(content);
         return;
