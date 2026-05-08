@@ -115,18 +115,18 @@
       <div id="hero-overlay" style="position:absolute;inset:0;z-index:1;background:#fff;will-change:opacity;transition:opacity 1.1s ease;pointer-events:none"></div>
 
       <!-- Band container (fades out in phase 2) -->
-      <div id="hero-bands" style="position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;transition:opacity .8s ease">
+      <div id="hero-bands" style="position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;transition:opacity .5s ease">
         <div style="flex:1;display:flex;align-items:center;justify-content:center;border-bottom:1px solid rgba(0,0,0,.1);overflow:hidden">
-          <span class="hbt" style="white-space:nowrap;font-size:clamp(24px,5vw,80px);font-weight:200;letter-spacing:-.03em;color:#0b0b0c;animation:hbt-in .82s cubic-bezier(.22,1,.36,1) .18s both">Türkiye'nin mimari</span>
+          <span class="hbt" style="white-space:nowrap;font-size:clamp(24px,5vw,80px);font-weight:200;letter-spacing:-.01em;color:#0b0b0c;animation:hbt-in .82s cubic-bezier(.22,1,.36,1) .18s both">Türkiye'nin mimari</span>
         </div>
         <div style="flex:1;display:flex;align-items:center;justify-content:center;border-bottom:1px solid rgba(0,0,0,.1);overflow:hidden">
-          <span class="hbt" style="white-space:nowrap;font-size:clamp(24px,5vw,80px);font-weight:200;letter-spacing:-.03em;color:#0b0b0c;animation:hbt-in .82s cubic-bezier(.22,1,.36,1) .38s both">malzeme platformu.</span>
+          <span class="hbt" style="white-space:nowrap;font-size:clamp(24px,5vw,80px);font-weight:200;letter-spacing:-.01em;color:#0b0b0c;animation:hbt-in .82s cubic-bezier(.22,1,.36,1) .38s both">malzeme platformu.</span>
         </div>
         <div style="flex:1;display:flex;align-items:center;justify-content:center;border-bottom:1px solid rgba(0,0,0,.1);overflow:hidden">
-          <span class="hbt" style="white-space:nowrap;font-size:clamp(24px,5vw,80px);font-weight:200;letter-spacing:-.03em;color:#0b0b0c;animation:hbt-in .82s cubic-bezier(.22,1,.36,1) .58s both">100+ marka · binlerce ürün</span>
+          <span class="hbt" style="white-space:nowrap;font-size:clamp(20px,4.2vw,66px);font-weight:100;letter-spacing:0;color:#0b0b0c;animation:hbt-in .82s cubic-bezier(.22,1,.36,1) .58s both">100+ marka&nbsp;&nbsp;·&nbsp;&nbsp;binlerce ürün</span>
         </div>
         <div style="flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden">
-          <span class="hbt" style="white-space:nowrap;font-size:clamp(24px,5vw,80px);font-weight:200;letter-spacing:-.03em;color:#0b0b0c;animation:hbt-in .82s cubic-bezier(.22,1,.36,1) .78s both">NRC · EPD · BIM · teknik veri</span>
+          <span class="hbt" style="white-space:nowrap;font-size:clamp(20px,4.2vw,66px);font-weight:100;letter-spacing:0;color:#0b0b0c;animation:hbt-in .82s cubic-bezier(.22,1,.36,1) .78s both">NRC&nbsp;&nbsp;·&nbsp;&nbsp;EPD&nbsp;&nbsp;·&nbsp;&nbsp;BIM&nbsp;&nbsp;·&nbsp;&nbsp;teknik veri</span>
         </div>
       </div>
 
@@ -182,17 +182,7 @@
         var finalX = [ lx, lx+tw[0]*s+gx, lx, lx+tw[2]*s+gx ];
         var finalY = [ r1y, r1y, r2y, r2y ];
 
-        // hero-bands is z-index:2, overlay is z-index:1 — overlay is BEHIND bands.
-        // Push bands behind overlay FIRST so overlay shields the entire transition.
-        heroBands.style.zIndex     = "0";
-        heroBands.style.transition = "none";
-        heroBands.style.opacity    = "0";
-
-        // Photo starts fading behind overlay
-        heroBg.style.opacity    = "1";
-        heroBg.style.transform  = "scale(1)";
-
-        // Reparent texts (overlay covers everything, no flick visible)
+        // Reparent texts — keep them at z-index:3 (above overlay), maintain visual position
         texts.forEach(function(t, i){
           var r = rects[i];
           var lX = r.left - sR.left;
@@ -205,23 +195,28 @@
           t.style.zIndex          = "3";
           t.style.transformOrigin = "0 0";
           t.style.transform       = "translateX("+lX+"px) translateY("+lY+"px) scale(1)";
-          t.style.color           = "#fff"; // set white now, no transition needed
           heroEl.appendChild(t);
         });
+
+        // Photo in; bands (now empty dividers) fade; overlay fades — all gradual, no snap
+        heroBg.style.opacity       = "1";
+        heroBg.style.transform     = "scale(1)";
+        heroBands.style.opacity    = "0"; // has .5s ease transition already set above
 
         // CTA position
         heroCta.style.left = lx + "px";
         heroCta.style.top  = (r2y + r2h + 22) + "px";
 
-        // double rAF: positions committed -> start movement AND reveal
+        // double rAF: browser commits text positions, then animate
         requestAnimationFrame(function(){
           requestAnimationFrame(function(){
             texts.forEach(function(t, i){
-              t.style.transition = "transform 1.1s cubic-bezier(.77,0,.18,1)";
+              // color: dark→white alongside movement; texts stay visible throughout
+              t.style.transition = "transform 1.1s cubic-bezier(.77,0,.18,1), color .7s ease";
+              t.style.color      = "#fff";
               t.style.transform  = "translateX("+finalX[i]+"px) translateY("+finalY[i]+"px) scale("+s+")";
             });
-            // Overlay fades: reveals photo + already-white texts in motion — zero flick
-            heroOverlay.style.opacity = "0";
+            heroOverlay.style.opacity = "0"; // white bg fades → photo revealed
           });
         });
 
