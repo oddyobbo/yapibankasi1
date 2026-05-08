@@ -15,7 +15,7 @@
     .card-lift:hover { transform: translateY(-3px); border-color: rgba(0,0,0,.22); }
     body.compare-mode-active .card-lift:hover { transform: none; }
 
-    /* Sidebar overlay — slides over products, doesn't push them */
+    /* Sidebar overlay — mobile: slides over products */
     #filter-sidebar-overlay {
       display: none;
       position: fixed;
@@ -40,6 +40,39 @@
     }
     #filter-sidebar.open { transform: translateX(0); }
     html.ag-dark #filter-sidebar { background: #1c1c1e; }
+
+    /* Desktop: restore old push behavior (sidebar in normal flow) */
+    @media (min-width: 1024px) {
+      #filter-sidebar-overlay { display: none !important; }
+      #products-content-row {
+        display: flex;
+        align-items: flex-start;
+      }
+      #filter-sidebar {
+        position: sticky;
+        top: 84px;
+        left: auto;
+        bottom: auto;
+        transform: none;
+        width: 300px;
+        height: calc(100vh - 84px);
+        flex: 0 0 300px;
+        z-index: 5;
+        box-shadow: none;
+        border-right: 1px solid rgba(0,0,0,.06);
+        transition: width 0.28s cubic-bezier(0.4, 0, 0.2, 1), flex-basis 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      #filter-sidebar.desktop-collapsed {
+        width: 0;
+        flex-basis: 0;
+        overflow: hidden;
+        border-right: none;
+      }
+      #products-grid-wrapper {
+        flex: 1;
+        min-width: 0;
+      }
+    }
 
     /* Category pills scroll */
     #category-pills {
@@ -255,10 +288,10 @@
 
     <!-- ── Main content ── -->
     <div id="filter-sidebar-overlay"></div>
-
-    <!-- Left sidebar (overlay panel, does not push product grid) -->
-    <aside id="filter-sidebar">
-        <div id="filter-sidebar-inner">
+    <div id="products-content-row">
+      <!-- Left sidebar -->
+      <aside id="filter-sidebar" class="desktop-collapsed">
+          <div id="filter-sidebar-inner">
           <div class="p-4 pt-6">
 
             <!-- Sidebar search -->
@@ -289,14 +322,15 @@
             <div id="acc-groups" class="space-y-0.5"></div>
 
           </div>
-        </div>
-    </aside>
+          </div>
+      </aside>
 
-    <!-- Product grid (full width, never squishes) -->
-    <div id="products-grid-wrapper" class="px-5 py-5">
-      <p id="result-count" class="text-[13px] text-[#6e6e73] mb-4"></p>
-      <div id="products-grid" class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-5"></div>
-      <p id="empty-msg" class="hidden text-center text-[#6e6e73] py-20 text-[15px]">Arama kriterlerine uygun ürün bulunamadı.</p>
+      <!-- Product grid -->
+      <div id="products-grid-wrapper" class="px-5 py-5">
+        <p id="result-count" class="text-[13px] text-[#6e6e73] mb-4"></p>
+        <div id="products-grid" class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-5"></div>
+        <p id="empty-msg" class="hidden text-center text-[#6e6e73] py-20 text-[15px]">Arama kriterlerine uygun ürün bulunamadı.</p>
+      </div>
     </div>
   </div>
 
@@ -901,24 +935,55 @@
     const filterSidebar = document.getElementById("filter-sidebar");
     const filterOverlay = document.getElementById("filter-sidebar-overlay");
     const sidebarBtn = document.getElementById("sidebar-toggle");
+    const desktopMq = window.matchMedia("(min-width: 1024px)");
+
+    function isDesktop() { return desktopMq.matches; }
 
     function openFilterSidebar() {
-      filterSidebar.classList.add("open");
-      filterOverlay.classList.add("open");
+      if (isDesktop()) {
+        filterSidebar.classList.remove("desktop-collapsed");
+        filterSidebar.classList.remove("open");
+      } else {
+        filterSidebar.classList.add("open");
+        filterOverlay.classList.add("open");
+        document.body.style.overflow = "hidden";
+      }
       sidebarBtn.classList.add("active");
-      document.body.style.overflow = "hidden";
     }
     function closeFilterSidebar() {
-      filterSidebar.classList.remove("open");
-      filterOverlay.classList.remove("open");
+      if (isDesktop()) {
+        filterSidebar.classList.add("desktop-collapsed");
+        filterSidebar.classList.remove("open");
+      } else {
+        filterSidebar.classList.remove("open");
+        filterOverlay.classList.remove("open");
+        document.body.style.overflow = "";
+      }
       sidebarBtn.classList.remove("active");
-      document.body.style.overflow = "";
     }
 
     sidebarBtn.addEventListener("click", () => {
-      filterSidebar.classList.contains("open") ? closeFilterSidebar() : openFilterSidebar();
+      const opened = isDesktop()
+        ? !filterSidebar.classList.contains("desktop-collapsed")
+        : filterSidebar.classList.contains("open");
+      opened ? closeFilterSidebar() : openFilterSidebar();
     });
     filterOverlay.addEventListener("click", closeFilterSidebar);
+
+    function syncSidebarByViewport() {
+      if (isDesktop()) {
+        filterOverlay.classList.remove("open");
+        document.body.style.overflow = "";
+        filterSidebar.classList.remove("open");
+        if (!filterSidebar.classList.contains("desktop-collapsed")) sidebarBtn.classList.add("active");
+        else sidebarBtn.classList.remove("active");
+      } else {
+        filterSidebar.classList.add("desktop-collapsed");
+        sidebarBtn.classList.remove("active");
+      }
+    }
+    desktopMq.addEventListener("change", syncSidebarByViewport);
+    syncSidebarByViewport();
 
     // ── Search input ──
     document.getElementById("search-input").addEventListener("input", e => {
