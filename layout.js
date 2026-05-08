@@ -23,50 +23,50 @@
 
   const productMegaMenu = [
     {
-      label: "Materials",
+      label: "Malzemeler",
       value: "Malzemeler",
       subs: [
-        { label: "Flooring", value: "Zemin" },
-        { label: "Glass", value: "Cam" },
-        { label: "Leather", value: "Deri" },
-        { label: "Masonry & Stone", value: "Yığma ve Taş" },
+        { label: "Zemin", value: "Zemin" },
+        { label: "Cam", value: "Cam" },
+        { label: "Deri", value: "Deri" },
+        { label: "Yığma ve Taş", value: "Yığma ve Taş" },
         { label: "Metal", value: "Metal" },
-        { label: "Paints", value: "Boya" },
-        { label: "Paneling", value: "Panel" },
-        { label: "Product Finish", value: "Yüzey Bitişi" },
-        { label: "Resin", value: "Reçine" },
-        { label: "Surfaces", value: "Yüzey" },
-        { label: "Textiles", value: "Tekstil" },
-        { label: "Tile", value: "Seramik" },
-        { label: "Wallcovering", value: "Duvar Kaplama" },
+        { label: "Boya", value: "Boya" },
+        { label: "Panel", value: "Panel" },
+        { label: "Yüzey Bitişi", value: "Yüzey Bitişi" },
+        { label: "Reçine", value: "Reçine" },
+        { label: "Yüzey", value: "Yüzey" },
+        { label: "Tekstil", value: "Tekstil" },
+        { label: "Seramik", value: "Seramik" },
+        { label: "Duvar Kaplama", value: "Duvar Kaplama" },
       ],
     },
     {
-      label: "FF&E",
+      label: "Mobilya ve Donatı",
       value: "Mobilya ve Donatı",
       subs: [
-        { label: "Acoustical", value: "Akustik" },
-        { label: "Appliances", value: "Elektrikli Cihazlar" },
-        { label: "Bathroom", value: "Banyo" },
-        { label: "Decor & Accessories", value: "Dekor ve Aksesuar" },
-        { label: "Furniture", value: "Mobilya" },
-        { label: "Hardware", value: "Donanım" },
-        { label: "Kitchen", value: "Mutfak" },
-        { label: "Lighting", value: "Aydınlatma" },
-        { label: "Outdoor", value: "Dış Mekan" },
-        { label: "Window Treatments", value: "Pencere Sistemleri" },
+        { label: "Akustik", value: "Akustik" },
+        { label: "Elektrikli Cihazlar", value: "Elektrikli Cihazlar" },
+        { label: "Banyo", value: "Banyo" },
+        { label: "Dekor ve Aksesuar", value: "Dekor ve Aksesuar" },
+        { label: "Mobilya", value: "Mobilya" },
+        { label: "Donanım", value: "Donanım" },
+        { label: "Mutfak", value: "Mutfak" },
+        { label: "Aydınlatma", value: "Aydınlatma" },
+        { label: "Dış Mekan", value: "Dış Mekan" },
+        { label: "Pencere Sistemleri", value: "Pencere Sistemleri" },
       ],
     },
     {
-      label: "Architectural",
+      label: "Mimari",
       value: "Mimari",
       subs: [
-        { label: "Ceiling", value: "Tavan" },
-        { label: "Decking", value: "Decking" },
-        { label: "Doors", value: "Kapılar" },
-        { label: "Facade", value: "Cephe" },
-        { label: "Moulding & Trim", value: "Profil ve Trim" },
-        { label: "Paving & Landscape", value: "Peyzaj ve Kaplama" },
+        { label: "Tavan", value: "Tavan" },
+        { label: "Deck Kaplama", value: "Decking" },
+        { label: "Kapılar", value: "Kapılar" },
+        { label: "Cephe", value: "Cephe" },
+        { label: "Profil ve Trim", value: "Profil ve Trim" },
+        { label: "Peyzaj ve Kaplama", value: "Peyzaj ve Kaplama" },
       ],
     },
   ];
@@ -125,7 +125,8 @@
                     <span class="text-[15px] text-[#7a7a80]">›</span>
                   </a>
                   <div class="mt-2 space-y-1">
-                    ${col.subs
+                    ${[...col.subs]
+                      .sort((a, b) => a.label.localeCompare(b.label, "tr"))
                       .map(
                         (sub) =>
                           `<a href="/urunler.html?category=${encodeURIComponent(col.value)}&sub=${encodeURIComponent(
