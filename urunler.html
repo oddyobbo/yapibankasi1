@@ -168,6 +168,7 @@
     #sort-dropdown .sort-opt:hover { background: #f5f5f7; }
     body.compare-mode-active #products-grid-wrapper { padding-bottom: 5.5rem; }
     #compare-open-btn[data-compare-on="1"] { background: #0b0b0c; color: #fff; border-color: #0b0b0c; }
+    [data-product-id].compare-card-shell { transition: box-shadow 0.22s ease; }
   </style>
 </head>
 <body data-page="products" class="bg-white text-[#0b0b0c] min-h-screen">
@@ -407,6 +408,32 @@
     function closeCompareResult() {
       document.getElementById("compare-result-modal").classList.add("hidden");
     }
+    /** Seçimi güncelle, grid'i baştan yazma — görseller yanıp sönmesin */
+    function syncCompareCardVisuals() {
+      document.querySelectorAll("#products-grid [data-product-id]").forEach((cardEl) => {
+        let id = "";
+        try {
+          id = decodeURIComponent(cardEl.getAttribute("data-product-id") || "");
+        } catch (_) {}
+        const on = Boolean(id && comparePickOrder.includes(id));
+        const cb = cardEl.querySelector("input[data-compare-card]");
+        if (cb) cb.checked = on;
+        if (!compareMode) {
+          cardEl.classList.remove("ring-2", "ring-transparent", "ring-black/75", "compare-card-shell");
+          return;
+        }
+        cardEl.classList.add("ring-2", "compare-card-shell");
+        if (on) {
+          cardEl.classList.add("ring-black/75");
+          cardEl.classList.remove("ring-transparent");
+        } else {
+          cardEl.classList.remove("ring-black/75");
+          cardEl.classList.add("ring-transparent");
+        }
+      });
+      updateCompareBar();
+    }
+
     function toggleComparePickFromCard(id) {
       const ix = comparePickOrder.indexOf(id);
       if (ix >= 0) comparePickOrder.splice(ix, 1);
@@ -417,8 +444,7 @@
         }
         comparePickOrder.push(id);
       }
-      updateCompareBar();
-      render();
+      syncCompareCardVisuals();
     }
 
     function updateCompareBar() {
@@ -612,18 +638,20 @@
       const fb = FB_IMAGES[Math.abs(String(p.id || "").split("").reduce((a, c) => a + c.charCodeAt(0), 0) || 0) % FB_IMAGES.length];
       const imgSrc = esc(p.image || fb);
       const inCompare = comparePickOrder.includes(p.id);
+      const ringShell = compareMode ? `ring-2 compare-card-shell ${inCompare ? "ring-black/75" : "ring-transparent"}` : "";
       const compareLabel = compareMode
         ? `<label data-compare-label class="absolute bottom-2 left-2 z-20 flex items-center gap-1.5 rounded-lg bg-white/95 border border-black/12 px-2 py-1 shadow-sm cursor-pointer text-[11px] font-medium text-[#1d1d1f]">
              <input type="checkbox" class="w-3.5 h-3.5 rounded border-black/20 accent-black pointer-events-none" data-compare-card="${encodeURIComponent(p.id)}" ${inCompare ? "checked" : ""}>
              Seç</label>`
         : "";
+      const imgHover = compareMode ? "" : "group-hover:scale-[1.03]";
       return `
-        <div data-product-id="${encodeURIComponent(p.id)}" class="card-lift group rounded-2xl overflow-hidden border border-black/[0.08] bg-white flex flex-col relative ${inCompare ? "ring-2 ring-black/75" : ""} ${compareMode ? "cursor-pointer" : ""}">
+        <div data-product-id="${encodeURIComponent(p.id)}" class="card-lift group rounded-2xl overflow-hidden border border-black/[0.08] bg-white flex flex-col relative ${ringShell} ${compareMode ? "cursor-pointer" : ""}">
           <div class="relative h-48 bg-[#f5f5f7] overflow-hidden">
           <a href="/urun-unica-baffle.html?id=${encodeURIComponent(p.id)}" data-view="${p.id}" class="block h-full w-full">
             <img src="${imgSrc}"
               onerror="const fb=['https://images.unsplash.com/photo-1600607686527-6fb886090705?q=80&w=800','https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?q=80&w=800','https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=800','https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=800','https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=800','https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?q=80&w=800'];this.onerror=null;this.src=fb[Math.abs((this.alt||'').split('').reduce((a,c)=>a+c.charCodeAt(0),0))%fb.length];"
-              alt="${esc(p.name)}" class="w-full h-full object-cover group-hover:scale-[1.03] transition duration-500">
+              alt="${esc(p.name)}" class="w-full h-full object-cover ${imgHover} transition-transform duration-500 ease-out">
           </a>
           ${compareLabel}
           </div>
@@ -922,7 +950,7 @@
       compareMode = false;
       comparePickOrder = [];
       updateCompareBar();
-      render();
+      render(); /* mod kapandı — kutucukları kaldırmak için tam çizim */
     });
     document.getElementById("compare-bar-show").addEventListener("click", () => {
       if (comparePickOrder.length < 2) return;
@@ -958,8 +986,7 @@
       } else {
         comparePickOrder = comparePickOrder.filter((x) => x !== id);
       }
-      updateCompareBar();
-      render();
+      syncCompareCardVisuals();
     });
 
     document.getElementById("compare-result-modal").addEventListener("click", e => {
