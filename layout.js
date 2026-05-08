@@ -164,6 +164,7 @@
                     </div>
                     <div></div>
                   </div>
+                  <div class="w-full border-t border-black/[0.08]"></div>
                   <div class="px-3 lg:px-6 py-5 grid grid-cols-3 divide-x divide-black/[0.06] gap-1">
                     ${megaCols}
                   </div>
