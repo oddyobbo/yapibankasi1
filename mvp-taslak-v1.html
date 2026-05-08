@@ -103,7 +103,7 @@
 
   <main>
     <!-- HERO -->
-    <section id="hero-anim" style="position:relative;background:#fff;height:88vh;overflow:hidden;border-radius:28px;margin:12px 16px 16px">
+    <section id="hero-anim" class="hero-frame" style="position:relative;background:#fff;height:88vh;overflow:hidden;border-radius:28px">
 
       <!-- Photo -->
       <div id="hero-bg" style="position:absolute;inset:0;z-index:0;opacity:0;will-change:opacity,transform;transform:scale(1.06);transition:opacity 1.2s ease,transform 7s ease">
@@ -145,6 +145,11 @@
       from { clip-path: inset(0 100% 0 0); }
       to   { clip-path: inset(0 0% 0 0); }
     }
+    .hero-frame {
+      margin: 12px 16px 16px;
+    }
+    @media (min-width: 640px)  { .hero-frame { margin: 12px 24px 16px; } }
+    @media (min-width: 1024px) { .hero-frame { margin: 12px 40px 16px; } }
     </style>
 
     <script>
