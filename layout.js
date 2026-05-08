@@ -405,7 +405,7 @@
             </p>
             <p class="text-[#6e6e73] mt-4 max-w-[42ch] leading-relaxed">Mimarların doğru ürünü bulduğu, markaların gerçek talebe ulaştığı Türkiye odaklı mimari malzeme platformu.</p>
             <div class="mt-5 flex gap-2">
-              <a href="/marka-basvuru.html" class="px-4 py-2 rounded-full bg-black text-white text-[13px] font-semibold">Marka Başvurususu</a>
+              <a href="/marka-basvuru.html" class="px-4 py-2 rounded-full bg-black text-white text-[13px] font-semibold">Marka Başvur</a>
               <a href="/urunler.html" class="px-4 py-2 rounded-full border border-black/15 text-[13px] font-semibold">Ürünleri Keşfet</a>
             </div>
           </div>
@@ -422,7 +422,7 @@
             <p class="font-semibold">Hesap</p>
             <div class="mt-3 space-y-2 text-[#6e6e73]">
               <a href="/marka-giris.html" class="block hover:text-black">Marka Girişi</a>
-              <a href="/marka-basvuru.html" class="block hover:text-black">Marka Başvurususuu</a>
+              <a href="/marka-basvuru.html" class="block hover:text-black">Marka Başvuru</a>
               <a href="/mimar-giris.html" class="block hover:text-black">Mimar Girişi</a>
             </div>
           </div>
@@ -456,6 +456,27 @@
       <span class="text-[13px] font-semibold">Ürün ara</span>
     `;
     document.body.appendChild(pill);
+  }
+
+  // Home brand strip hardening:
+  // If stale markup/cache leaves broken external logos, repaint with guaranteed inline labels.
+  if (window.location.pathname === "/mvp-taslak-v1.html" || window.location.pathname === "/") {
+    const brandTitle = Array.from(document.querySelectorAll("p")).find(
+      (el) => (el.textContent || "").trim() === "Birlikte Çalıştığımız Markalar"
+    );
+    const brandGrid = brandTitle
+      ? brandTitle.closest("div")?.parentElement?.querySelector(".grid.grid-cols-2")
+      : null;
+    if (brandGrid) {
+      brandGrid.innerHTML = `
+        <div class="text-[#c4c7cf] text-[42px] leading-none font-semibold tracking-wide text-center">Vitra</div>
+        <div class="text-[#c4c7cf] text-[34px] leading-none font-bold tracking-[0.12em] text-center">UNICA ACOUSTIC</div>
+        <div class="text-[#c4c7cf] text-[48px] leading-none font-bold tracking-wide text-center">Kale</div>
+        <div class="text-[#c4c7cf] text-[52px] leading-none font-extrabold italic tracking-wide text-center">KNAUF</div>
+      `;
+      brandGrid.classList.remove("sm:grid-cols-3");
+      brandGrid.classList.add("sm:grid-cols-4");
+    }
   }
 
   // Site-wide reveal animation (no-op on home which already wires it)
