@@ -321,7 +321,7 @@
           <form id="header-search-form" action="/urunler.html" method="get" class="hidden lg:flex flex-1 relative mx-6 max-w-[520px]">
             <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8e8e93] pointer-events-none" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
             <input name="q" type="text" placeholder="Ürün ara..." autocomplete="off"
-              class="w-full h-[38px] rounded-full border border-black/[0.12] bg-[#f5f5f7] pl-10 pr-4 text-[13.5px] outline-none focus:bg-white focus:border-black/25 transition-colors">
+              class="w-full h-[38px] rounded-full border border-black/[0.12] bg-[#f5f5f7] pl-10 pr-4 outline-none focus:bg-white focus:border-black/25 transition-colors" style="font-size:16px;">
           </form>
           <!-- Spacer pushes profile to far right -->
           <div class="flex-1"></div>
