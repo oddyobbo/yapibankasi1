@@ -3,19 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script>
-    (function(){
-      try {
-        if (localStorage.getItem("ag_theme_v1") === "dark") {
-          document.documentElement.classList.add("ag-dark");
-          var st = document.createElement("style");
-          st.id = "ag-theme-preload";
-          st.textContent = "html.ag-dark{background:#111214;color:#eceef2;}html.ag-dark body{background:#111214;color:#eceef2;}";
-          document.head.appendChild(st);
-        }
-      } catch (_) {}
-    })();
-  </script>
   <title>Archilink | Ürün Kataloğu</title>
   <meta name="description" content="Akustik, aydınlatma, dış cephe, zemin ve daha fazlası. Teknik filtrelerle doğru mimari malzemeyi saniyeler içinde bul.">
   <script src="https://cdn.tailwindcss.com"></script>
@@ -195,35 +182,32 @@
     <div class="bg-white border-b border-black/[0.06]">
       <div class="px-5 py-2.5 flex items-center gap-3">
 
-        <!-- Filtreler toggle -->
-        <button id="sidebar-toggle" class="flex items-center gap-1.5 px-3 h-[34px] rounded-full border border-black/[0.14] text-[13px] font-medium hover:bg-black/[0.04] transition-all flex-shrink-0">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="4" y1="6" x2="20" y2="6"/><circle cx="16" cy="6" r="3" fill="currentColor" stroke="none"/>
-            <line x1="4" y1="12" x2="20" y2="12"/><circle cx="8" cy="12" r="3" fill="currentColor" stroke="none"/>
-            <line x1="4" y1="18" x2="20" y2="18"/><circle cx="16" cy="18" r="3" fill="currentColor" stroke="none"/>
-          </svg>
-          <span>Filtreler</span>
-        </button>
-
-        <!-- Separator -->
-        <div class="w-px h-5 bg-black/[0.1] flex-shrink-0"></div>
-
-        <!-- Category pills -->
-        <div id="category-pills" class="flex items-center gap-2 flex-1 min-w-0 py-1"></div>
-
-        <!-- Right controls -->
-        <div class="flex items-center gap-1.5 flex-shrink-0 ml-1">
-          <div class="relative">
+        <div class="w-full flex items-center gap-2">
+          <div class="relative flex-shrink-0">
             <button id="search-toggle" class="w-[34px] h-[34px] rounded-full border border-black/[0.12] flex items-center justify-center hover:bg-black/[0.04] transition" title="Ürün ara">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
               </svg>
             </button>
-            <div id="search-dropdown" class="hidden absolute right-0 top-10 bg-white border border-black/[0.1] rounded-xl shadow-xl p-2 z-30">
+            <div id="search-dropdown" class="hidden absolute left-0 top-10 bg-white border border-black/[0.1] rounded-xl shadow-xl p-2 z-30">
               <input id="search-input" type="text" placeholder="Ürün ara..." autocomplete="off"
                 class="w-[220px] h-9 rounded-lg border border-black/15 bg-[#fafafa] px-3 text-[13px] outline-none focus:border-black/40 focus:bg-white">
             </div>
           </div>
+          <div id="category-pills" class="flex items-center gap-2 flex-1 min-w-0 py-1"></div>
+        </div>
+      </div>
+
+      <div class="px-5 pb-2.5">
+        <div class="flex items-center gap-1.5">
+          <button id="sidebar-toggle" class="flex items-center gap-1.5 px-3 h-[34px] rounded-full border border-black/[0.14] text-[13px] font-medium hover:bg-black/[0.04] transition-all flex-shrink-0">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="4" y1="6" x2="20" y2="6"/><circle cx="16" cy="6" r="3" fill="currentColor" stroke="none"/>
+              <line x1="4" y1="12" x2="20" y2="12"/><circle cx="8" cy="12" r="3" fill="currentColor" stroke="none"/>
+              <line x1="4" y1="18" x2="20" y2="18"/><circle cx="16" cy="18" r="3" fill="currentColor" stroke="none"/>
+            </svg>
+            <span>Filtreler</span>
+          </button>
           <div class="relative">
             <button id="sort-toggle" type="button" class="flex items-center gap-1.5 px-3 h-[34px] rounded-full border border-black/[0.12] text-[12px] font-medium hover:bg-black/[0.04] transition">
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
@@ -231,7 +215,7 @@
               </svg>
               Sırala
             </button>
-            <div id="sort-dropdown" class="hidden absolute right-0 top-10 w-56 rounded-xl border border-black/[0.1] bg-white shadow-xl py-1 z-40 text-[13px]">
+            <div id="sort-dropdown" class="hidden absolute left-0 top-10 w-56 rounded-xl border border-black/[0.1] bg-white shadow-xl py-1 z-40 text-[13px]">
               <button type="button" data-sort="name_asc" class="sort-opt w-full text-left px-3 py-2">İsme göre (A → Z)</button>
               <button type="button" data-sort="name_desc" class="sort-opt w-full text-left px-3 py-2">İsme göre (Z → A)</button>
               <button type="button" data-sort="brand_asc" class="sort-opt w-full text-left px-3 py-2">Markaya göre (A → Z)</button>
