@@ -80,6 +80,38 @@ html.ag-dark .bg-\[\#1d1d1f\] { background-color: #2a2d33 !important; }
 
 html.ag-dark .text-white { color: #f7f8fa !important; }
 
+/* extra contrast guards for mixed utility combinations */
+html.ag-dark a { color: inherit; }
+html.ag-dark .hover\:text-black:hover { color: #d7dce6 !important; }
+html.ag-dark .hover\:text-\[\#6e6e73\]:hover { color: #c6cdd8 !important; }
+
+html.ag-dark .bg-black .text-black,
+html.ag-dark .bg-\[\#0b0b0c\] .text-black,
+html.ag-dark .bg-\[\#1d1d1f\] .text-black,
+html.ag-dark .bg-black .text-\[\#111\],
+html.ag-dark .bg-\[\#0b0b0c\] .text-\[\#111\],
+html.ag-dark .bg-\[\#1d1d1f\] .text-\[\#111\] { color: #f7f8fa !important; }
+
+html.ag-dark .bg-white .text-white,
+html.ag-dark .bg-\[\#fafafa\] .text-white,
+html.ag-dark .bg-\[\#f5f5f7\] .text-white { color: #f7f8fa !important; }
+
+html.ag-dark svg[stroke="currentColor"],
+html.ag-dark svg[fill="currentColor"] { color: inherit; }
+
+html.ag-dark button,
+html.ag-dark [role="button"],
+html.ag-dark .rounded-full.border,
+html.ag-dark .rounded-xl.border,
+html.ag-dark .rounded-2xl.border {
+  border-color: rgba(255,255,255,.2);
+}
+
+html.ag-dark .border-black,
+html.ag-dark .border-black\/20,
+html.ag-dark .border-black\/25,
+html.ag-dark .border-black\/30 { border-color: rgba(255,255,255,.22) !important; }
+
 html.ag-dark .shadow-\[0_30px_70px_rgba\(0\,0\,0\,0\.16\)\] {
   box-shadow: 0 30px 70px rgba(0,0,0,.45) !important;
 }
