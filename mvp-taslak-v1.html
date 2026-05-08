@@ -182,32 +182,34 @@
         var finalX = [ lx, lx+tw[0]*s+gx, lx, lx+tw[2]*s+gx ];
         var finalY = [ r1y, r1y, r2y, r2y ];
 
-        // Move each text to section, preserving exact visual position
+        // Snap bands out instantly (no fading — avoids flick)
+        heroBands.style.transition = "none";
+        heroBands.style.opacity    = "0";
+
+        // Photo starts fading in (overlay still hides it)
+        heroBg.style.opacity    = "1";
+        heroBg.style.transform  = "scale(1)";
+
+        // Reparent texts while overlay shields the DOM change
         texts.forEach(function(t, i){
           var r = rects[i];
           var lX = r.left - sR.left;
           var lY = r.top  - sR.top;
-          t.style.animation      = "none";
-          t.style.clipPath       = "none";
-          t.style.position       = "absolute";
-          t.style.top            = "0";
-          t.style.left           = "0";
+          t.style.animation       = "none";
+          t.style.clipPath        = "none";
+          t.style.position        = "absolute";
+          t.style.top             = "0";
+          t.style.left            = "0";
           t.style.transformOrigin = "0 0";
-          t.style.transform      = "translateX("+lX+"px) translateY("+lY+"px) scale(1)";
+          t.style.transform       = "translateX("+lX+"px) translateY("+lY+"px) scale(1)";
           heroEl.appendChild(t);
         });
-
-        // Photo in, bands + overlay out
-        heroBg.style.opacity      = "1";
-        heroBg.style.transform    = "scale(1)";
-        heroOverlay.style.opacity = "0";
-        heroBands.style.opacity   = "0";
 
         // CTA position
         heroCta.style.left = lx + "px";
         heroCta.style.top  = (r2y + r2h + 22) + "px";
 
-        // double rAF → browser commits current absolute positions → then animate
+        // double rAF: positions committed -> start movement AND reveal simultaneously
         requestAnimationFrame(function(){
           requestAnimationFrame(function(){
             texts.forEach(function(t, i){
@@ -215,6 +217,8 @@
               t.style.color      = "#fff";
               t.style.transform  = "translateX("+finalX[i]+"px) translateY("+finalY[i]+"px) scale("+s+")";
             });
+            // Overlay fades AFTER positions are committed — clean reveal, no flick
+            heroOverlay.style.opacity = "0";
           });
         });
 
