@@ -102,68 +102,68 @@
   <div id="site-header"></div>
 
   <main>
-    <!-- HERO – bands over full-bleed photo -->
+    <!-- HERO -->
     <section id="hero-anim" style="position:relative;background:#fff;height:88vh;overflow:hidden">
 
-      <!-- Photo (z-index 0) -->
+      <!-- Photo -->
       <div id="hero-bg" style="position:absolute;inset:0;z-index:0;opacity:0;will-change:opacity,transform;transform:scale(1.06);transition:opacity 1.2s ease,transform 7s ease">
         <img src="https://images.unsplash.com/photo-1497366811353-6870744d04b2?q=80&w=1974&auto=format&fit=crop" alt="" style="width:100%;height:100%;object-fit:cover">
-        <div style="position:absolute;inset:0;background:linear-gradient(105deg,rgba(0,0,0,.74) 0%,rgba(0,0,0,.4) 60%,rgba(0,0,0,.2) 100%)"></div>
+        <div style="position:absolute;inset:0;background:linear-gradient(105deg,rgba(0,0,0,.76) 0%,rgba(0,0,0,.42) 60%,rgba(0,0,0,.18) 100%)"></div>
       </div>
 
-      <!-- White overlay – single fade replaces 4 bg-color transitions (faster) -->
+      <!-- White overlay -->
       <div id="hero-overlay" style="position:absolute;inset:0;z-index:1;background:#fff;will-change:opacity;transition:opacity 1.1s ease;pointer-events:none"></div>
 
-      <!-- CTA -->
-      <div id="hero-cta" style="position:absolute;bottom:36px;left:clamp(24px,4vw,64px);z-index:3;opacity:0;transform:translateY(14px);transition:opacity .7s ease,transform .7s ease">
-        <p style="color:rgba(255,255,255,.65);font-size:14px;margin:0 0 14px;font-weight:300">Mimari proje için doğru malzemeyi saniyeler içinde bul.</p>
-        <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <!-- INTRO: 4 full-height bands -->
+      <div id="hero-intro" style="position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;will-change:opacity,transform;transition:opacity .7s ease,transform .7s cubic-bezier(.4,0,.2,1)">
+        <div style="flex:1;position:relative;overflow:hidden">
+          <div class="hline" style="position:absolute;bottom:0;left:0;width:100%;height:1px;background:rgba(0,0,0,.12);will-change:transform;transform:scaleX(0);transform-origin:left;transition:transform .82s cubic-bezier(.4,0,.2,1)"></div>
+          <span class="hbt" style="position:absolute;top:50%;left:0;white-space:nowrap;font-size:clamp(26px,5.2vw,82px);font-weight:200;letter-spacing:-.03em;color:#0b0b0c;will-change:transform;transform:translateX(-110vw) translateY(-50%);transition:transform .88s cubic-bezier(.22,1,.36,1)">Türkiye'nin mimari</span>
+        </div>
+        <div style="flex:1;position:relative;overflow:hidden">
+          <div class="hline" style="position:absolute;bottom:0;left:0;width:100%;height:1px;background:rgba(0,0,0,.12);will-change:transform;transform:scaleX(0);transform-origin:left;transition:transform .82s cubic-bezier(.4,0,.2,1)"></div>
+          <span class="hbt" style="position:absolute;top:50%;left:0;white-space:nowrap;font-size:clamp(26px,5.2vw,82px);font-weight:200;letter-spacing:-.03em;color:#0b0b0c;will-change:transform;transform:translateX(-110vw) translateY(-50%);transition:transform .88s cubic-bezier(.22,1,.36,1)">malzeme platformu.</span>
+        </div>
+        <div style="flex:1;position:relative;overflow:hidden">
+          <div class="hline" style="position:absolute;bottom:0;left:0;width:100%;height:1px;background:rgba(0,0,0,.12);will-change:transform;transform:scaleX(0);transform-origin:left;transition:transform .82s cubic-bezier(.4,0,.2,1)"></div>
+          <span class="hbt" style="position:absolute;top:50%;left:0;white-space:nowrap;font-size:clamp(26px,5.2vw,82px);font-weight:200;letter-spacing:-.03em;color:#0b0b0c;will-change:transform;transform:translateX(-110vw) translateY(-50%);transition:transform .88s cubic-bezier(.22,1,.36,1)">100+ marka · binlerce ürün</span>
+        </div>
+        <div style="flex:1;position:relative;overflow:hidden">
+          <span class="hbt" style="position:absolute;top:50%;left:0;white-space:nowrap;font-size:clamp(26px,5.2vw,82px);font-weight:200;letter-spacing:-.03em;color:#0b0b0c;will-change:transform;transform:translateX(-110vw) translateY(-50%);transition:transform .88s cubic-bezier(.22,1,.36,1)">NRC · EPD · BIM · teknik veri</span>
+        </div>
+      </div>
+
+      <!-- FINAL: compact 2-row text on photo -->
+      <div id="hero-final" style="position:absolute;left:clamp(24px,4vw,64px);bottom:clamp(100px,18vh,160px);z-index:3;opacity:0;will-change:opacity,transform;transform:translateY(16px);transition:opacity .75s ease,transform .75s cubic-bezier(.22,1,.36,1)">
+        <div style="display:flex;flex-wrap:wrap;gap:6px 28px;max-width:min(820px,68vw)">
+          <span style="color:#fff;font-size:clamp(15px,2.5vw,38px);font-weight:200;letter-spacing:-.025em;line-height:1.2">Türkiye'nin mimari</span>
+          <span style="color:#fff;font-size:clamp(15px,2.5vw,38px);font-weight:200;letter-spacing:-.025em;line-height:1.2">malzeme platformu.</span>
+          <span style="color:rgba(255,255,255,.6);font-size:clamp(13px,2vw,30px);font-weight:200;letter-spacing:-.015em;line-height:1.2">100+ marka · binlerce ürün</span>
+          <span style="color:rgba(255,255,255,.6);font-size:clamp(13px,2vw,30px);font-weight:200;letter-spacing:-.015em;line-height:1.2">NRC · EPD · BIM · teknik veri</span>
+        </div>
+        <div style="margin-top:20px;display:flex;gap:10px;flex-wrap:wrap">
           <a href="/urunler.html" style="display:inline-flex;align-items:center;padding:11px 24px;border-radius:999px;background:#fff;color:#0b0b0c;font-size:13px;font-weight:600;text-decoration:none">Ürünleri Keşfet &#8594;</a>
           <a href="/marka-basvuru.html" style="display:inline-flex;align-items:center;padding:11px 24px;border-radius:999px;border:1.5px solid rgba(255,255,255,.35);color:#fff;font-size:13px;font-weight:600;text-decoration:none">Marka Başvurusu</a>
         </div>
       </div>
 
-      <!-- Text bands (z-index 2) -->
-      <div style="position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;pointer-events:none">
-
-        <div style="flex:1;position:relative;overflow:hidden">
-          <div class="hline" style="position:absolute;bottom:0;left:0;width:100%;height:1px;background:rgba(0,0,0,.12);will-change:transform;transform:scaleX(0);transform-origin:left;transition:transform .82s cubic-bezier(.4,0,.2,1),background-color .9s ease"></div>
-          <span class="hbt" style="position:absolute;top:50%;left:0;white-space:nowrap;font-size:clamp(26px,5.2vw,82px);font-weight:200;letter-spacing:-.03em;color:#0b0b0c;will-change:transform;transform:translateX(-110vw) translateY(-50%);transition:transform .88s cubic-bezier(.22,1,.36,1),color .8s ease">Türkiye'nin mimari</span>
-        </div>
-
-        <div style="flex:1;position:relative;overflow:hidden">
-          <div class="hline" style="position:absolute;bottom:0;left:0;width:100%;height:1px;background:rgba(0,0,0,.12);will-change:transform;transform:scaleX(0);transform-origin:left;transition:transform .82s cubic-bezier(.4,0,.2,1),background-color .9s ease"></div>
-          <span class="hbt" style="position:absolute;top:50%;left:0;white-space:nowrap;font-size:clamp(26px,5.2vw,82px);font-weight:200;letter-spacing:-.03em;color:#0b0b0c;will-change:transform;transform:translateX(-110vw) translateY(-50%);transition:transform .88s cubic-bezier(.22,1,.36,1),color .8s ease">malzeme platformu.</span>
-        </div>
-
-        <div style="flex:1;position:relative;overflow:hidden">
-          <div class="hline" style="position:absolute;bottom:0;left:0;width:100%;height:1px;background:rgba(0,0,0,.12);will-change:transform;transform:scaleX(0);transform-origin:left;transition:transform .82s cubic-bezier(.4,0,.2,1),background-color .9s ease"></div>
-          <span class="hbt" style="position:absolute;top:50%;left:0;white-space:nowrap;font-size:clamp(26px,5.2vw,82px);font-weight:200;letter-spacing:-.03em;color:#0b0b0c;will-change:transform;transform:translateX(-110vw) translateY(-50%);transition:transform .88s cubic-bezier(.22,1,.36,1),color .8s ease">100+ marka · binlerce ürün</span>
-        </div>
-
-        <div style="flex:1;position:relative;overflow:hidden">
-          <span class="hbt" style="position:absolute;top:50%;left:0;white-space:nowrap;font-size:clamp(26px,5.2vw,82px);font-weight:200;letter-spacing:-.03em;color:#0b0b0c;will-change:transform;transform:translateX(-110vw) translateY(-50%);transition:transform .88s cubic-bezier(.22,1,.36,1),color .8s ease">NRC · EPD · BIM · teknik veri</span>
-        </div>
-
-      </div>
     </section>
 
     <script>
     (function(){
       var texts   = document.querySelectorAll(".hbt");
       var lines   = document.querySelectorAll(".hline");
-      var heroBg  = document.getElementById("hero-bg");
+      var heroBg      = document.getElementById("hero-bg");
       var heroOverlay = document.getElementById("hero-overlay");
-      var heroCta = document.getElementById("hero-cta");
+      var heroIntro   = document.getElementById("hero-intro");
+      var heroFinal   = document.getElementById("hero-final");
       var vw = window.innerWidth;
 
-      // Pre-compute center offsets ONCE – avoids reflow during animation
+      // Pre-compute center offsets once
       var centers = [];
       texts.forEach(function(t){ centers.push(vw / 2 - t.offsetWidth / 2); });
 
-      var lx = Math.round(Math.max(24, Math.min(64, vw * 0.04)));
-
-      // Phase 1 – lines draw + texts slide to center, staggered
+      // Phase 1 – bands slide in staggered
       texts.forEach(function(t, i){
         setTimeout(function(){
           if(lines[i]) lines[i].style.transform = "scaleX(1)";
@@ -171,26 +171,16 @@
         }, 260 + i * 210);
       });
 
-      // Phase 2 – photo in, white overlay out, texts → white + shift left + shrink
+      // Phase 2 – photo in, intro out, final compact text in
       setTimeout(function(){
         heroBg.style.opacity = "1";
         heroBg.style.transform = "scale(1)";
         heroOverlay.style.opacity = "0";
-
-        lines.forEach(function(l){ l.style.backgroundColor = "rgba(255,255,255,.18)"; });
-
-        texts.forEach(function(t){
-          t.style.color = "#fff";
-          t.style.transition = "transform 1.1s cubic-bezier(.77,0,.18,1), color .9s ease";
-          t.style.transform = "translateX("+lx+"px) translateY(-50%) scale(0.58)";
-        });
-      }, 1850);
-
-      // Phase 3 – CTA
-      setTimeout(function(){
-        heroCta.style.opacity = "1";
-        heroCta.style.transform = "translateY(0)";
-      }, 2750);
+        heroIntro.style.opacity = "0";
+        heroIntro.style.transform = "translateY(-18px)";
+        heroFinal.style.opacity = "1";
+        heroFinal.style.transform = "translateY(0)";
+      }, 1900);
     })();
     </script>
 
