@@ -141,15 +141,12 @@
               </button>
               <div id="products-mega-panel" class="hidden fixed left-0 right-0 top-[72px] z-40">
                 <div class="w-full border-y border-black/[0.08] bg-white shadow-[0_30px_70px_rgba(0,0,0,0.16)]">
-                  <div class="px-6 pt-4 pb-1 flex items-center">
-                    <p class="text-[20px] font-semibold text-black min-w-[120px]">Ürünler</p>
-                    <div class="flex-1 flex justify-center">
-                      <div class="inline-flex rounded-full bg-[#f1f1f3] p-1">
-                        <a href="/urunler.html" class="inline-flex items-center h-10 px-5 rounded-full text-[14px] font-semibold text-black hover:text-[#6e6e73] transition-colors">Tüm Ürünler</a>
-                        <a href="/yeni-koleksiyonlar.html" class="inline-flex items-center h-10 px-5 rounded-full text-[14px] font-semibold text-black hover:text-[#6e6e73] transition-colors">Yeni Koleksiyonlar</a>
-                      </div>
+                  <div class="px-6 pt-4 pb-1 flex items-center gap-4">
+                    <p class="text-[20px] font-semibold text-black">Ürünler</p>
+                    <div class="inline-flex rounded-full bg-[#f1f1f3] p-1">
+                      <a href="/urunler.html" class="inline-flex items-center h-10 px-5 rounded-full text-[14px] font-semibold text-black hover:text-[#6e6e73] transition-colors">Tüm Ürünler</a>
+                      <a href="/yeni-koleksiyonlar.html" class="inline-flex items-center h-10 px-5 rounded-full text-[14px] font-semibold text-black hover:text-[#6e6e73] transition-colors">Yeni Koleksiyonlar</a>
                     </div>
-                    <div class="min-w-[120px]"></div>
                   </div>
                   <div class="px-6 py-5 grid grid-cols-3 gap-6">
                     ${megaCols}
