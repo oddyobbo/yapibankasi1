@@ -182,15 +182,17 @@
         var finalX = [ lx, lx+tw[0]*s+gx, lx, lx+tw[2]*s+gx ];
         var finalY = [ r1y, r1y, r2y, r2y ];
 
-        // Snap bands out instantly (no fading — avoids flick)
+        // hero-bands is z-index:2, overlay is z-index:1 — overlay is BEHIND bands.
+        // Push bands behind overlay FIRST so overlay shields the entire transition.
+        heroBands.style.zIndex     = "0";
         heroBands.style.transition = "none";
         heroBands.style.opacity    = "0";
 
-        // Photo starts fading in (overlay still hides it)
+        // Photo starts fading behind overlay
         heroBg.style.opacity    = "1";
         heroBg.style.transform  = "scale(1)";
 
-        // Reparent texts while overlay shields the DOM change
+        // Reparent texts (overlay covers everything, no flick visible)
         texts.forEach(function(t, i){
           var r = rects[i];
           var lX = r.left - sR.left;
@@ -200,8 +202,10 @@
           t.style.position        = "absolute";
           t.style.top             = "0";
           t.style.left            = "0";
+          t.style.zIndex          = "3";
           t.style.transformOrigin = "0 0";
           t.style.transform       = "translateX("+lX+"px) translateY("+lY+"px) scale(1)";
+          t.style.color           = "#fff"; // set white now, no transition needed
           heroEl.appendChild(t);
         });
 
@@ -209,15 +213,14 @@
         heroCta.style.left = lx + "px";
         heroCta.style.top  = (r2y + r2h + 22) + "px";
 
-        // double rAF: positions committed -> start movement AND reveal simultaneously
+        // double rAF: positions committed -> start movement AND reveal
         requestAnimationFrame(function(){
           requestAnimationFrame(function(){
             texts.forEach(function(t, i){
-              t.style.transition = "transform 1.1s cubic-bezier(.77,0,.18,1), color .8s ease";
-              t.style.color      = "#fff";
+              t.style.transition = "transform 1.1s cubic-bezier(.77,0,.18,1)";
               t.style.transform  = "translateX("+finalX[i]+"px) translateY("+finalY[i]+"px) scale("+s+")";
             });
-            // Overlay fades AFTER positions are committed — clean reveal, no flick
+            // Overlay fades: reveals photo + already-white texts in motion — zero flick
             heroOverlay.style.opacity = "0";
           });
         });
