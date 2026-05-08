@@ -405,7 +405,7 @@
             </p>
             <p class="text-[#6e6e73] mt-4 max-w-[42ch] leading-relaxed">Mimarların doğru ürünü bulduğu, markaların gerçek talebe ulaştığı Türkiye odaklı mimari malzeme platformu.</p>
             <div class="mt-5 flex gap-2">
-              <a href="/marka-basvuru.html" class="px-4 py-2 rounded-full bg-black text-white text-[13px] font-semibold">Marka Başvur</a>
+              <a href="/marka-basvuru.html" class="px-4 py-2 rounded-full bg-black text-white text-[13px] font-semibold">Marka Başvurususu</a>
               <a href="/urunler.html" class="px-4 py-2 rounded-full border border-black/15 text-[13px] font-semibold">Ürünleri Keşfet</a>
             </div>
           </div>
@@ -422,7 +422,7 @@
             <p class="font-semibold">Hesap</p>
             <div class="mt-3 space-y-2 text-[#6e6e73]">
               <a href="/marka-giris.html" class="block hover:text-black">Marka Girişi</a>
-              <a href="/marka-basvuru.html" class="block hover:text-black">Marka Başvuru</a>
+              <a href="/marka-basvuru.html" class="block hover:text-black">Marka Başvurususuu</a>
               <a href="/mimar-giris.html" class="block hover:text-black">Mimar Girişi</a>
             </div>
           </div>
