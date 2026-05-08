@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 150" role="img" aria-label="Knauf">
+  <rect width="500" height="150" fill="none"/>
+  <g transform="translate(18,120) skewX(-8)">
+    <text fill="#10a1e6" font-family="'Arial Black','Arial Narrow',Arial,sans-serif" font-size="138" font-weight="900" letter-spacing="2">KNAUF</text>
+  </g>
+</svg>

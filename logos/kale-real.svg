@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 120" role="img" aria-label="Kale">
+  <rect width="380" height="120" fill="none"/>
+  <g transform="translate(8,24)">
+    <rect x="0" y="0" width="50" height="42" rx="2" fill="#ef4036"/>
+    <rect x="8" y="-7" width="9" height="10" fill="#fff"/>
+    <rect x="23" y="-7" width="9" height="10" fill="#fff"/>
+    <rect x="38" y="-7" width="9" height="10" fill="#fff"/>
+  </g>
+  <text x="72" y="86" fill="#003845" font-family="-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',Arial,sans-serif" font-size="92" font-weight="700" letter-spacing="0.5">Kale</text>
+</svg>
