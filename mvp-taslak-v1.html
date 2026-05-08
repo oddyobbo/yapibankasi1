@@ -114,16 +114,21 @@
       <!-- White overlay -->
       <div id="hero-overlay" style="position:absolute;inset:0;z-index:1;background:#fff;will-change:opacity;transition:opacity 1.1s ease;pointer-events:none"></div>
 
-      <!-- 3 horizontal divider lines -->
-      <div class="hdiv" style="position:absolute;left:0;right:0;top:25%;height:1px;background:rgba(0,0,0,.11);z-index:2;transform:scaleX(0);transform-origin:left;transition:transform .8s cubic-bezier(.4,0,.2,1)"></div>
-      <div class="hdiv" style="position:absolute;left:0;right:0;top:50%;height:1px;background:rgba(0,0,0,.11);z-index:2;transform:scaleX(0);transform-origin:left;transition:transform .8s cubic-bezier(.4,0,.2,1)"></div>
-      <div class="hdiv" style="position:absolute;left:0;right:0;top:75%;height:1px;background:rgba(0,0,0,.11);z-index:2;transform:scaleX(0);transform-origin:left;transition:transform .8s cubic-bezier(.4,0,.2,1)"></div>
-
-      <!-- 4 text spans – free-floating, transform-origin:0 0 -->
-      <span class="hbt" style="position:absolute;top:0;left:0;transform-origin:0 0;white-space:nowrap;font-size:clamp(24px,5vw,80px);font-weight:200;letter-spacing:-.03em;color:#0b0b0c;will-change:transform;transition:none">Türkiye'nin mimari</span>
-      <span class="hbt" style="position:absolute;top:0;left:0;transform-origin:0 0;white-space:nowrap;font-size:clamp(24px,5vw,80px);font-weight:200;letter-spacing:-.03em;color:#0b0b0c;will-change:transform;transition:none">malzeme platformu.</span>
-      <span class="hbt" style="position:absolute;top:0;left:0;transform-origin:0 0;white-space:nowrap;font-size:clamp(24px,5vw,80px);font-weight:200;letter-spacing:-.03em;color:#0b0b0c;will-change:transform;transition:none">100+ marka · binlerce ürün</span>
-      <span class="hbt" style="position:absolute;top:0;left:0;transform-origin:0 0;white-space:nowrap;font-size:clamp(24px,5vw,80px);font-weight:200;letter-spacing:-.03em;color:#0b0b0c;will-change:transform;transition:none">NRC · EPD · BIM · teknik veri</span>
+      <!-- Band container (fades out in phase 2) -->
+      <div id="hero-bands" style="position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;transition:opacity .8s ease">
+        <div style="flex:1;display:flex;align-items:center;justify-content:center;border-bottom:1px solid rgba(0,0,0,.1);overflow:hidden">
+          <span class="hbt" style="white-space:nowrap;font-size:clamp(24px,5vw,80px);font-weight:200;letter-spacing:-.03em;color:#0b0b0c;animation:hbt-in .82s cubic-bezier(.22,1,.36,1) .18s both">Türkiye'nin mimari</span>
+        </div>
+        <div style="flex:1;display:flex;align-items:center;justify-content:center;border-bottom:1px solid rgba(0,0,0,.1);overflow:hidden">
+          <span class="hbt" style="white-space:nowrap;font-size:clamp(24px,5vw,80px);font-weight:200;letter-spacing:-.03em;color:#0b0b0c;animation:hbt-in .82s cubic-bezier(.22,1,.36,1) .38s both">malzeme platformu.</span>
+        </div>
+        <div style="flex:1;display:flex;align-items:center;justify-content:center;border-bottom:1px solid rgba(0,0,0,.1);overflow:hidden">
+          <span class="hbt" style="white-space:nowrap;font-size:clamp(24px,5vw,80px);font-weight:200;letter-spacing:-.03em;color:#0b0b0c;animation:hbt-in .82s cubic-bezier(.22,1,.36,1) .58s both">100+ marka · binlerce ürün</span>
+        </div>
+        <div style="flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden">
+          <span class="hbt" style="white-space:nowrap;font-size:clamp(24px,5vw,80px);font-weight:200;letter-spacing:-.03em;color:#0b0b0c;animation:hbt-in .82s cubic-bezier(.22,1,.36,1) .78s both">NRC · EPD · BIM · teknik veri</span>
+        </div>
+      </div>
 
       <!-- CTA -->
       <div id="hero-cta" style="position:absolute;z-index:4;opacity:0;will-change:opacity,transform;transform:translateY(14px);transition:opacity .7s ease,transform .7s ease">
@@ -135,98 +140,91 @@
       </div>
 
     </section>
+    <style>
+    @keyframes hbt-in {
+      from { clip-path: inset(0 100% 0 0); }
+      to   { clip-path: inset(0 0% 0 0); }
+    }
+    </style>
 
     <script>
     (function(){
-      var texts   = document.querySelectorAll(".hbt");
-      var divs    = document.querySelectorAll(".hdiv");
-      var heroBg      = document.getElementById("hero-bg");
+      var heroEl   = document.getElementById("hero-anim");
+      var heroBg   = document.getElementById("hero-bg");
       var heroOverlay = document.getElementById("hero-overlay");
-      var heroCta     = document.getElementById("hero-cta");
-      var heroEl      = document.getElementById("hero-anim");
+      var heroBands   = document.getElementById("hero-bands");
+      var heroCta  = document.getElementById("hero-cta");
+      var texts    = document.querySelectorAll(".hbt");
 
-      // -- Measure once (single layout pass, no reflow during animation) --
-      var vw = window.innerWidth;
-      var hy = heroEl.offsetHeight;
-      var bh = hy / 4;
-      var tw = [], th = [];
-      texts.forEach(function(t){ tw.push(t.offsetWidth); th.push(t.offsetHeight); });
-
-      // Initial: centered in each band (transform-origin: 0 0)
-      var cx = tw.map(function(w){ return vw/2 - w/2; });
-      var cy = th.map(function(h,i){ return (i+0.5)*bh - h/2; });
-
-      // Set initial off-screen transform WITHOUT transition
-      texts.forEach(function(t,i){
-        t.style.transform = "translateX("+(cx[i]-vw*1.2)+"px) translateY("+cy[i]+"px) scale(1)";
-      });
-
-      // Final compact layout constants
-      var s   = 0.58;
-      var lx  = Math.round(Math.max(24, Math.min(64, vw*0.04)));
-      var gx  = 20;
-      var gy  = 10;
-      var bot = 160; // distance from hero bottom — higher = text appears higher up
-
-      var r1h = th[0]*s;
-      var r2h = th[2]*s;
-      var r1y = hy - bot - r1h - gy - r2h;
-      var r2y = hy - bot - r2h;
-      var r2x0 = lx + tw[0]*s + gx;
-      var r2x2 = lx + tw[2]*s + gx;
-
-      var finalT = [
-        "translateX("+lx+"px) translateY("+r1y+"px) scale("+s+")",
-        "translateX("+r2x0+"px) translateY("+r1y+"px) scale("+s+")",
-        "translateX("+lx+"px) translateY("+r2y+"px) scale("+s+")",
-        "translateX("+r2x2+"px) translateY("+r2y+"px) scale("+s+")"
-      ];
-
-      // Place CTA just below row 2
-      heroCta.style.left  = lx+"px";
-      heroCta.style.top   = (r2y + r2h + 22)+"px";
-
-      var slideT = "transform .88s cubic-bezier(.22,1,.36,1)";
-
-      // Double rAF: forces browser to COMMIT the off-screen state before
-      // any transition fires — otherwise browser batches and skips Phase 1
-      requestAnimationFrame(function(){
-        requestAnimationFrame(function(){
-          // -- Phase 1: staggered slide to center --
-          texts.forEach(function(t,i){
-            setTimeout(function(){
-              if(divs[i]) divs[i].style.transform = "scaleX(1)";
-              t.style.transition = slideT;
-              t.style.transform  = "translateX("+cx[i]+"px) translateY("+cy[i]+"px) scale(1)";
-            }, i*220);
-          });
-        });
-      });
-
-      // -- Phase 2: photo + overlay + texts fly to final positions --
+      // Phase 2 fires after all CSS animations finish (~0.78 + 0.82 = 1.6s) + buffer
       setTimeout(function(){
-        heroBg.style.opacity = "1";
-        heroBg.style.transform = "scale(1)";
+        var sR  = heroEl.getBoundingClientRect();
+        var vw  = window.innerWidth;
+        var hy  = heroEl.offsetHeight;
+        var s   = 0.58;
+        var lx  = Math.round(Math.max(24, Math.min(64, vw * 0.04)));
+        var gx  = 20;
+        var gy  = 10;
+        var bot = 160;
+
+        // Record current visual positions
+        var rects = [];
+        texts.forEach(function(t){ rects.push(t.getBoundingClientRect()); });
+
+        // Compute sizes
+        var tw = [], th = [];
+        texts.forEach(function(t){ tw.push(t.offsetWidth); th.push(t.offsetHeight); });
+
+        // Final 2x2 grid positions (absolute within section, transform-origin 0 0)
+        var r1h  = th[0]*s, r2h = th[2]*s;
+        var r1y  = hy - bot - r1h - gy - r2h;
+        var r2y  = hy - bot - r2h;
+        var finalX = [ lx, lx+tw[0]*s+gx, lx, lx+tw[2]*s+gx ];
+        var finalY = [ r1y, r1y, r2y, r2y ];
+
+        // Move each text to section, preserving exact visual position
+        texts.forEach(function(t, i){
+          var r = rects[i];
+          var lX = r.left - sR.left;
+          var lY = r.top  - sR.top;
+          t.style.animation      = "none";
+          t.style.clipPath       = "none";
+          t.style.position       = "absolute";
+          t.style.top            = "0";
+          t.style.left           = "0";
+          t.style.transformOrigin = "0 0";
+          t.style.transform      = "translateX("+lX+"px) translateY("+lY+"px) scale(1)";
+          heroEl.appendChild(t);
+        });
+
+        // Photo in, bands + overlay out
+        heroBg.style.opacity      = "1";
+        heroBg.style.transform    = "scale(1)";
         heroOverlay.style.opacity = "0";
-        divs.forEach(function(d){ d.style.opacity="0"; d.style.transition="transform .8s cubic-bezier(.4,0,.2,1),opacity .6s ease"; });
+        heroBands.style.opacity   = "0";
 
-        texts.forEach(function(t){
-          t.style.color = "#fff";
-          t.style.transition = "transform 1.05s cubic-bezier(.77,0,.18,1), color .8s ease";
-        });
-        // slight delay so color starts before move
-        setTimeout(function(){
-          texts.forEach(function(t,i){
-            t.style.transform = finalT[i];
+        // CTA position
+        heroCta.style.left = lx + "px";
+        heroCta.style.top  = (r2y + r2h + 22) + "px";
+
+        // double rAF → browser commits current absolute positions → then animate
+        requestAnimationFrame(function(){
+          requestAnimationFrame(function(){
+            texts.forEach(function(t, i){
+              t.style.transition = "transform 1.1s cubic-bezier(.77,0,.18,1), color .8s ease";
+              t.style.color      = "#fff";
+              t.style.transform  = "translateX("+finalX[i]+"px) translateY("+finalY[i]+"px) scale("+s+")";
+            });
           });
-        }, 80);
-      }, 1900);
+        });
 
-      // -- Phase 3: CTA --
-      setTimeout(function(){
-        heroCta.style.opacity   = "1";
-        heroCta.style.transform = "translateY(0)";
-      }, 2800);
+        // CTA
+        setTimeout(function(){
+          heroCta.style.opacity   = "1";
+          heroCta.style.transform = "translateY(0)";
+        }, 1000);
+
+      }, 2000);
     })();
     </script>
 
