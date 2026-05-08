@@ -310,9 +310,12 @@
 
     headerTarget.innerHTML = `
       <header class="border-b border-black/[0.06] sticky top-0 bg-white/85 backdrop-blur-xl z-30">
-        <div class="h-[72px] px-4 sm:px-6 lg:px-10 flex items-center">
+        <div class="h-[72px] px-4 sm:px-6 lg:px-10 flex items-center relative">
           <!-- Logo -->
-          <a href="/mvp-taslak-v1.html" data-ag-logo="1" class="flex-shrink-0 mr-8 inline-flex items-baseline gap-0 leading-none select-none" style="font-size:22px;font-weight:600;letter-spacing:-0.3px;color:${logoColor};text-decoration:none;" aria-label="Archilink">
+          <a href="/mvp-taslak-v1.html" data-ag-logo="1" class="hidden lg:inline-flex flex-shrink-0 mr-8 items-baseline gap-0 leading-none select-none" style="font-size:22px;font-weight:600;letter-spacing:-0.3px;color:${logoColor};text-decoration:none;" aria-label="Archilink">
+            <span>Arch</span><span style="position:relative;display:inline-block;"><span>il</span><svg style="position:absolute;bottom:-5px;left:-1px;right:-1px;width:calc(100% + 2px);overflow:visible;" height="6" viewBox="0 0 20 6" preserveAspectRatio="none"><path data-ag-logo-path="1" d="M0,1 Q10,6 20,1" stroke="${logoColor}" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg></span><span>ink</span>
+          </a>
+          <a href="/mvp-taslak-v1.html" data-ag-logo="1" class="lg:hidden absolute left-1/2 -translate-x-1/2 inline-flex items-baseline gap-0 leading-none select-none" style="font-size:23px;font-weight:600;letter-spacing:-0.3px;color:${logoColor};text-decoration:none;" aria-label="Archilink">
             <span>Arch</span><span style="position:relative;display:inline-block;"><span>il</span><svg style="position:absolute;bottom:-5px;left:-1px;right:-1px;width:calc(100% + 2px);overflow:visible;" height="6" viewBox="0 0 20 6" preserveAspectRatio="none"><path data-ag-logo-path="1" d="M0,1 Q10,6 20,1" stroke="${logoColor}" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg></span><span>ink</span>
           </a>
           <!-- Nav -->
@@ -330,21 +333,23 @@
             ${themeToggleBtn}
             ${desktopAuthLinks}
           </div>
-          <button id="mobile-menu-btn" class="lg:hidden inline-flex items-center justify-center w-12 h-12 rounded-full border border-black/[0.10] text-[24px] font-semibold" aria-label="Menü">☰</button>
+          <button id="mobile-menu-btn" class="lg:hidden inline-flex items-center justify-center w-12 h-12 text-[32px] font-semibold leading-none" aria-label="Menü">☰</button>
         </div>
         <div id="mobile-drawer-overlay" class="lg:hidden hidden fixed inset-0 bg-black/40 z-40"></div>
-        <aside id="mobile-drawer" class="lg:hidden fixed top-0 left-0 h-full w-[86vw] max-w-[360px] bg-white z-50 border-r border-black/[0.08] shadow-[0_20px_50px_rgba(0,0,0,0.2)]" style="transform:translateX(-100%);transition:transform .28s ease;">
+        <aside id="mobile-drawer" class="lg:hidden fixed top-0 left-0 h-full w-[86vw] max-w-[360px] z-50 border-r border-black/[0.08] shadow-[0_20px_50px_rgba(0,0,0,0.2)]" style="background:${isDarkTheme ? "#17181b" : "#ffffff"};transform:translateX(-100%);transition:transform .28s ease;">
           <div class="h-[76px] px-5 border-b border-black/[0.08] flex items-center justify-between">
             <a href="/mvp-taslak-v1.html" data-ag-logo="1" class="inline-flex items-baseline gap-0 leading-none select-none" style="font-size:22px;font-weight:600;letter-spacing:-0.3px;color:${logoColor};text-decoration:none;" aria-label="Archilink">
               <span>Arch</span><span style="position:relative;display:inline-block;"><span>il</span><svg style="position:absolute;bottom:-5px;left:-1px;right:-1px;width:calc(100% + 2px);overflow:visible;" height="6" viewBox="0 0 20 6" preserveAspectRatio="none"><path data-ag-logo-path="1" d="M0,1 Q10,6 20,1" stroke="${logoColor}" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg></span><span>ink</span>
             </a>
             <button id="mobile-drawer-close" type="button" class="w-10 h-10 inline-flex items-center justify-center rounded-full border border-black/[0.10] text-[22px] leading-none" aria-label="Menüyü kapat">×</button>
           </div>
-          <div class="px-5 py-4">
+          <div class="px-4 py-4">
+            <div class="mt-2 rounded-2xl border border-black/[0.08] ${isDarkTheme ? "bg-[#1e2024]" : "bg-[#f7f7f9]"} px-4 py-3">
             <nav>
               ${mobileNav}
             </nav>
             ${mobileAuthLinks}
+            </div>
           </div>
         </aside>
       </header>
