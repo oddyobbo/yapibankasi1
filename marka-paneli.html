@@ -3,20 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script>
-    (function(){
-      try {
-        if (localStorage.getItem("ag_theme_v1") === "dark") {
-          document.documentElement.classList.add("ag-dark");
-          var st = document.createElement("style");
-          st.id = "ag-theme-preload";
-          st.textContent = "html.ag-dark{background:#111214;color:#eceef2;}html.ag-dark body{background:#111214;color:#eceef2;}";
-          document.head.appendChild(st);
-        }
-      } catch (_) {}
-    })();
-  </script>
-  <title>Archilink | Marka Paneli</title>
+  <title>Antigravity | Marka Paneli</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body data-page="brand-panel" class="bg-[#f5f5f7] text-[#111] font-sans min-h-screen">
@@ -264,8 +251,13 @@
       <section class="rounded-2xl border border-black/10 p-5">
         <div class="flex items-center justify-between">
           <h3 class="text-[20px] font-semibold">Paneldeki Ürünlerim</h3>
-          <button id="clear-products" class="px-4 py-2 rounded-full border border-black/15 text-[13px]">Hepsini Temizle</button>
+          <div class="flex flex-wrap gap-2">
+            <button id="toggle-select-mode" type="button" class="px-4 py-2 rounded-full border border-black/15 text-[13px]">Seç</button>
+            <button id="delete-selected-products" type="button" class="px-4 py-2 rounded-full border border-black/15 text-[13px] hidden">Seçilenleri Sil</button>
+            <button id="clear-products" class="px-4 py-2 rounded-full border border-black/15 text-[13px]">Hepsini Temizle</button>
+          </div>
         </div>
+        <p id="bulk-delete-msg" class="mt-2 text-[12px] text-[#6e6e73] hidden"></p>
         <div id="brand-products" class="mt-4 grid md:grid-cols-2 xl:grid-cols-3 gap-4"></div>
       </section>
 
@@ -288,6 +280,14 @@
           <p id="project-save-msg" class="md:col-span-2 text-[12px] text-[#6e6e73]"></p>
         </form>
       </section>
+
+      <section class="rounded-2xl border border-black/10 p-5">
+        <div class="flex items-center justify-between gap-3">
+          <h3 class="text-[20px] font-semibold">Projelerim</h3>
+          <span id="projects-count" class="text-[12px] text-[#6e6e73]">0 proje</span>
+        </div>
+        <div id="brand-projects" class="mt-4 grid md:grid-cols-2 xl:grid-cols-3 gap-4"></div>
+      </section>
     </main>
     <div id="site-footer"></div>
   </div>
@@ -302,6 +302,8 @@
     const countViews    = document.getElementById("count-views");
 
     let session = null;
+    let selectMode = false;
+    let selectedProductIds = new Set();
     const PRODUCT_TAXONOMY = {
       "Malzemeler": [
         "Zemin",
@@ -448,9 +450,10 @@
 
       productsWrap.innerHTML = items.length
         ? items.map((p) => `
-          <article class="rounded-2xl overflow-hidden border border-black/10 bg-white">
+          <article class="rounded-2xl overflow-hidden border border-black/10 bg-white ${selectMode && selectedProductIds.has(p.id) ? "ring-2 ring-black/70" : ""}">
             <img src="${p.image || "https://images.unsplash.com/photo-1600607686527-6fb886090705?q=80&w=1974&auto=format&fit=crop"}" class="w-full h-36 object-cover" alt="${p.name}">
             <div class="p-4">
+              ${selectMode ? `<label class="inline-flex items-center gap-2 text-[12px] mb-2 cursor-pointer"><input type="checkbox" class="accent-black" data-select-product="${p.id}" ${selectedProductIds.has(p.id) ? "checked" : ""}> Seç</label>` : ""}
               <p class="text-[11px] text-[#6e6e73]">${p.category || "—"}</p>
               <h4 class="font-semibold mt-1">${p.name}</h4>
               <p class="text-[12px] text-[#6e6e73] mt-1">${p.spec || "Teknik bilgi bekleniyor"}</p>
@@ -467,6 +470,17 @@
             </div>
           </article>`).join("")
         : `<p class="text-[14px] text-[#6e6e73]">Henüz ürün eklenmedi.</p>`;
+
+      const toggleBtn = document.getElementById("toggle-select-mode");
+      const deleteSelectedBtn = document.getElementById("delete-selected-products");
+      const bulkMsg = document.getElementById("bulk-delete-msg");
+      if (toggleBtn && deleteSelectedBtn && bulkMsg) {
+        toggleBtn.textContent = selectMode ? "Seçimi Kapat" : "Seç";
+        deleteSelectedBtn.classList.toggle("hidden", !selectMode);
+        const count = selectedProductIds.size;
+        bulkMsg.classList.toggle("hidden", !selectMode);
+        bulkMsg.textContent = selectMode ? `${count} ürün seçildi.` : "";
+      }
 
       productsWrap.querySelectorAll("[data-publish]").forEach((btn) => {
         btn.onclick = async () => {
@@ -485,6 +499,39 @@
           await render();
         };
       });
+
+      productsWrap.querySelectorAll("[data-select-product]").forEach((cb) => {
+        cb.addEventListener("change", () => {
+          const id = cb.getAttribute("data-select-product");
+          if (!id) return;
+          if (cb.checked) selectedProductIds.add(id);
+          else selectedProductIds.delete(id);
+          const bulkMsg = document.getElementById("bulk-delete-msg");
+          if (bulkMsg && selectMode) bulkMsg.textContent = `${selectedProductIds.size} ürün seçildi.`;
+        });
+      });
+
+      await renderProjects();
+    }
+
+    async function renderProjects() {
+      const wrap = document.getElementById("brand-projects");
+      const countEl = document.getElementById("projects-count");
+      if (!wrap || !countEl) return;
+      const projects = await AG.getProjects({ brandId: session.id });
+      countEl.textContent = `${projects.length} proje`;
+      wrap.innerHTML = projects.length
+        ? projects.map((pr) => `
+          <article class="rounded-2xl overflow-hidden border border-black/10 bg-white">
+            <img src="${pr.image || "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=1200&auto=format&fit=crop"}" class="w-full h-36 object-cover" alt="${pr.title}">
+            <div class="p-4">
+              <p class="text-[11px] text-[#6e6e73]">${pr.location || "Lokasyon yok"}${pr.year ? ` · ${pr.year}` : ""}</p>
+              <h4 class="font-semibold mt-1">${pr.title}</h4>
+              <p class="text-[12px] text-[#6e6e73] mt-1 line-clamp-2">${pr.description || "Açıklama yok."}</p>
+              <p class="text-[12px] text-[#6e6e73] mt-2">Etiketli malzeme: ${(pr.materials || []).length}</p>
+            </div>
+          </article>`).join("")
+        : `<p class="text-[14px] text-[#6e6e73]">Henüz proje eklenmedi.</p>`;
     }
 
     function attachHandlers() {
@@ -739,6 +786,24 @@
         if (!confirm("Tüm ürünleri silmek istediğinden emin misin?")) return;
         const items = await AG.getProducts({ brandId: session.id });
         for (const p of items) { await AG.deleteProduct(p.id); }
+        selectedProductIds.clear();
+        await render();
+      });
+
+      document.getElementById("toggle-select-mode")?.addEventListener("click", async () => {
+        selectMode = !selectMode;
+        if (!selectMode) selectedProductIds.clear();
+        await render();
+      });
+
+      document.getElementById("delete-selected-products")?.addEventListener("click", async () => {
+        if (!selectedProductIds.size) return;
+        if (!confirm(`${selectedProductIds.size} ürünü silmek istediğine emin misin?`)) return;
+        const ids = [...selectedProductIds];
+        for (const id of ids) {
+          await AG.deleteProduct(id);
+        }
+        selectedProductIds.clear();
         await render();
       });
 
@@ -774,8 +839,9 @@
         }
         e.currentTarget.reset();
         [...sel.options].forEach((o) => (o.selected = false));
-        msg.textContent = "Proje yayınlandı.";
+        msg.textContent = "Proje başarıyla eklenmiştir.";
         msg.className = "md:col-span-2 text-[12px] text-green-600";
+        await renderProjects();
       });
 
     // --- URL Import ---
