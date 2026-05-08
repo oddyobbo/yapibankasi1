@@ -332,23 +332,29 @@
           </div>
           <button id="mobile-menu-btn" class="lg:hidden inline-flex items-center justify-center w-12 h-12 text-[32px] font-semibold leading-none" aria-label="Menü">☰</button>
         </div>
-        <div id="mobile-drawer-overlay" class="lg:hidden hidden fixed inset-0 bg-black/40 z-40"></div>
-        <aside id="mobile-drawer" class="lg:hidden fixed inset-0 z-50" style="background-color:${isDarkTheme ? "#17181b" : "#ffffff"};transform:translate3d(-100%,0,0);transition:transform .34s cubic-bezier(.22,1,.36,1);will-change:transform;backface-visibility:hidden;isolation:isolate;">
-          <div class="h-[76px] px-5 border-b border-black/[0.08] flex items-center justify-between">
-            <a href="/mvp-taslak-v1.html" data-ag-logo="1" class="inline-flex items-baseline gap-0 leading-none select-none" style="font-size:22px;font-weight:600;letter-spacing:-0.3px;color:${logoColor};text-decoration:none;" aria-label="Archilink">
-              <span>Arch</span><span style="position:relative;display:inline-block;"><span>il</span><svg style="position:absolute;bottom:-5px;left:-1px;right:-1px;width:calc(100% + 2px);overflow:visible;" height="6" viewBox="0 0 20 6" preserveAspectRatio="none"><path data-ag-logo-path="1" d="M0,1 Q10,6 20,1" stroke="${logoColor}" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg></span><span>ink</span>
-            </a>
-            <button id="mobile-drawer-close" type="button" class="w-10 h-10 inline-flex items-center justify-center rounded-full border border-black/[0.10] text-[22px] leading-none" aria-label="Menüyü kapat">×</button>
-          </div>
-          <div class="px-5 py-4">
-            <nav>
-              ${mobileNav}
-            </nav>
-            ${mobileAuthLinks}
-          </div>
-        </aside>
       </header>
     `;
+
+    // Drawer must live on body, NOT inside header — backdrop-filter on header
+    // creates a new containing block that breaks fixed positioning of children.
+    const drawerHTML = `
+      <div id="mobile-drawer-overlay" class="lg:hidden hidden fixed inset-0 bg-black/40 z-[90]"></div>
+      <aside id="mobile-drawer" class="lg:hidden fixed inset-0 z-[100] overflow-y-auto" style="background-color:${isDarkTheme ? "#17181b" : "#ffffff"};transform:translate3d(-100%,0,0);transition:transform .34s cubic-bezier(.22,1,.36,1);will-change:transform;">
+        <div class="h-[72px] px-5 border-b border-black/[0.08] flex items-center justify-between" style="border-color:${isDarkTheme ? "rgba(255,255,255,.12)" : "rgba(0,0,0,.08)"};">
+          <a href="/mvp-taslak-v1.html" data-ag-logo="1" class="inline-flex items-baseline gap-0 leading-none select-none" style="font-size:22px;font-weight:600;letter-spacing:-0.3px;color:${logoColor};text-decoration:none;" aria-label="Archilink">
+            <span>Arch</span><span style="position:relative;display:inline-block;"><span>il</span><svg style="position:absolute;bottom:-5px;left:-1px;right:-1px;width:calc(100% + 2px);overflow:visible;" height="6" viewBox="0 0 20 6" preserveAspectRatio="none"><path data-ag-logo-path="1" d="M0,1 Q10,6 20,1" stroke="${logoColor}" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg></span><span>ink</span>
+          </a>
+          <button id="mobile-drawer-close" type="button" class="w-10 h-10 inline-flex items-center justify-center rounded-full text-[26px] leading-none" aria-label="Menüyü kapat">×</button>
+        </div>
+        <div class="px-5 py-4">
+          <nav>${mobileNav}</nav>
+          ${mobileAuthLinks}
+        </div>
+      </aside>
+    `;
+    const drawerWrap = document.createElement("div");
+    drawerWrap.innerHTML = drawerHTML;
+    document.body.appendChild(drawerWrap);
 
     const menuBtn = document.getElementById("mobile-menu-btn");
     const mobileDrawer = document.getElementById("mobile-drawer");
@@ -357,9 +363,9 @@
     if (menuBtn && mobileDrawer && mobileDrawerOverlay) {
       const openDrawer = () => {
         const bg = document.documentElement.classList.contains("ag-dark") ? "#17181b" : "#ffffff";
-        mobileDrawer.style.setProperty("background-color", bg, "important");
+        mobileDrawer.style.backgroundColor = bg;
         mobileDrawerOverlay.classList.remove("hidden");
-        requestAnimationFrame(() => { mobileDrawer.style.transform = "translate3d(0,0,0)"; });
+        requestAnimationFrame(() => requestAnimationFrame(() => { mobileDrawer.style.transform = "translate3d(0,0,0)"; }));
         document.body.style.overflow = "hidden";
       };
       const closeDrawer = () => {
