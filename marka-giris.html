@@ -3,6 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>
+    (function(){
+      try {
+        if (localStorage.getItem("ag_theme_v1") === "dark") {
+          document.documentElement.classList.add("ag-dark");
+        }
+      } catch (_) {}
+    })();
+  </script>
   <title>Archilink | Marka Giriş</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
