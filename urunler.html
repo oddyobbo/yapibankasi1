@@ -15,15 +15,31 @@
     .card-lift:hover { transform: translateY(-3px); border-color: rgba(0,0,0,.22); }
     body.compare-mode-active .card-lift:hover { transform: none; }
 
-    /* Sidebar slide */
-    #filter-sidebar {
-      width: 0;
-      overflow: hidden;
-      flex-shrink: 0;
-      transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Sidebar overlay — slides over products, doesn't push them */
+    #filter-sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.32);
+      z-index: 40;
     }
-    #filter-sidebar.open { width: 264px; }
-    #filter-sidebar-inner { width: 264px; }
+    #filter-sidebar-overlay.open { display: block; }
+
+    #filter-sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 300px;
+      z-index: 41;
+      overflow-y: auto;
+      background: #fff;
+      transform: translateX(-100%);
+      transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 4px 0 32px rgba(0,0,0,.12);
+    }
+    #filter-sidebar.open { transform: translateX(0); }
+    html.ag-dark #filter-sidebar { background: #1c1c1e; }
 
     /* Category pills scroll */
     #category-pills {
@@ -241,12 +257,12 @@
     </div>
 
     <!-- ── Main content ── -->
-    <div class="flex min-h-[calc(100vh-130px)]">
+    <div id="filter-sidebar-overlay"></div>
 
-      <!-- Left sidebar -->
-      <aside id="filter-sidebar">
-        <div id="filter-sidebar-inner" class="border-r border-black/[0.07]" style="overflow-y:auto;">
-          <div class="p-4">
+    <!-- Left sidebar (overlay panel, does not push product grid) -->
+    <aside id="filter-sidebar">
+        <div id="filter-sidebar-inner">
+          <div class="p-4 pt-6">
 
             <!-- Sidebar search -->
             <div class="relative mb-4">
@@ -277,14 +293,13 @@
 
           </div>
         </div>
-      </aside>
+    </aside>
 
-      <!-- Product grid -->
-      <div id="products-grid-wrapper" class="flex-1 min-w-0 px-5 py-5">
-        <p id="result-count" class="text-[13px] text-[#6e6e73] mb-4"></p>
-        <div id="products-grid" class="grid sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-5"></div>
-        <p id="empty-msg" class="hidden text-center text-[#6e6e73] py-20 text-[15px]">Arama kriterlerine uygun ürün bulunamadı.</p>
-      </div>
+    <!-- Product grid (full width, never squishes) -->
+    <div id="products-grid-wrapper" class="px-5 py-5">
+      <p id="result-count" class="text-[13px] text-[#6e6e73] mb-4"></p>
+      <div id="products-grid" class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-5"></div>
+      <p id="empty-msg" class="hidden text-center text-[#6e6e73] py-20 text-[15px]">Arama kriterlerine uygun ürün bulunamadı.</p>
     </div>
   </div>
 
@@ -886,12 +901,27 @@
     });
 
     // ── Sidebar toggle ──
-    document.getElementById("sidebar-toggle").addEventListener("click", () => {
-      const sidebar = document.getElementById("filter-sidebar");
-      const btn = document.getElementById("sidebar-toggle");
-      sidebar.classList.toggle("open");
-      btn.classList.toggle("active");
+    const filterSidebar = document.getElementById("filter-sidebar");
+    const filterOverlay = document.getElementById("filter-sidebar-overlay");
+    const sidebarBtn = document.getElementById("sidebar-toggle");
+
+    function openFilterSidebar() {
+      filterSidebar.classList.add("open");
+      filterOverlay.classList.add("open");
+      sidebarBtn.classList.add("active");
+      document.body.style.overflow = "hidden";
+    }
+    function closeFilterSidebar() {
+      filterSidebar.classList.remove("open");
+      filterOverlay.classList.remove("open");
+      sidebarBtn.classList.remove("active");
+      document.body.style.overflow = "";
+    }
+
+    sidebarBtn.addEventListener("click", () => {
+      filterSidebar.classList.contains("open") ? closeFilterSidebar() : openFilterSidebar();
     });
+    filterOverlay.addEventListener("click", closeFilterSidebar);
 
     // ── Search dropdown toggle ──
     document.getElementById("search-toggle").addEventListener("click", e => {
