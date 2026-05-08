@@ -156,7 +156,7 @@
       var cx = tw.map(function(w){ return vw/2 - w/2; });
       var cy = th.map(function(h,i){ return (i+0.5)*bh - h/2; });
 
-      // Set initial off-screen transform BEFORE transition fires
+      // Set initial off-screen transform WITHOUT transition
       texts.forEach(function(t,i){
         t.style.transform = "translateX("+(cx[i]-vw*1.2)+"px) translateY("+cy[i]+"px) scale(1)";
       });
@@ -164,9 +164,9 @@
       // Final compact layout constants
       var s   = 0.58;
       var lx  = Math.round(Math.max(24, Math.min(64, vw*0.04)));
-      var gx  = 20;  // horizontal gap between col1 and col2
-      var gy  = 10;  // vertical gap between rows
-      var bot = 110; // distance from hero bottom
+      var gx  = 20;
+      var gy  = 10;
+      var bot = 160; // distance from hero bottom — higher = text appears higher up
 
       var r1h = th[0]*s;
       var r2h = th[2]*s;
@@ -184,16 +184,23 @@
 
       // Place CTA just below row 2
       heroCta.style.left  = lx+"px";
-      heroCta.style.top   = (r2y + r2h + 20)+"px";
+      heroCta.style.top   = (r2y + r2h + 22)+"px";
 
-      // -- Phase 1: enable transition, staggered slide to center --
       var slideT = "transform .88s cubic-bezier(.22,1,.36,1)";
-      texts.forEach(function(t,i){
-        setTimeout(function(){
-          if(divs[i]) divs[i].style.transform = "scaleX(1)";
-          t.style.transition = slideT;
-          t.style.transform  = "translateX("+cx[i]+"px) translateY("+cy[i]+"px) scale(1)";
-        }, 260 + i*210);
+
+      // Double rAF: forces browser to COMMIT the off-screen state before
+      // any transition fires — otherwise browser batches and skips Phase 1
+      requestAnimationFrame(function(){
+        requestAnimationFrame(function(){
+          // -- Phase 1: staggered slide to center --
+          texts.forEach(function(t,i){
+            setTimeout(function(){
+              if(divs[i]) divs[i].style.transform = "scaleX(1)";
+              t.style.transition = slideT;
+              t.style.transform  = "translateX("+cx[i]+"px) translateY("+cy[i]+"px) scale(1)";
+            }, i*220);
+          });
+        });
       });
 
       // -- Phase 2: photo + overlay + texts fly to final positions --
