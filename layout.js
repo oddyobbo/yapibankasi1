@@ -333,7 +333,7 @@
           <button id="mobile-menu-btn" class="lg:hidden inline-flex items-center justify-center w-12 h-12 text-[32px] font-semibold leading-none" aria-label="Menü">☰</button>
         </div>
         <div id="mobile-drawer-overlay" class="lg:hidden hidden fixed inset-0 bg-black/40 z-40"></div>
-        <aside id="mobile-drawer" class="lg:hidden fixed inset-0 z-50 shadow-[0_20px_50px_rgba(0,0,0,0.2)]" style="background:${isDarkTheme ? "#17181b" : "#ffffff"};transform:translate3d(-100%,0,0);transition:transform .34s cubic-bezier(.22,1,.36,1);will-change:transform;backface-visibility:hidden;">
+        <aside id="mobile-drawer" class="lg:hidden fixed inset-0 z-50" style="background-color:${isDarkTheme ? "#17181b" : "#ffffff"};transform:translate3d(-100%,0,0);transition:transform .34s cubic-bezier(.22,1,.36,1);will-change:transform;backface-visibility:hidden;isolation:isolate;">
           <div class="h-[76px] px-5 border-b border-black/[0.08] flex items-center justify-between">
             <a href="/mvp-taslak-v1.html" data-ag-logo="1" class="inline-flex items-baseline gap-0 leading-none select-none" style="font-size:22px;font-weight:600;letter-spacing:-0.3px;color:${logoColor};text-decoration:none;" aria-label="Archilink">
               <span>Arch</span><span style="position:relative;display:inline-block;"><span>il</span><svg style="position:absolute;bottom:-5px;left:-1px;right:-1px;width:calc(100% + 2px);overflow:visible;" height="6" viewBox="0 0 20 6" preserveAspectRatio="none"><path data-ag-logo-path="1" d="M0,1 Q10,6 20,1" stroke="${logoColor}" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg></span><span>ink</span>
@@ -356,6 +356,8 @@
     const mobileDrawerClose = document.getElementById("mobile-drawer-close");
     if (menuBtn && mobileDrawer && mobileDrawerOverlay) {
       const openDrawer = () => {
+        const bg = document.documentElement.classList.contains("ag-dark") ? "#17181b" : "#ffffff";
+        mobileDrawer.style.setProperty("background-color", bg, "important");
         mobileDrawerOverlay.classList.remove("hidden");
         requestAnimationFrame(() => { mobileDrawer.style.transform = "translate3d(0,0,0)"; });
         document.body.style.overflow = "hidden";
