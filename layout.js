@@ -110,7 +110,7 @@
           const megaCols = productMegaMenu.map(
               (col) => `
                 <div>
-                  <a href="/urunler.html?category=${encodeURIComponent(col.name)}" class="inline-flex items-center gap-2 text-[17px] font-semibold text-black hover:opacity-80">
+                  <a href="/urunler.html?category=${encodeURIComponent(col.name)}" class="inline-flex items-center gap-2 text-[18px] font-semibold text-black hover:text-[#6e6e73] transition-colors">
                     <span>${col.name}</span>
                     <span class="text-[15px] text-[#7a7a80]">›</span>
                   </a>
@@ -120,7 +120,7 @@
                         (sub) =>
                           `<a href="/urunler.html?category=${encodeURIComponent(col.name)}&sub=${encodeURIComponent(
                             sub
-                          )}" class="flex items-center gap-2 text-[15px] text-[#4a4a4f] hover:text-black">
+                          )}" class="flex items-center gap-2 text-[16px] text-black hover:text-[#6e6e73] transition-colors">
                             <span class="w-4 h-4 inline-flex items-center justify-center">${subCategoryIcons[sub] || iSquare}</span>
                             <span>${sub}</span>
                           </a>`
@@ -141,11 +141,15 @@
               </button>
               <div id="products-mega-panel" class="hidden fixed left-0 right-0 top-[72px] z-40">
                 <div class="w-full border-y border-black/[0.08] bg-white shadow-[0_30px_70px_rgba(0,0,0,0.16)]">
-                  <div class="px-6 pt-4">
-                    <div class="inline-flex rounded-full bg-[#f1f1f3] p-1">
-                      <a href="/urunler.html" data-products-tab="all" class="products-tab-btn inline-flex items-center h-9 px-4 rounded-full bg-[#2c2d3a] text-white text-[12px] font-semibold">Tüm Ürünler</a>
-                      <button data-products-tab="new" class="products-tab-btn h-9 px-4 rounded-full text-[12px] font-semibold text-[#3a3a40]">Yeni Koleksiyonlar</button>
+                  <div class="px-6 pt-4 pb-1 flex items-center">
+                    <p class="text-[20px] font-semibold text-black min-w-[120px]">Ürünler</p>
+                    <div class="flex-1 flex justify-center">
+                      <div class="inline-flex rounded-full bg-[#f1f1f3] p-1">
+                        <a href="/urunler.html" class="inline-flex items-center h-10 px-5 rounded-full text-[14px] font-semibold text-black hover:text-[#6e6e73] transition-colors">Tüm Ürünler</a>
+                        <a href="/yeni-koleksiyonlar.html" class="inline-flex items-center h-10 px-5 rounded-full text-[14px] font-semibold text-black hover:text-[#6e6e73] transition-colors">Yeni Koleksiyonlar</a>
+                      </div>
                     </div>
+                    <div class="min-w-[120px]"></div>
                   </div>
                   <div class="px-6 py-5 grid grid-cols-3 gap-6">
                     ${megaCols}
@@ -287,13 +291,6 @@
       document.addEventListener("click", closeMega);
       document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeMega(); });
 
-      const tabs = megaPanel.querySelectorAll(".products-tab-btn");
-      tabs.forEach((t) => {
-        t.addEventListener("click", () => {
-          tabs.forEach((x) => x.className = "products-tab-btn h-9 px-4 rounded-full text-[12px] font-semibold text-[#3a3a40]");
-          t.className = "products-tab-btn h-9 px-4 rounded-full bg-[#2c2d3a] text-white text-[12px] font-semibold";
-        });
-      });
     }
 
     const archDropBtn = document.getElementById("arch-dropdown-btn");
