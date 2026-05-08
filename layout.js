@@ -33,6 +33,8 @@
   }
 
   const current = document.body.dataset.page || "";
+  const themeForUi = getTheme();
+  const logoColor = themeForUi === "dark" ? "#f2f4f8" : "#1d1d1f";
 
   const baseNavItems = [
     { id: "home",     href: "/mvp-taslak-v1.html", label: "Anasayfa" },
@@ -277,8 +279,6 @@
         ${theme === "dark" ? sunIcon : moonIcon}
       </button>
     `;
-
-    const logoColor = theme === "dark" ? "#f2f4f8" : "#1d1d1f";
 
     const mobileAuthLinks = architectSession
       ? `
