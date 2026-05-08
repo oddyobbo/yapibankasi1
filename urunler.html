@@ -1010,6 +1010,7 @@
     });
 
     document.getElementById("compare-open-btn").addEventListener("click", () => {
+      // Toggle behavior: second click exits compare mode directly.
       if (!compareMode) {
         compareMode = true;
         updateCompareBar();
@@ -1017,11 +1018,10 @@
         showToast("Karşılaştırmak için kartlardaki kutucuğu işaretle (en fazla 5).");
         return;
       }
-      if (comparePickOrder.length >= 2) {
-        openCompareResult();
-        return;
-      }
-      showToast("Önce en az 2 ürün seç veya alttaki şeritten devam et.");
+      compareMode = false;
+      comparePickOrder = [];
+      updateCompareBar();
+      render();
     });
 
     document.getElementById("compare-bar-cancel").addEventListener("click", () => {
