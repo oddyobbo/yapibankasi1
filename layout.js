@@ -120,7 +120,7 @@
                         (sub) =>
                           `<a href="/urunler.html?category=${encodeURIComponent(col.name)}&sub=${encodeURIComponent(
                             sub
-                          )}" class="flex items-center gap-2 text-[16px] text-black hover:text-[#6e6e73] transition-colors">
+                          )}" class="flex items-center gap-2 text-[17px] text-black hover:text-[#6e6e73] transition-colors">
                             <span class="w-4 h-4 inline-flex items-center justify-center">${subCategoryIcons[sub] || iSquare}</span>
                             <span>${sub}</span>
                           </a>`
@@ -144,8 +144,8 @@
                   <div class="px-6 pt-4 pb-1 flex items-center gap-4">
                     <p class="text-[20px] font-semibold text-black">Ürünler</p>
                     <div class="inline-flex rounded-full bg-[#f1f1f3] p-1">
-                      <a href="/urunler.html" class="inline-flex items-center h-10 px-5 rounded-full text-[14px] font-semibold text-black hover:text-[#6e6e73] transition-colors">Tüm Ürünler</a>
-                      <a href="/yeni-koleksiyonlar.html" class="inline-flex items-center h-10 px-5 rounded-full text-[14px] font-semibold text-black hover:text-[#6e6e73] transition-colors">Yeni Koleksiyonlar</a>
+                      <a href="/urunler.html" class="inline-flex items-center h-10 px-5 rounded-full text-[15px] font-semibold text-black hover:text-[#6e6e73] transition-colors">Tüm Ürünler</a>
+                      <a href="/yeni-koleksiyonlar.html" class="inline-flex items-center h-10 px-5 rounded-full text-[15px] font-semibold text-black hover:text-[#6e6e73] transition-colors">Yeni Koleksiyonlar</a>
                     </div>
                   </div>
                   <div class="px-6 py-5 grid grid-cols-3 gap-6">
