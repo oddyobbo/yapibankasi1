@@ -102,37 +102,35 @@
   <div id="site-header"></div>
 
   <main>
-    <!-- HERO – full-screen animated bands -->
-    <section id="hero-anim" style="background:#fff;height:100svh;display:flex;overflow:hidden;position:relative">
+    <!-- HERO – animated bands (GPU-only transforms) -->
+    <section id="hero-anim" style="background:#fff;height:88vh;display:flex;overflow:hidden;position:relative">
 
-      <!-- LEFT: 4 bands column -->
-      <div id="hero-left" style="flex-shrink:0;width:100%;display:flex;flex-direction:column;transition:width 1.15s cubic-bezier(.77,0,.18,1)">
+      <div id="hero-left" style="flex-shrink:0;width:100%;display:flex;flex-direction:column;will-change:width;transition:width 1.1s cubic-bezier(.77,0,.18,1)">
 
         <div class="hband" style="flex:1;position:relative;overflow:hidden">
-          <div class="hline" style="position:absolute;bottom:0;left:0;height:1px;background:rgba(0,0,0,.13);width:0;transition:width .75s cubic-bezier(.4,0,.2,1)"></div>
-          <span class="hbt" style="position:absolute;top:50%;left:50%;white-space:nowrap;font-size:clamp(28px,5.2vw,84px);font-weight:200;letter-spacing:-.03em;color:#0b0b0c;transform:translate(calc(-50% - 110vw),-50%);transition:transform .85s cubic-bezier(.22,1,.36,1),left .95s cubic-bezier(.77,0,.18,1)">Türkiye'nin mimari</span>
+          <div class="hline" style="position:absolute;bottom:0;left:0;width:100%;height:1px;background:rgba(0,0,0,.13);transform:scaleX(0);transform-origin:left;will-change:transform;transition:transform .8s cubic-bezier(.4,0,.2,1)"></div>
+          <span class="hbt" style="position:absolute;top:50%;left:0;white-space:nowrap;font-size:clamp(26px,5.2vw,82px);font-weight:200;letter-spacing:-.03em;color:#0b0b0c;will-change:transform;transform:translateX(-110vw) translateY(-50%);transition:transform .85s cubic-bezier(.22,1,.36,1)">Türkiye'nin mimari</span>
         </div>
 
         <div class="hband" style="flex:1;position:relative;overflow:hidden">
-          <div class="hline" style="position:absolute;bottom:0;left:0;height:1px;background:rgba(0,0,0,.13);width:0;transition:width .75s cubic-bezier(.4,0,.2,1)"></div>
-          <span class="hbt" style="position:absolute;top:50%;left:50%;white-space:nowrap;font-size:clamp(28px,5.2vw,84px);font-weight:200;letter-spacing:-.03em;color:#0b0b0c;transform:translate(calc(-50% - 110vw),-50%);transition:transform .85s cubic-bezier(.22,1,.36,1),left .95s cubic-bezier(.77,0,.18,1)">malzeme platformu.</span>
+          <div class="hline" style="position:absolute;bottom:0;left:0;width:100%;height:1px;background:rgba(0,0,0,.13);transform:scaleX(0);transform-origin:left;will-change:transform;transition:transform .8s cubic-bezier(.4,0,.2,1)"></div>
+          <span class="hbt" style="position:absolute;top:50%;left:0;white-space:nowrap;font-size:clamp(26px,5.2vw,82px);font-weight:200;letter-spacing:-.03em;color:#0b0b0c;will-change:transform;transform:translateX(-110vw) translateY(-50%);transition:transform .85s cubic-bezier(.22,1,.36,1)">malzeme platformu.</span>
         </div>
 
         <div class="hband" style="flex:1;position:relative;overflow:hidden">
-          <div class="hline" style="position:absolute;bottom:0;left:0;height:1px;background:rgba(0,0,0,.13);width:0;transition:width .75s cubic-bezier(.4,0,.2,1)"></div>
-          <span class="hbt" style="position:absolute;top:50%;left:50%;white-space:nowrap;font-size:clamp(28px,5.2vw,84px);font-weight:200;letter-spacing:-.03em;color:#0b0b0c;transform:translate(calc(-50% - 110vw),-50%);transition:transform .85s cubic-bezier(.22,1,.36,1),left .95s cubic-bezier(.77,0,.18,1)">100+ marka · binlerce ürün</span>
+          <div class="hline" style="position:absolute;bottom:0;left:0;width:100%;height:1px;background:rgba(0,0,0,.13);transform:scaleX(0);transform-origin:left;will-change:transform;transition:transform .8s cubic-bezier(.4,0,.2,1)"></div>
+          <span class="hbt" style="position:absolute;top:50%;left:0;white-space:nowrap;font-size:clamp(26px,5.2vw,82px);font-weight:200;letter-spacing:-.03em;color:#0b0b0c;will-change:transform;transform:translateX(-110vw) translateY(-50%);transition:transform .85s cubic-bezier(.22,1,.36,1)">100+ marka · binlerce ürün</span>
         </div>
 
         <div class="hband" style="flex:1;position:relative;overflow:hidden">
-          <span class="hbt" style="position:absolute;top:50%;left:50%;white-space:nowrap;font-size:clamp(28px,5.2vw,84px);font-weight:200;letter-spacing:-.03em;color:#0b0b0c;transform:translate(calc(-50% - 110vw),-50%);transition:transform .85s cubic-bezier(.22,1,.36,1),left .95s cubic-bezier(.77,0,.18,1)">NRC · EPD · BIM · teknik veri</span>
+          <span class="hbt" style="position:absolute;top:50%;left:0;white-space:nowrap;font-size:clamp(26px,5.2vw,82px);font-weight:200;letter-spacing:-.03em;color:#0b0b0c;will-change:transform;transform:translateX(-110vw) translateY(-50%);transition:transform .85s cubic-bezier(.22,1,.36,1)">NRC · EPD · BIM · teknik veri</span>
         </div>
 
       </div>
 
-      <!-- RIGHT: photo panel, slides in from right, rounded, padded -->
-      <div id="hero-right" style="flex-shrink:0;width:0%;overflow:hidden;transition:width 1.15s cubic-bezier(.77,0,.18,1);padding:20px 20px 20px 0;box-sizing:border-box">
+      <div id="hero-right" style="flex-shrink:0;width:0%;overflow:hidden;will-change:width;transition:width 1.1s cubic-bezier(.77,0,.18,1);padding:20px 20px 20px 0;box-sizing:border-box">
         <div style="border-radius:22px;overflow:hidden;height:100%;position:relative">
-          <img id="hero-right-img" src="https://images.unsplash.com/photo-1497366811353-6870744d04b2?q=80&w=1974&auto=format&fit=crop" alt="Mimari çalışma alanı" style="width:100%;height:100%;object-fit:cover;transform:translateX(100%);transition:transform 1.15s cubic-bezier(.77,0,.18,1)">
+          <img id="hero-right-img" src="https://images.unsplash.com/photo-1497366811353-6870744d04b2?q=80&w=1974&auto=format&fit=crop" alt="Mimari çalışma alanı" style="width:100%;height:100%;object-fit:cover;will-change:transform;transform:translateX(100%);transition:transform 1.1s cubic-bezier(.77,0,.18,1)">
           <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.38) 0%,transparent 55%)"></div>
           <div id="hero-cta" style="position:absolute;bottom:24px;left:24px;right:24px;opacity:0;transform:translateY(10px);transition:opacity .65s ease,transform .65s ease">
             <p style="color:rgba(255,255,255,.75);font-size:13px;margin:0 0 12px">Mimari proje için doğru malzemeyi saniyeler içinde bul.</p>
@@ -153,35 +151,39 @@
       var heroRight = document.getElementById("hero-right");
       var heroImg   = document.getElementById("hero-right-img");
       var heroCta   = document.getElementById("hero-cta");
+      var vw = window.innerWidth;
 
-      // Phase 1: line draws left→right, text slides in from left → centered
+      // Centered X offset for each text (only transform, no left change)
+      function centerX(el) {
+        return "translateX(calc(50vw - " + (el.offsetWidth / 2) + "px)) translateY(-50%)";
+      }
+      function leftX() {
+        return "translateX(clamp(24px, 4vw, 64px)) translateY(-50%)";
+      }
+
+      // Phase 1: line scaleX + text slides to center, staggered
       texts.forEach(function(t, i) {
         setTimeout(function() {
-          if (lines[i]) lines[i].style.width = "100%";
-          t.style.transform = "translate(-50%,-50%)";
-        }, 280 + i * 210);
+          if (lines[i]) lines[i].style.transform = "scaleX(1)";
+          t.style.transform = centerX(t);
+        }, 260 + i * 200);
       });
 
-      // Phase 2: split (desktop only)
-      if (window.innerWidth >= 768) {
+      // Phase 2: split (desktop only) — only transform changes, no left/width on text
+      if (vw >= 768) {
         setTimeout(function() {
-          // expand panels
           heroLeft.style.width  = "54%";
           heroRight.style.width = "46%";
           heroImg.style.transform = "translateX(0)";
-
-          // slide texts to left-aligned
           texts.forEach(function(t) {
-            t.style.left      = "clamp(24px,4vw,64px)";
-            t.style.transform = "translateY(-50%)";
+            t.style.transition = "transform 1s cubic-bezier(.77,0,.18,1)";
+            t.style.transform  = leftX();
           });
-
-          // show CTA on image
           setTimeout(function() {
             heroCta.style.opacity   = "1";
             heroCta.style.transform = "translateY(0)";
-          }, 650);
-        }, 2000);
+          }, 680);
+        }, 1900);
       }
     })();
     </script>
