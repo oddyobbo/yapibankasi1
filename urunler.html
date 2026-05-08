@@ -6,6 +6,7 @@
   <title>Archilink | Ürün Kataloğu</title>
   <meta name="description" content="Akustik, aydınlatma, dış cephe, zemin ve daha fazlası. Teknik filtrelerle doğru mimari malzemeyi saniyeler içinde bul.">
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif; }
 
@@ -165,7 +166,8 @@
       border-color: #0b0b0c;
     }
     #sort-dropdown .sort-opt:hover { background: #f5f5f7; }
-    #compare-select-grid button:focus-visible { outline: 2px solid #0b0b0c; outline-offset: 2px; }
+    body.compare-mode-active #products-grid-wrapper { padding-bottom: 5.5rem; }
+    #compare-open-btn[data-compare-on="1"] { background: #0b0b0c; color: #fff; border-color: #0b0b0c; }
   </style>
 </head>
 <body data-page="products" class="bg-white text-[#0b0b0c] min-h-screen">
@@ -223,7 +225,7 @@
               <button type="button" data-sort="price_desc" class="sort-opt w-full text-left px-3 py-2">Fiyat (yüksek → düşük)</button>
             </div>
           </div>
-          <button id="compare-open-btn" type="button" class="flex items-center gap-1.5 px-3 h-[34px] rounded-full border border-black/[0.12] text-[12px] font-medium hover:bg-black/[0.04] transition">
+          <button id="compare-open-btn" type="button" title="Karşılaştırma modu: kartları işaretle" class="flex items-center gap-1.5 px-3 h-[34px] rounded-full border border-black/[0.12] text-[12px] font-medium hover:bg-black/[0.04] transition">
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
               <rect x="3" y="3" width="7" height="18" rx="1.5"/><rect x="14" y="3" width="7" height="18" rx="1.5"/>
             </svg>
@@ -290,24 +292,13 @@
 
   <div id="site-footer"></div>
 
-  <!-- Karşılaştır: ürün seçimi -->
-  <div id="compare-select-modal" class="hidden fixed inset-0 z-[60]">
-    <div class="absolute inset-0 bg-black/45" data-compare-select-close="1"></div>
-    <div class="absolute inset-3 sm:inset-6 md:inset-10 max-w-5xl mx-auto rounded-2xl bg-white shadow-2xl flex flex-col overflow-hidden border border-black/[0.08]">
-      <div class="flex items-start justify-between gap-3 px-5 py-4 border-b border-black/[0.06]">
-        <div>
-          <h2 class="text-[18px] font-semibold text-[#1d1d1f]">Ürünleri karşılaştır</h2>
-          <p class="text-[12px] text-[#6e6e73] mt-1">Listeden en fazla <strong>5</strong> ürüne tıklayarak seç. En az 2 ürün gerekir.</p>
-        </div>
-        <button type="button" class="w-9 h-9 rounded-full hover:bg-black/[0.06] text-[#6e6e73]" data-compare-select-close="1" aria-label="Kapat">✕</button>
-      </div>
-      <div id="compare-select-grid" class="flex-1 min-h-[200px] max-h-[min(60vh,520px)] overflow-y-auto p-4 sm:p-5 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3"></div>
-      <div class="flex flex-wrap items-center justify-between gap-3 px-5 py-4 border-t border-black/[0.06] bg-[#fafafa]">
-        <p id="compare-select-count" class="text-[13px] text-[#3a3a3c]">0/5 ürün seçildi</p>
-        <div class="flex gap-2">
-          <button type="button" class="h-9 px-4 rounded-full border border-black/15 text-[13px]" data-compare-select-close="1">Vazgeç</button>
-          <button type="button" id="compare-select-go" disabled class="h-9 px-5 rounded-full bg-[#1d1d1f] text-white text-[13px] font-medium disabled:opacity-40 disabled:cursor-not-allowed">Karşılaştır</button>
-        </div>
+  <!-- Karşılaştır: alt şerit -->
+  <div id="compare-bar" class="hidden fixed bottom-0 left-0 right-0 z-[55] border-t border-black/[0.08] bg-white/95 backdrop-blur-md shadow-[0_-8px_32px_rgba(0,0,0,.08)] px-4 py-3">
+    <div class="max-w-[1400px] mx-auto flex flex-wrap items-center justify-between gap-3">
+      <p id="compare-bar-text" class="text-[13px] text-[#3a3a3c]">0 ürün seçildi (en fazla 5)</p>
+      <div class="flex flex-wrap gap-2">
+        <button type="button" id="compare-bar-cancel" class="h-9 px-4 rounded-full border border-black/15 text-[13px]">İptal</button>
+        <button type="button" id="compare-bar-show" disabled class="h-9 px-5 rounded-full bg-[#1d1d1f] text-white text-[13px] font-semibold disabled:opacity-35 disabled:pointer-events-none">Karşılaştırmayı göster</button>
       </div>
     </div>
   </div>
@@ -316,10 +307,11 @@
   <div id="compare-result-modal" class="hidden fixed inset-0 z-[61]">
     <div class="absolute inset-0 bg-black/45" data-compare-result-close="1"></div>
     <div class="absolute inset-3 sm:inset-5 md:inset-8 max-w-[1400px] mx-auto rounded-2xl bg-white shadow-2xl flex flex-col overflow-hidden border border-black/[0.08] max-h-[92vh]">
-      <div class="flex items-center justify-between gap-3 px-4 sm:px-5 py-3 border-b border-black/[0.06] flex-shrink-0">
+      <div class="flex flex-wrap items-center justify-between gap-3 px-4 sm:px-5 py-3 border-b border-black/[0.06] flex-shrink-0">
         <h2 class="text-[17px] font-semibold">Karşılaştırma</h2>
-        <div class="flex gap-2">
-          <button type="button" id="compare-back-to-pick" class="h-9 px-3 rounded-full border border-black/15 text-[12px]">Seçimi değiştir</button>
+        <div class="flex flex-wrap gap-2">
+          <button type="button" id="compare-pdf-btn" class="h-9 px-4 rounded-full border border-black/15 text-[12px] font-medium hover:bg-black/[0.04]">PDF indir</button>
+          <button type="button" id="compare-back-to-pick" class="h-9 px-3 rounded-full border border-black/15 text-[12px]">Seçimi düzenle</button>
           <button type="button" class="w-9 h-9 rounded-full hover:bg-black/[0.06] text-[#6e6e73]" data-compare-result-close="1" aria-label="Kapat">✕</button>
         </div>
       </div>
@@ -381,8 +373,9 @@
     const toggles = { ticari: false, konut: false, tumRenkler: false };
 
     let sortBy = "name_asc";
-    let compareSelectSource = [];
+    let compareMode = false;
     let comparePickOrder = [];
+    let lastCompareProducts = [];
 
     const FB_IMAGES = ['https://images.unsplash.com/photo-1600607686527-6fb886090705?q=80&w=800','https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?q=80&w=800','https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=800','https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=800','https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=800','https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?q=80&w=800'];
     function productImageUrl(p) {
@@ -411,48 +404,99 @@
       return sortProducts(filtered(), sortBy);
     }
 
-    function closeCompareSelect() {
-      document.getElementById("compare-select-modal").classList.add("hidden");
-    }
     function closeCompareResult() {
       document.getElementById("compare-result-modal").classList.add("hidden");
     }
-    function openCompareSelect(sourceList) {
-      compareSelectSource = (sourceList || []).filter(Boolean);
-      comparePickOrder = [];
-      if (!compareSelectSource.length) {
-        showToast("Karşılaştırılacak ürün bulunamadı.");
+    function updateCompareBar() {
+      const bar = document.getElementById("compare-bar");
+      const headBtn = document.getElementById("compare-open-btn");
+      if (!bar || !headBtn) return;
+      if (compareMode) {
+        bar.classList.remove("hidden");
+        document.body.classList.add("compare-mode-active");
+        headBtn.setAttribute("data-compare-on", "1");
+      } else {
+        bar.classList.add("hidden");
+        document.body.classList.remove("compare-mode-active");
+        headBtn.removeAttribute("data-compare-on");
+      }
+      const n = comparePickOrder.length;
+      const t = document.getElementById("compare-bar-text");
+      const showBtn = document.getElementById("compare-bar-show");
+      if (t) t.textContent = `${n}/5 seçili · en fazla 5 ürün${n < 2 ? " (en az 2 gerekli)" : ""}`;
+      if (showBtn) showBtn.disabled = n < 2;
+    }
+    function exportComparePdf() {
+      const prods = lastCompareProducts;
+      if (!window.jspdf?.jsPDF || !prods?.length) {
+        showToast("PDF için önce karşılaştırmayı aç.");
         return;
       }
-      renderCompareSelectGrid();
-      document.getElementById("compare-select-modal").classList.remove("hidden");
-    }
-    function renderCompareSelectGrid() {
-      const grid = document.getElementById("compare-select-grid");
-      const n = comparePickOrder.length;
-      document.getElementById("compare-select-count").textContent = `${n}/5 ürün seçildi · en az 2 gerekir`;
-      const go = document.getElementById("compare-select-go");
-      go.disabled = n < 2;
-      grid.innerHTML = compareSelectSource.map(p => {
-        const sel = comparePickOrder.includes(p.id);
-        const img = productImageUrl(p);
-        return `
-          <button type="button" data-compare-pick="${encodeURIComponent(p.id)}" class="relative text-left rounded-2xl border overflow-hidden transition ${sel ? "ring-2 ring-black border-black" : "border-black/[0.08] hover:border-black/25"}">
-            ${sel ? `<span class="absolute top-2 right-2 z-10 w-7 h-7 rounded-full bg-black text-white text-[12px] flex items-center justify-center font-medium">✓</span>` : ""}
-            <div class="h-28 sm:h-32 bg-[#f5f5f7]"><img src="${esc(img)}" alt="" class="w-full h-full object-cover"></div>
-            <div class="p-2.5 sm:p-3">
-              <p class="text-[12px] sm:text-[13px] font-semibold leading-snug line-clamp-2">${esc(p.name)}</p>
-              <p class="text-[11px] text-[#6e6e73] mt-1 truncate">${esc(p.brandName || "—")}</p>
-            </div>
-          </button>`;
-      }).join("");
+      const tech = (p) => p.technical || {};
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
+      const pageH = doc.internal.pageSize.getHeight();
+      const pageW = doc.internal.pageSize.getWidth();
+      const left = 12;
+      const labelCol = 42;
+      const colW = (pageW - left - labelCol - 8) / prods.length;
+      let y = 12;
+      doc.setFontSize(13);
+      doc.setFont(undefined, "bold");
+      doc.text("Archilink — Ürün karşılaştırması", left, y);
+      doc.setFont(undefined, "normal");
+      y += 6;
+      doc.setFontSize(8);
+      doc.setTextColor(100);
+      doc.text("Görseller yalnızca web üzerinde gösterilir.", left, y);
+      doc.text(new Date().toLocaleString("tr-TR"), pageW - 12, y, { align: "right" });
+      doc.setTextColor(0);
+      y += 10;
+      const rowSpecs = [
+        ["Ürün adı", (p) => p.name || "—"],
+        ["Marka", (p) => p.brandName || "—"],
+        ["Kategori", (p) => p.category || "—"],
+        ["Özet", (p) => p.spec || "—"],
+        ["Yangın sınıfı", (p) => tech(p).fireClass || "—"],
+        ["Akustik", (p) => tech(p).acoustic || "—"],
+        ["Boyutlar", (p) => tech(p).dimensions || "—"],
+        ["Kalınlık", (p) => tech(p).thickness || "—"],
+        ["Sertifikalar", (p) => tech(p).certificates || "—"],
+        ["PDF", (p) => (p.files?.pdfUrl || p.hasPdf) ? "Var" : "Yok"],
+        ["CAD", (p) => (p.files?.cadUrl || p.hasCad) ? "Var" : "Yok"],
+        ["Görüntülenme", (p) => String(p.views ?? "—")],
+      ];
+      doc.setFontSize(8);
+      rowSpecs.forEach(([label, get]) => {
+        let rowH = 5;
+        prods.forEach((p, i) => {
+          const lines = doc.splitTextToSize(String(get(p) || "—"), colW - 1);
+          rowH = Math.max(rowH, lines.length * 4.2 + 2);
+        });
+        if (y + rowH > pageH - 10) {
+          doc.addPage();
+          y = 12;
+        }
+        doc.setFont(undefined, "bold");
+        doc.text(label + ":", left, y + 4);
+        doc.setFont(undefined, "normal");
+        let x = left + labelCol;
+        prods.forEach((p, i) => {
+          x = left + labelCol + i * colW;
+          const lines = doc.splitTextToSize(String(get(p) || "—"), colW - 1);
+          doc.text(lines, x, y + 4);
+        });
+        y += rowH;
+      });
+      doc.save(`archilink-karsilastirma-${Date.now()}.pdf`);
+      showToast("PDF indirildi");
     }
     function openCompareResult() {
-      const prods = comparePickOrder.map(id => compareSelectSource.find(x => x.id === id) || allProducts.find(x => x.id === id)).filter(Boolean);
+      const prods = comparePickOrder.map(id => allProducts.find(x => x.id === id)).filter(Boolean);
       if (prods.length < 2) return;
+      lastCompareProducts = prods;
       const tech = (p) => p.technical || {};
       const rows = [
-        { label: "Görsel", type: "img" },
         { label: "Marka", get: (p) => p.brandName || "—" },
         { label: "Kategori", get: (p) => p.category || "—" },
         { label: "Özet", get: (p) => p.spec || "—" },
@@ -465,21 +509,13 @@
         { label: "CAD", get: (p) => (p.files?.cadUrl || p.hasCad) ? "Var" : "Yok" },
         { label: "Görüntülenme", get: (p) => String(p.views ?? "—") },
       ];
-      let thead = "<tr><th class=\"text-left text-[11px] font-semibold text-[#6e6e73] uppercase tracking-wide p-2 w-36 min-w-[8rem]\"></th>";
+      let thead = "<tr><th class=\"text-left text-[11px] font-semibold text-[#6e6e73] uppercase tracking-wide p-2 w-36 min-w-[8rem]\">Özellik</th>";
       prods.forEach(p => {
-        thead += `<th class=\"p-2 align-bottom min-w-[140px] max-w-[200px]\"><a href=\"/urun-unica-baffle.html?id=${encodeURIComponent(p.id)}\" class=\"block group\"><div class=\"aspect-square rounded-xl overflow-hidden bg-[#f5f5f7] mb-2\"><img src=\"${esc(productImageUrl(p))}\" alt=\"\" class=\"w-full h-full object-cover group-hover:opacity-95\"></div><span class=\"text-[13px] font-semibold leading-tight text-[#1d1d1f] group-hover:underline\">${esc(p.name)}</span></a><p class=\"text-[11px] text-[#6e6e73] mt-1\">${esc(p.brandName || "")}</p></th>`;
+        thead += `<th class=\"p-2 align-bottom min-w-[140px] max-w-[220px]\"><div class=\"aspect-[4/3] rounded-xl overflow-hidden bg-[#f5f5f7] mb-2\"><img src=\"${esc(productImageUrl(p))}\" alt=\"\" class=\"w-full h-full object-cover\"></div><a href=\"/urun-unica-baffle.html?id=${encodeURIComponent(p.id)}\" class=\"text-[13px] font-semibold leading-tight text-[#1d1d1f] hover:underline\">${esc(p.name)}</a><p class=\"text-[11px] text-[#6e6e73] mt-1\">${esc(p.brandName || "")}</p></th>`;
       });
       thead += "</tr>";
       let tbody = "";
       rows.forEach(r => {
-        if (r.type === "img") {
-          tbody += "<tr class=\"border-t border-black/[0.06]\"><td class=\"p-2 text-[12px] font-medium text-[#6e6e73] align-middle\">Görsel</td>";
-          prods.forEach(p => {
-            tbody += `<td class=\"p-2 align-middle\"><div class=\"aspect-[4/3] rounded-xl overflow-hidden bg-[#f5f5f7]\"><img src=\"${esc(productImageUrl(p))}\" alt=\"\" class=\"w-full h-full object-cover\"></div></td>`;
-          });
-          tbody += "</tr>";
-          return;
-        }
         tbody += `<tr class=\"border-t border-black/[0.06]\"><td class=\"p-2 text-[12px] font-medium text-[#6e6e73] align-top\">${esc(r.label)}</td>`;
         prods.forEach(p => {
           const v = r.get(p);
@@ -491,7 +527,6 @@
         <div class="overflow-x-auto -mx-1">
           <table class="w-full border-collapse min-w-[640px]"><thead>${thead}</thead><tbody>${tbody}</tbody></table>
         </div>`;
-      closeCompareSelect();
       document.getElementById("compare-result-modal").classList.remove("hidden");
     }
 
@@ -540,10 +575,14 @@
             files: {},
           };
         });
+        compareMode = true;
+        comparePickOrder = merged.slice(0, 5).map((x) => x.id);
+        updateCompareBar();
         renderCategoryPills();
         buildAccordionGroups();
         render();
-        if (merged.length) setTimeout(() => openCompareSelect(merged), 250);
+        if (comparePickOrder.length >= 2) setTimeout(() => openCompareResult(), 200);
+        else if (merged.length) showToast("En az 2 favori ürün seç veya listeden işaretle.");
         else showToast("Karşılaştırmak için önce favori ürün ekleyin.");
         return;
       }
@@ -553,16 +592,27 @@
       render();
     });
 
-    // ── renderCard (keep exactly as original) ──
+    // ── renderCard ──
     function renderCard(p) {
       const isFav = favoriteProductIds.has(p.id);
+      const fb = FB_IMAGES[Math.abs(String(p.id || "").split("").reduce((a, c) => a + c.charCodeAt(0), 0) || 0) % FB_IMAGES.length];
+      const imgSrc = esc(p.image || fb);
+      const inCompare = comparePickOrder.includes(p.id);
+      const compareLabel = compareMode
+        ? `<label onclick="event.stopPropagation()" class="absolute bottom-2 left-2 z-20 flex items-center gap-1.5 rounded-lg bg-white/95 border border-black/12 px-2 py-1 shadow-sm cursor-pointer text-[11px] font-medium text-[#1d1d1f]">
+             <input type="checkbox" class="w-3.5 h-3.5 rounded border-black/20 accent-black" data-compare-card="${encodeURIComponent(p.id)}" ${inCompare ? "checked" : ""}>
+             Seç</label>`
+        : "";
       return `
-        <div class="card-lift group rounded-2xl overflow-hidden border border-black/[0.08] bg-white flex flex-col relative">
-          <a href="/urun-unica-baffle.html?id=${encodeURIComponent(p.id)}" data-view="${p.id}" class="overflow-hidden h-48 bg-[#f5f5f7] block">
-            <img src="${p.image || (() => { const fb = ['https://images.unsplash.com/photo-1600607686527-6fb886090705?q=80&w=800','https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?q=80&w=800','https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=800','https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=800','https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=800','https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?q=80&w=800']; return fb[Math.abs(p.id?.split('').reduce((a,c)=>a+c.charCodeAt(0),0)||0) % fb.length]; })()}"
+        <div class="card-lift group rounded-2xl overflow-hidden border border-black/[0.08] bg-white flex flex-col relative ${inCompare ? "ring-2 ring-black/75" : ""}">
+          <div class="relative h-48 bg-[#f5f5f7] overflow-hidden">
+          <a href="/urun-unica-baffle.html?id=${encodeURIComponent(p.id)}" data-view="${p.id}" class="block h-full w-full">
+            <img src="${imgSrc}"
               onerror="const fb=['https://images.unsplash.com/photo-1600607686527-6fb886090705?q=80&w=800','https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?q=80&w=800','https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=800','https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=800','https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=800','https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?q=80&w=800'];this.onerror=null;this.src=fb[Math.abs((this.alt||'').split('').reduce((a,c)=>a+c.charCodeAt(0),0))%fb.length];"
-              alt="${p.name}" class="w-full h-full object-cover group-hover:scale-[1.03] transition duration-500">
+              alt="${esc(p.name)}" class="w-full h-full object-cover group-hover:scale-[1.03] transition duration-500">
           </a>
+          ${compareLabel}
+          </div>
           <div class="p-4 flex flex-col flex-1">
             <h3 class="text-[14px] font-semibold leading-snug">${p.name}</h3>
             <p class="text-[12px] text-[#6e6e73] mt-1">${p.brandName || ""}</p>
@@ -840,27 +890,47 @@
     });
 
     document.getElementById("compare-open-btn").addEventListener("click", () => {
-      openCompareSelect(getSortedFilteredList());
-    });
-
-    document.getElementById("compare-select-modal").addEventListener("click", e => {
-      if (e.target.closest("[data-compare-select-close]")) {
-        closeCompareSelect();
+      if (!compareMode) {
+        compareMode = true;
+        updateCompareBar();
+        render();
+        showToast("Karşılaştırmak için kartlardaki kutucuğu işaretle (en fazla 5).");
         return;
       }
-      const pick = e.target.closest("[data-compare-pick]");
-      if (pick) {
-        const id = decodeURIComponent(pick.getAttribute("data-compare-pick") || "");
-        const ix = comparePickOrder.indexOf(id);
-        if (ix >= 0) comparePickOrder.splice(ix, 1);
-        else if (comparePickOrder.length < 5) comparePickOrder.push(id);
-        else showToast("En fazla 5 ürün seçebilirsin.");
-        renderCompareSelectGrid();
+      if (comparePickOrder.length >= 2) {
+        openCompareResult();
+        return;
       }
+      showToast("Önce en az 2 ürün seç veya alttaki şeritten devam et.");
     });
-    document.getElementById("compare-select-go").addEventListener("click", () => {
+
+    document.getElementById("compare-bar-cancel").addEventListener("click", () => {
+      compareMode = false;
+      comparePickOrder = [];
+      updateCompareBar();
+      render();
+    });
+    document.getElementById("compare-bar-show").addEventListener("click", () => {
       if (comparePickOrder.length < 2) return;
       openCompareResult();
+    });
+
+    document.getElementById("products-grid").addEventListener("change", e => {
+      const cb = e.target.closest("[data-compare-card]");
+      if (!cb || !compareMode) return;
+      const id = decodeURIComponent(cb.getAttribute("data-compare-card") || "");
+      if (cb.checked) {
+        if (comparePickOrder.length >= 5) {
+          cb.checked = false;
+          showToast("En fazla 5 ürün seçebilirsin.");
+          return;
+        }
+        if (!comparePickOrder.includes(id)) comparePickOrder.push(id);
+      } else {
+        comparePickOrder = comparePickOrder.filter((x) => x !== id);
+      }
+      updateCompareBar();
+      render();
     });
 
     document.getElementById("compare-result-modal").addEventListener("click", e => {
@@ -868,9 +938,11 @@
     });
     document.getElementById("compare-back-to-pick").addEventListener("click", () => {
       document.getElementById("compare-result-modal").classList.add("hidden");
-      document.getElementById("compare-select-modal").classList.remove("hidden");
-      renderCompareSelectGrid();
+      compareMode = true;
+      updateCompareBar();
+      render();
     });
+    document.getElementById("compare-pdf-btn").addEventListener("click", () => exportComparePdf());
 
     // ── Toggle switches ──
     document.querySelectorAll("[data-tog]").forEach(input => {
