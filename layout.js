@@ -119,7 +119,7 @@
         if (item.id === "products") {
           const megaCols = productMegaMenu.map(
               (col) => `
-                <div>
+                <div class="px-6">
                   <a href="/urunler.html?category=${encodeURIComponent(col.value)}" class="inline-flex items-center gap-2 text-[18px] font-semibold text-black hover:text-[#6e6e73] transition-colors">
                     <span>${col.label}</span>
                     <span class="text-[15px] text-[#7a7a80]">›</span>
@@ -150,7 +150,7 @@
                 </span>
               </button>
               <div id="products-mega-panel" class="hidden fixed left-0 right-0 top-[72px] z-40">
-                <div class="w-full border-y border-black/[0.08] bg-white shadow-[0_30px_70px_rgba(0,0,0,0.16)]">
+                <div class="w-full border-x border-b border-black/[0.08] bg-white shadow-[0_30px_70px_rgba(0,0,0,0.16)] rounded-b-2xl overflow-hidden">
                   <div class="px-6 pt-4 pb-1 flex items-center gap-4">
                     <p class="text-[20px] font-semibold text-black">Ürünler</p>
                     <div class="inline-flex rounded-full bg-[#f1f1f3] p-1">
@@ -158,7 +158,7 @@
                       <a href="/yeni-koleksiyonlar.html" class="inline-flex items-center h-10 px-5 rounded-full text-[15px] font-semibold text-black hover:text-[#6e6e73] transition-colors">Yeni Koleksiyonlar</a>
                     </div>
                   </div>
-                  <div class="px-6 py-5 grid grid-cols-3 gap-6">
+                  <div class="py-5 grid grid-cols-3 divide-x divide-black/[0.06]">
                     ${megaCols}
                   </div>
                 </div>
