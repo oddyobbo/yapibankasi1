@@ -210,7 +210,7 @@
     const mobileNav = navItems
       .map((item) => {
         const isActive = item.id === current;
-        return `<a href="${item.href}" class="block px-1 py-3 text-[15px] border-b border-black/[0.06] ${
+        return `<a href="${item.href}" class="block px-1 py-3.5 text-[18px] leading-tight border-b border-black/[0.06] ${
           isActive
             ? (isDarkTheme ? "text-white font-semibold" : "text-black font-semibold")
             : (isDarkTheme ? "text-[#d7dce6]" : "text-[#1f1f22]")
@@ -282,15 +282,30 @@
 
     const mobileAuthLinks = architectSession
       ? `
-        ${themeToggleBtn}
-        <a href="/marka-giris.html" class="flex-1 h-10 inline-flex items-center justify-center rounded-full border border-black/[0.10] text-[13px]">Marka Girişi</a>
-        <a href="/mimar-paneli.html" class="flex-1 h-10 inline-flex items-center justify-center rounded-full border border-black/[0.10] text-[13px]">Mimar Paneli</a>
-        <a href="/moodboard.html" class="flex-1 h-10 inline-flex items-center justify-center rounded-full bg-black text-white text-[13px] font-semibold">Moodboard</a>
+        <div class="pt-4 border-t border-black/[0.08]">
+          <div class="flex items-center justify-between">
+            <p class="text-[12px] uppercase tracking-[0.14em] text-[#6e6e73] font-semibold">Tercihler</p>
+            ${themeToggleBtn}
+          </div>
+          <div class="mt-4 space-y-2">
+            <a href="/mimar-paneli.html" class="h-11 px-4 inline-flex items-center rounded-xl border border-black/[0.10] text-[15px] font-medium w-full">Mimar Paneli</a>
+            <a href="/moodboard.html" class="h-11 px-4 inline-flex items-center rounded-xl bg-black text-white text-[15px] font-semibold w-full">Moodboard</a>
+            <a href="/marka-giris.html" class="h-11 px-4 inline-flex items-center rounded-xl border border-black/[0.10] text-[15px] font-medium w-full">Marka Girişi</a>
+          </div>
+        </div>
       `
       : `
-        ${themeToggleBtn}
-        <a href="/marka-giris.html" class="flex-1 h-10 inline-flex items-center justify-center rounded-full border border-black/[0.10] text-[13px]">Marka Girişi</a>
-        <a href="/marka-basvuru.html" class="flex-1 h-10 inline-flex items-center justify-center rounded-full bg-black text-white text-[13px] font-semibold">Marka Başla</a>
+        <div class="pt-4 border-t border-black/[0.08]">
+          <div class="flex items-center justify-between">
+            <p class="text-[12px] uppercase tracking-[0.14em] text-[#6e6e73] font-semibold">Tercihler</p>
+            ${themeToggleBtn}
+          </div>
+          <div class="mt-4 space-y-2">
+            <a href="/giris.html" class="h-11 px-4 inline-flex items-center rounded-xl border border-black/[0.10] text-[15px] font-medium w-full">Giriş Yap</a>
+            <a href="/marka-giris.html" class="h-11 px-4 inline-flex items-center rounded-xl border border-black/[0.10] text-[15px] font-medium w-full">Marka Girişi</a>
+            <a href="/marka-basvuru.html" class="h-11 px-4 inline-flex items-center rounded-xl bg-black text-white text-[15px] font-semibold w-full">Marka Başvurusu</a>
+          </div>
+        </div>
       `;
 
     headerTarget.innerHTML = `
@@ -315,25 +330,46 @@
             ${themeToggleBtn}
             ${desktopAuthLinks}
           </div>
-          <button id="mobile-menu-btn" class="lg:hidden inline-flex items-center justify-center w-10 h-10 rounded-full border border-black/[0.08] text-[18px]" aria-label="Menü">☰</button>
+          <button id="mobile-menu-btn" class="lg:hidden inline-flex items-center justify-center w-12 h-12 rounded-full border border-black/[0.10] text-[24px] font-semibold" aria-label="Menü">☰</button>
         </div>
-        <div id="mobile-menu" class="lg:hidden hidden px-4 sm:px-6 pb-4">
-          <div class="rounded-2xl border border-black/[0.08] bg-white px-4">
-            ${mobileNav}
-            <div class="py-4 flex gap-2">
-              ${mobileAuthLinks}
-            </div>
+        <div id="mobile-drawer-overlay" class="lg:hidden hidden fixed inset-0 bg-black/40 z-40"></div>
+        <aside id="mobile-drawer" class="lg:hidden fixed top-0 left-0 h-full w-[86vw] max-w-[360px] bg-white z-50 border-r border-black/[0.08] shadow-[0_20px_50px_rgba(0,0,0,0.2)]" style="transform:translateX(-100%);transition:transform .28s ease;">
+          <div class="h-[76px] px-5 border-b border-black/[0.08] flex items-center justify-between">
+            <a href="/mvp-taslak-v1.html" data-ag-logo="1" class="inline-flex items-baseline gap-0 leading-none select-none" style="font-size:22px;font-weight:600;letter-spacing:-0.3px;color:${logoColor};text-decoration:none;" aria-label="Archilink">
+              <span>Arch</span><span style="position:relative;display:inline-block;"><span>il</span><svg style="position:absolute;bottom:-5px;left:-1px;right:-1px;width:calc(100% + 2px);overflow:visible;" height="6" viewBox="0 0 20 6" preserveAspectRatio="none"><path data-ag-logo-path="1" d="M0,1 Q10,6 20,1" stroke="${logoColor}" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg></span><span>ink</span>
+            </a>
+            <button id="mobile-drawer-close" type="button" class="w-10 h-10 inline-flex items-center justify-center rounded-full border border-black/[0.10] text-[22px] leading-none" aria-label="Menüyü kapat">×</button>
           </div>
-        </div>
+          <div class="px-5 py-4">
+            <nav>
+              ${mobileNav}
+            </nav>
+            ${mobileAuthLinks}
+          </div>
+        </aside>
       </header>
     `;
 
     const menuBtn = document.getElementById("mobile-menu-btn");
-    const mobileMenu = document.getElementById("mobile-menu");
-    if (menuBtn && mobileMenu) {
-      menuBtn.addEventListener("click", () => {
-        mobileMenu.classList.toggle("hidden");
-      });
+    const mobileDrawer = document.getElementById("mobile-drawer");
+    const mobileDrawerOverlay = document.getElementById("mobile-drawer-overlay");
+    const mobileDrawerClose = document.getElementById("mobile-drawer-close");
+    if (menuBtn && mobileDrawer && mobileDrawerOverlay) {
+      const openDrawer = () => {
+        mobileDrawerOverlay.classList.remove("hidden");
+        requestAnimationFrame(() => { mobileDrawer.style.transform = "translateX(0)"; });
+        document.body.style.overflow = "hidden";
+      };
+      const closeDrawer = () => {
+        mobileDrawer.style.transform = "translateX(-100%)";
+        setTimeout(() => mobileDrawerOverlay.classList.add("hidden"), 280);
+        document.body.style.overflow = "";
+      };
+      menuBtn.addEventListener("click", openDrawer);
+      mobileDrawerOverlay.addEventListener("click", closeDrawer);
+      if (mobileDrawerClose) mobileDrawerClose.addEventListener("click", closeDrawer);
+      mobileDrawer.querySelectorAll("a").forEach((a) => a.addEventListener("click", closeDrawer));
+      document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeDrawer(); });
     }
 
     document.querySelectorAll("[data-theme-toggle='1']").forEach((themeToggle) => {
