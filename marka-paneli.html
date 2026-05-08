@@ -513,15 +513,17 @@
       countEl.textContent = `${projects.length} proje`;
       wrap.innerHTML = projects.length
         ? projects.map((pr) => `
-          <article class="rounded-2xl overflow-hidden border border-black/10 bg-white">
-            <img src="${pr.image || "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=1200&auto=format&fit=crop"}" class="w-full h-36 object-cover" alt="${pr.title}">
+          <a href="/proje-detay.html?id=${encodeURIComponent(pr.id)}" class="block rounded-2xl overflow-hidden border border-black/10 bg-white hover:border-black/25 transition">
+            <div class="aspect-square overflow-hidden bg-[#f5f5f7]">
+              <img src="${pr.image || "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=1200&auto=format&fit=crop"}" class="w-full h-full object-cover" alt="${pr.title}">
+            </div>
             <div class="p-4">
               <p class="text-[11px] text-[#6e6e73]">${pr.location || "Lokasyon yok"}${pr.year ? ` · ${pr.year}` : ""}</p>
               <h4 class="font-semibold mt-1">${pr.title}</h4>
               <p class="text-[12px] text-[#6e6e73] mt-1 line-clamp-2">${pr.description || "Açıklama yok."}</p>
               <p class="text-[12px] text-[#6e6e73] mt-2">Etiketli malzeme: ${(pr.materials || []).length}</p>
             </div>
-          </article>`).join("")
+          </a>`).join("")
         : `<p class="text-[14px] text-[#6e6e73]">Henüz proje eklenmedi.</p>`;
     }
 
