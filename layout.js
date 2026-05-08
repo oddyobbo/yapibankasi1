@@ -152,14 +152,19 @@
               </button>
               <div id="products-mega-panel" class="hidden fixed left-0 right-0 top-[72px] z-40">
                 <div class="w-full border-x border-b border-black/[0.08] bg-white shadow-[0_30px_70px_rgba(0,0,0,0.16)] rounded-b-2xl overflow-hidden">
-                  <div class="px-6 pt-4 pb-1 flex items-center gap-4">
-                    <p class="text-[20px] font-semibold text-black">Ürünler</p>
-                    <div class="inline-flex rounded-full bg-[#f1f1f3] p-1">
-                      <a href="/urunler.html" class="inline-flex items-center h-10 px-5 rounded-full text-[15px] font-semibold text-black hover:text-[#6e6e73] transition-colors">Tüm Ürünler</a>
-                      <a href="/yeni-koleksiyonlar.html" class="inline-flex items-center h-10 px-5 rounded-full text-[15px] font-semibold text-black hover:text-[#6e6e73] transition-colors">Yeni Koleksiyonlar</a>
+                  <div class="px-3 lg:px-6 pt-4 pb-1 grid grid-cols-3 items-center">
+                    <div class="px-6">
+                      <p class="text-[20px] font-semibold text-black leading-none">Ürünler</p>
                     </div>
+                    <div class="flex justify-center">
+                      <div class="inline-flex rounded-full bg-[#f1f1f3] p-1 gap-1">
+                        <a href="/urunler.html" class="inline-flex items-center h-10 px-5 rounded-full bg-black text-white text-[15px] font-semibold hover:bg-[#2a2a2a] transition-colors">Tüm Ürünler</a>
+                        <a href="/yeni-koleksiyonlar.html" class="inline-flex items-center h-10 px-5 rounded-full text-[15px] font-semibold text-black hover:text-[#6e6e73] transition-colors">Yeni Koleksiyonlar</a>
+                      </div>
+                    </div>
+                    <div></div>
                   </div>
-                  <div class="px-4 lg:px-8 py-5 grid grid-cols-3 divide-x divide-black/[0.06] gap-2">
+                  <div class="px-3 lg:px-6 py-5 grid grid-cols-3 divide-x divide-black/[0.06] gap-1">
                     ${megaCols}
                   </div>
                 </div>
