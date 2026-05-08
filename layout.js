@@ -260,6 +260,8 @@
       </button>
     `;
 
+    const logoColor = theme === "dark" ? "#f2f4f8" : "#1d1d1f";
+
     const mobileAuthLinks = architectSession
       ? `
         ${themeToggleBtn}
@@ -277,8 +279,8 @@
       <header class="border-b border-black/[0.06] sticky top-0 bg-white/85 backdrop-blur-xl z-30">
         <div class="h-[72px] px-4 sm:px-6 lg:px-10 flex items-center">
           <!-- Logo -->
-          <a href="/mvp-taslak-v1.html" class="flex-shrink-0 mr-8 inline-flex items-baseline gap-0 leading-none select-none" style="font-size:22px;font-weight:600;letter-spacing:-0.3px;color:#1d1d1f;text-decoration:none;" aria-label="Archilink">
-            <span>Arch</span><span style="position:relative;display:inline-block;"><span>il</span><svg style="position:absolute;bottom:-5px;left:-1px;right:-1px;width:calc(100% + 2px);overflow:visible;" height="6" viewBox="0 0 20 6" preserveAspectRatio="none"><path d="M0,1 Q10,6 20,1" stroke="#1d1d1f" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg></span><span>ink</span>
+          <a href="/mvp-taslak-v1.html" class="flex-shrink-0 mr-8 inline-flex items-baseline gap-0 leading-none select-none" style="font-size:22px;font-weight:600;letter-spacing:-0.3px;color:${logoColor};text-decoration:none;" aria-label="Archilink">
+            <span>Arch</span><span style="position:relative;display:inline-block;"><span>il</span><svg style="position:absolute;bottom:-5px;left:-1px;right:-1px;width:calc(100% + 2px);overflow:visible;" height="6" viewBox="0 0 20 6" preserveAspectRatio="none"><path d="M0,1 Q10,6 20,1" stroke="${logoColor}" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg></span><span>ink</span>
           </a>
           <!-- Nav -->
           <nav class="hidden lg:flex items-center gap-1 flex-shrink-0">${nav}</nav>
@@ -379,8 +381,8 @@
       <footer class="border-t border-black/[0.06] bg-white w-full">
         <div class="w-full px-6 lg:px-10 pt-16 pb-10 grid md:grid-cols-5 gap-10 text-[14px]">
           <div class="md:col-span-2">
-            <p class="inline-flex items-baseline gap-0 leading-none" style="font-size:24px;font-weight:600;letter-spacing:-0.3px;color:#1d1d1f;">
-              <span>Arch</span><span style="position:relative;display:inline-block;"><span>il</span><svg style="position:absolute;bottom:-5px;left:-1px;width:calc(100% + 2px);overflow:visible;" height="6" viewBox="0 0 20 6" preserveAspectRatio="none"><path d="M0,1 Q10,6 20,1" stroke="#1d1d1f" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg></span><span>ink</span>
+            <p class="inline-flex items-baseline gap-0 leading-none" style="font-size:24px;font-weight:600;letter-spacing:-0.3px;color:${logoColor};">
+              <span>Arch</span><span style="position:relative;display:inline-block;"><span>il</span><svg style="position:absolute;bottom:-5px;left:-1px;width:calc(100% + 2px);overflow:visible;" height="6" viewBox="0 0 20 6" preserveAspectRatio="none"><path d="M0,1 Q10,6 20,1" stroke="${logoColor}" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg></span><span>ink</span>
             </p>
             <p class="text-[#6e6e73] mt-4 max-w-[42ch] leading-relaxed">Mimarların doğru ürünü bulduğu, markaların gerçek talebe ulaştığı Türkiye odaklı mimari malzeme platformu.</p>
             <div class="mt-5 flex gap-2">
