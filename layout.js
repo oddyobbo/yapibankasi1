@@ -23,41 +23,51 @@
 
   const productMegaMenu = [
     {
-      name: "Malzemeler",
+      label: "Materials",
+      value: "Malzemeler",
       subs: [
-        "Zemin",
-        "Cam",
-        "Deri",
-        "Yığma ve Taş",
-        "Metal",
-        "Boya",
-        "Panel",
-        "Yüzey Bitişi",
-        "Reçine",
-        "Yüzey",
-        "Tekstil",
-        "Seramik",
-        "Duvar Kaplama",
+        { label: "Flooring", value: "Zemin" },
+        { label: "Glass", value: "Cam" },
+        { label: "Leather", value: "Deri" },
+        { label: "Masonry & Stone", value: "Yığma ve Taş" },
+        { label: "Metal", value: "Metal" },
+        { label: "Paints", value: "Boya" },
+        { label: "Paneling", value: "Panel" },
+        { label: "Product Finish", value: "Yüzey Bitişi" },
+        { label: "Resin", value: "Reçine" },
+        { label: "Surfaces", value: "Yüzey" },
+        { label: "Textiles", value: "Tekstil" },
+        { label: "Tile", value: "Seramik" },
+        { label: "Wallcovering", value: "Duvar Kaplama" },
       ],
     },
     {
-      name: "Mobilya ve Donatı",
+      label: "FF&E",
+      value: "Mobilya ve Donatı",
       subs: [
-        "Akustik",
-        "Elektrikli Cihazlar",
-        "Banyo",
-        "Dekor ve Aksesuar",
-        "Mobilya",
-        "Donanım",
-        "Mutfak",
-        "Aydınlatma",
-        "Dış Mekan",
-        "Pencere Sistemleri",
+        { label: "Acoustical", value: "Akustik" },
+        { label: "Appliances", value: "Elektrikli Cihazlar" },
+        { label: "Bathroom", value: "Banyo" },
+        { label: "Decor & Accessories", value: "Dekor ve Aksesuar" },
+        { label: "Furniture", value: "Mobilya" },
+        { label: "Hardware", value: "Donanım" },
+        { label: "Kitchen", value: "Mutfak" },
+        { label: "Lighting", value: "Aydınlatma" },
+        { label: "Outdoor", value: "Dış Mekan" },
+        { label: "Window Treatments", value: "Pencere Sistemleri" },
       ],
     },
     {
-      name: "Mimari",
-      subs: ["Tavan", "Decking", "Kapılar", "Cephe", "Profil ve Trim", "Peyzaj ve Kaplama"],
+      label: "Architectural",
+      value: "Mimari",
+      subs: [
+        { label: "Ceiling", value: "Tavan" },
+        { label: "Decking", value: "Decking" },
+        { label: "Doors", value: "Kapılar" },
+        { label: "Facade", value: "Cephe" },
+        { label: "Moulding & Trim", value: "Profil ve Trim" },
+        { label: "Paving & Landscape", value: "Peyzaj ve Kaplama" },
+      ],
     },
   ];
 
@@ -110,20 +120,19 @@
           const megaCols = productMegaMenu.map(
               (col) => `
                 <div>
-                  <a href="/urunler.html?category=${encodeURIComponent(col.name)}" class="inline-flex items-center gap-2 text-[18px] font-semibold text-black hover:text-[#6e6e73] transition-colors">
-                    <span>${col.name}</span>
+                  <a href="/urunler.html?category=${encodeURIComponent(col.value)}" class="inline-flex items-center gap-2 text-[18px] font-semibold text-black hover:text-[#6e6e73] transition-colors">
+                    <span>${col.label}</span>
                     <span class="text-[15px] text-[#7a7a80]">›</span>
                   </a>
                   <div class="mt-2 space-y-1">
-                    ${[...col.subs]
-                      .sort((a, b) => a.localeCompare(b, "tr"))
+                    ${col.subs
                       .map(
                         (sub) =>
-                          `<a href="/urunler.html?category=${encodeURIComponent(col.name)}&sub=${encodeURIComponent(
-                            sub
+                          `<a href="/urunler.html?category=${encodeURIComponent(col.value)}&sub=${encodeURIComponent(
+                            sub.value
                           )}" class="flex items-center gap-2 text-[17px] text-black hover:text-[#6e6e73] transition-colors">
-                            <span class="w-4 h-4 inline-flex items-center justify-center">${subCategoryIcons[sub] || iSquare}</span>
-                            <span>${sub}</span>
+                            <span class="w-4 h-4 inline-flex items-center justify-center">${subCategoryIcons[sub.value] || iSquare}</span>
+                            <span>${sub.label}</span>
                           </a>`
                       )
                       .join("")}
