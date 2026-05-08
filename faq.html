@@ -3,6 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>
+    (function(){
+      try {
+        if (localStorage.getItem("ag_theme_v1") === "dark") {
+          document.documentElement.classList.add("ag-dark");
+          var st = document.createElement("style");
+          st.id = "ag-theme-preload";
+          st.textContent = "html.ag-dark{background:#111214;color:#eceef2;}html.ag-dark body{background:#111214;color:#eceef2;}";
+          document.head.appendChild(st);
+        }
+      } catch (_) {}
+    })();
+  </script>
   <title>Archilink | Sık Sorulan Sorular</title>
   <meta name="description" content="Archilink hakkında sık sorulan sorular: üyelik modeli, ürün yükleme akışları, teknik dosya formatları ve yayın süreci.">
   <script src="https://cdn.tailwindcss.com"></script>
