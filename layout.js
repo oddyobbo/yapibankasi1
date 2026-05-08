@@ -1,4 +1,15 @@
 (() => {
+  const THEME_KEY = "ag_theme_v1";
+  const getTheme = () => {
+    try { return localStorage.getItem(THEME_KEY) || "light"; } catch { return "light"; }
+  };
+  const applyTheme = (theme) => {
+    const root = document.documentElement;
+    if (!root) return;
+    root.classList.toggle("ag-dark", theme === "dark");
+  };
+  applyTheme(getTheme());
+
   let architectSession = null;
   let brandSession = null;
   try { architectSession = JSON.parse(localStorage.getItem("ag_architect_session_v1") || "null"); } catch {}
@@ -240,13 +251,22 @@
           ${profileIcon} Giriş Yap
         </a>`;
 
+    const theme = getTheme();
+    const themeToggleBtn = `
+      <button data-theme-toggle="1" type="button" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-black/[0.12] text-[14px] hover:bg-black/[0.04] transition" title="Koyu mod aç/kapat" aria-label="Koyu mod aç/kapat">
+        ${theme === "dark" ? "☀️" : "🌙"}
+      </button>
+    `;
+
     const mobileAuthLinks = architectSession
       ? `
+        ${themeToggleBtn}
         <a href="/marka-giris.html" class="flex-1 h-10 inline-flex items-center justify-center rounded-full border border-black/[0.10] text-[13px]">Marka Girişi</a>
         <a href="/mimar-paneli.html" class="flex-1 h-10 inline-flex items-center justify-center rounded-full border border-black/[0.10] text-[13px]">Mimar Paneli</a>
         <a href="/moodboard.html" class="flex-1 h-10 inline-flex items-center justify-center rounded-full bg-black text-white text-[13px] font-semibold">Moodboard</a>
       `
       : `
+        ${themeToggleBtn}
         <a href="/marka-giris.html" class="flex-1 h-10 inline-flex items-center justify-center rounded-full border border-black/[0.10] text-[13px]">Marka Girişi</a>
         <a href="/marka-basvuru.html" class="flex-1 h-10 inline-flex items-center justify-center rounded-full bg-black text-white text-[13px] font-semibold">Marka Başla</a>
       `;
@@ -270,6 +290,7 @@
           <div class="flex-1"></div>
           <!-- Profile (far right) -->
           <div class="hidden lg:flex items-center gap-2 flex-shrink-0">
+            ${themeToggleBtn}
             ${desktopAuthLinks}
           </div>
           <button id="mobile-menu-btn" class="lg:hidden inline-flex items-center justify-center w-10 h-10 rounded-full border border-black/[0.08] text-[18px]" aria-label="Menü">☰</button>
@@ -292,6 +313,17 @@
         mobileMenu.classList.toggle("hidden");
       });
     }
+
+    document.querySelectorAll("[data-theme-toggle='1']").forEach((themeToggle) => {
+      themeToggle.addEventListener("click", () => {
+        const next = document.documentElement.classList.contains("ag-dark") ? "light" : "dark";
+        applyTheme(next);
+        try { localStorage.setItem(THEME_KEY, next); } catch {}
+        document.querySelectorAll("[data-theme-toggle='1']").forEach((btn) => {
+          btn.textContent = next === "dark" ? "☀️" : "🌙";
+        });
+      });
+    });
 
     const megaToggle = document.getElementById("products-mega-toggle");
     const megaPanel = document.getElementById("products-mega-panel");
