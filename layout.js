@@ -120,7 +120,7 @@
           const megaCols = productMegaMenu.map(
               (col) => `
                 <div class="px-6">
-                  <a href="/urunler.html?category=${encodeURIComponent(col.value)}" class="inline-flex items-center gap-2 text-[18px] font-semibold text-black hover:text-[#6e6e73] transition-colors">
+                  <a href="/urunler.html?category=${encodeURIComponent(col.value)}" class="inline-flex items-center gap-2 text-[19px] font-semibold text-black hover:text-[#6e6e73] transition-colors">
                     <span>${col.label}</span>
                     <span class="text-[15px] text-[#7a7a80]">›</span>
                   </a>
@@ -131,7 +131,7 @@
                         (sub) =>
                           `<a href="/urunler.html?category=${encodeURIComponent(col.value)}&sub=${encodeURIComponent(
                             sub.value
-                          )}" class="flex items-center gap-2 text-[17px] text-black hover:text-[#6e6e73] transition-colors">
+                          )}" class="flex items-center gap-2 text-[18px] text-black hover:text-[#6e6e73] transition-colors">
                             <span class="w-4 h-4 inline-flex items-center justify-center">${subCategoryIcons[sub.value] || iSquare}</span>
                             <span>${sub.label}</span>
                           </a>`
@@ -159,7 +159,7 @@
                       <a href="/yeni-koleksiyonlar.html" class="inline-flex items-center h-10 px-5 rounded-full text-[15px] font-semibold text-black hover:text-[#6e6e73] transition-colors">Yeni Koleksiyonlar</a>
                     </div>
                   </div>
-                  <div class="py-5 grid grid-cols-3 divide-x divide-black/[0.06]">
+                  <div class="px-4 lg:px-8 py-5 grid grid-cols-3 divide-x divide-black/[0.06] gap-2">
                     ${megaCols}
                   </div>
                 </div>
