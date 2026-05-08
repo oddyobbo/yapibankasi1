@@ -105,7 +105,7 @@
                 <p id="upload-bim-msg" class="text-[11px] text-[#6e6e73] mt-2">Maks 100 MB</p>
               </div>
             </div>
-            <button class="md:col-span-2 h-11 rounded-xl bg-black text-white font-semibold">Ürünü Kaydet (Taslak)</button>
+            <button class="md:col-span-2 h-11 rounded-xl bg-black text-white font-semibold">Ürünü Kaydet (Yayında)</button>
             <p id="manual-save-msg" class="md:col-span-2 text-[12px] text-[#6e6e73]"></p>
           </form>
         </div>
@@ -128,7 +128,7 @@
               <div class="mt-4 rounded-lg bg-[#fbfbfd] border border-black/10 p-3 text-[12px] text-[#3a3a3c]">
                 <p class="font-semibold">Not:</p>
                 <p>- İlk 4 alan (name, sku, category, description) zorunlu.</p>
-                <p>- Import edilen ürünler taslak olarak açılır.</p>
+                <p>- Import edilen ürünler yayında olarak açılır.</p>
                 <p>- Panelden yayına alırsın.</p>
               </div>
             </article>
@@ -242,7 +242,7 @@
                   <input id="prev-source-url" class="w-full h-10 rounded-xl border border-black/10 px-3 text-[12px] text-[#6e6e73] bg-[#fafafa]" readonly>
                 </div>
               </div>
-              <button id="btn-save-url-product" class="mt-4 w-full h-11 rounded-xl bg-black text-white text-[13px] font-semibold hover:bg-[#222] transition-colors">Ürünü Kaydet (Taslak)</button>
+              <button id="btn-save-url-product" class="mt-4 w-full h-11 rounded-xl bg-black text-white text-[13px] font-semibold hover:bg-[#222] transition-colors">Ürünü Kaydet (Yayında)</button>
             </div>
           </div>
         </div>
@@ -427,7 +427,7 @@
         },
         hasPdf: Boolean(fd.get("pdfUrl")?.trim()),
         hasCad: Boolean(fd.get("cadUrl")?.trim()),
-        status: "draft",
+        status: "published",
       };
     }
 
@@ -667,7 +667,7 @@
         if (!created) {
           saveMsg.textContent = "Kaydedilemedi. Oturumunu yenileyip tekrar dene (çıkış yap/giriş yap).";
           saveMsg.className = "md:col-span-2 text-[12px] text-red-600";
-          if (btn) { btn.disabled = false; btn.textContent = "Ürünü Kaydet (Taslak)"; }
+          if (btn) { btn.disabled = false; btn.textContent = "Ürünü Kaydet (Yayında)"; }
           return;
         }
         e.currentTarget.reset();
@@ -678,9 +678,9 @@
         document.getElementById("upload-pdf-msg").textContent = `Maks ${PDF_MAX_MB} MB`;
         document.getElementById("upload-cad-msg").textContent = `Maks ${CAD_MAX_MB} MB`;
         document.getElementById("upload-bim-msg").textContent = `Maks ${BIM_MAX_MB} MB`;
-        saveMsg.textContent = "Ürün taslak olarak kaydedildi.";
+        saveMsg.textContent = "Ürün yayına alındı.";
         saveMsg.className = "md:col-span-2 text-[12px] text-green-600";
-        if (btn) { btn.disabled = false; btn.textContent = "Ürünü Kaydet (Taslak)"; }
+        if (btn) { btn.disabled = false; btn.textContent = "Ürünü Kaydet (Yayında)"; }
         await render();
       });
 
@@ -743,7 +743,7 @@
           files: { pdfUrl: get("pdfUrl").trim(), cadUrl: get("cadUrl").trim(), bimUrl: get("bimUrl").trim() },
           hasPdf: Boolean(get("pdfUrl").trim()),
           hasCad: Boolean(get("cadUrl").trim()),
-          status: "draft",
+          status: "published",
         });
       }
       return { ok: true, added: products.length, products };
@@ -771,7 +771,7 @@
         if (!res.ok) { msg.textContent = res.message; return; }
         msg.textContent = `${res.added} ürün içeri aktarılıyor…`;
         for (const p of res.products) { await AG.addProduct(p); }
-        msg.textContent = `${res.added} ürün taslak olarak kaydedildi.`;
+        msg.textContent = `${res.added} ürün yayına alındı.`;
         await render();
       });
 
@@ -1047,9 +1047,9 @@
           files: { pdfUrl: document.getElementById("prev-source-url").value.trim(), cadUrl: "", bimUrl: "" },
           hasPdf: Boolean(document.getElementById("prev-source-url").value.trim()),
           hasCad: false,
-          status: "draft",
+          status: "published",
         });
-        saveBtn.disabled = false; saveBtn.textContent = "Ürünü Kaydet (Taslak)";
+        saveBtn.disabled = false; saveBtn.textContent = "Ürünü Kaydet (Yayında)";
         document.getElementById("url-preview").classList.add("hidden");
         document.getElementById("url-input").value = "";
         const saveMsgEl = document.getElementById("url-save-msg");
