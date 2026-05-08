@@ -180,25 +180,7 @@
 
     <!-- ── Top filter bar ── -->
     <div class="bg-white border-b border-black/[0.06]">
-      <div class="px-5 py-2.5 flex items-center gap-3">
-
-        <div class="w-full flex items-center gap-2">
-          <div class="relative flex-shrink-0">
-            <button id="search-toggle" class="w-[34px] h-[34px] rounded-full border border-black/[0.12] flex items-center justify-center hover:bg-black/[0.04] transition" title="Ürün ara">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-              </svg>
-            </button>
-            <div id="search-dropdown" class="hidden absolute left-0 top-10 bg-white border border-black/[0.1] rounded-xl shadow-xl p-2 z-30">
-              <input id="search-input" type="text" placeholder="Ürün ara..." autocomplete="off"
-                class="w-[220px] h-9 rounded-lg border border-black/15 bg-[#fafafa] px-3 text-[13px] outline-none focus:border-black/40 focus:bg-white">
-            </div>
-          </div>
-          <div id="category-pills" class="flex items-center gap-2 flex-1 min-w-0 py-1"></div>
-        </div>
-      </div>
-
-      <div class="px-5 pb-2.5">
+      <div class="px-5 py-2.5">
         <div class="flex items-center gap-1.5">
           <button id="sidebar-toggle" class="flex items-center gap-1.5 px-3 h-[34px] rounded-full border border-black/[0.14] text-[13px] font-medium hover:bg-black/[0.04] transition-all flex-shrink-0">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -230,6 +212,23 @@
             </svg>
             Karşılaştır
           </button>
+        </div>
+      </div>
+
+      <div class="px-5 pb-2.5 flex items-center gap-3">
+        <div class="w-full flex items-center gap-2">
+          <div class="relative flex-shrink-0">
+            <button id="search-toggle" class="w-[34px] h-[34px] rounded-full border border-black/[0.12] flex items-center justify-center hover:bg-black/[0.04] transition" title="Ürün ara">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+            </button>
+            <div id="search-dropdown" class="hidden absolute left-0 top-10 bg-white border border-black/[0.1] rounded-xl shadow-xl p-2 z-30">
+              <input id="search-input" type="text" placeholder="Ürün ara..." autocomplete="off"
+                class="w-[220px] h-9 rounded-lg border border-black/15 bg-[#fafafa] px-3 text-[13px] outline-none focus:border-black/40 focus:bg-white">
+            </div>
+          </div>
+          <div id="category-pills" class="flex items-center gap-2 flex-1 min-w-0 py-1"></div>
         </div>
       </div>
 
