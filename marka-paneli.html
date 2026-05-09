@@ -6,35 +6,60 @@
   <title>Archilink | Marka Paneli</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
+    html { scroll-behavior: smooth; scroll-padding-top: 5.5rem; }
     body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif; }
     .panel-card-lift { transition: transform .3s cubic-bezier(.2,.7,.2,1), border-color .3s; }
     .panel-card-lift:hover { transform: translateY(-3px); border-color: rgba(0,0,0,.22); }
+    .panel-nav { display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.65rem; border-radius: 0.5rem; color: #424245; font-size: 13px; font-weight: 500; transition: background .15s, color .15s; }
+    .panel-nav:hover { background: rgba(0,0,0,.05); color: #1d1d1f; }
+    .panel-nav.active { background: rgba(0,0,0,.08); color: #1d1d1f; font-weight: 600; }
+    .panel-section-title { font-size: 17px; font-weight: 600; letter-spacing: -0.02em; color: #1d1d1f; }
   </style>
 </head>
 <body data-page="brand-panel" class="bg-white text-[#0b0b0c] font-sans min-h-screen antialiased">
   <div class="w-full min-h-screen bg-white">
     <div id="site-header"></div>
-    <main class="px-5 py-6 lg:px-8 lg:py-8 max-w-[1400px] mx-auto space-y-5">
-      <section class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+    <div id="brand-panel-layout" class="flex w-full min-h-0">
+      <!-- Mobil: yatay menü -->
+      <div class="lg:hidden fixed bottom-0 left-0 right-0 z-40 border-t border-black/[0.08] bg-white/95 backdrop-blur-md px-2 py-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
+        <nav class="flex gap-1 overflow-x-auto" style="-webkit-overflow-scrolling:touch">
+          <a href="#panel-ozet" class="panel-nav-mobile shrink-0 px-3 py-2 rounded-lg text-[12px] font-medium text-[#424245] whitespace-nowrap" data-panel-nav="panel-ozet">Özet</a>
+          <a href="#panel-urunler" class="panel-nav-mobile shrink-0 px-3 py-2 rounded-lg text-[12px] font-medium text-[#424245] whitespace-nowrap" data-panel-nav="panel-urunler">Ürünler</a>
+          <a href="#panel-analiz" class="panel-nav-mobile shrink-0 px-3 py-2 rounded-lg text-[12px] font-medium text-[#424245] whitespace-nowrap" data-panel-nav="panel-analiz">Analiz</a>
+          <a href="#panel-proje-form" class="panel-nav-mobile shrink-0 px-3 py-2 rounded-lg text-[12px] font-medium text-[#424245] whitespace-nowrap" data-panel-nav="panel-proje-form">Proje ekle</a>
+          <a href="#panel-projeler" class="panel-nav-mobile shrink-0 px-3 py-2 rounded-lg text-[12px] font-medium text-[#424245] whitespace-nowrap" data-panel-nav="panel-projeler">Projeler</a>
+        </nav>
+      </div>
+      <!-- Sol menü (masaüstü) -->
+      <aside class="hidden lg:flex w-[220px] shrink-0 flex-col border-r border-black/[0.08] bg-[#fafafa] sticky top-0 self-start max-h-[calc(100vh-0.5rem)] overflow-y-auto py-6 px-3">
+        <p class="px-2 mb-3 text-[11px] font-semibold uppercase tracking-wide text-[#6e6e73]">Panel</p>
+        <nav class="flex flex-col gap-0.5" id="panel-nav-desktop">
+          <a href="#panel-ozet" class="panel-nav" data-panel-nav="panel-ozet"><span>Özet</span></a>
+          <a href="#panel-urunler" class="panel-nav" data-panel-nav="panel-urunler"><span>Ürünlerim</span></a>
+          <a href="#panel-analiz" class="panel-nav" data-panel-nav="panel-analiz"><span>Analizler</span></a>
+          <a href="#panel-proje-form" class="panel-nav" data-panel-nav="panel-proje-form"><span>Proje paylaş</span></a>
+          <a href="#panel-projeler" class="panel-nav" data-panel-nav="panel-projeler"><span>Projelerim</span></a>
+        </nav>
+      </aside>
+
+      <main class="flex-1 min-w-0 w-full px-4 py-5 sm:px-5 lg:px-8 lg:py-7 space-y-8 pb-24 lg:pb-8">
+      <section id="panel-ozet" class="scroll-mt-24 lg:scroll-mt-20 grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
         <article class="rounded-2xl border border-black/[0.08] bg-white p-4 md:p-5"><p class="text-[11px] uppercase tracking-wide text-[#6e6e73] font-medium">Yüklü ürün</p><p id="count-products" class="text-[24px] md:text-[26px] font-semibold tracking-tight text-[#1d1d1f] mt-1">0</p></article>
         <article class="rounded-2xl border border-black/[0.08] bg-white p-4 md:p-5"><p class="text-[11px] uppercase tracking-wide text-[#6e6e73] font-medium">Teknik dosya</p><p id="count-files" class="text-[24px] md:text-[26px] font-semibold tracking-tight text-[#1d1d1f] mt-1">0</p></article>
         <article class="rounded-2xl border border-black/[0.08] bg-white p-4 md:p-5"><p class="text-[11px] uppercase tracking-wide text-[#6e6e73] font-medium">Taslak</p><p id="count-drafts" class="text-[24px] md:text-[26px] font-semibold tracking-tight text-[#1d1d1f] mt-1">0</p></article>
         <article class="rounded-2xl border border-black/[0.08] bg-white p-4 md:p-5"><p class="text-[11px] uppercase tracking-wide text-[#6e6e73] font-medium">Görüntülenme</p><p id="count-views" class="text-[24px] md:text-[26px] font-semibold tracking-tight text-[#1d1d1f] mt-1">0</p></article>
       </section>
 
-      <section class="rounded-2xl border border-black/[0.08] bg-white p-5 lg:p-6">
-        <div class="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h2 class="text-[19px] font-semibold tracking-tight text-[#1d1d1f]">Ürün yükleme</h2>
-            <p class="text-[13px] text-[#6e6e73] mt-1">Manuel, CSV veya API ile ürün aktar.</p>
-          </div>
-          <div id="mode-tabs" class="flex gap-2 flex-wrap">
+      <section id="panel-urunler" class="scroll-mt-24 lg:scroll-mt-20 rounded-2xl border border-black/[0.08] bg-white p-5 lg:p-6 space-y-8">
+        <div>
+          <h2 class="panel-section-title">Ürün ekle</h2>
+          <p class="text-[13px] text-[#6e6e73] mt-1">Manuel, CSV, API veya web adresiyle kataloga aktar.</p>
+          <div id="mode-tabs" class="flex gap-2 flex-wrap mt-4">
             <button data-mode="manual" class="mode-tab h-8 px-3 rounded-lg text-[12px] font-medium border border-black/[0.08] bg-[#1d1d1f] text-white">Manuel</button>
             <button data-mode="csv" class="mode-tab h-8 px-3 rounded-lg text-[12px] font-medium border border-black/[0.08] bg-white text-[#1d1d1f] hover:border-black/20">CSV</button>
             <button data-mode="api" class="mode-tab h-8 px-3 rounded-lg text-[12px] font-medium border border-black/[0.08] bg-white text-[#1d1d1f] hover:border-black/20">API</button>
             <button data-mode="url" class="mode-tab h-8 px-3 rounded-lg text-[12px] font-medium border border-black/[0.08] bg-white text-[#1d1d1f] hover:border-black/20">Web'den aktar</button>
           </div>
-        </div>
 
         <div id="mode-manual" class="mode-panel mt-5">
           <form id="product-form" class="grid md:grid-cols-2 gap-3 text-[14px]">
@@ -251,11 +276,14 @@
             </div>
           </div>
         </div>
-      </section>
+        </div>
 
-      <section class="rounded-2xl border border-black/[0.08] bg-white p-5 lg:p-6">
-        <div class="flex items-center justify-between gap-3">
-          <h3 class="text-[17px] font-semibold tracking-tight text-[#1d1d1f]">Ürünlerim</h3>
+        <div class="border-t border-black/[0.08] pt-8">
+        <div class="flex items-center justify-between gap-3 flex-wrap">
+          <div>
+            <h3 class="panel-section-title">Ürün listesi</h3>
+            <p class="text-[12px] text-[#6e6e73] mt-0.5">Yayın ve taslak ürünler</p>
+          </div>
           <div class="flex flex-wrap gap-2">
             <button id="toggle-select-mode" type="button" class="h-8 px-3 rounded-lg border border-black/[0.08] text-[12px] font-medium text-[#1d1d1f] hover:border-black/20 bg-white">Seç</button>
             <button id="delete-selected-products" type="button" class="h-8 px-3 rounded-lg border border-black/[0.08] text-[12px] font-medium text-[#1d1d1f] hover:border-black/20 bg-white hidden">Seçilenleri sil</button>
@@ -263,14 +291,15 @@
           </div>
         </div>
         <p id="bulk-delete-msg" class="mt-2 text-[12px] text-[#6e6e73] hidden"></p>
-        <div id="brand-products" class="mt-4 grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-5"></div>
+        <div id="brand-products" class="mt-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 md:gap-4"></div>
+        </div>
+      </section>
 
-        <div class="mt-8 pt-8 border-t border-black/[0.06]">
-          <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
-            <div>
-              <h4 class="text-[17px] font-semibold tracking-tight text-[#1d1d1f]">Ürün analitiği</h4>
-              <p class="text-[13px] text-[#6e6e73] mt-1">Dönem seç: tıklama ve mimar favorileri; özet ve ürün kırılımı.</p>
-            </div>
+      <section id="panel-analiz" class="scroll-mt-24 lg:scroll-mt-20 rounded-2xl border border-black/[0.08] bg-white p-5 lg:p-6">
+          <h3 class="panel-section-title">Analizler</h3>
+          <p class="text-[13px] text-[#6e6e73] mt-1">Dönemi seç; özet rakamlar ve ürün kırılımı güncellenir. Tabloda her ürünün küçük görseli görünür.</p>
+          <div class="mt-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <span class="text-[12px] font-medium text-[#6e6e73]">Dönem</span>
             <div id="analytics-range-btns" class="flex flex-wrap gap-2">
               <button type="button" data-range="7" class="analytics-range px-3.5 py-2 rounded-full text-[12px] font-semibold border border-black/12 bg-white hover:bg-black/[0.03]">7 gün</button>
               <button type="button" data-range="30" class="analytics-range px-3.5 py-2 rounded-full text-[12px] font-semibold border border-black/12 bg-black text-white">30 gün</button>
@@ -307,11 +336,10 @@
               <tbody id="analytics-tbody" class="divide-y divide-black/5"></tbody>
             </table>
           </div>
-        </div>
       </section>
 
-      <section class="rounded-2xl border border-black/[0.08] bg-white p-5 lg:p-6">
-        <h3 class="text-[17px] font-semibold tracking-tight text-[#1d1d1f]">Proje paylaş</h3>
+      <section id="panel-proje-form" class="scroll-mt-24 lg:scroll-mt-20 rounded-2xl border border-black/[0.08] bg-white p-5 lg:p-6">
+        <h3 class="panel-section-title">Proje paylaş</h3>
         <p class="text-[13px] text-[#6e6e73] mt-1">Projende kullandığın kendi ürünlerini etiketle; proje detayında malzemeler görünür.</p>
         <form id="project-form" class="mt-4 grid md:grid-cols-2 gap-3 text-[14px]">
           <input name="title" required class="h-11 rounded-xl border border-black/10 px-4 md:col-span-2" placeholder="Proje adı *">
@@ -330,14 +358,15 @@
         </form>
       </section>
 
-      <section class="rounded-2xl border border-black/[0.08] bg-white p-5 lg:p-6">
+      <section id="panel-projeler" class="scroll-mt-24 lg:scroll-mt-20 rounded-2xl border border-black/[0.08] bg-white p-5 lg:p-6">
         <div class="flex items-center justify-between gap-3">
-          <h3 class="text-[17px] font-semibold tracking-tight text-[#1d1d1f]">Projelerim</h3>
+          <h3 class="panel-section-title">Projelerim</h3>
           <span id="projects-count" class="text-[12px] text-[#6e6e73]">0 proje</span>
         </div>
-        <div id="brand-projects" class="mt-4 grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-5"></div>
+        <div id="brand-projects" class="mt-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 md:gap-4"></div>
       </section>
     </main>
+    </div>
     <div id="site-footer"></div>
   </div>
 
@@ -390,12 +419,17 @@
       session = await AG.getSessionBrand();
 
       if (!session) {
-        document.querySelector("main").innerHTML = `
-          <section class="rounded-2xl border border-black/10 p-6 max-w-2xl">
-            <h1 class="text-[28px] font-semibold">Marka paneline erişim için giriş yapmalısın.</h1>
-            <p class="text-[14px] text-[#6e6e73] mt-2">Marka hesabınla giriş yaparak ürünleri yönetebilir, yayınlayabilir ve performansı görebilirsin.</p>
-            <a href="/marka-giris.html" class="inline-block mt-4 px-5 py-2.5 rounded-full bg-black text-white text-[14px] font-semibold">Marka Giriş Sayfasına Git</a>
-          </section>`;
+        const layout = document.getElementById("brand-panel-layout");
+        if (layout) {
+          layout.innerHTML = `
+          <main class="flex-1 w-full px-5 py-10">
+            <section class="rounded-2xl border border-black/[0.08] p-6 max-w-2xl mx-auto bg-white">
+              <h1 class="text-[24px] sm:text-[28px] font-semibold tracking-tight text-[#1d1d1f]">Marka paneline erişim için giriş yapmalısın.</h1>
+              <p class="text-[14px] text-[#6e6e73] mt-2">Marka hesabınla giriş yaparak ürünleri yönetebilir, yayınlayabilir ve performansı görebilirsin.</p>
+              <a href="/marka-giris.html" class="inline-block mt-5 px-5 py-2.5 rounded-lg bg-[#1d1d1f] text-white text-[14px] font-semibold hover:bg-[#3a3a3c]">Marka girişi</a>
+            </section>
+          </main>`;
+        }
         return;
       }
 
@@ -403,6 +437,7 @@
 
       attachHandlers();
       setupAnalyticsRange();
+      setupPanelNav();
       await render();
       await hydrateProjectMaterialOptions();
     }
@@ -424,6 +459,69 @@
           render();
         });
       });
+    }
+
+    function escAttr(s) {
+      return String(s ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;")
+        .replace(/</g, "&lt;");
+    }
+
+    function setupPanelNav() {
+      const ids = ["panel-ozet", "panel-urunler", "panel-analiz", "panel-proje-form", "panel-projeler"];
+      const desktopLinks = document.querySelectorAll("#panel-nav-desktop .panel-nav");
+      const mobileLinks = document.querySelectorAll(".panel-nav-mobile");
+
+      function setActive(id) {
+        desktopLinks.forEach((a) => a.classList.toggle("active", a.getAttribute("data-panel-nav") === id));
+        mobileLinks.forEach((a) => {
+          const on = a.getAttribute("data-panel-nav") === id;
+          a.classList.toggle("bg-[#1d1d1f]", on);
+          a.classList.toggle("text-white", on);
+          a.classList.toggle("font-semibold", on);
+          a.classList.toggle("text-[#424245]", !on);
+        });
+      }
+
+      document.querySelectorAll("[data-panel-nav]").forEach((link) => {
+        link.addEventListener("click", (e) => {
+          e.preventDefault();
+          const id = link.getAttribute("data-panel-nav");
+          const el = document.getElementById(id);
+          if (el) {
+            el.scrollIntoView({ behavior: "smooth", block: "start" });
+            history.replaceState(null, "", "#" + id);
+            setActive(id);
+          }
+        });
+      });
+
+      const obs = new IntersectionObserver(
+        (entries) => {
+          const visible = entries
+            .filter((en) => en.isIntersecting && en.intersectionRatio >= 0.2)
+            .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
+          const top = visible[0];
+          if (top?.target?.id) setActive(top.target.id);
+        },
+        { root: null, rootMargin: "-12% 0px -55% 0px", threshold: [0.15, 0.25, 0.4] }
+      );
+      ids.forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) obs.observe(el);
+      });
+
+      const hash = (location.hash || "").replace("#", "");
+      if (hash && ids.includes(hash)) {
+        requestAnimationFrame(() => {
+          document.getElementById(hash)?.scrollIntoView({ behavior: "instant", block: "start" });
+          setActive(hash);
+        });
+      } else {
+        setActive("panel-ozet");
+      }
     }
 
     function buildSpec(technical) {
@@ -516,15 +614,26 @@
       if (au) au.textContent = String(ana.totals.uniqueVisitors);
       if (atb) {
         const sorted = [...items].sort((a, b) => (ana.viewsByProduct[b.id] || 0) - (ana.viewsByProduct[a.id] || 0));
+        const fallbackThumb = "https://images.unsplash.com/photo-1600607686527-6fb886090705?q=80&w=96&auto=format&fit=crop";
         atb.innerHTML = sorted.length
-          ? sorted.map((p) => `
+          ? sorted.map((p) => {
+            const nameStr = String(p.name || "—").replace(/</g, "&lt;");
+            const thumbRaw = (p.image && String(p.image).trim()) ? String(p.image).trim() : fallbackThumb;
+            const thumbSrc = escAttr(thumbRaw);
+            return `
             <tr>
-              <td class="px-4 py-2.5 font-medium">${String(p.name || "—").replace(/</g, "&lt;")}</td>
-              <td class="px-4 py-2.5 text-[#6e6e73]">${String(p.sku || "—").replace(/</g, "&lt;")}</td>
-              <td class="px-4 py-2.5">${ana.viewsByProduct[p.id] || 0}</td>
-              <td class="px-4 py-2.5">${ana.favByProduct[p.id] || 0}</td>
-              <td class="px-4 py-2.5 text-[#6e6e73]">${p.views || 0}</td>
-            </tr>`).join("")
+              <td class="px-3 py-2 min-w-0">
+                <div class="flex items-center gap-2.5 min-w-0 max-w-[240px] sm:max-w-xs">
+                  <img src="${thumbSrc}" alt="" width="36" height="36" class="w-9 h-9 shrink-0 rounded-md object-cover bg-[#f5f5f7] border border-black/[0.06]" loading="lazy" decoding="async">
+                  <span class="font-medium text-[#1d1d1f] truncate">${nameStr}</span>
+                </div>
+              </td>
+              <td class="px-4 py-2.5 text-[#6e6e73] whitespace-nowrap">${String(p.sku || "—").replace(/</g, "&lt;")}</td>
+              <td class="px-4 py-2.5 whitespace-nowrap">${ana.viewsByProduct[p.id] || 0}</td>
+              <td class="px-4 py-2.5 whitespace-nowrap">${ana.favByProduct[p.id] || 0}</td>
+              <td class="px-4 py-2.5 text-[#6e6e73] whitespace-nowrap">${p.views || 0}</td>
+            </tr>`;
+          }).join("")
           : `<tr><td colspan="5" class="px-4 py-6 text-center text-[#6e6e73]">Ürün yok</td></tr>`;
       }
 
@@ -540,25 +649,25 @@
           const pv = ana.viewsByProduct[p.id] || 0;
           const pf = ana.favByProduct[p.id] || 0;
           return `
-          <article class="panel-card-lift group rounded-2xl overflow-hidden border border-black/[0.08] bg-white flex flex-col ${selectMode && selectedProductIds.has(p.id) ? "ring-2 ring-black/75" : ""}">
-            <div class="relative h-48 bg-[#f5f5f7] overflow-hidden shrink-0">
-              <img src="${p.image || "https://images.unsplash.com/photo-1600607686527-6fb886090705?q=80&w=800&auto=format&fit=crop"}" class="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500 ease-out" alt="${p.name}">
+          <article class="panel-card-lift group rounded-xl overflow-hidden border border-black/[0.08] bg-white flex flex-col ${selectMode && selectedProductIds.has(p.id) ? "ring-2 ring-black/75" : ""}">
+            <div class="relative h-28 sm:h-32 bg-[#f5f5f7] overflow-hidden shrink-0">
+              <img src="${p.image || "https://images.unsplash.com/photo-1600607686527-6fb886090705?q=80&w=400&auto=format&fit=crop"}" class="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-300 ease-out" alt="${escAttr(p.name || "Ürün")}">
             </div>
-            <div class="p-4 flex flex-col flex-1">
-              ${selectMode ? `<label class="inline-flex items-center gap-2 text-[12px] mb-2 cursor-pointer text-[#1d1d1f]"><input type="checkbox" class="accent-black w-3.5 h-3.5 rounded border-black/20" data-select-product="${p.id}" ${selectedProductIds.has(p.id) ? "checked" : ""}> Seç</label>` : ""}
-              <p class="text-[11px] text-[#6e6e73]">${p.category || "—"}</p>
-              <h4 class="text-[14px] font-semibold leading-snug text-[#1d1d1f] mt-0.5">${p.name}</h4>
-              <p class="text-[12px] text-[#6e6e73] mt-1 line-clamp-2">${p.spec || "Teknik bilgi bekleniyor"}</p>
-              <p class="text-[12px] text-[#6e6e73] mt-1">${p.status === "published" ? "Yayında" : "Taslak"} · ${p.views || 0} görüntülenme</p>
-              <p class="text-[11px] text-[#1d1d1f] mt-1 font-medium">${periodLabel}: ${pv} tıklama · ${pf} favori</p>
-              <div class="mt-2 text-[11px] text-[#6e6e73]">
+            <div class="p-3 flex flex-col flex-1 min-h-0">
+              ${selectMode ? `<label class="inline-flex items-center gap-2 text-[11px] mb-1.5 cursor-pointer text-[#1d1d1f]"><input type="checkbox" class="accent-black w-3.5 h-3.5 rounded border-black/20" data-select-product="${p.id}" ${selectedProductIds.has(p.id) ? "checked" : ""}> Seç</label>` : ""}
+              <p class="text-[10px] sm:text-[11px] text-[#6e6e73] truncate">${p.category || "—"}</p>
+              <h4 class="text-[12px] sm:text-[13px] font-semibold leading-snug text-[#1d1d1f] mt-0.5 line-clamp-2">${String(p.name || "").replace(/</g, "&lt;")}</h4>
+              <p class="text-[11px] text-[#6e6e73] mt-1 line-clamp-2">${String(p.spec || "Teknik bilgi bekleniyor").replace(/</g, "&lt;")}</p>
+              <p class="text-[11px] text-[#6e6e73] mt-1">${p.status === "published" ? "Yayında" : "Taslak"} · ${p.views || 0} gör.</p>
+              <p class="text-[10px] text-[#1d1d1f] mt-1 font-medium line-clamp-2">${periodLabel}: ${pv} tık · ${pf} fav</p>
+              <div class="mt-1.5 text-[10px] text-[#6e6e73]">
                 ${p.files?.pdfUrl ? "<span>PDF</span>" : ""}
                 ${p.files?.cadUrl ? " · <span>DWG</span>" : ""}
                 ${p.files?.bimUrl ? " · <span>BIM</span>" : ""}
               </div>
-              <div class="mt-3 flex flex-wrap gap-2">
-                <button data-publish="${p.id}" data-status="${p.status}" class="h-8 px-3 rounded-lg border border-black/[0.08] text-[12px] font-medium text-[#1d1d1f] hover:border-black/20 bg-white">${p.status === "published" ? "Taslağa al" : "Yayınla"}</button>
-                <button data-delete="${p.id}" class="h-8 px-3 rounded-lg border border-black/[0.08] text-[12px] font-medium text-[#1d1d1f] hover:border-black/20 bg-white">Sil</button>
+              <div class="mt-2 flex flex-wrap gap-1.5">
+                <button data-publish="${p.id}" data-status="${p.status}" class="h-7 px-2 rounded-md border border-black/[0.08] text-[11px] font-medium text-[#1d1d1f] hover:border-black/20 bg-white">${p.status === "published" ? "Taslak" : "Yayınla"}</button>
+                <button data-delete="${p.id}" class="h-7 px-2 rounded-md border border-black/[0.08] text-[11px] font-medium text-[#1d1d1f] hover:border-black/20 bg-white">Sil</button>
               </div>
             </div>
           </article>`;
@@ -616,16 +725,16 @@
       countEl.textContent = `${projects.length} proje`;
       wrap.innerHTML = projects.length
         ? projects.map((pr) => `
-          <a href="/proje-detay.html?id=${encodeURIComponent(pr.id)}" class="block panel-card-lift group rounded-2xl overflow-hidden border border-black/[0.08] bg-white flex flex-col h-full">
-            <div class="relative h-48 bg-[#f5f5f7] overflow-hidden shrink-0">
-              <img src="${pr.image || "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=800&auto=format&fit=crop"}" class="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500 ease-out" alt="${pr.title}">
+          <a href="/proje-detay.html?id=${encodeURIComponent(pr.id)}" class="block panel-card-lift group rounded-xl overflow-hidden border border-black/[0.08] bg-white flex flex-col h-full">
+            <div class="relative h-28 sm:h-32 bg-[#f5f5f7] overflow-hidden shrink-0">
+              <img src="${pr.image || "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=400&auto=format&fit=crop"}" class="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-300 ease-out" alt="">
             </div>
-            <div class="p-4 flex flex-col flex-1">
-              <p class="text-[11px] text-[#6e6e73]">${pr.location || "Lokasyon yok"}${pr.year ? ` · ${pr.year}` : ""}</p>
-              <h4 class="text-[14px] font-semibold leading-snug text-[#1d1d1f] mt-0.5">${pr.title}</h4>
-              <p class="text-[12px] text-[#6e6e73] mt-1 line-clamp-2">${pr.description || "Açıklama yok."}</p>
-              <p class="text-[12px] text-[#6e6e73] mt-2">Malzeme: ${(pr.materials || []).length}</p>
-              <span class="mt-3 w-full h-8 flex items-center justify-center bg-[#1d1d1f] text-white text-[12px] font-medium rounded-lg group-hover:bg-[#3a3a3c] transition">Detay</span>
+            <div class="p-3 flex flex-col flex-1 min-h-0">
+              <p class="text-[10px] sm:text-[11px] text-[#6e6e73] truncate">${pr.location || "Lokasyon yok"}${pr.year ? ` · ${pr.year}` : ""}</p>
+              <h4 class="text-[12px] sm:text-[13px] font-semibold leading-snug text-[#1d1d1f] mt-0.5 line-clamp-2">${pr.title}</h4>
+              <p class="text-[11px] text-[#6e6e73] mt-1 line-clamp-2">${pr.description || "Açıklama yok."}</p>
+              <p class="text-[11px] text-[#6e6e73] mt-1.5">Malzeme: ${(pr.materials || []).length}</p>
+              <span class="mt-2 w-full h-7 flex items-center justify-center bg-[#1d1d1f] text-white text-[11px] font-medium rounded-md group-hover:bg-[#3a3a3c] transition">Detay</span>
             </div>
           </a>`).join("")
         : `<p class="text-[13px] text-[#6e6e73]">Henüz proje eklenmedi.</p>`;
