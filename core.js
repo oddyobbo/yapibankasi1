@@ -601,7 +601,7 @@
     await ready;
     const sb = getSB();
     if (!sb) return [];
-    const { data } = await sb.from("visits").select("*").order("created_at", { ascending: false }).limit(500);
+    const { data } = await sb.from("visits").select("*").order("created_at", { ascending: false }).limit(2500);
     return data || [];
   };
 

@@ -49,6 +49,9 @@ create table if not exists public.visits (
   country text,
   ip text,
   ts bigint,
+  user_id uuid references auth.users(id) on delete set null,
+  visitor_kind text default 'anonymous',
+  display_name text default '',
   created_at timestamptz default now()
 );
 
@@ -84,6 +87,58 @@ create policy "visits_insert" on public.visits
 drop policy if exists "visits_admin_read" on public.visits;
 create policy "visits_admin_read" on public.visits
   for select using (auth.email() = 'onatderindere@icloud.com');
+
+-- ── Migration: visits — kimlik alanları (bir kez çalıştır) ─────────────────
+
+alter table public.visits add column if not exists user_id uuid references auth.users(id) on delete set null;
+alter table public.visits add column if not exists visitor_kind text default 'anonymous';
+alter table public.visits add column if not exists display_name text default '';
+update public.visits set visitor_kind = 'anonymous' where visitor_kind is null;
+
+-- Giriş yapan kullanıcıyı ziyaret satırına yazar (JWT varsa)
+create or replace function public.visits_set_actor()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  uid uuid;
+  acc text;
+  pname text;
+  pemail text;
+  uemail text;
+begin
+  uid := auth.uid();
+  new.user_id := uid;
+
+  if uid is null then
+    new.visitor_kind := 'anonymous';
+    new.display_name := '';
+    return new;
+  end if;
+
+  select account_type, name, email into acc, pname, pemail
+  from public.profiles
+  where id = uid;
+
+  if found then
+    new.visitor_kind := coalesce(nullif(trim(acc), ''), 'brand');
+    new.display_name := coalesce(nullif(trim(pname), ''), nullif(trim(pemail), ''), split_part(pemail, '@', 1), '');
+  else
+    select au.email into uemail from auth.users au where au.id = uid;
+    new.visitor_kind := 'member';
+    new.display_name := coalesce(nullif(trim(uemail), ''), '');
+  end if;
+
+  return new;
+end;
+$$;
+
+drop trigger if exists visits_set_actor_trg on public.visits;
+create trigger visits_set_actor_trg
+  before insert on public.visits
+  for each row execute function public.visits_set_actor();
 
 -- ── Migration: mevcut projede profiles genişletme (bir kez çalıştır) ───────
 

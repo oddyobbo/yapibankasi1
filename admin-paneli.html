@@ -56,6 +56,37 @@
         </div>
       </section>
 
+      <section class="mt-10" id="visit-analytics">
+        <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+          <div>
+            <p class="text-[12px] uppercase tracking-[0.18em] text-[#6e6e73] font-semibold">Site girişleri</p>
+            <h2 class="text-[22px] font-semibold tracking-tight">Ziyaretçi oturumları</h2>
+            <p class="text-[13px] text-[#6e6e73] mt-1">Giriş yapan mimar/marka ile çerezli ziyaretçiler ayrılır. Detayda sayfa bazlı zaman çizelgesi.</p>
+          </div>
+          <div id="visit-filters" class="flex flex-wrap gap-2">
+            <button type="button" data-filter="all" class="visit-filter px-4 py-2 rounded-full text-[13px] font-semibold border border-black/15 bg-black text-white">Tümü</button>
+            <button type="button" data-filter="architect" class="visit-filter px-4 py-2 rounded-full text-[13px] font-semibold border border-black/15 bg-white hover:bg-black/[0.04]">Mimarlar</button>
+            <button type="button" data-filter="brand" class="visit-filter px-4 py-2 rounded-full text-[13px] font-semibold border border-black/15 bg-white hover:bg-black/[0.04]">Marka sorumlusu</button>
+            <button type="button" data-filter="anonymous" class="visit-filter px-4 py-2 rounded-full text-[13px] font-semibold border border-black/15 bg-white hover:bg-black/[0.04]">Üye olmayan</button>
+          </div>
+        </div>
+        <div class="mt-4 rounded-2xl border border-black/10 bg-white overflow-hidden overflow-x-auto">
+          <table class="w-full text-[14px] min-w-[720px]">
+            <thead class="bg-black/[0.03] text-[#6e6e73]">
+              <tr>
+                <th class="text-left font-medium px-5 py-3">İsim</th>
+                <th class="text-left font-medium px-5 py-3">Konum</th>
+                <th class="text-left font-medium px-5 py-3">Son sayfa</th>
+                <th class="text-left font-medium px-5 py-3">Sayfa adedi</th>
+                <th class="text-left font-medium px-5 py-3">Son giriş</th>
+                <th class="text-left font-medium px-5 py-3"></th>
+              </tr>
+            </thead>
+            <tbody id="visit-groups-tbody" class="divide-y divide-black/5"></tbody>
+          </table>
+        </div>
+      </section>
+
       <section class="mt-10">
         <div class="flex items-end justify-between gap-3">
           <div>
@@ -81,32 +112,32 @@
           </table>
         </div>
       </section>
-
-      <section class="mt-10">
-        <div class="flex items-end justify-between gap-3">
-          <div>
-            <p class="text-[12px] uppercase tracking-[0.18em] text-[#6e6e73] font-semibold">Trafik</p>
-            <h2 class="text-[22px] font-semibold tracking-tight">Son Ziyaretler</h2>
-          </div>
-          <p class="text-[12px] text-[#6e6e73]">Şehir bilgisi IP üzerinden çözülür.</p>
-        </div>
-        <div class="mt-4 rounded-2xl border border-black/10 bg-white overflow-hidden">
-          <table class="w-full text-[14px]">
-            <thead class="bg-black/[0.03] text-[#6e6e73]">
-              <tr>
-                <th class="text-left font-medium px-5 py-3">Zaman</th>
-                <th class="text-left font-medium px-5 py-3">Sayfa</th>
-                <th class="text-left font-medium px-5 py-3">Şehir</th>
-                <th class="text-left font-medium px-5 py-3">Ülke</th>
-                <th class="text-left font-medium px-5 py-3">Yönlendiren</th>
-                <th class="text-left font-medium px-5 py-3">Ziyaretçi</th>
-              </tr>
-            </thead>
-            <tbody id="visits-tbody" class="divide-y divide-black/5"></tbody>
-          </table>
-        </div>
-      </section>
     </main>
+  </div>
+
+  <div id="visit-detail-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/45" aria-hidden="true">
+    <div class="bg-white rounded-2xl max-w-[720px] w-full max-h-[85vh] overflow-hidden shadow-xl border border-black/10 flex flex-col">
+      <div class="px-5 py-4 border-b border-black/10 flex items-start justify-between gap-3">
+        <div>
+          <p class="text-[11px] uppercase tracking-[0.16em] text-[#6e6e73] font-semibold">Ziyaret detayı</p>
+          <h3 id="visit-detail-title" class="text-[18px] font-semibold mt-1">—</h3>
+          <p id="visit-detail-sub" class="text-[13px] text-[#6e6e73] mt-1"></p>
+        </div>
+        <button type="button" id="visit-detail-close" class="shrink-0 w-9 h-9 rounded-full hover:bg-black/[0.06] text-[20px] leading-none" aria-label="Kapat">×</button>
+      </div>
+      <div class="overflow-y-auto p-5">
+        <table class="w-full text-[13px]">
+          <thead class="text-[#6e6e73] text-left border-b border-black/10">
+            <tr>
+              <th class="pb-2 font-medium">Sayfa</th>
+              <th class="pb-2 font-medium">Saat</th>
+              <th class="pb-2 font-medium">Konum</th>
+            </tr>
+          </thead>
+          <tbody id="visit-detail-tbody"></tbody>
+        </table>
+      </div>
+    </div>
   </div>
 
   <script src="/core.js"></script>
@@ -129,10 +160,13 @@
 
       const productsByBrand = (id) => products.filter((p) => p.brandId === id).length;
 
+      const visitorSessionKey = (v) => (v.user_id ? `u:${v.user_id}` : `v:${v.visitor_id || "unknown"}`);
+      const uniqSessions = new Set(visits.map(visitorSessionKey));
+
       document.getElementById("stat-brands").textContent   = brands.length;
       document.getElementById("stat-products").textContent = products.filter((p) => p.status === "published").length;
       document.getElementById("stat-visits").textContent   = visits.length;
-      document.getElementById("stat-uniq").textContent     = new Set(visits.map((v) => v.visitor_id)).size;
+      document.getElementById("stat-uniq").textContent     = uniqSessions.size;
 
       document.getElementById("brands-count").textContent = `${brands.length} marka`;
       const brandsTbody = document.getElementById("brands-tbody");
@@ -150,18 +184,119 @@
             </tr>`).join("")
         : `<tr><td colspan="7" class="px-5 py-6 text-[#6e6e73] text-center">Henüz kayıtlı marka yok.</td></tr>`;
 
-      const visitsTbody = document.getElementById("visits-tbody");
-      visitsTbody.innerHTML = visits.length
-        ? visits.slice(0, 100).map((v) => `
-            <tr>
-              <td class="px-5 py-3 text-[#6e6e73]">${v.ts ? new Date(v.ts).toLocaleString("tr-TR") : new Date(v.created_at).toLocaleString("tr-TR")}</td>
-              <td class="px-5 py-3 font-medium">${v.page || "—"}</td>
-              <td class="px-5 py-3">${v.city || "—"}</td>
-              <td class="px-5 py-3">${v.country || "—"}</td>
-              <td class="px-5 py-3 text-[#6e6e73] truncate max-w-[260px]">${v.referrer || "—"}</td>
-              <td class="px-5 py-3 text-[#6e6e73] font-mono text-[12px]">${(v.visitor_id || "").slice(0, 14)}…</td>
-            </tr>`).join("")
-        : `<tr><td colspan="6" class="px-5 py-6 text-[#6e6e73] text-center">Henüz ziyaret yok.</td></tr>`;
+      const visitTs = (v) => Number(v.ts) || new Date(v.created_at).getTime();
+
+      const groupVisits = (list) => {
+        const m = new Map();
+        for (const v of list) {
+          const key = visitorSessionKey(v);
+          if (!m.has(key)) m.set(key, []);
+          m.get(key).push(v);
+        }
+        const rows = [];
+        for (const [key, arr] of m) {
+          const sorted = [...arr].sort((a, b) => visitTs(b) - visitTs(a));
+          const latest = sorted[0];
+          const kind = (latest.visitor_kind || "anonymous").toLowerCase();
+          const anonLabel = `Ziyaretçi (${String(latest.visitor_id || "").slice(0, 10)}…)`;
+          const name = (kind === "anonymous" || !latest.display_name)
+            ? anonLabel
+            : String(latest.display_name).trim() || anonLabel;
+          const loc = [latest.city, latest.country].filter(Boolean).join(", ") || "—";
+          rows.push({
+            key,
+            kind,
+            name: esc(name),
+            loc: esc(loc),
+            lastPage: esc(latest.page || "—"),
+            count: sorted.length,
+            lastAt: visitTs(latest),
+            visits: sorted,
+            rawName: name,
+          });
+        }
+        rows.sort((a, b) => b.lastAt - a.lastAt);
+        return rows;
+      };
+
+      const kindMatchesFilter = (kind, filter) => {
+        if (filter === "all") return true;
+        if (filter === "architect") return kind === "architect";
+        if (filter === "brand") return kind === "brand" || kind === "member";
+        if (filter === "anonymous") return kind === "anonymous" || !kind;
+        return true;
+      };
+
+      let visitFilter = "all";
+      const visitGroupsTbody = document.getElementById("visit-groups-tbody");
+      const modal = document.getElementById("visit-detail-modal");
+      const modalTitle = document.getElementById("visit-detail-title");
+      const modalSub = document.getElementById("visit-detail-sub");
+      const modalTbody = document.getElementById("visit-detail-tbody");
+
+      const renderVisitGroups = () => {
+        const filtered = visits.filter((v) => kindMatchesFilter((v.visitor_kind || "anonymous").toLowerCase(), visitFilter));
+        const groups = groupVisits(filtered);
+        visitGroupsTbody.innerHTML = groups.length
+          ? groups.map((g) => `
+              <tr class="hover:bg-black/[0.02]">
+                <td class="px-5 py-3 font-medium">${g.name}</td>
+                <td class="px-5 py-3 text-[#3a3a3c]">${g.loc}</td>
+                <td class="px-5 py-3">${g.lastPage}</td>
+                <td class="px-5 py-3">${g.count}</td>
+                <td class="px-5 py-3 text-[#6e6e73]">${new Date(g.lastAt).toLocaleString("tr-TR")}</td>
+                <td class="px-5 py-3">
+                  <button type="button" class="visit-detail-btn text-[13px] font-semibold text-black underline underline-offset-2" data-key="${encodeURIComponent(g.key)}">Detay</button>
+                </td>
+              </tr>`).join("")
+          : `<tr><td colspan="6" class="px-5 py-8 text-[#6e6e73] text-center">Bu filtrede kayıt yok.</td></tr>`;
+
+        visitGroupsTbody.querySelectorAll(".visit-detail-btn").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const key = decodeURIComponent(btn.getAttribute("data-key") || "");
+            const g = groups.find((x) => x.key === key);
+            if (!g) return;
+            modalTitle.textContent = g.rawName;
+            const kinds = [...new Set(g.visits.map((x) => x.visitor_kind || "anonymous"))];
+            modalSub.textContent = `${g.count} kayıt · ${kinds.join(", ")}`;
+            const chron = [...g.visits].sort((a, b) => visitTs(a) - visitTs(b));
+            modalTbody.innerHTML = chron.map((v) => {
+              const t = visitTs(v);
+              const loc = [v.city, v.country].filter(Boolean).join(", ") || "—";
+              return `<tr class="border-b border-black/5">
+                <td class="py-2.5 pr-3">${esc(v.page || "—")}</td>
+                <td class="py-2.5 pr-3 text-[#6e6e73] whitespace-nowrap">${new Date(t).toLocaleString("tr-TR")}</td>
+                <td class="py-2.5 text-[#6e6e73]">${esc(loc)}</td>
+              </tr>`;
+            }).join("");
+            modal.classList.remove("hidden");
+            modal.classList.add("flex");
+            modal.setAttribute("aria-hidden", "false");
+          });
+        });
+      };
+
+      document.querySelectorAll(".visit-filter").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          visitFilter = btn.getAttribute("data-filter") || "all";
+          document.querySelectorAll(".visit-filter").forEach((b) => {
+            const on = b.getAttribute("data-filter") === visitFilter;
+            b.classList.toggle("bg-black", on);
+            b.classList.toggle("text-white", on);
+            b.classList.toggle("bg-white", !on);
+          });
+          renderVisitGroups();
+        });
+      });
+
+      document.getElementById("visit-detail-close").addEventListener("click", () => {
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
+        modal.setAttribute("aria-hidden", "true");
+      });
+      modal.addEventListener("click", (e) => { if (e.target === modal) document.getElementById("visit-detail-close").click(); });
+
+      renderVisitGroups();
     })();
   </script>
 </body>
