@@ -206,8 +206,69 @@
   const incrementView = async (id) => {
     await ready;
     const sb = getSB();
-    if (!sb) return;
+    if (!sb || !id) return;
     try { await sb.rpc("increment_product_view", { product_id: id }); } catch {}
+    try {
+      const { data: { user } } = await sb.auth.getUser();
+      await sb.from("product_view_log").insert({
+        product_id: id,
+        visitor_id: ensureVisitorId(),
+        user_id:    user?.id || null,
+      });
+    } catch {}
+  };
+
+  /** Marka paneli: dönem içinde ürün başına tıklama / favori sayıları (rangeDays null = tümü) */
+  const getBrandProductAnalytics = async (brandId, rangeDays = null, productsIn = null) => {
+    await ready;
+    const sb = getSB();
+    const empty = {
+      viewsByProduct: {},
+      favByProduct:   {},
+      totals:         { views: 0, favorites: 0, uniqueVisitors: 0 },
+    };
+    if (!sb || !brandId) return empty;
+
+    const products = productsIn || await getProducts({ brandId });
+    const ids = products.map((p) => p.id).filter(Boolean);
+    if (!ids.length) return { ...empty, products };
+
+    const sinceIso = rangeDays != null && rangeDays > 0
+      ? new Date(Date.now() - rangeDays * 86400000).toISOString()
+      : null;
+
+    let vq = sb.from("product_view_log").select("product_id, visitor_id, user_id, created_at").in("product_id", ids);
+    if (sinceIso) vq = vq.gte("created_at", sinceIso);
+    const { data: vrows, error: ve } = await vq;
+    if (ve) return { ...empty, products };
+
+    let fq = sb.from("product_favorites").select("product_id, user_id, created_at").in("product_id", ids);
+    if (sinceIso) fq = fq.gte("created_at", sinceIso);
+    const { data: frows, error: fe } = await fq;
+    if (fe) return { ...empty, products };
+
+    const viewsByProduct = {};
+    const favByProduct = {};
+    const uniq = new Set();
+
+    (vrows || []).forEach((r) => {
+      viewsByProduct[r.product_id] = (viewsByProduct[r.product_id] || 0) + 1;
+      uniq.add(r.user_id ? `u:${r.user_id}` : `v:${r.visitor_id || "?"}`);
+    });
+    (frows || []).forEach((r) => {
+      favByProduct[r.product_id] = (favByProduct[r.product_id] || 0) + 1;
+    });
+
+    return {
+      viewsByProduct,
+      favByProduct,
+      totals: {
+        views: (vrows || []).length,
+        favorites: (frows || []).length,
+        uniqueVisitors: uniq.size,
+      },
+      products,
+    };
   };
 
   const uploadBrandAsset = async (file, brandId, bucket = "product-images") => {
@@ -422,9 +483,13 @@
     if (!session) return { ok: false, message: "Favori eklemek için mimar girişi yapın." };
     const list = getArchitectArray("favorite_products", session.id, []);
     const idx = list.findIndex((x) => x.id === item.id);
+    const sb = getSB();
     if (idx >= 0) {
       list.splice(idx, 1);
       setArchitectArray("favorite_products", session.id, list);
+      if (sb && session.id && item.id) {
+        try { await sb.from("product_favorites").delete().eq("user_id", session.id).eq("product_id", item.id); } catch {}
+      }
       return { ok: true, active: false };
     }
     list.unshift({
@@ -436,6 +501,9 @@
       savedAt: Date.now(),
     });
     setArchitectArray("favorite_products", session.id, list);
+    if (sb && session.id && item.id) {
+      try { await sb.from("product_favorites").insert({ user_id: session.id, product_id: item.id }); } catch {}
+    }
     return { ok: true, active: true };
   };
 
@@ -706,6 +774,7 @@
     updateProduct,
     deleteProduct,
     incrementView,
+    getBrandProductAnalytics,
     uploadBrandAsset,
     uploadBrandImage,
     uploadBrandDocument,

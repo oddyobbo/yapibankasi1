@@ -6,7 +6,7 @@
   <title>Antigravity | Marka Paneli</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body data-page="brand-panel" class="bg-white text-[#111] font-sans min-h-screen">
+<body data-page="brand-panel" class="bg-[#f5f5f7] text-[#111] font-sans min-h-screen">
   <div class="w-full min-h-screen bg-white">
     <div id="site-header"></div>
     <main class="p-6 lg:p-8 space-y-6">
@@ -259,6 +259,50 @@
         </div>
         <p id="bulk-delete-msg" class="mt-2 text-[12px] text-[#6e6e73] hidden"></p>
         <div id="brand-products" class="mt-4 grid md:grid-cols-2 xl:grid-cols-3 gap-4"></div>
+
+        <div class="mt-8 pt-8 border-t border-black/10">
+          <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
+            <div>
+              <h4 class="text-[18px] font-semibold tracking-tight">Ürün analitiği</h4>
+              <p class="text-[13px] text-[#6e6e73] mt-1">Dönem seç: tıklama (ürün kartına/detaya giden) ve mimar favorileri. Özet + ürün kırılımı.</p>
+            </div>
+            <div id="analytics-range-btns" class="flex flex-wrap gap-2">
+              <button type="button" data-range="7" class="analytics-range px-3.5 py-2 rounded-full text-[12px] font-semibold border border-black/12 bg-white hover:bg-black/[0.03]">7 gün</button>
+              <button type="button" data-range="30" class="analytics-range px-3.5 py-2 rounded-full text-[12px] font-semibold border border-black/12 bg-black text-white">30 gün</button>
+              <button type="button" data-range="90" class="analytics-range px-3.5 py-2 rounded-full text-[12px] font-semibold border border-black/12 bg-white hover:bg-black/[0.03]">90 gün</button>
+              <button type="button" data-range="all" class="analytics-range px-3.5 py-2 rounded-full text-[12px] font-semibold border border-black/12 bg-white hover:bg-black/[0.03]">Tümü</button>
+            </div>
+          </div>
+          <div class="mt-4 grid sm:grid-cols-3 gap-3">
+            <div class="rounded-xl border border-black/10 bg-[#fbfbfd] px-4 py-3">
+              <p class="text-[11px] uppercase tracking-[0.12em] text-[#6e6e73] font-semibold">Tıklama</p>
+              <p id="ana-views" class="text-[26px] font-semibold mt-0.5">0</p>
+            </div>
+            <div class="rounded-xl border border-black/10 bg-[#fbfbfd] px-4 py-3">
+              <p class="text-[11px] uppercase tracking-[0.12em] text-[#6e6e73] font-semibold">Favori</p>
+              <p id="ana-fav" class="text-[26px] font-semibold mt-0.5">0</p>
+            </div>
+            <div class="rounded-xl border border-black/10 bg-[#fbfbfd] px-4 py-3">
+              <p class="text-[11px] uppercase tracking-[0.12em] text-[#6e6e73] font-semibold">Tekil ziyaretçi</p>
+              <p id="ana-uniq" class="text-[26px] font-semibold mt-0.5">0</p>
+              <p class="text-[11px] text-[#6e6e73] mt-1">Çerez veya giriş yapan kullanıcı</p>
+            </div>
+          </div>
+          <div class="mt-4 overflow-x-auto rounded-xl border border-black/10">
+            <table class="w-full text-[13px] min-w-[520px]">
+              <thead class="bg-black/[0.03] text-[#6e6e73] text-left">
+                <tr>
+                  <th class="font-medium px-4 py-2.5">Ürün</th>
+                  <th class="font-medium px-4 py-2.5">SKU</th>
+                  <th class="font-medium px-4 py-2.5">Tıklama</th>
+                  <th class="font-medium px-4 py-2.5">Favori</th>
+                  <th class="font-medium px-4 py-2.5">Toplam gör.</th>
+                </tr>
+              </thead>
+              <tbody id="analytics-tbody" class="divide-y divide-black/5"></tbody>
+            </table>
+          </div>
+        </div>
       </section>
 
       <section class="rounded-2xl border border-black/10 p-5">
@@ -304,6 +348,7 @@
     let session = null;
     let selectMode = false;
     let selectedProductIds = new Set();
+    let analyticsRange = 30;
     const PRODUCT_TAXONOMY = {
       "Malzemeler": [
         "Zemin",
@@ -352,8 +397,28 @@
       setupCategorySelectors();
 
       attachHandlers();
+      setupAnalyticsRange();
       await render();
       await hydrateProjectMaterialOptions();
+    }
+
+    function setupAnalyticsRange() {
+      const wrap = document.getElementById("analytics-range-btns");
+      if (!wrap) return;
+      wrap.querySelectorAll(".analytics-range").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const r = btn.getAttribute("data-range");
+          analyticsRange = r === "all" ? "all" : Number(r);
+          wrap.querySelectorAll(".analytics-range").forEach((b) => {
+            const br = b.getAttribute("data-range");
+            const on = br === "all" ? analyticsRange === "all" : Number(br) === analyticsRange;
+            b.classList.toggle("bg-black", on);
+            b.classList.toggle("text-white", on);
+            b.classList.toggle("bg-white", !on);
+          });
+          render();
+        });
+      });
     }
 
     function buildSpec(technical) {
@@ -434,13 +499,42 @@
     async function render() {
       productsWrap.innerHTML = `<p class="text-[14px] text-[#6e6e73]">Ürünler yükleniyor…</p>`;
       const items = await AG.getProducts({ brandId: session.id });
+      const rangeDays = analyticsRange === "all" ? null : analyticsRange;
+      const ana = await AG.getBrandProductAnalytics(session.id, rangeDays, items);
+
+      const av = document.getElementById("ana-views");
+      const af = document.getElementById("ana-fav");
+      const au = document.getElementById("ana-uniq");
+      const atb = document.getElementById("analytics-tbody");
+      if (av) av.textContent = String(ana.totals.views);
+      if (af) af.textContent = String(ana.totals.favorites);
+      if (au) au.textContent = String(ana.totals.uniqueVisitors);
+      if (atb) {
+        const sorted = [...items].sort((a, b) => (ana.viewsByProduct[b.id] || 0) - (ana.viewsByProduct[a.id] || 0));
+        atb.innerHTML = sorted.length
+          ? sorted.map((p) => `
+            <tr>
+              <td class="px-4 py-2.5 font-medium">${String(p.name || "—").replace(/</g, "&lt;")}</td>
+              <td class="px-4 py-2.5 text-[#6e6e73]">${String(p.sku || "—").replace(/</g, "&lt;")}</td>
+              <td class="px-4 py-2.5">${ana.viewsByProduct[p.id] || 0}</td>
+              <td class="px-4 py-2.5">${ana.favByProduct[p.id] || 0}</td>
+              <td class="px-4 py-2.5 text-[#6e6e73]">${p.views || 0}</td>
+            </tr>`).join("")
+          : `<tr><td colspan="5" class="px-4 py-6 text-center text-[#6e6e73]">Ürün yok</td></tr>`;
+      }
+
       countProducts.textContent = String(items.length);
       countFiles.textContent    = String(items.reduce((n, i) => n + (i.hasPdf ? 1 : 0) + (i.hasCad ? 1 : 0) + (i.files?.bimUrl ? 1 : 0), 0));
       countDrafts.textContent   = String(items.filter((p) => p.status !== "published").length);
       countViews.textContent    = String(items.reduce((n, i) => n + (i.views || 0), 0));
 
+      const periodLabel = analyticsRange === "all" ? "Tüm zamanlar" : `Son ${analyticsRange} gün`;
+
       productsWrap.innerHTML = items.length
-        ? items.map((p) => `
+        ? items.map((p) => {
+          const pv = ana.viewsByProduct[p.id] || 0;
+          const pf = ana.favByProduct[p.id] || 0;
+          return `
           <article class="rounded-2xl overflow-hidden border border-black/10 bg-white ${selectMode && selectedProductIds.has(p.id) ? "ring-2 ring-black/70" : ""}">
             <img src="${p.image || "https://images.unsplash.com/photo-1600607686527-6fb886090705?q=80&w=1974&auto=format&fit=crop"}" class="w-full h-36 object-cover" alt="${p.name}">
             <div class="p-4">
@@ -448,7 +542,8 @@
               <p class="text-[11px] text-[#6e6e73]">${p.category || "—"}</p>
               <h4 class="font-semibold mt-1">${p.name}</h4>
               <p class="text-[12px] text-[#6e6e73] mt-1">${p.spec || "Teknik bilgi bekleniyor"}</p>
-              <p class="text-[12px] text-[#6e6e73] mt-1">Durum: ${p.status === "published" ? "Yayında" : "Taslak"} · Görüntülenme: ${p.views || 0}</p>
+              <p class="text-[12px] text-[#6e6e73] mt-1">Durum: ${p.status === "published" ? "Yayında" : "Taslak"} · Toplam görüntülenme: ${p.views || 0}</p>
+              <p class="text-[11px] text-[#1d1d1f] mt-1 font-medium">${periodLabel}: ${pv} tıklama · ${pf} favori</p>
               <div class="mt-2 text-[11px] text-[#6e6e73]">
                 ${p.files?.pdfUrl ? "<span>PDF</span>" : ""}
                 ${p.files?.cadUrl ? " · <span>DWG</span>" : ""}
@@ -459,7 +554,8 @@
                 <button data-delete="${p.id}" class="px-3 py-1.5 rounded-full border border-black/15 text-[12px]">Sil</button>
               </div>
             </div>
-          </article>`).join("")
+          </article>`;
+        }).join("")
         : `<p class="text-[14px] text-[#6e6e73]">Henüz ürün eklenmedi.</p>`;
 
       const toggleBtn = document.getElementById("toggle-select-mode");

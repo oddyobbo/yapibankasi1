@@ -188,6 +188,54 @@ returns void as $$
   update public.products set views = views + 1 where id = product_id;
 $$ language sql security definer;
 
+-- ── Marka paneli analitiği: ürün tıklama logu + favoriler ─────────────────
+
+create table if not exists public.product_view_log (
+  id uuid default gen_random_uuid() primary key,
+  product_id uuid not null references public.products(id) on delete cascade,
+  visitor_id text,
+  user_id uuid references auth.users(id) on delete set null,
+  created_at timestamptz default now()
+);
+create index if not exists idx_product_view_log_pid_created on public.product_view_log(product_id, created_at desc);
+
+alter table public.product_view_log enable row level security;
+
+drop policy if exists "pvl_insert_any" on public.product_view_log;
+create policy "pvl_insert_any" on public.product_view_log
+  for insert with check (exists (select 1 from public.products p where p.id = product_id));
+
+drop policy if exists "pvl_select_brand" on public.product_view_log;
+create policy "pvl_select_brand" on public.product_view_log
+  for select using (
+    exists (select 1 from public.products p where p.id = product_view_log.product_id and p.brand_id = auth.uid())
+  );
+
+create table if not exists public.product_favorites (
+  user_id uuid not null references auth.users(id) on delete cascade,
+  product_id uuid not null references public.products(id) on delete cascade,
+  created_at timestamptz default now(),
+  primary key (user_id, product_id)
+);
+create index if not exists idx_product_favorites_pid on public.product_favorites(product_id);
+
+alter table public.product_favorites enable row level security;
+
+drop policy if exists "pf_insert_own" on public.product_favorites;
+create policy "pf_insert_own" on public.product_favorites
+  for insert with check (auth.uid() = user_id);
+
+drop policy if exists "pf_delete_own" on public.product_favorites;
+create policy "pf_delete_own" on public.product_favorites
+  for delete using (auth.uid() = user_id);
+
+drop policy if exists "pf_select_own_or_brand" on public.product_favorites;
+create policy "pf_select_own_or_brand" on public.product_favorites
+  for select using (
+    auth.uid() = user_id
+    or exists (select 1 from public.products p where p.id = product_favorites.product_id and p.brand_id = auth.uid())
+  );
+
 -- ── Admin kullanıcısı ─────────────────────────────────────────────────────
 -- Supabase Dashboard → Authentication → Users → Add User bölümünden oluştur:
 --   Email:    onatderindere@icloud.com
