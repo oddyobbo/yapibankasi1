@@ -3,31 +3,36 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Antigravity | Marka Paneli</title>
+  <title>Archilink | Marka Paneli</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif; }
+    .panel-card-lift { transition: transform .3s cubic-bezier(.2,.7,.2,1), border-color .3s; }
+    .panel-card-lift:hover { transform: translateY(-3px); border-color: rgba(0,0,0,.22); }
+  </style>
 </head>
-<body data-page="brand-panel" class="bg-[#f5f5f7] text-[#111] font-sans min-h-screen">
+<body data-page="brand-panel" class="bg-white text-[#0b0b0c] font-sans min-h-screen antialiased">
   <div class="w-full min-h-screen bg-white">
     <div id="site-header"></div>
-    <main class="p-6 lg:p-8 space-y-6">
-      <section class="grid md:grid-cols-2 xl:grid-cols-4 gap-4">
-        <article class="rounded-2xl border border-black/10 p-5"><p class="text-[12px] text-[#6e6e73]">Yüklü Ürün</p><p id="count-products" class="text-[30px] font-semibold mt-1">0</p></article>
-        <article class="rounded-2xl border border-black/10 p-5"><p class="text-[12px] text-[#6e6e73]">Teknik Dosya</p><p id="count-files" class="text-[30px] font-semibold mt-1">0</p></article>
-        <article class="rounded-2xl border border-black/10 p-5"><p class="text-[12px] text-[#6e6e73]">Taslak Ürün</p><p id="count-drafts" class="text-[30px] font-semibold mt-1">0</p></article>
-        <article class="rounded-2xl border border-black/10 p-5"><p class="text-[12px] text-[#6e6e73]">Toplam Görüntülenme</p><p id="count-views" class="text-[30px] font-semibold mt-1">0</p></article>
+    <main class="px-5 py-6 lg:px-8 lg:py-8 max-w-[1400px] mx-auto space-y-5">
+      <section class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+        <article class="rounded-2xl border border-black/[0.08] bg-white p-4 md:p-5"><p class="text-[11px] uppercase tracking-wide text-[#6e6e73] font-medium">Yüklü ürün</p><p id="count-products" class="text-[24px] md:text-[26px] font-semibold tracking-tight text-[#1d1d1f] mt-1">0</p></article>
+        <article class="rounded-2xl border border-black/[0.08] bg-white p-4 md:p-5"><p class="text-[11px] uppercase tracking-wide text-[#6e6e73] font-medium">Teknik dosya</p><p id="count-files" class="text-[24px] md:text-[26px] font-semibold tracking-tight text-[#1d1d1f] mt-1">0</p></article>
+        <article class="rounded-2xl border border-black/[0.08] bg-white p-4 md:p-5"><p class="text-[11px] uppercase tracking-wide text-[#6e6e73] font-medium">Taslak</p><p id="count-drafts" class="text-[24px] md:text-[26px] font-semibold tracking-tight text-[#1d1d1f] mt-1">0</p></article>
+        <article class="rounded-2xl border border-black/[0.08] bg-white p-4 md:p-5"><p class="text-[11px] uppercase tracking-wide text-[#6e6e73] font-medium">Görüntülenme</p><p id="count-views" class="text-[24px] md:text-[26px] font-semibold tracking-tight text-[#1d1d1f] mt-1">0</p></article>
       </section>
 
-      <section class="rounded-2xl border border-black/10 bg-[#fbfbfd] p-5">
+      <section class="rounded-2xl border border-black/[0.08] bg-white p-5 lg:p-6">
         <div class="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h2 class="text-[22px] font-semibold tracking-tight">Ürün Yükleme Merkezi</h2>
-            <p class="text-[14px] text-[#6e6e73] mt-1">Diğer global platformlardaki gibi 3 giriş akışı: manuel, CSV, API.</p>
+            <h2 class="text-[19px] font-semibold tracking-tight text-[#1d1d1f]">Ürün yükleme</h2>
+            <p class="text-[13px] text-[#6e6e73] mt-1">Manuel, CSV veya API ile ürün aktar.</p>
           </div>
           <div id="mode-tabs" class="flex gap-2 flex-wrap">
-            <button data-mode="manual" class="mode-tab px-4 py-2 rounded-full text-[13px] border border-black/10 bg-black text-white">Manuel</button>
-            <button data-mode="csv" class="mode-tab px-4 py-2 rounded-full text-[13px] border border-black/10 bg-white">CSV</button>
-            <button data-mode="api" class="mode-tab px-4 py-2 rounded-full text-[13px] border border-black/10 bg-white">API</button>
-            <button data-mode="url" class="mode-tab px-4 py-2 rounded-full text-[13px] border border-black/10 bg-white">Web'den Aktar</button>
+            <button data-mode="manual" class="mode-tab h-8 px-3 rounded-lg text-[12px] font-medium border border-black/[0.08] bg-[#1d1d1f] text-white">Manuel</button>
+            <button data-mode="csv" class="mode-tab h-8 px-3 rounded-lg text-[12px] font-medium border border-black/[0.08] bg-white text-[#1d1d1f] hover:border-black/20">CSV</button>
+            <button data-mode="api" class="mode-tab h-8 px-3 rounded-lg text-[12px] font-medium border border-black/[0.08] bg-white text-[#1d1d1f] hover:border-black/20">API</button>
+            <button data-mode="url" class="mode-tab h-8 px-3 rounded-lg text-[12px] font-medium border border-black/[0.08] bg-white text-[#1d1d1f] hover:border-black/20">Web'den aktar</button>
           </div>
         </div>
 
@@ -192,7 +197,7 @@
             <div id="url-preview" class="hidden rounded-xl border border-black/10 bg-white p-4">
               <h4 class="text-[15px] font-semibold">Çekilen Veri — Gözden Geçir & Düzenle</h4>
               <p class="text-[12px] text-[#6e6e73] mt-1 mb-4">Alanları kaydetmeden önce düzenleyebilirsin.</p>
-              <img id="prev-img-preview" class="hidden w-full h-40 object-cover rounded-xl mb-2 border border-black/10" alt="Ürün görseli">
+              <img id="prev-img-preview" class="hidden w-full h-32 max-h-48 object-cover rounded-2xl mb-2 border border-black/[0.08]" alt="Ürün görseli">
               <div id="prev-img-strip" class="hidden flex gap-2 overflow-x-auto py-2 mb-3"></div>
               <div class="grid md:grid-cols-2 gap-2 text-[13px]">
                 <div class="md:col-span-2">
@@ -248,23 +253,23 @@
         </div>
       </section>
 
-      <section class="rounded-2xl border border-black/10 p-5">
-        <div class="flex items-center justify-between">
-          <h3 class="text-[20px] font-semibold">Paneldeki Ürünlerim</h3>
+      <section class="rounded-2xl border border-black/[0.08] bg-white p-5 lg:p-6">
+        <div class="flex items-center justify-between gap-3">
+          <h3 class="text-[17px] font-semibold tracking-tight text-[#1d1d1f]">Ürünlerim</h3>
           <div class="flex flex-wrap gap-2">
-            <button id="toggle-select-mode" type="button" class="px-4 py-2 rounded-full border border-black/15 text-[13px]">Seç</button>
-            <button id="delete-selected-products" type="button" class="px-4 py-2 rounded-full border border-black/15 text-[13px] hidden">Seçilenleri Sil</button>
-            <button id="clear-products" class="px-4 py-2 rounded-full border border-black/15 text-[13px]">Hepsini Temizle</button>
+            <button id="toggle-select-mode" type="button" class="h-8 px-3 rounded-lg border border-black/[0.08] text-[12px] font-medium text-[#1d1d1f] hover:border-black/20 bg-white">Seç</button>
+            <button id="delete-selected-products" type="button" class="h-8 px-3 rounded-lg border border-black/[0.08] text-[12px] font-medium text-[#1d1d1f] hover:border-black/20 bg-white hidden">Seçilenleri sil</button>
+            <button id="clear-products" class="h-8 px-3 rounded-lg border border-black/[0.08] text-[12px] font-medium text-[#1d1d1f] hover:border-black/20 bg-white">Hepsini temizle</button>
           </div>
         </div>
         <p id="bulk-delete-msg" class="mt-2 text-[12px] text-[#6e6e73] hidden"></p>
-        <div id="brand-products" class="mt-4 grid md:grid-cols-2 xl:grid-cols-3 gap-4"></div>
+        <div id="brand-products" class="mt-4 grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-5"></div>
 
-        <div class="mt-8 pt-8 border-t border-black/10">
+        <div class="mt-8 pt-8 border-t border-black/[0.06]">
           <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
             <div>
-              <h4 class="text-[18px] font-semibold tracking-tight">Ürün analitiği</h4>
-              <p class="text-[13px] text-[#6e6e73] mt-1">Dönem seç: tıklama (ürün kartına/detaya giden) ve mimar favorileri. Özet + ürün kırılımı.</p>
+              <h4 class="text-[17px] font-semibold tracking-tight text-[#1d1d1f]">Ürün analitiği</h4>
+              <p class="text-[13px] text-[#6e6e73] mt-1">Dönem seç: tıklama ve mimar favorileri; özet ve ürün kırılımı.</p>
             </div>
             <div id="analytics-range-btns" class="flex flex-wrap gap-2">
               <button type="button" data-range="7" class="analytics-range px-3.5 py-2 rounded-full text-[12px] font-semibold border border-black/12 bg-white hover:bg-black/[0.03]">7 gün</button>
@@ -274,23 +279,23 @@
             </div>
           </div>
           <div class="mt-4 grid sm:grid-cols-3 gap-3">
-            <div class="rounded-xl border border-black/10 bg-[#fbfbfd] px-4 py-3">
-              <p class="text-[11px] uppercase tracking-[0.12em] text-[#6e6e73] font-semibold">Tıklama</p>
-              <p id="ana-views" class="text-[26px] font-semibold mt-0.5">0</p>
+            <div class="rounded-2xl border border-black/[0.08] bg-white px-4 py-3">
+              <p class="text-[11px] uppercase tracking-wide text-[#6e6e73] font-medium">Tıklama</p>
+              <p id="ana-views" class="text-[22px] md:text-[24px] font-semibold tracking-tight text-[#1d1d1f] mt-0.5">0</p>
             </div>
-            <div class="rounded-xl border border-black/10 bg-[#fbfbfd] px-4 py-3">
-              <p class="text-[11px] uppercase tracking-[0.12em] text-[#6e6e73] font-semibold">Favori</p>
-              <p id="ana-fav" class="text-[26px] font-semibold mt-0.5">0</p>
+            <div class="rounded-2xl border border-black/[0.08] bg-white px-4 py-3">
+              <p class="text-[11px] uppercase tracking-wide text-[#6e6e73] font-medium">Favori</p>
+              <p id="ana-fav" class="text-[22px] md:text-[24px] font-semibold tracking-tight text-[#1d1d1f] mt-0.5">0</p>
             </div>
-            <div class="rounded-xl border border-black/10 bg-[#fbfbfd] px-4 py-3">
-              <p class="text-[11px] uppercase tracking-[0.12em] text-[#6e6e73] font-semibold">Tekil ziyaretçi</p>
-              <p id="ana-uniq" class="text-[26px] font-semibold mt-0.5">0</p>
+            <div class="rounded-2xl border border-black/[0.08] bg-white px-4 py-3">
+              <p class="text-[11px] uppercase tracking-wide text-[#6e6e73] font-medium">Tekil ziyaretçi</p>
+              <p id="ana-uniq" class="text-[22px] md:text-[24px] font-semibold tracking-tight text-[#1d1d1f] mt-0.5">0</p>
               <p class="text-[11px] text-[#6e6e73] mt-1">Çerez veya giriş yapan kullanıcı</p>
             </div>
           </div>
-          <div class="mt-4 overflow-x-auto rounded-xl border border-black/10">
+          <div class="mt-4 overflow-x-auto rounded-2xl border border-black/[0.08]">
             <table class="w-full text-[13px] min-w-[520px]">
-              <thead class="bg-black/[0.03] text-[#6e6e73] text-left">
+              <thead class="bg-[#fafafa] text-[#6e6e73] text-left">
                 <tr>
                   <th class="font-medium px-4 py-2.5">Ürün</th>
                   <th class="font-medium px-4 py-2.5">SKU</th>
@@ -305,9 +310,9 @@
         </div>
       </section>
 
-      <section class="rounded-2xl border border-black/10 p-5">
-        <h3 class="text-[20px] font-semibold">Proje Paylaş ve Malzeme Etiketle</h3>
-        <p class="text-[13px] text-[#6e6e73] mt-1">Firma projeni paylaş, bu projede kullandığın kendi ürünlerini etiketle. Projeler sayfasında “Bu projede kullanılan malzemeler” alanında yayınlanır.</p>
+      <section class="rounded-2xl border border-black/[0.08] bg-white p-5 lg:p-6">
+        <h3 class="text-[17px] font-semibold tracking-tight text-[#1d1d1f]">Proje paylaş</h3>
+        <p class="text-[13px] text-[#6e6e73] mt-1">Projende kullandığın kendi ürünlerini etiketle; proje detayında malzemeler görünür.</p>
         <form id="project-form" class="mt-4 grid md:grid-cols-2 gap-3 text-[14px]">
           <input name="title" required class="h-11 rounded-xl border border-black/10 px-4 md:col-span-2" placeholder="Proje adı *">
           <input name="location" class="h-11 rounded-xl border border-black/10 px-4" placeholder="Lokasyon (örn: İstanbul)">
@@ -325,12 +330,12 @@
         </form>
       </section>
 
-      <section class="rounded-2xl border border-black/10 p-5">
+      <section class="rounded-2xl border border-black/[0.08] bg-white p-5 lg:p-6">
         <div class="flex items-center justify-between gap-3">
-          <h3 class="text-[20px] font-semibold">Projelerim</h3>
+          <h3 class="text-[17px] font-semibold tracking-tight text-[#1d1d1f]">Projelerim</h3>
           <span id="projects-count" class="text-[12px] text-[#6e6e73]">0 proje</span>
         </div>
-        <div id="brand-projects" class="mt-4 grid md:grid-cols-2 xl:grid-cols-3 gap-4"></div>
+        <div id="brand-projects" class="mt-4 grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-5"></div>
       </section>
     </main>
     <div id="site-footer"></div>
@@ -497,7 +502,7 @@
     }
 
     async function render() {
-      productsWrap.innerHTML = `<p class="text-[14px] text-[#6e6e73]">Ürünler yükleniyor…</p>`;
+      productsWrap.innerHTML = `<p class="text-[13px] text-[#6e6e73]">Ürünler yükleniyor…</p>`;
       const items = await AG.getProducts({ brandId: session.id });
       const rangeDays = analyticsRange === "all" ? null : analyticsRange;
       const ana = await AG.getBrandProductAnalytics(session.id, rangeDays, items);
@@ -535,28 +540,30 @@
           const pv = ana.viewsByProduct[p.id] || 0;
           const pf = ana.favByProduct[p.id] || 0;
           return `
-          <article class="rounded-2xl overflow-hidden border border-black/10 bg-white ${selectMode && selectedProductIds.has(p.id) ? "ring-2 ring-black/70" : ""}">
-            <img src="${p.image || "https://images.unsplash.com/photo-1600607686527-6fb886090705?q=80&w=1974&auto=format&fit=crop"}" class="w-full h-36 object-cover" alt="${p.name}">
-            <div class="p-4">
-              ${selectMode ? `<label class="inline-flex items-center gap-2 text-[12px] mb-2 cursor-pointer"><input type="checkbox" class="accent-black" data-select-product="${p.id}" ${selectedProductIds.has(p.id) ? "checked" : ""}> Seç</label>` : ""}
+          <article class="panel-card-lift group rounded-2xl overflow-hidden border border-black/[0.08] bg-white flex flex-col ${selectMode && selectedProductIds.has(p.id) ? "ring-2 ring-black/75" : ""}">
+            <div class="relative h-48 bg-[#f5f5f7] overflow-hidden shrink-0">
+              <img src="${p.image || "https://images.unsplash.com/photo-1600607686527-6fb886090705?q=80&w=800&auto=format&fit=crop"}" class="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500 ease-out" alt="${p.name}">
+            </div>
+            <div class="p-4 flex flex-col flex-1">
+              ${selectMode ? `<label class="inline-flex items-center gap-2 text-[12px] mb-2 cursor-pointer text-[#1d1d1f]"><input type="checkbox" class="accent-black w-3.5 h-3.5 rounded border-black/20" data-select-product="${p.id}" ${selectedProductIds.has(p.id) ? "checked" : ""}> Seç</label>` : ""}
               <p class="text-[11px] text-[#6e6e73]">${p.category || "—"}</p>
-              <h4 class="font-semibold mt-1">${p.name}</h4>
-              <p class="text-[12px] text-[#6e6e73] mt-1">${p.spec || "Teknik bilgi bekleniyor"}</p>
-              <p class="text-[12px] text-[#6e6e73] mt-1">Durum: ${p.status === "published" ? "Yayında" : "Taslak"} · Toplam görüntülenme: ${p.views || 0}</p>
+              <h4 class="text-[14px] font-semibold leading-snug text-[#1d1d1f] mt-0.5">${p.name}</h4>
+              <p class="text-[12px] text-[#6e6e73] mt-1 line-clamp-2">${p.spec || "Teknik bilgi bekleniyor"}</p>
+              <p class="text-[12px] text-[#6e6e73] mt-1">${p.status === "published" ? "Yayında" : "Taslak"} · ${p.views || 0} görüntülenme</p>
               <p class="text-[11px] text-[#1d1d1f] mt-1 font-medium">${periodLabel}: ${pv} tıklama · ${pf} favori</p>
               <div class="mt-2 text-[11px] text-[#6e6e73]">
                 ${p.files?.pdfUrl ? "<span>PDF</span>" : ""}
                 ${p.files?.cadUrl ? " · <span>DWG</span>" : ""}
                 ${p.files?.bimUrl ? " · <span>BIM</span>" : ""}
               </div>
-              <div class="mt-3 flex gap-2">
-                <button data-publish="${p.id}" data-status="${p.status}" class="px-3 py-1.5 rounded-full border border-black/15 text-[12px]">${p.status === "published" ? "Taslağa Al" : "Yayınla"}</button>
-                <button data-delete="${p.id}" class="px-3 py-1.5 rounded-full border border-black/15 text-[12px]">Sil</button>
+              <div class="mt-3 flex flex-wrap gap-2">
+                <button data-publish="${p.id}" data-status="${p.status}" class="h-8 px-3 rounded-lg border border-black/[0.08] text-[12px] font-medium text-[#1d1d1f] hover:border-black/20 bg-white">${p.status === "published" ? "Taslağa al" : "Yayınla"}</button>
+                <button data-delete="${p.id}" class="h-8 px-3 rounded-lg border border-black/[0.08] text-[12px] font-medium text-[#1d1d1f] hover:border-black/20 bg-white">Sil</button>
               </div>
             </div>
           </article>`;
         }).join("")
-        : `<p class="text-[14px] text-[#6e6e73]">Henüz ürün eklenmedi.</p>`;
+        : `<p class="text-[13px] text-[#6e6e73]">Henüz ürün eklenmedi.</p>`;
 
       const toggleBtn = document.getElementById("toggle-select-mode");
       const deleteSelectedBtn = document.getElementById("delete-selected-products");
@@ -609,18 +616,19 @@
       countEl.textContent = `${projects.length} proje`;
       wrap.innerHTML = projects.length
         ? projects.map((pr) => `
-          <a href="/proje-detay.html?id=${encodeURIComponent(pr.id)}" class="block rounded-2xl overflow-hidden border border-black/10 bg-white hover:border-black/25 transition">
-            <div class="aspect-square overflow-hidden bg-[#f5f5f7]">
-              <img src="${pr.image || "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=1200&auto=format&fit=crop"}" class="w-full h-full object-cover" alt="${pr.title}">
+          <a href="/proje-detay.html?id=${encodeURIComponent(pr.id)}" class="block panel-card-lift group rounded-2xl overflow-hidden border border-black/[0.08] bg-white flex flex-col h-full">
+            <div class="relative h-48 bg-[#f5f5f7] overflow-hidden shrink-0">
+              <img src="${pr.image || "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=800&auto=format&fit=crop"}" class="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500 ease-out" alt="${pr.title}">
             </div>
-            <div class="p-4">
+            <div class="p-4 flex flex-col flex-1">
               <p class="text-[11px] text-[#6e6e73]">${pr.location || "Lokasyon yok"}${pr.year ? ` · ${pr.year}` : ""}</p>
-              <h4 class="font-semibold mt-1">${pr.title}</h4>
+              <h4 class="text-[14px] font-semibold leading-snug text-[#1d1d1f] mt-0.5">${pr.title}</h4>
               <p class="text-[12px] text-[#6e6e73] mt-1 line-clamp-2">${pr.description || "Açıklama yok."}</p>
-              <p class="text-[12px] text-[#6e6e73] mt-2">Etiketli malzeme: ${(pr.materials || []).length}</p>
+              <p class="text-[12px] text-[#6e6e73] mt-2">Malzeme: ${(pr.materials || []).length}</p>
+              <span class="mt-3 w-full h-8 flex items-center justify-center bg-[#1d1d1f] text-white text-[12px] font-medium rounded-lg group-hover:bg-[#3a3a3c] transition">Detay</span>
             </div>
           </a>`).join("")
-        : `<p class="text-[14px] text-[#6e6e73]">Henüz proje eklenmedi.</p>`;
+        : `<p class="text-[13px] text-[#6e6e73]">Henüz proje eklenmedi.</p>`;
     }
 
     function attachHandlers() {
@@ -1170,8 +1178,8 @@
       document.querySelectorAll(".mode-tab").forEach((btn) => {
         btn.addEventListener("click", () => {
           const mode = btn.dataset.mode;
-          document.querySelectorAll(".mode-tab").forEach((b) => b.className = "mode-tab px-4 py-2 rounded-full text-[13px] border border-black/10 bg-white");
-          btn.className = "mode-tab px-4 py-2 rounded-full text-[13px] border border-black/10 bg-black text-white";
+          document.querySelectorAll(".mode-tab").forEach((b) => b.className = "mode-tab h-8 px-3 rounded-lg text-[12px] font-medium border border-black/[0.08] bg-white text-[#1d1d1f] hover:border-black/20");
+          btn.className = "mode-tab h-8 px-3 rounded-lg text-[12px] font-medium border border-black/[0.08] bg-[#1d1d1f] text-white";
           document.querySelectorAll(".mode-panel").forEach((p) => p.classList.add("hidden"));
           document.getElementById(`mode-${mode}`).classList.remove("hidden");
         });
