@@ -1,7 +1,7 @@
 (() => {
   const SUPABASE_URL = "https://dbcyoveyoqjlmybklovu.supabase.co";
   const SUPABASE_KEY = "sb_publishable_RhoIIO1nhGpyGqgU6MD3kw_sawB4_Zk";
-  const ADMIN_EMAIL  = "onatderindere@gmail.com";
+  const ADMIN_EMAIL  = "onatderindere@icloud.com";
 
   const CATEGORIES = ["Akustik", "Aydınlatma", "Dış Cephe", "Zemin", "Tavan Sistemleri", "Mobilya"];
   const LS_PROJECTS_KEY = "ag_projects_v1";
