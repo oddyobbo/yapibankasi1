@@ -44,7 +44,7 @@
         <input name="email" type="email" class="w-full h-11 rounded-xl border border-black/10 px-4" placeholder="Kurumsal e-posta *" required>
         <input name="phone" class="w-full h-11 rounded-xl border border-black/10 px-4" placeholder="Telefon *" required>
         <input name="website" class="w-full h-11 rounded-xl border border-black/10 px-4 md:col-span-2" placeholder="Web sitesi (örn. https://markaniz.com)">
-        <select name="category" class="w-full h-11 rounded-xl border border-black/10 px-4 bg-white md:col-span-2">
+        <select name="category" required class="w-full h-11 rounded-xl border border-black/10 px-4 bg-white md:col-span-2">
           <option value="">Birincil ürün kategorisi seç *</option>
           <option>Akustik</option>
           <option>Aydınlatma</option>
@@ -115,6 +115,10 @@
       const password = fd.get("password");
       const passwordConfirm = fd.get("passwordConfirm");
       const website = fd.get("website")?.trim();
+      const contactName = fd.get("contactName")?.trim();
+      const jobTitle = fd.get("title")?.trim();
+      const phone = fd.get("phone")?.trim();
+      const primaryCategory = fd.get("category")?.trim();
       const errEl = document.getElementById("apply-error");
 
       errEl.classList.add("hidden");
@@ -133,7 +137,16 @@
       this.disabled = true;
       this.textContent = "Hesap oluşturuluyor…";
 
-      const result = await AG.registerBrand({ name: brandName, email, password, website });
+      const result = await AG.registerBrand({
+        name: brandName,
+        email,
+        password,
+        website,
+        contactName,
+        jobTitle,
+        phone,
+        primaryCategory,
+      });
       if (!result.ok) {
         errEl.textContent = result.message || "Bir hata oluştu. Lütfen tekrar deneyin.";
         errEl.classList.remove("hidden");

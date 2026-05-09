@@ -11,6 +11,12 @@ create table if not exists public.profiles (
   email text default '',
   website text default '',
   logo text default '',
+  account_type text not null default 'brand',
+  phone text not null default '',
+  contact_name text not null default '',
+  job_title text not null default '',
+  primary_category text not null default '',
+  office text not null default '',
   created_at timestamptz default now()
 );
 
@@ -79,17 +85,36 @@ drop policy if exists "visits_admin_read" on public.visits;
 create policy "visits_admin_read" on public.visits
   for select using (auth.email() = 'onatderindere@icloud.com');
 
+-- ── Migration: mevcut projede profiles genişletme (bir kez çalıştır) ───────
+
+alter table public.profiles add column if not exists account_type text default 'brand';
+alter table public.profiles add column if not exists phone text default '';
+alter table public.profiles add column if not exists contact_name text default '';
+alter table public.profiles add column if not exists job_title text default '';
+alter table public.profiles add column if not exists primary_category text default '';
+alter table public.profiles add column if not exists office text default '';
+update public.profiles set account_type = coalesce(nullif(trim(account_type), ''), 'brand') where account_type is null or trim(account_type) = '';
+
 -- ── Auto-profile on signup trigger ───────────────────────────────────────
 
 create or replace function public.handle_new_user()
 returns trigger as $$
 begin
-  insert into public.profiles (id, name, email, website)
+  insert into public.profiles (
+    id, name, email, website, account_type,
+    phone, contact_name, job_title, primary_category, office
+  )
   values (
     new.id,
     coalesce(new.raw_user_meta_data->>'name', split_part(new.email, '@', 1)),
     new.email,
-    coalesce(new.raw_user_meta_data->>'website', '')
+    coalesce(new.raw_user_meta_data->>'website', ''),
+    coalesce(nullif(trim(new.raw_user_meta_data->>'account_type'), ''), 'brand'),
+    coalesce(new.raw_user_meta_data->>'phone', ''),
+    coalesce(new.raw_user_meta_data->>'contact_name', ''),
+    coalesce(new.raw_user_meta_data->>'job_title', ''),
+    coalesce(new.raw_user_meta_data->>'primary_category', ''),
+    coalesce(new.raw_user_meta_data->>'office', '')
   )
   on conflict (id) do nothing;
   return new;

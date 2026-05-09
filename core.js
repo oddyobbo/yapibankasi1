@@ -5,7 +5,6 @@
 
   const CATEGORIES = ["Akustik", "Aydınlatma", "Dış Cephe", "Zemin", "Tavan Sistemleri", "Mobilya"];
   const LS_PROJECTS_KEY = "ag_projects_v1";
-  const LS_ARCHITECT_ACCOUNTS_KEY = "ag_architect_accounts_v1";
   const LS_ARCHITECT_SESSION_KEY = "ag_architect_session_v1";
   const LS_BRAND_SESSION_KEY = "ag_brand_session_v1";
 
@@ -68,20 +67,38 @@
     setArchitectSession(null);
     lsWrite(LS_BRAND_SESSION_KEY, null);
     const { data: profile } = await sb.from("profiles").select("*").eq("id", data.user.id).single();
+    if (profile?.account_type === "architect") {
+      await sb.auth.signOut();
+      return { ok: false, message: "Bu hesap mimar hesabı. Mimar girişi için /mimar-giris.html sayfasını kullanın." };
+    }
     return { ok: true, brand: { id: data.user.id, email: data.user.email, ...(profile || {}) } };
   };
 
-  const registerBrand = async ({ name, email, password, website }) => {
+  const registerBrand = async ({
+    name, email, password, website,
+    contactName, jobTitle, phone, primaryCategory,
+  }) => {
     await ready;
     const sb = getSB();
     if (!sb) return { ok: false, message: "Sunucu bağlantısı kurulamadı." };
     const { data, error } = await sb.auth.signUp({
-      email, password,
-      options: { data: { name: name.trim(), website: (website || "").trim() } },
+      email: (email || "").trim(),
+      password,
+      options: {
+        data: {
+          name: (name || "").trim(),
+          website: (website || "").trim(),
+          account_type: "brand",
+          contact_name: (contactName || "").trim(),
+          job_title: (jobTitle || "").trim(),
+          phone: (phone || "").trim(),
+          primary_category: (primaryCategory || "").trim(),
+        },
+      },
     });
     if (error) return { ok: false, message: error.message };
     if (!data.user) return { ok: false, message: "Kayıt başarısız. Lütfen tekrar dene." };
-    return { ok: true, brand: { id: data.user.id, email, name } };
+    return { ok: true, brand: { id: data.user.id, email: data.user.email, name: (name || "").trim() } };
   };
 
   const logoutBrand = async () => {
@@ -98,6 +115,7 @@
     const { data: { user } } = await sb.auth.getUser();
     if (!user || user.email === ADMIN_EMAIL) return null;
     const { data: profile } = await sb.from("profiles").select("*").eq("id", user.id).single();
+    if (profile?.account_type === "architect") return null;
     if (profile) return { id: user.id, email: user.email, ...profile };
     return { id: user.id, email: user.email, name: user.email.split("@")[0] };
   };
@@ -282,12 +300,25 @@
     return created;
   };
 
-  // ── Architect auth & moodboard data (local-first robust fallback) ───────
-  const getArchitectAccounts = () => lsRead(LS_ARCHITECT_ACCOUNTS_KEY, []);
-  const setArchitectAccounts = (accounts) => lsWrite(LS_ARCHITECT_ACCOUNTS_KEY, accounts);
-  const getArchitectSessionSync = () => lsRead(LS_ARCHITECT_SESSION_KEY, null);
+  // ── Architect auth (Supabase) + moodboard verisi (localStorage / kullanıcı id) ─
   const setArchitectSession = (session) => lsWrite(LS_ARCHITECT_SESSION_KEY, session || null);
   const nsKey = (suffix, architectId) => `ag_architect_${suffix}_${architectId}`;
+
+  const getSessionArchitect = async () => {
+    await ready;
+    const sb = getSB();
+    if (!sb) return null;
+    const { data: { user } } = await sb.auth.getUser();
+    if (!user || user.email === ADMIN_EMAIL) return null;
+    const { data: profile } = await sb.from("profiles").select("*").eq("id", user.id).single();
+    if (!profile || profile.account_type !== "architect") return null;
+    return {
+      id: user.id,
+      email: user.email,
+      name: profile.name || user.email.split("@")[0],
+      office: profile.office || "",
+    };
+  };
 
   const registerArchitect = async ({ name, email, password, office }) => {
     const safeEmail = (email || "").trim().toLowerCase();
@@ -296,48 +327,74 @@
       return { ok: false, message: "Ad, e-posta ve şifre zorunludur." };
     }
 
-    const accounts = getArchitectAccounts();
-    if (accounts.some((x) => x.email === safeEmail)) {
-      return { ok: false, message: "Bu e-posta ile kayıtlı mimar hesabı var." };
-    }
+    await ready;
+    const sb = getSB();
+    if (!sb) return { ok: false, message: "Sunucu bağlantısı kurulamadı." };
 
-    const architect = {
-      id: `arch-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-      name: safeName,
+    const { data, error } = await sb.auth.signUp({
       email: safeEmail,
       password,
-      office: (office || "").trim(),
-      createdAt: Date.now(),
+      options: {
+        data: {
+          name: safeName,
+          account_type: "architect",
+          office: (office || "").trim(),
+        },
+      },
+    });
+    if (error) return { ok: false, message: error.message };
+    if (!data.user) return { ok: false, message: "Kayıt başarısız. Lütfen tekrar dene." };
+
+    lsWrite(LS_BRAND_SESSION_KEY, null);
+    setArchitectSession(null);
+    return {
+      ok: true,
+      architect: {
+        id: data.user.id,
+        name: safeName,
+        email: safeEmail,
+        office: (office || "").trim(),
+      },
     };
-    accounts.push(architect);
-    setArchitectAccounts(accounts);
-    const session = { id: architect.id, name: architect.name, email: architect.email, office: architect.office };
-    setArchitectSession(session);
-    return { ok: true, architect: session };
   };
 
   const loginArchitect = async ({ email, password }) => {
     await ready;
     const safeEmail = (email || "").trim().toLowerCase();
-    const accounts = getArchitectAccounts();
-    const found = accounts.find((x) => x.email === safeEmail && x.password === password);
-    if (!found) return { ok: false, message: "E-posta veya şifre hatalı." };
-    // Architect ve brand oturumları aynı anda aktif olmasın.
     const sb = getSB();
-    if (sb) {
-      try { await sb.auth.signOut(); } catch {}
+    if (!sb) return { ok: false, message: "Sunucu bağlantısı kurulamadı." };
+
+    const { data, error } = await sb.auth.signInWithPassword({ email: safeEmail, password });
+    if (error) return { ok: false, message: "E-posta veya şifre hatalı." };
+
+    const { data: profile } = await sb.from("profiles").select("*").eq("id", data.user.id).single();
+    if (profile?.account_type !== "architect") {
+      await sb.auth.signOut();
+      if (!profile || profile.account_type === "brand" || !profile.account_type) {
+        return { ok: false, message: "Bu hesap marka hesabı. Marka girişi için /marka-giris.html sayfasını kullanın." };
+      }
+      return { ok: false, message: "Bu e-posta ile mimar hesabı bulunamadı." };
     }
+
     lsWrite(LS_BRAND_SESSION_KEY, null);
-    const session = { id: found.id, name: found.name, email: found.email, office: found.office || "" };
-    setArchitectSession(session);
+    setArchitectSession(null);
+    const session = {
+      id: data.user.id,
+      name: profile.name || data.user.email.split("@")[0],
+      email: data.user.email,
+      office: profile.office || "",
+    };
     return { ok: true, architect: session };
   };
 
   const logoutArchitect = async () => {
+    await ready;
+    const sb = getSB();
+    if (sb) {
+      try { await sb.auth.signOut(); } catch {}
+    }
     setArchitectSession(null);
   };
-
-  const getSessionArchitect = async () => getArchitectSessionSync();
 
   const getArchitectArray = (suffix, architectId, fallback = []) => {
     if (!architectId) return fallback;
@@ -349,19 +406,19 @@
   };
 
   const getFavoriteProducts = async () => {
-    const session = getArchitectSessionSync();
+    const session = await getSessionArchitect();
     if (!session) return [];
     return getArchitectArray("favorite_products", session.id, []);
   };
 
   const getFavoriteProjects = async () => {
-    const session = getArchitectSessionSync();
+    const session = await getSessionArchitect();
     if (!session) return [];
     return getArchitectArray("favorite_projects", session.id, []);
   };
 
   const toggleFavoriteProduct = async (item) => {
-    const session = getArchitectSessionSync();
+    const session = await getSessionArchitect();
     if (!session) return { ok: false, message: "Favori eklemek için mimar girişi yapın." };
     const list = getArchitectArray("favorite_products", session.id, []);
     const idx = list.findIndex((x) => x.id === item.id);
@@ -383,7 +440,7 @@
   };
 
   const toggleFavoriteProject = async (item) => {
-    const session = getArchitectSessionSync();
+    const session = await getSessionArchitect();
     if (!session) return { ok: false, message: "Favori eklemek için mimar girişi yapın." };
     const list = getArchitectArray("favorite_projects", session.id, []);
     const idx = list.findIndex((x) => x.id === item.id);
@@ -405,7 +462,7 @@
   };
 
   const createCollection = async (name) => {
-    const session = getArchitectSessionSync();
+    const session = await getSessionArchitect();
     if (!session) return { ok: false, message: "Koleksiyon oluşturmak için giriş yapın." };
     const safeName = (name || "").trim();
     if (!safeName) return { ok: false, message: "Koleksiyon adı zorunludur." };
@@ -417,13 +474,13 @@
   };
 
   const getCollections = async () => {
-    const session = getArchitectSessionSync();
+    const session = await getSessionArchitect();
     if (!session) return [];
     return getArchitectArray("collections", session.id, []);
   };
 
   const addCollectionItem = async ({ collectionId, item }) => {
-    const session = getArchitectSessionSync();
+    const session = await getSessionArchitect();
     if (!session) return { ok: false, message: "Giriş yapın." };
     const list = getArchitectArray("collections", session.id, []);
     const target = list.find((x) => x.id === collectionId);
@@ -437,7 +494,7 @@
   };
 
   const removeCollectionItem = async ({ collectionId, itemId, type }) => {
-    const session = getArchitectSessionSync();
+    const session = await getSessionArchitect();
     if (!session) return { ok: false, message: "Giriş yapın." };
     const list = getArchitectArray("collections", session.id, []);
     const target = list.find((x) => x.id === collectionId);
@@ -448,7 +505,7 @@
   };
 
   const createMoodboard = async ({ name }) => {
-    const session = getArchitectSessionSync();
+    const session = await getSessionArchitect();
     if (!session) return { ok: false, message: "Moodboard oluşturmak için giriş yapın." };
     const list = getArchitectArray("moodboards", session.id, []);
     const created = {
@@ -465,7 +522,7 @@
   };
 
   const getMoodboards = async () => {
-    const session = getArchitectSessionSync();
+    const session = await getSessionArchitect();
     if (!session) return [];
     return getArchitectArray("moodboards", session.id, []);
   };
@@ -476,7 +533,7 @@
   };
 
   const updateMoodboard = async (id, patch) => {
-    const session = getArchitectSessionSync();
+    const session = await getSessionArchitect();
     if (!session) return { ok: false, message: "Giriş yapın." };
     const list = getArchitectArray("moodboards", session.id, []);
     const idx = list.findIndex((x) => x.id === id);
@@ -492,7 +549,7 @@
   };
 
   const addProductToMoodboard = async ({ moodboardId, moodboardName, product }) => {
-    const session = getArchitectSessionSync();
+    const session = await getSessionArchitect();
     if (!session) return { ok: false, message: "Lütfen mimar girişi yapın." };
     const list = getArchitectArray("moodboards", session.id, []);
     let idx = list.findIndex((x) => x.id === moodboardId);
@@ -537,7 +594,7 @@
     const sb = getSB();
     if (!sb) return [];
     const { data } = await sb.from("profiles").select("*").order("created_at", { ascending: false });
-    return data || [];
+    return (data || []).filter((row) => row.account_type !== "architect");
   };
 
   const getVisits = async () => {

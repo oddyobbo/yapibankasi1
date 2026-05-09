@@ -69,6 +69,9 @@
             <thead class="bg-black/[0.03] text-[#6e6e73]">
               <tr>
                 <th class="text-left font-medium px-5 py-3">Marka</th>
+                <th class="text-left font-medium px-5 py-3">Yetkili</th>
+                <th class="text-left font-medium px-5 py-3">Telefon</th>
+                <th class="text-left font-medium px-5 py-3">Kategori</th>
                 <th class="text-left font-medium px-5 py-3">E-posta</th>
                 <th class="text-left font-medium px-5 py-3">Ürün</th>
                 <th class="text-left font-medium px-5 py-3">Kayıt</th>
@@ -133,15 +136,19 @@
 
       document.getElementById("brands-count").textContent = `${brands.length} marka`;
       const brandsTbody = document.getElementById("brands-tbody");
+      const esc = (s) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
       brandsTbody.innerHTML = brands.length
         ? brands.map((b) => `
             <tr>
-              <td class="px-5 py-3 font-medium">${b.name || "—"}</td>
-              <td class="px-5 py-3 text-[#3a3a3c]">${b.email || "—"}</td>
+              <td class="px-5 py-3 font-medium">${esc(b.name)}</td>
+              <td class="px-5 py-3 text-[#3a3a3c]">${esc(b.contact_name)}</td>
+              <td class="px-5 py-3">${esc(b.phone)}</td>
+              <td class="px-5 py-3 text-[#6e6e73]">${esc(b.primary_category)}</td>
+              <td class="px-5 py-3 text-[#3a3a3c]">${esc(b.email)}</td>
               <td class="px-5 py-3">${productsByBrand(b.id)}</td>
               <td class="px-5 py-3 text-[#6e6e73]">${new Date(b.created_at).toLocaleString("tr-TR")}</td>
             </tr>`).join("")
-        : `<tr><td colspan="4" class="px-5 py-6 text-[#6e6e73] text-center">Henüz kayıtlı marka yok.</td></tr>`;
+        : `<tr><td colspan="7" class="px-5 py-6 text-[#6e6e73] text-center">Henüz kayıtlı marka yok.</td></tr>`;
 
       const visitsTbody = document.getElementById("visits-tbody");
       visitsTbody.innerHTML = visits.length
