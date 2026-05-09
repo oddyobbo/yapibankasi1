@@ -251,17 +251,17 @@
           </button>
           <div id="brand-dropdown-panel" class="hidden absolute right-0 top-full mt-2 w-52 rounded-2xl border border-black/[0.08] bg-white shadow-[0_8px_40px_rgba(0,0,0,0.14)] z-50 py-1.5 overflow-hidden">
             <a href="/marka-paneli.html" class="flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-[#1d1d1f] hover:bg-[#f5f5f7]">${profileIcon} Marka Paneli</a>
-            <a href="/marka-paneli.html?tab=products" class="flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-[#1d1d1f] hover:bg-[#f5f5f7]">
+            <a href="/marka-paneli-urunler.html" class="flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-[#1d1d1f] hover:bg-[#f5f5f7]">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
               Ürünlerim
             </a>
-            <a href="/marka-paneli.html?tab=projects" class="flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-[#1d1d1f] hover:bg-[#f5f5f7]">
+            <a href="/marka-paneli-projeler.html" class="flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-[#1d1d1f] hover:bg-[#f5f5f7]">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
               Projeler
             </a>
-            <a href="/marka-paneli.html?tab=profile" class="flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-[#1d1d1f] hover:bg-[#f5f5f7]">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-              Marka Profili
+            <a href="/marka-paneli-analiz.html" class="flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-[#1d1d1f] hover:bg-[#f5f5f7]">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 3v18h18"/><path d="M7 16l4-4 4 4 5-7"/></svg>
+              Analizler
             </a>
             <div class="border-t border-black/[0.07] my-1"></div>
             <button id="brand-logout-btn" type="button" class="w-full flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-[#1d1d1f] hover:bg-[#f5f5f7]">${logoutIcon} Çıkış Yap</button>

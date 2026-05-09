@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Archilink | Marka paneli — Ürünler</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/marka-panel-chrome.css">
+</head>
+<body data-page="brand-panel" data-brand-nav="urunler" class="marka-panel-body bg-white text-[#0b0b0c] font-sans min-h-screen antialiased">
+  <div class="w-full min-h-screen bg-white">
+    <div id="site-header"></div>
+    <div id="brand-panel-layout" class="flex w-full min-h-0">
+      <!-- Mobil: yatay menü -->
+      <div class="lg:hidden fixed bottom-0 left-0 right-0 z-40 border-t border-black/[0.08] bg-white/95 backdrop-blur-md px-2 py-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
+        <nav class="flex gap-1 overflow-x-auto" style="-webkit-overflow-scrolling:touch">
+          <a href="/marka-paneli.html" class="panel-nav-mobile shrink-0 px-3 py-2 rounded-lg text-[12px] font-medium text-[#424245] whitespace-nowrap" data-brand-nav-link="ozet">Özet</a>
+          <a href="/marka-paneli-urunler.html" class="panel-nav-mobile shrink-0 px-3 py-2 rounded-lg text-[12px] font-medium text-[#424245] whitespace-nowrap" data-brand-nav-link="urunler">Ürünler</a>
+          <a href="/marka-paneli-analiz.html" class="panel-nav-mobile shrink-0 px-3 py-2 rounded-lg text-[12px] font-medium text-[#424245] whitespace-nowrap" data-brand-nav-link="analiz">Analiz</a>
+          <a href="/marka-paneli-proje.html" class="panel-nav-mobile shrink-0 px-3 py-2 rounded-lg text-[12px] font-medium text-[#424245] whitespace-nowrap" data-brand-nav-link="proje">Proje ekle</a>
+          <a href="/marka-paneli-projeler.html" class="panel-nav-mobile shrink-0 px-3 py-2 rounded-lg text-[12px] font-medium text-[#424245] whitespace-nowrap" data-brand-nav-link="projeler">Projeler</a>
+        </nav>
+      </div>
+      <!-- Sol menü (masaüstü) -->
+      <aside class="hidden lg:flex w-[220px] shrink-0 flex-col border-r border-black/[0.08] bg-[#fafafa] sticky top-0 self-start max-h-[calc(100vh-0.5rem)] overflow-y-auto py-6 px-3">
+        <p class="px-2 mb-3 text-[11px] font-semibold uppercase tracking-wide text-[#6e6e73]">Panel</p>
+        <nav class="flex flex-col gap-0.5" id="panel-nav-desktop">
+          <a href="/marka-paneli.html" class="panel-nav" data-brand-nav-link="ozet"><span>Özet</span></a>
+          <a href="/marka-paneli-urunler.html" class="panel-nav" data-brand-nav-link="urunler"><span>Ürünlerim</span></a>
+          <a href="/marka-paneli-analiz.html" class="panel-nav" data-brand-nav-link="analiz"><span>Analizler</span></a>
+          <a href="/marka-paneli-proje.html" class="panel-nav" data-brand-nav-link="proje"><span>Proje paylaş</span></a>
+          <a href="/marka-paneli-projeler.html" class="panel-nav" data-brand-nav-link="projeler"><span>Projelerim</span></a>
+        </nav>
+      </aside>
+
+      <main class="flex-1 min-w-0 w-full px-4 py-5 sm:px-5 lg:px-8 lg:py-7 space-y-8 pb-24 lg:pb-8">
+      <section id="panel-urunler" class="scroll-mt-24 lg:scroll-mt-20 rounded-2xl border border-black/[0.08] bg-white p-5 lg:p-6 space-y-8">
+        <div>
+          <h2 class="panel-section-title">Ürün ekle</h2>
+          <p class="text-[13px] text-[#6e6e73] mt-1">Manuel, CSV, API veya web adresiyle kataloga aktar.</p>
+          <div id="mode-tabs" class="flex gap-2 flex-wrap mt-4">
+            <button data-mode="manual" class="mode-tab h-8 px-3 rounded-lg text-[12px] font-medium border border-black/[0.08] bg-[#1d1d1f] text-white">Manuel</button>
+            <button data-mode="csv" class="mode-tab h-8 px-3 rounded-lg text-[12px] font-medium border border-black/[0.08] bg-white text-[#1d1d1f] hover:border-black/20">CSV</button>
+            <button data-mode="api" class="mode-tab h-8 px-3 rounded-lg text-[12px] font-medium border border-black/[0.08] bg-white text-[#1d1d1f] hover:border-black/20">API</button>
+            <button data-mode="url" class="mode-tab h-8 px-3 rounded-lg text-[12px] font-medium border border-black/[0.08] bg-white text-[#1d1d1f] hover:border-black/20">Web'den aktar</button>
+          </div>
+
+        <div id="mode-manual" class="mode-panel mt-5">
+          <form id="product-form" class="grid md:grid-cols-2 gap-3 text-[14px]">
+            <input required name="name" class="h-11 rounded-xl border border-black/10 px-4" placeholder="Ürün adı *">
+            <input required name="sku" class="h-11 rounded-xl border border-black/10 px-4" placeholder="SKU / Ürün kodu *">
+            <select required name="category" id="manual-category" class="h-11 rounded-xl border border-black/10 px-4 bg-white">
+              <option value="">Ana kategori seç *</option>
+            </select>
+            <select required name="subcategory" id="manual-subcategory" class="h-11 rounded-xl border border-black/10 px-4 bg-white">
+              <option value="">Alt kategori seç *</option>
+            </select>
+            <input required name="description" class="h-11 rounded-xl border border-black/10 px-4 md:col-span-2" placeholder="Kısa ürün açıklaması *">
+
+            <h3 class="md:col-span-2 text-[15px] font-semibold mt-2">Teknik Bilgi Başlıkları</h3>
+            <label class="text-[12px] text-[#6e6e73]">Yangın Sınıfı
+              <input name="fireClass" class="mt-1 h-11 w-full rounded-xl border border-black/10 px-4" placeholder="Örn: EN 13501-1 / B-s1,d0">
+            </label>
+            <label class="text-[12px] text-[#6e6e73]">Akustik Performans
+              <input name="acoustic" class="mt-1 h-11 w-full rounded-xl border border-black/10 px-4" placeholder="Örn: NRC 0.85">
+            </label>
+            <label class="text-[12px] text-[#6e6e73]">Ölçü
+              <input name="dimensions" class="mt-1 h-11 w-full rounded-xl border border-black/10 px-4" placeholder="Örn: 60x120 cm">
+            </label>
+            <label class="text-[12px] text-[#6e6e73]">Kalınlık
+              <input name="thickness" class="mt-1 h-11 w-full rounded-xl border border-black/10 px-4" placeholder="Örn: 12 mm">
+            </label>
+            <label class="md:col-span-2 text-[12px] text-[#6e6e73]">Sertifikalar
+              <input name="certificates" class="mt-1 h-11 w-full rounded-xl border border-black/10 px-4" placeholder="Örn: EPD, CE, ISO 9001">
+            </label>
+            <div class="md:col-span-2 rounded-xl border border-black/10 bg-white p-3">
+              <div class="flex items-center justify-between gap-3">
+                <p class="text-[13px] font-semibold">Özel Teknik Başlıklar</p>
+                <button type="button" id="add-tech-row" class="px-3 py-1.5 rounded-full border border-black/15 text-[12px]">Başlık Ekle</button>
+              </div>
+              <p class="text-[12px] text-[#6e6e73] mt-1">Markana özel teknik alanları ekleyebilirsin (örn: Işık Yansıtma, Montaj Aralığı).</p>
+              <div id="custom-tech-rows" class="mt-3 space-y-2"></div>
+            </div>
+
+            <h3 class="md:col-span-2 text-[15px] font-semibold mt-2">Dosya ve Medya</h3>
+            <input type="hidden" name="image">
+            <input type="hidden" name="imageGallery">
+            <input type="hidden" name="pdfUrl">
+            <input type="hidden" name="cadUrl">
+            <input type="hidden" name="bimUrl">
+
+            <div class="md:col-span-2 rounded-xl border border-black/10 bg-white p-3">
+              <div class="flex flex-wrap items-center gap-2">
+                <input id="manual-image-file" type="file" accept="image/*" multiple class="hidden">
+                <button type="button" id="upload-image-btn" class="h-10 px-4 rounded-full bg-black text-white text-[13px] font-semibold">Görsel Yükle</button>
+                <p class="text-[12px] text-[#6e6e73]">JPG/PNG/WebP · Maks 8 MB / görsel · Çoklu seçim desteklenir</p>
+              </div>
+              <p id="upload-image-msg" class="text-[12px] text-[#6e6e73] mt-2"></p>
+              <div id="uploaded-image-list" class="mt-2 flex flex-wrap gap-2"></div>
+            </div>
+
+            <div class="md:col-span-2 grid md:grid-cols-3 gap-2">
+              <div class="rounded-xl border border-black/10 bg-white p-3">
+                <p class="text-[12px] font-semibold">Teknik PDF</p>
+                <input id="manual-pdf-file" type="file" accept=".pdf" class="hidden">
+                <button type="button" id="upload-pdf-btn" class="mt-2 h-9 px-3 rounded-full border border-black/15 text-[12px] font-semibold">PDF Yükle</button>
+                <p id="upload-pdf-msg" class="text-[11px] text-[#6e6e73] mt-2">Maks 25 MB</p>
+              </div>
+              <div class="rounded-xl border border-black/10 bg-white p-3">
+                <p class="text-[12px] font-semibold">DWG/CAD</p>
+                <input id="manual-cad-file" type="file" accept=".dwg,.dxf,.zip,.rar,.7z" class="hidden">
+                <button type="button" id="upload-cad-btn" class="mt-2 h-9 px-3 rounded-full border border-black/15 text-[12px] font-semibold">CAD Yükle</button>
+                <p id="upload-cad-msg" class="text-[11px] text-[#6e6e73] mt-2">Maks 50 MB</p>
+              </div>
+              <div class="rounded-xl border border-black/10 bg-white p-3">
+                <p class="text-[12px] font-semibold">BIM/Revit</p>
+                <input id="manual-bim-file" type="file" accept=".rfa,.rvt,.ifc,.zip,.rar,.7z" class="hidden">
+                <button type="button" id="upload-bim-btn" class="mt-2 h-9 px-3 rounded-full border border-black/15 text-[12px] font-semibold">BIM Yükle</button>
+                <p id="upload-bim-msg" class="text-[11px] text-[#6e6e73] mt-2">Maks 100 MB</p>
+              </div>
+            </div>
+            <button class="md:col-span-2 h-11 rounded-xl bg-black text-white font-semibold">Ürünü Kaydet (Yayında)</button>
+            <p id="manual-save-msg" class="md:col-span-2 text-[12px] text-[#6e6e73]"></p>
+          </form>
+        </div>
+
+        <div id="mode-csv" class="mode-panel mt-5 hidden">
+          <div class="grid lg:grid-cols-[1fr_1.2fr] gap-5">
+            <article class="rounded-xl border border-black/10 bg-white p-4">
+              <h3 class="text-[16px] font-semibold">CSV ile Toplu Yükleme</h3>
+              <p class="text-[13px] text-[#6e6e73] mt-2">Önce şablonu indir, doldur, sonra tek seferde yükle.</p>
+              <button id="download-template" class="mt-4 px-4 py-2 rounded-full bg-black text-white text-[13px]">CSV Şablonu İndir</button>
+              <div class="mt-4">
+                <input id="csv-file" type="file" accept=".csv" class="w-full h-11 rounded-xl border border-black/10 px-4 bg-white">
+                <button id="import-csv" class="mt-3 w-full h-11 rounded-xl border border-black/15 text-[13px] font-semibold">CSV'yi İçeri Aktar</button>
+              </div>
+              <p id="csv-msg" class="text-[12px] text-[#6e6e73] mt-3"></p>
+            </article>
+            <article class="rounded-xl border border-black/10 bg-white p-4">
+              <h4 class="text-[15px] font-semibold">Beklenen başlıklar</h4>
+              <p class="text-[13px] text-[#6e6e73] mt-2">name, sku, category, subcategory, description, fireClass, acoustic, dimensions, thickness, certificates, image, pdfUrl, cadUrl, bimUrl</p>
+              <div class="mt-4 rounded-lg bg-[#fbfbfd] border border-black/10 p-3 text-[12px] text-[#3a3a3c]">
+                <p class="font-semibold">Not:</p>
+                <p>- İlk 4 alan (name, sku, category, description) zorunlu.</p>
+                <p>- Import edilen ürünler yayında olarak açılır.</p>
+                <p>- Panelden yayına alırsın.</p>
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <div id="mode-api" class="mode-panel mt-5 hidden">
+          <article class="rounded-xl border border-black/10 bg-white p-4">
+            <h3 class="text-[16px] font-semibold">API Senkronu (Hazırlık Modu)</h3>
+            <p class="text-[13px] text-[#6e6e73] mt-2">Canlı backend'e geçtiğimizde markaya özel endpoint ve API key verilecek.</p>
+            <div class="mt-4 grid md:grid-cols-2 gap-3 text-[13px]">
+              <input class="h-11 rounded-xl border border-black/10 px-4 bg-[#fafafa]" value="POST /api/v1/brand/products/sync" readonly>
+              <input class="h-11 rounded-xl border border-black/10 px-4 bg-[#fafafa]" value="Authorization: Bearer {API_KEY}" readonly>
+            </div>
+            <pre class="mt-4 p-3 rounded-lg bg-[#0b0b0c] text-white text-[12px] overflow-x-auto">{
+  "name": "Unica Baffle Tavan Paneli",
+  "sku": "UNI-BAF-1200",
+  "category": "Akustik",
+  "description": "Yüksek akustik performanslı tavan paneli",
+  "technical": {
+    "fireClass": "B-s1,d0",
+    "acoustic": "NRC 0.85",
+    "dimensions": "40x1200 mm",
+    "thickness": "40 mm",
+    "certificates": ["EPD", "CE"]
+  },
+  "files": {
+    "pdfUrl": "https://.../datasheet.pdf",
+    "cadUrl": "https://.../detail.dwg",
+    "bimUrl": "https://.../revit.rfa"
+  }
+}</pre>
+          </article>
+        </div>
+
+        <div id="mode-url" class="mode-panel mt-5 hidden">
+          <div class="grid lg:grid-cols-[1fr_1.4fr] gap-5 items-start">
+            <article class="rounded-xl border border-black/10 bg-white p-4">
+              <h3 class="text-[16px] font-semibold">Web'den İçe Aktar</h3>
+              <p class="text-[13px] text-[#6e6e73] mt-2">Ürün sayfasının URL'sini gir, sistem başlığı, açıklamayı ve teknik verileri otomatik çeker.</p>
+              <div class="mt-4 space-y-3">
+                <label class="block text-[12px] text-[#6e6e73]">Ürün sayfası URL'si</label>
+                <input id="url-input" type="url" class="w-full h-11 rounded-xl border border-black/10 px-4 text-[14px] outline-none focus:border-black/30" placeholder="https://markaniz.com/urun-adi">
+                <button id="btn-fetch-url" class="w-full h-11 rounded-xl bg-black text-white text-[13px] font-semibold hover:bg-[#222] transition-colors">Veri Çek</button>
+              </div>
+              <div id="url-loading" class="hidden mt-4 flex items-center gap-2 text-[13px] text-[#6e6e73]">
+                <svg class="animate-spin w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg>
+                <span>Sayfa analiz ediliyor…</span>
+              </div>
+              <p id="url-error" class="hidden mt-3 text-[12px] text-red-500 leading-relaxed"></p>
+              <p id="url-save-msg" class="hidden mt-3 text-[12px] text-green-600 font-semibold"></p>
+              <div class="mt-5 rounded-lg bg-[#fbfbfd] border border-black/10 p-3 text-[12px] text-[#3a3a3c]">
+                <p class="font-semibold mb-1">Nasıl çalışır?</p>
+                <p>Sayfa başlığı → ürün adı</p>
+                <p>Meta açıklama → ürün açıklaması</p>
+                <p>NRC, yangın sınıfı, kalınlık → teknik bilgi</p>
+                <p>Görseller → ürün fotoğrafı</p>
+              </div>
+            </article>
+
+            <div id="url-preview" class="hidden rounded-xl border border-black/10 bg-white p-4">
+              <h4 class="text-[15px] font-semibold">Çekilen Veri — Gözden Geçir & Düzenle</h4>
+              <p class="text-[12px] text-[#6e6e73] mt-1 mb-4">Alanları kaydetmeden önce düzenleyebilirsin.</p>
+              <img id="prev-img-preview" class="hidden w-full h-32 max-h-48 object-cover rounded-2xl mb-2 border border-black/[0.08]" alt="Ürün görseli">
+              <div id="prev-img-strip" class="hidden flex gap-2 overflow-x-auto py-2 mb-3"></div>
+              <div class="grid md:grid-cols-2 gap-2 text-[13px]">
+                <div class="md:col-span-2">
+                  <label class="block text-[11px] text-[#6e6e73] mb-1">Ürün Adı *</label>
+                  <input id="prev-name" class="w-full h-10 rounded-xl border border-black/10 px-3 outline-none focus:border-black/30" placeholder="Ürün adı">
+                </div>
+                <div>
+                  <label class="block text-[11px] text-[#6e6e73] mb-1">Kategori</label>
+                  <select id="prev-category" class="w-full h-10 rounded-xl border border-black/10 px-3 bg-white outline-none focus:border-black/30">
+                    <option value="">Kategori seç</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-[11px] text-[#6e6e73] mb-1">Akustik Değer</label>
+                  <input id="prev-acoustic" class="w-full h-10 rounded-xl border border-black/10 px-3 outline-none focus:border-black/30" placeholder="NRC 0.85">
+                </div>
+                <div>
+                  <label class="block text-[11px] text-[#6e6e73] mb-1">Yangın Sınıfı</label>
+                  <input id="prev-fire" class="w-full h-10 rounded-xl border border-black/10 px-3 outline-none focus:border-black/30" placeholder="B-s1,d0">
+                </div>
+                <div>
+                  <label class="block text-[11px] text-[#6e6e73] mb-1">Kalınlık</label>
+                  <input id="prev-thickness" class="w-full h-10 rounded-xl border border-black/10 px-3 outline-none focus:border-black/30" placeholder="24 mm">
+                </div>
+                <div class="md:col-span-2">
+                  <label class="block text-[11px] text-[#6e6e73] mb-1">Ölçüler</label>
+                  <input id="prev-dimensions" class="w-full h-10 rounded-xl border border-black/10 px-3 outline-none focus:border-black/30" placeholder="60x120 cm">
+                </div>
+                <div class="md:col-span-2">
+                  <label class="block text-[11px] text-[#6e6e73] mb-1">Sertifikalar</label>
+                  <input id="prev-certs" class="w-full h-10 rounded-xl border border-black/10 px-3 outline-none focus:border-black/30" placeholder="OEKO-TEX, EPD, CE">
+                </div>
+                <div class="md:col-span-2">
+                  <label class="block text-[11px] text-[#6e6e73] mb-1">Ürün Açıklaması *</label>
+                  <textarea id="prev-desc" class="w-full rounded-xl border border-black/10 px-3 py-2 text-[13px] resize-none outline-none focus:border-black/30" rows="3" placeholder="Ürün açıklaması"></textarea>
+                </div>
+                <div class="md:col-span-2">
+                  <label class="block text-[11px] text-[#6e6e73] mb-1">Görsel URL</label>
+                  <input id="prev-image" class="w-full h-10 rounded-xl border border-black/10 px-3 text-[12px] outline-none focus:border-black/30" placeholder="https://...">
+                </div>
+                <div id="prev-headings-section" class="md:col-span-2 hidden">
+                  <label class="block text-[11px] text-[#6e6e73] mb-1">Sayfada bulunan başlıklar</label>
+                  <div id="prev-headings" class="flex flex-wrap gap-2 mt-1"></div>
+                </div>
+                <div class="md:col-span-2">
+                  <label class="block text-[11px] text-[#6e6e73] mb-1">Kaynak URL (PDF linki olarak kaydedilir)</label>
+                  <input id="prev-source-url" class="w-full h-10 rounded-xl border border-black/10 px-3 text-[12px] text-[#6e6e73] bg-[#fafafa]" readonly>
+                </div>
+              </div>
+              <button id="btn-save-url-product" class="mt-4 w-full h-11 rounded-xl bg-black text-white text-[13px] font-semibold hover:bg-[#222] transition-colors">Ürünü Kaydet (Yayında)</button>
+            </div>
+          </div>
+        </div>
+        </div>
+
+        <div class="border-t border-black/[0.08] pt-8">
+        <div class="flex items-center justify-between gap-3 flex-wrap">
+          <div>
+            <h3 class="panel-section-title">Ürün listesi</h3>
+            <p class="text-[12px] text-[#6e6e73] mt-0.5">Yayın ve taslak ürünler</p>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <button id="toggle-select-mode" type="button" class="h-8 px-3 rounded-lg border border-black/[0.08] text-[12px] font-medium text-[#1d1d1f] hover:border-black/20 bg-white">Seç</button>
+            <button id="delete-selected-products" type="button" class="h-8 px-3 rounded-lg border border-black/[0.08] text-[12px] font-medium text-[#1d1d1f] hover:border-black/20 bg-white hidden">Seçilenleri sil</button>
+            <button id="clear-products" class="h-8 px-3 rounded-lg border border-black/[0.08] text-[12px] font-medium text-[#1d1d1f] hover:border-black/20 bg-white">Hepsini temizle</button>
+          </div>
+        </div>
+        <p id="bulk-delete-msg" class="mt-2 text-[12px] text-[#6e6e73] hidden"></p>
+        <div id="brand-products" class="mt-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 md:gap-4"></div>
+        </div>
+      </section>
+    </main>
+    </div>
+    <div id="site-footer"></div>
+  </div>
+  <script>window.__MARKA_PANEL_PAGE__ = "products";</script>
+  <script src="/core.js"></script>
+  <script src="/layout.js"></script>
+  <script src="/marka-panel.js"></script>
+</body>
+</html>

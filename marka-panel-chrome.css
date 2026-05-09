@@ -1,0 +1,9 @@
+html { scroll-behavior: smooth; scroll-padding-top: 5.5rem; }
+body.marka-panel-body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif; }
+.panel-card-lift { transition: transform .3s cubic-bezier(.2,.7,.2,1), border-color .3s; }
+.panel-card-lift:hover { transform: translateY(-3px); border-color: rgba(0,0,0,.22); }
+.panel-nav { display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.65rem; border-radius: 0.5rem; color: #424245; font-size: 13px; font-weight: 500; transition: background .15s, color .15s; text-decoration: none; }
+.panel-nav:hover { background: rgba(0,0,0,.05); color: #1d1d1f; }
+.panel-nav.active { background: rgba(0,0,0,.08); color: #1d1d1f; font-weight: 600; }
+.panel-nav-mobile.active { background: #1d1d1f; color: #fff; font-weight: 600; }
+.panel-section-title { font-size: 17px; font-weight: 600; letter-spacing: -0.02em; color: #1d1d1f; }
