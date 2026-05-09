@@ -77,7 +77,7 @@ create policy "visits_insert" on public.visits
 
 drop policy if exists "visits_admin_read" on public.visits;
 create policy "visits_admin_read" on public.visits
-  for select using (auth.email() = 'admin@antigravity.com');
+  for select using (auth.email() = 'onatderindere@gmail.com');
 
 -- ── Auto-profile on signup trigger ───────────────────────────────────────
 
@@ -110,6 +110,6 @@ $$ language sql security definer;
 
 -- ── Admin kullanıcısı ─────────────────────────────────────────────────────
 -- Supabase Dashboard → Authentication → Users → Add User bölümünden oluştur:
---   Email:    admin@antigravity.com
---   Password: admin1234
+--   Email:    onatderindere@gmail.com
+--   Password: (Dashboard’da belirlediğin şifre)
 -- Bu SQL ile oluşturamazsın — dashboard üzerinden yapılmalı.
