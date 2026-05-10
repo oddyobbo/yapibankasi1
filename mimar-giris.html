@@ -22,7 +22,7 @@
 <body data-page="architect-login" class="bg-white text-[#111] min-h-screen">
   <div id="site-header"></div>
   <main class="px-6 lg:px-10 py-10">
-    <section class="max-w-[1200px] mx-auto grid lg:grid-cols-2 gap-6">
+    <section id="login-screen" class="max-w-[1200px] mx-auto grid lg:grid-cols-2 gap-6">
       <article class="rounded-3xl border border-black/10 bg-white p-6 lg:p-8">
         <p class="text-[12px] uppercase tracking-[0.14em] text-[#6e6e73]">Mimar Hesabı</p>
         <h1 class="text-[30px] font-semibold mt-3">Giriş Yap</h1>
@@ -33,7 +33,22 @@
           <button class="w-full h-11 rounded-xl bg-black text-white text-[14px] font-semibold">Giriş Yap</button>
         </form>
       </article>
+      <article class="rounded-3xl border border-black/10 bg-[#f5f5f7] p-6 lg:p-8 flex flex-col justify-between min-h-[340px]">
+        <div>
+          <p class="text-[12px] uppercase tracking-[0.14em] text-[#6e6e73]">Yeni Üyelik</p>
+          <h2 class="text-[30px] font-semibold mt-3">Archilink'e katıl</h2>
+          <p class="text-[14px] text-[#6e6e73] mt-2">Ürünleri kaydet, moodboard oluştur ve mimarlık ofisiysen projelerini görünür hale getir.</p>
+        </div>
+        <div class="mt-8 space-y-3">
+          <a href="#mimar-kayit" data-show-register="1" class="w-full h-11 rounded-xl bg-black text-white text-[14px] font-semibold inline-flex items-center justify-center">Kayıt Ol</a>
+          <p class="text-[12px] leading-relaxed text-[#6e6e73]">Kayıt formunu ayrı ekranda açıyoruz; böylece giriş alanı sade kalır.</p>
+        </div>
+      </article>
+    </section>
+
+    <section id="register-screen" class="hidden max-w-[720px] mx-auto">
       <article id="mimar-kayit" class="rounded-3xl border border-black/10 bg-white p-6 lg:p-8 scroll-mt-24">
+        <a href="/mimar-giris.html" data-show-login="1" class="inline-flex items-center text-[13px] text-[#6e6e73] hover:text-black mb-5">← Giriş ekranına dön</a>
         <p class="text-[12px] uppercase tracking-[0.14em] text-[#6e6e73]">Yeni Üyelik</p>
         <h2 class="text-[30px] font-semibold mt-3">Kayıt Ol</h2>
         <p class="text-[14px] text-[#6e6e73] mt-2">Ürünleri kaydet, moodboard oluştur ve istersen mimarlık ofisi profilini projelerinle görünür hale getir.</p>
@@ -81,6 +96,35 @@
         location.href = "/mimar-paneli.html";
         return;
       }
+
+      const loginScreen = document.getElementById("login-screen");
+      const registerScreen = document.getElementById("register-screen");
+      const showRegister = () => {
+        loginScreen.classList.add("hidden");
+        registerScreen.classList.remove("hidden");
+        msg.textContent = "";
+      };
+      const showLogin = () => {
+        registerScreen.classList.add("hidden");
+        loginScreen.classList.remove("hidden");
+        msg.textContent = "";
+      };
+      const syncScreenFromHash = () => {
+        if (location.hash === "#mimar-kayit") showRegister();
+        else showLogin();
+      };
+      document.querySelectorAll("[data-show-register]").forEach((link) => {
+        link.addEventListener("click", () => setTimeout(syncScreenFromHash, 0));
+      });
+      document.querySelectorAll("[data-show-login]").forEach((link) => {
+        link.addEventListener("click", (e) => {
+          e.preventDefault();
+          history.pushState(null, "", `${location.pathname}${location.search}`);
+          showLogin();
+        });
+      });
+      window.addEventListener("hashchange", syncScreenFromHash);
+      syncScreenFromHash();
 
       const officeInput = document.getElementById("office-input");
       const officeNote = document.getElementById("office-note");
