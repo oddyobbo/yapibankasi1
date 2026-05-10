@@ -41,21 +41,50 @@
     document.head.appendChild(s);
   });
 
-  const ensureOwnProfile = async (profile) => {
+  const ensureOwnProfile = async (row) => {
     const sb = getSB();
-    if (!sb || !profile?.id) return;
+    if (!sb || !row?.id) return;
     try {
-      await sb.from("profiles").upsert(profile, { onConflict: "id" });
+      await sb.from("profiles").upsert(row, { onConflict: "id" });
     } catch {}
   };
 
-  const authRedirectUrl = (path) => {
-    try {
-      if (window.location.origin && window.location.origin !== "null") {
-        return `${window.location.origin}${path}`;
-      }
-    } catch {}
-    return path;
+  /** Kayıtta Auth metadata'ya yazılan mimar tipi/ofis adı, trigger gecikmesi veya eski şema yüzünden profiles'ta yanlış kalabiliyor; girişte düzelt. */
+  const syncArchitectProfileFromMetadata = async (user, profile) => {
+    if (!user?.id || !profile || profile.account_type !== "architect") return profile;
+    const meta = user.user_metadata || {};
+    const hasExplicitType = meta.architect_profile_type != null && String(meta.architect_profile_type).trim() !== "";
+    const nextType = hasExplicitType
+      ? (String(meta.architect_profile_type).toLowerCase().trim() === "office" ? "office" : "individual")
+      : ((profile.architect_profile_type || "individual") === "office" ? "office" : "individual");
+    const fromMetaOffice = (meta.office || "").trim();
+    const dbOffice = (profile.office || "").trim();
+    const nextOffice = nextType === "office" && fromMetaOffice ? fromMetaOffice : dbOffice;
+    const fromMetaName = (meta.name || "").trim();
+    const nextName = fromMetaName || (profile.name || "").trim() || (user.email || "").split("@")[0];
+    const dbType = (profile.architect_profile_type || "individual") === "office" ? "office" : "individual";
+    const changed =
+      nextType !== dbType
+      || nextOffice !== dbOffice
+      || nextName !== (profile.name || "").trim();
+    if (!changed) return profile;
+    const merged = {
+      ...profile,
+      id: user.id,
+      name: nextName,
+      email: profile.email || user.email || "",
+      account_type: "architect",
+      office: nextOffice,
+      architect_profile_type: nextType,
+    };
+    await ensureOwnProfile(merged);
+    const sb = getSB();
+    if (!sb) return merged;
+    const { data: refreshed } = await sb.from("profiles").select("*").eq("id", user.id).single();
+    if (!refreshed) return merged;
+    const refType = (refreshed.architect_profile_type || "individual") === "office" ? "office" : "individual";
+    if (refType === nextType && (nextOffice || "") === ((refreshed.office || "").trim())) return refreshed;
+    return merged;
   };
 
   // ── Visitor ID ──────────────────────────────────────────────────────────
@@ -102,7 +131,6 @@
       email: (email || "").trim(),
       password,
       options: {
-        emailRedirectTo: authRedirectUrl("/marka-giris.html"),
         data: {
           name: (name || "").trim(),
           website: (website || "").trim(),
@@ -116,22 +144,7 @@
     });
     if (error) return { ok: false, message: error.message };
     if (!data.user) return { ok: false, message: "Kayıt başarısız. Lütfen tekrar dene." };
-    await ensureOwnProfile({
-      id: data.user.id,
-      name: (name || "").trim(),
-      email: data.user.email || (email || "").trim(),
-      website: (website || "").trim(),
-      account_type: "brand",
-      contact_name: (contactName || "").trim(),
-      job_title: (jobTitle || "").trim(),
-      phone: (phone || "").trim(),
-      primary_category: (primaryCategory || "").trim(),
-    });
-    return {
-      ok: true,
-      sessionReady: Boolean(data.session),
-      brand: { id: data.user.id, email: data.user.email, name: (name || "").trim() },
-    };
+    return { ok: true, brand: { id: data.user.id, email: data.user.email, name: (name || "").trim() } };
   };
 
   const logoutBrand = async () => {
@@ -406,12 +419,14 @@
     if (!user || user.email === ADMIN_EMAIL) return null;
     const { data: profile } = await sb.from("profiles").select("*").eq("id", user.id).single();
     if (!profile || profile.account_type !== "architect") return null;
+    const synced = await syncArchitectProfileFromMetadata(user, profile);
+    const t = (synced.architect_profile_type || "individual") === "office" ? "office" : "individual";
     return {
       id: user.id,
       email: user.email,
-      name: profile.name || user.email.split("@")[0],
-      office: profile.office || "",
-      architectProfileType: profile.architect_profile_type || "individual",
+      name: synced.name || user.email.split("@")[0],
+      office: synced.office || "",
+      architectProfileType: t,
     };
   };
 
@@ -431,46 +446,51 @@
     const sb = getSB();
     if (!sb) return { ok: false, message: "Sunucu bağlantısı kurulamadı." };
 
+    const meta = {
+      name: safeName,
+      account_type: "architect",
+      office: safeOffice,
+      architect_profile_type: safeProfileType,
+    };
+
     const { data, error } = await sb.auth.signUp({
       email: safeEmail,
       password,
-      options: {
-        emailRedirectTo: authRedirectUrl("/mimar-giris.html"),
-        data: {
-          name: safeName,
-          account_type: "architect",
-          architect_profile_type: safeProfileType,
-          office: safeOffice,
-        },
-      },
+      options: { data: meta },
     });
     if (error) return { ok: false, message: error.message };
     if (!data.user) return { ok: false, message: "Kayıt başarısız. Lütfen tekrar dene." };
+
     await ensureOwnProfile({
       id: data.user.id,
       name: safeName,
       email: data.user.email || safeEmail,
+      website: "",
       account_type: "architect",
-      architect_profile_type: safeProfileType,
+      phone: "",
+      contact_name: "",
+      job_title: "",
+      primary_category: "",
       office: safeOffice,
+      architect_profile_type: safeProfileType,
     });
 
     lsWrite(LS_BRAND_SESSION_KEY, null);
     const sessionReady = Boolean(data.session);
-    const session = {
+    const architect = {
       id: data.user.id,
       name: safeName,
       email: safeEmail,
       office: safeOffice,
       architectProfileType: safeProfileType,
     };
-    if (sessionReady) setArchitectSession(session);
+    if (sessionReady) setArchitectSession(architect);
     else setArchitectSession(null);
 
     return {
       ok: true,
       sessionReady,
-      architect: session,
+      architect,
     };
   };
 
@@ -492,13 +512,16 @@
       return { ok: false, message: "Bu e-posta ile mimar hesabı bulunamadı." };
     }
 
+    const synced = await syncArchitectProfileFromMetadata(data.user, profile);
+    const t = (synced.architect_profile_type || "individual") === "office" ? "office" : "individual";
+
     lsWrite(LS_BRAND_SESSION_KEY, null);
     const session = {
       id: data.user.id,
-      name: profile.name || data.user.email.split("@")[0],
+      name: synced.name || data.user.email.split("@")[0],
       email: data.user.email,
-      office: profile.office || "",
-      architectProfileType: profile.architect_profile_type || "individual",
+      office: synced.office || "",
+      architectProfileType: t,
     };
     // Header (layout.js) ve eski akışlar localStorage'dan okuyor; Supabase oturumuyla senkron tut.
     setArchitectSession(session);
@@ -512,6 +535,62 @@
       try { await sb.auth.signOut(); } catch {}
     }
     setArchitectSession(null);
+  };
+
+  /** Mimarlık ofisi hesabı: `projects.brand_id` = mimarın `profiles.id` (auth uid). */
+  const getArchitectOfficeProjects = async () => {
+    const session = await getSessionArchitect();
+    if (!session || session.architectProfileType !== "office") return [];
+    return getProjects({ brandId: session.id });
+  };
+
+  const addArchitectOfficeProject = async (fields) => {
+    const session = await getSessionArchitect();
+    if (!session || session.architectProfileType !== "office") {
+      return { ok: false, message: "Bu özellik yalnızca mimarlık ofisi hesapları içindir." };
+    }
+    await ready;
+    const sb = getSB();
+    if (!sb) return { ok: false, message: "Sunucu bağlantısı kurulamadı." };
+    const title = (fields.title || "").trim();
+    if (!title) return { ok: false, message: "Proje başlığı zorunludur." };
+    const row = projectToDB({
+      brandId: session.id,
+      brandName: (session.office || session.name || "").trim(),
+      title,
+      location: (fields.location || "").trim(),
+      architect: (fields.architectName || session.name || "").trim(),
+      year: (fields.year || "").trim(),
+      description: (fields.description || "").trim(),
+      image: (fields.image || "").trim(),
+      materials: Array.isArray(fields.materials) ? fields.materials : [],
+      status: "published",
+    });
+    try {
+      const { data, error } = await sb.from("projects").insert(row).select().single();
+      if (error) return { ok: false, message: error.message };
+      if (!data) return { ok: false, message: "Proje oluşturulamadı." };
+      return { ok: true, project: dbToProject(data) };
+    } catch {
+      return { ok: false, message: "Proje kaydedilemedi." };
+    }
+  };
+
+  const deleteArchitectOfficeProject = async (projectId) => {
+    const session = await getSessionArchitect();
+    if (!session || session.architectProfileType !== "office") {
+      return { ok: false, message: "Bu işlem yalnızca mimarlık ofisi hesapları içindir." };
+    }
+    await ready;
+    const sb = getSB();
+    if (!sb) return { ok: false, message: "Sunucu bağlantısı kurulamadı." };
+    try {
+      const { error } = await sb.from("projects").delete().eq("id", projectId).eq("brand_id", session.id);
+      if (error) return { ok: false, message: error.message };
+      return { ok: true };
+    } catch {
+      return { ok: false, message: "Proje silinemedi." };
+    }
   };
 
   const getArchitectArray = (suffix, architectId, fallback = []) => {
@@ -824,6 +903,9 @@
     getMoodboard,
     updateMoodboard,
     addProductToMoodboard,
+    getArchitectOfficeProjects,
+    addArchitectOfficeProject,
+    deleteArchitectOfficeProject,
     // products
     getProducts,
     getAllProducts,
