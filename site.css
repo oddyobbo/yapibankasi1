@@ -191,8 +191,21 @@ html.ag-dark .hover\:bg-black\/\[0\.06\]:hover {
 
 @media (min-width: 1024px) {
   .product-detail-hero-grid {
-    grid-template-columns: minmax(0, 1.22fr) minmax(300px, 440px);
+    grid-template-columns: minmax(0, 1.28fr) minmax(300px, 480px);
     gap: clamp(28px, 3vw, 44px);
+  }
+}
+
+.product-detail-hero-left {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  min-width: 0;
+}
+
+@media (min-width: 768px) {
+  .product-detail-hero-left {
+    gap: 26px;
   }
 }
 
@@ -201,25 +214,25 @@ html.ag-dark .hover\:bg-black\/\[0\.06\]:hover {
   display: flex;
   flex-direction: row;
   align-items: flex-start;
-  gap: 10px;
+  gap: 8px;
 }
 
 @media (min-width: 640px) {
   .product-detail-gallery {
-    gap: 12px;
+    gap: 10px;
   }
 }
 
 .product-detail-gallery-thumbs {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 7px;
   flex-shrink: 0;
-  width: 76px;
+  width: 64px;
   max-height: min(640px, 72vh);
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 4px 6px 4px 2px;
+  padding: 4px 4px 4px 2px;
   margin: -2px 0;
   scrollbar-width: thin;
   scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
@@ -227,15 +240,15 @@ html.ag-dark .hover\:bg-black\/\[0\.06\]:hover {
 
 @media (min-width: 640px) {
   .product-detail-gallery-thumbs {
-    width: 88px;
-    gap: 9px;
+    width: 76px;
+    gap: 8px;
   }
 }
 
 @media (min-width: 1024px) {
   .product-detail-gallery-thumbs {
-    width: 96px;
-    gap: 10px;
+    width: 80px;
+    gap: 8px;
   }
 }
 
@@ -361,19 +374,22 @@ html.ag-dark .hover\:bg-black\/\[0\.06\]:hover {
   }
 
   .product-detail-gallery-thumb {
-    flex: 0 0 72px;
-    width: 72px;
+    flex: 0 0 64px;
+    width: 64px;
   }
 }
 
-.product-detail-hero-info {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
+.product-detail-hero-brand {
   min-width: 0;
 }
 
-.product-detail-hero-info .product-detail-section-title {
+.product-detail-hero-brand .product-detail-brand-panel {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+}
+
+.product-detail-hero-description .product-detail-section-title {
   margin-bottom: 14px;
 }
 
@@ -607,7 +623,7 @@ html.ag-dark .hover\:bg-black\/\[0\.06\]:hover {
 }
 
 /* Hero copy rhythm (does not affect injected lower sections) */
-.product-detail-hero-info .product-detail-lead {
+.product-detail-hero-description .product-detail-lead {
   margin-top: 0;
 }
 
@@ -843,6 +859,10 @@ html.ag-dark .product-detail-gallery-nav:hover {
 
 html.ag-dark .product-detail-brand-panel {
   border-top-color: rgba(255, 255, 255, 0.1);
+}
+
+html.ag-dark .product-detail-hero-brand .product-detail-brand-panel {
+  border-top: none;
 }
 
 html.ag-dark .product-detail-brand-label {

@@ -36,24 +36,26 @@
           </header>
 
           <div class="product-detail-hero-grid">
-            <div class="product-detail-gallery min-w-0">
-              <div id="gallery-thumbs" class="product-detail-gallery-thumbs" aria-label="Galeri küçük görselleri"></div>
-              <div class="product-detail-gallery-main">
-                <img id="gallery-main-img" src="" alt="">
-                <button type="button" id="gallery-prev" aria-label="Önceki görsel" class="product-detail-gallery-nav product-detail-gallery-nav--prev">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-                </button>
-                <button type="button" id="gallery-next" aria-label="Sonraki görsel" class="product-detail-gallery-nav product-detail-gallery-nav--next">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
-                </button>
+            <div class="product-detail-hero-left">
+              <div class="product-detail-gallery min-w-0">
+                <div id="gallery-thumbs" class="product-detail-gallery-thumbs" aria-label="Galeri küçük görselleri"></div>
+                <div class="product-detail-gallery-main">
+                  <img id="gallery-main-img" src="" alt="">
+                  <button type="button" id="gallery-prev" aria-label="Önceki görsel" class="product-detail-gallery-nav product-detail-gallery-nav--prev">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+                  </button>
+                  <button type="button" id="gallery-next" aria-label="Sonraki görsel" class="product-detail-gallery-nav product-detail-gallery-nav--next">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                  </button>
+                </div>
+              </div>
+              <div class="product-detail-hero-description">
+                <h2 class="product-detail-section-title">Ürün Açıklaması</h2>
+                <p id="product-description" class="product-detail-lead">—</p>
               </div>
             </div>
 
-            <div class="product-detail-hero-info">
-              <h2 class="product-detail-section-title">Ürün Açıklaması</h2>
-              <p id="product-description" class="product-detail-lead">—</p>
-              <p id="product-spec-snippet" class="hidden product-detail-muted mt-4 pt-4 border-t border-black/[0.06]"></p>
-
+            <aside class="product-detail-hero-brand">
               <div class="product-detail-brand-panel">
                 <div class="product-detail-brand-row">
                   <img id="brand-logo" class="product-detail-brand-logo is-hidden" src="" alt="">
@@ -75,7 +77,7 @@
                   <div id="brand-preview-strip" class="product-detail-brand-preview" aria-label="Markanın diğer ürünleri"></div>
                 </div>
               </div>
-            </div>
+            </aside>
           </div>
         </article>
 
@@ -137,7 +139,6 @@
             { label: "Renk varyantları", value: "12 melamin seçeneği" },
           ],
         },
-        spec: "Lineer baffle · yüksek NRC · ofis ve eğitim",
         files: {
           pdfs: [
             { url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf", label: "Ürün kataloğu (PDF)" },
@@ -504,15 +505,6 @@
 
       const descEl = document.getElementById("product-description");
       descEl.textContent = product.description || "Bu ürün için açıklama henüz eklenmedi.";
-
-      const specEl = document.getElementById("product-spec-snippet");
-      const spec = String(product.spec || "").trim();
-      if (spec) {
-        specEl.textContent = spec;
-        specEl.classList.remove("hidden");
-      } else {
-        specEl.classList.add("hidden");
-      }
 
       const brand = product.brandName || "—";
       document.getElementById("brand-name").textContent = brand;
