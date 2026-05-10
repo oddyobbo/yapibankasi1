@@ -345,6 +345,32 @@
       collections: null,
     };
 
+    const LS_ARCHITECT_SESSION_KEY = "ag_architect_session_v1";
+    function lsReadJson(k, fallback) {
+      try {
+        const r = localStorage.getItem(k);
+        return r ? JSON.parse(r) : fallback;
+      } catch {
+        return fallback;
+      }
+    }
+    function architectStorageKey(suffix, architectId) {
+      return `ag_architect_${suffix}_${architectId}`;
+    }
+    /** core.js ile aynı LS anahtarları — Supabase/AG.ready beklemeden favoriler ve panoları anında göster. */
+    function tryHydratePanelFromLocalStorage() {
+      const sess = lsReadJson(LS_ARCHITECT_SESSION_KEY, null);
+      if (!sess || !sess.id) return false;
+      cachedArchitectSession = sess;
+      const id = sess.id;
+      moodboards = lsReadJson(architectStorageKey("moodboards", id), []);
+      panelCache.favProducts = lsReadJson(architectStorageKey("favorite_products", id), []);
+      panelCache.favProjects = lsReadJson(architectStorageKey("favorite_projects", id), []);
+      panelCache.collections = lsReadJson(architectStorageKey("collections", id), []);
+      panelCache.officeProjects = null;
+      return true;
+    }
+
     let favCompareMode = false;
     let favComparePickOrder = [];
     const favCompareMergedById = new Map();
@@ -760,9 +786,23 @@
     }
 
     async function boot() {
+      const hadLocalShell = tryHydratePanelFromLocalStorage();
+      if (hadLocalShell) {
+        TAB_IDS = tabIdsForSession(cachedArchitectSession);
+        const urlEarly = new URLSearchParams(location.search).get("tab");
+        if (urlEarly && TAB_IDS.includes(urlEarly)) activeTab = urlEarly;
+        const rl0 = cachedArchitectSession.architectProfileType === "office" ? "Mimarlık ofisi" : "Bireysel mimar";
+        document.getElementById("welcome").textContent = `${cachedArchitectSession.name || "Mimar"} · ${rl0}`;
+        renderTabs();
+        await renderContent();
+      }
+
       await AG.ready;
       const session = await AG.getSessionArchitect();
-      if (!session) { location.href = "/mimar-giris.html"; return; }
+      if (!session) {
+        location.href = "/mimar-giris.html";
+        return;
+      }
       cachedArchitectSession = session;
 
       /* Tek turda: panolar + favoriler + koleksiyonlar (+ ofis projeleri). Seri beklemek yerine paralel. */
