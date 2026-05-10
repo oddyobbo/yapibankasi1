@@ -27,6 +27,12 @@ alwaysApply: true
 - **Başlıklar:** Sayfa `h1` ve bölüm `h2` puntosu **bilinçli olarak daha büyük** kalabilir (ör. mevcut `ag-section-title` ~20px). Başlık altındaki ilk gövde satırına pill ritmine uygun **`mt-2` veya `space-y-2`** kullan; başlıklara pill ile aynı punto zorunlu değil.
 - **Font stack:** Katalog gövdesinde `body`/sayfa için `urunler.html` ile aynı sistem fontları: `-apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif`.
 
+# UI brief — Cursor Canvas (token / anlatım tasarrufu)
+
+- **Dosya:** `~/.cursor/projects/Users-onatderindere-Desktop-katalog-projesi/canvases/archilink-ui-brief.canvas.tsx` (workspace kökü `katalog-projesi` iken Cursor’un oluşturduğu proje klasörü).
+- **Amaç:** Kullanıcı uzun serbest metin yerine formu doldurur; sohbette `@archilink-ui-brief.canvas.tsx` ile referans verir ve «Brief'e göre uygula» der. Agent aynı brief + `archilink-ship.mdc` kurallarıyla ilerler.
+- **Not:** Canvas canlı React önizlemesidir; üretim `*.html` ile otomatik senkron olmaz — brief → agent → repo dosyası akışıdır.
+
 # Archilink teslim standardı
 
 - **Kullanıcı GitHub veya Netlify arayüzüne girmiyor.** “GitHub’da diff’e bak / Netlify’dan deploy et” gibi yönlendirmeler yapma; varsayılan hedef **canlı sitede güncel kod**.
