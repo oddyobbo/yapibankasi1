@@ -16,7 +16,8 @@
           <p id="welcome" class="text-[13px] text-[#6e6e73]"></p>
           <h1 class="text-[30px] font-semibold">Mimar Paneli</h1>
         </div>
-        <div class="flex gap-2">
+        <div class="flex flex-wrap justify-end gap-2">
+          <button type="button" id="office-project-add-btn" class="hidden h-10 px-4 rounded-full border border-black/15 bg-white text-[13px] font-medium hover:bg-black/[0.04] transition">Proje ekle</button>
           <button id="new-moodboard-btn" class="h-10 px-4 rounded-full bg-black text-white text-[13px] font-semibold">+ Yeni Tasarım Panosu</button>
           <button id="logout-btn" class="h-10 px-4 rounded-full border border-black/15 text-[13px]">Çıkış</button>
         </div>
@@ -29,6 +30,46 @@
     </section>
   </main>
   <div id="site-footer"></div>
+  <div id="office-project-modal" class="hidden fixed inset-0 z-[60]">
+    <div class="absolute inset-0 bg-black/35" data-office-project-close="1"></div>
+    <div class="absolute inset-0 flex items-center justify-center p-4 overflow-y-auto">
+      <div class="w-full max-w-lg rounded-2xl bg-white border border-black/10 p-5 my-6 shadow-xl">
+        <h3 class="text-[19px] font-semibold tracking-tight">Proje ekle</h3>
+        <p class="text-[13px] text-[#6e6e73] mt-1">Kaydettiğin proje <a href="/projeler.html" class="underline hover:text-black">Referans Projeler</a> sayfasında yayınlanır.</p>
+        <form id="office-project-form" class="mt-5 grid sm:grid-cols-2 gap-3">
+          <div class="sm:col-span-2">
+            <label class="text-[12px] text-[#6e6e73]">Başlık *</label>
+            <input name="title" required class="mt-1 w-full h-10 rounded-xl border border-black/15 px-3 text-[14px]" placeholder="Örn. Ofis cephesi yenileme">
+          </div>
+          <div>
+            <label class="text-[12px] text-[#6e6e73]">Konum</label>
+            <input name="location" class="mt-1 w-full h-10 rounded-xl border border-black/15 px-3 text-[14px]" placeholder="İl / semt">
+          </div>
+          <div>
+            <label class="text-[12px] text-[#6e6e73]">Yıl</label>
+            <input name="year" class="mt-1 w-full h-10 rounded-xl border border-black/15 px-3 text-[14px]" placeholder="2024">
+          </div>
+          <div class="sm:col-span-2">
+            <label class="text-[12px] text-[#6e6e73]">Mimar / proje ekibi</label>
+            <input name="architectName" class="mt-1 w-full h-10 rounded-xl border border-black/15 px-3 text-[14px]" placeholder="Listede görünecek isim">
+          </div>
+          <div class="sm:col-span-2">
+            <label class="text-[12px] text-[#6e6e73]">Kapak görseli URL</label>
+            <input name="image" type="url" class="mt-1 w-full h-10 rounded-xl border border-black/15 px-3 text-[14px]" placeholder="https://...">
+          </div>
+          <div class="sm:col-span-2">
+            <label class="text-[12px] text-[#6e6e73]">Açıklama</label>
+            <textarea name="description" rows="3" class="mt-1 w-full rounded-xl border border-black/15 px-3 py-2 text-[14px]" placeholder="Proje özeti"></textarea>
+          </div>
+          <div class="sm:col-span-2 flex flex-wrap justify-end gap-2 pt-1">
+            <button type="button" data-office-project-close="1" class="h-10 px-4 rounded-full border border-black/15 text-[13px]">Vazgeç</button>
+            <button type="submit" class="h-10 px-5 rounded-full bg-black text-white text-[13px] font-semibold">Yayınla</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <div id="board-modal" class="hidden fixed inset-0 z-50">
     <div class="absolute inset-0 bg-black/35" data-board-close="1"></div>
     <div class="absolute inset-0 flex items-center justify-center p-4">
@@ -119,6 +160,14 @@
       selectedProduct = null;
     }
 
+    function openOfficeProjectModal() {
+      document.getElementById("office-project-modal").classList.remove("hidden");
+    }
+
+    function closeOfficeProjectModal() {
+      document.getElementById("office-project-modal").classList.add("hidden");
+    }
+
     function renderBoardList() {
       const wrap = document.getElementById("board-list");
       if (!moodboards.length) {
@@ -186,38 +235,11 @@
       if (activeTab === "office-projects") {
         const list = await AG.getArchitectOfficeProjects();
         content.innerHTML = `
-          <div class="mb-5 rounded-xl border border-black/10 bg-[#fafafa] p-4">
-            <p class="text-[14px] font-medium">Yeni proje ekle</p>
-            <p class="text-[13px] text-[#6e6e73] mt-1">Eklediğin projeler <a href="/projeler.html" class="underline hover:text-black">Referans Projeler</a> sayfasında ve detay linkiyle yayınlanır.</p>
-            <form id="office-project-form" class="mt-4 grid sm:grid-cols-2 gap-3">
-              <div class="sm:col-span-2">
-                <label class="text-[12px] text-[#6e6e73]">Başlık *</label>
-                <input name="title" required class="mt-1 w-full h-10 rounded-xl border border-black/15 px-3 text-[14px]" placeholder="Örn. Ofis cephesi yenileme">
-              </div>
-              <div>
-                <label class="text-[12px] text-[#6e6e73]">Konum</label>
-                <input name="location" class="mt-1 w-full h-10 rounded-xl border border-black/15 px-3 text-[14px]" placeholder="İl / semt">
-              </div>
-              <div>
-                <label class="text-[12px] text-[#6e6e73]">Yıl</label>
-                <input name="year" class="mt-1 w-full h-10 rounded-xl border border-black/15 px-3 text-[14px]" placeholder="2024">
-              </div>
-              <div class="sm:col-span-2">
-                <label class="text-[12px] text-[#6e6e73]">Mimar / proje ekibi (listede görünen isim)</label>
-                <input name="architectName" class="mt-1 w-full h-10 rounded-xl border border-black/15 px-3 text-[14px]" placeholder="Varsayılan: hesap adın">
-              </div>
-              <div class="sm:col-span-2">
-                <label class="text-[12px] text-[#6e6e73]">Kapak görseli URL</label>
-                <input name="image" type="url" class="mt-1 w-full h-10 rounded-xl border border-black/15 px-3 text-[14px]" placeholder="https://...">
-              </div>
-              <div class="sm:col-span-2">
-                <label class="text-[12px] text-[#6e6e73]">Açıklama</label>
-                <textarea name="description" rows="3" class="mt-1 w-full rounded-xl border border-black/15 px-3 py-2 text-[14px]" placeholder="Proje özeti"></textarea>
-              </div>
-              <div class="sm:col-span-2">
-                <button type="submit" class="h-10 px-5 rounded-full bg-black text-white text-[13px] font-semibold">Projeyi yayınla</button>
-              </div>
-            </form>
+          <div class="flex flex-wrap items-start justify-between gap-3 mb-5">
+            <div>
+              <p class="text-[15px] font-medium">Ofis portföyü</p>
+              <p class="text-[13px] text-[#6e6e73] mt-1 max-w-xl">Yayınladığın projeler sitede <a href="/projeler.html" class="underline hover:text-black">Referans Projeler</a> ile aynı listede görünür. Yeni kayıt için üstteki <span class="font-medium text-[#111]">Proje ekle</span> düğmesini kullan.</p>
+            </div>
           </div>
           ${
             list.length
@@ -236,7 +258,7 @@
                 </div>`
                   )
                   .join("")}</div>`
-              : `<p class="text-[14px] text-[#6e6e73]">Henüz ofis projen yok. Yukarıdaki formdan ekleyebilirsin.</p>`
+              : `<p class="text-[14px] text-[#6e6e73]">Henüz yayınlanmış ofis projen yok. Üst menüden <span class="font-medium text-[#111]">Proje ekle</span> ile başlayabilirsin.</p>`
           }
         `;
         return;
@@ -286,8 +308,18 @@
       moodboards = await AG.getMoodboards();
       const roleLabel = session.architectProfileType === "office" ? "Mimarlık ofisi" : "Bireysel mimar";
       document.getElementById("welcome").textContent = `${session.name || "Mimar"} · ${roleLabel}`;
+      if (session.architectProfileType === "office") {
+        document.getElementById("office-project-add-btn").classList.remove("hidden");
+      }
       renderTabs();
       renderContent();
+
+      document.getElementById("office-project-add-btn").addEventListener("click", () => {
+        openOfficeProjectModal();
+      });
+      document.querySelectorAll("[data-office-project-close]").forEach((el) => {
+        el.addEventListener("click", () => closeOfficeProjectModal());
+      });
 
       document.getElementById("logout-btn").addEventListener("click", async () => {
         await AG.logoutArchitect();
@@ -313,11 +345,9 @@
         showToast("Board'a eklendi");
       });
 
-      const tabContent = document.getElementById("tab-content");
-      tabContent.addEventListener("submit", async (e) => {
-        const form = e.target;
-        if (!(form instanceof HTMLFormElement) || form.id !== "office-project-form") return;
+      document.getElementById("office-project-form").addEventListener("submit", async (e) => {
         e.preventDefault();
+        const form = e.currentTarget;
         const fd = new FormData(form);
         const res = await AG.addArchitectOfficeProject({
           title: fd.get("title"),
@@ -332,9 +362,12 @@
           return;
         }
         form.reset();
+        closeOfficeProjectModal();
         showToast("Proje yayınlandı");
-        renderContent();
+        if (activeTab === "office-projects") renderContent();
       });
+
+      const tabContent = document.getElementById("tab-content");
       tabContent.addEventListener("click", async (e) => {
         const btn = e.target.closest("[data-delete-office-project]");
         if (!btn) return;
