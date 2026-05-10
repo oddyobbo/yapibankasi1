@@ -764,23 +764,24 @@
       const session = await AG.getSessionArchitect();
       if (!session) { location.href = "/mimar-giris.html"; return; }
       cachedArchitectSession = session;
-      const boards = await AG.getMoodboards();
-      moodboards = boards;
 
-      const prefetch = [
+      /* Tek turda: panolar + favoriler + koleksiyonlar (+ ofis projeleri). Seri beklemek yerine paralel. */
+      const fetches = [
+        AG.getMoodboards(),
         AG.getFavoriteProducts(),
         AG.getFavoriteProjects(),
         AG.getCollections(),
       ];
       if (session.architectProfileType === "office") {
-        prefetch.push(AG.getArchitectOfficeProjects());
+        fetches.push(AG.getArchitectOfficeProjects());
       }
-      const pref = await Promise.all(prefetch);
-      panelCache.favProducts = pref[0];
-      panelCache.favProjects = pref[1];
-      panelCache.collections = pref[2];
+      const results = await Promise.all(fetches);
+      moodboards = results[0];
+      panelCache.favProducts = results[1];
+      panelCache.favProjects = results[2];
+      panelCache.collections = results[3];
       if (session.architectProfileType === "office") {
-        panelCache.officeProjects = pref[3];
+        panelCache.officeProjects = results[4];
       }
 
       TAB_IDS = tabIdsForSession(session);
@@ -789,8 +790,7 @@
       const roleLabel = session.architectProfileType === "office" ? "Mimarlık ofisi" : "Bireysel mimar";
       document.getElementById("welcome").textContent = `${session.name || "Mimar"} · ${roleLabel}`;
       renderTabs();
-      renderContent();
-      renderProjectsSidebar();
+      await Promise.all([renderContent(), renderProjectsSidebar()]);
 
       document.getElementById("logout-btn").addEventListener("click", async () => {
         await AG.logoutArchitect();
