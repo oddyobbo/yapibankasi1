@@ -411,14 +411,20 @@
       email: user.email,
       name: profile.name || user.email.split("@")[0],
       office: profile.office || "",
+      architectProfileType: profile.architect_profile_type || "individual",
     };
   };
 
-  const registerArchitect = async ({ name, email, password, office }) => {
+  const registerArchitect = async ({ name, email, password, office, architectProfileType }) => {
     const safeEmail = (email || "").trim().toLowerCase();
     const safeName = (name || "").trim();
+    const safeProfileType = architectProfileType === "office" ? "office" : "individual";
+    const safeOffice = (office || "").trim();
     if (!safeName || !safeEmail || !password) {
       return { ok: false, message: "Ad, e-posta ve şifre zorunludur." };
+    }
+    if (safeProfileType === "office" && !safeOffice) {
+      return { ok: false, message: "Mimarlık ofisi olarak kayıt için ofis/stüdyo adını yazın." };
     }
 
     await ready;
@@ -433,7 +439,8 @@
         data: {
           name: safeName,
           account_type: "architect",
-          office: (office || "").trim(),
+          architect_profile_type: safeProfileType,
+          office: safeOffice,
         },
       },
     });
@@ -444,7 +451,8 @@
       name: safeName,
       email: data.user.email || safeEmail,
       account_type: "architect",
-      office: (office || "").trim(),
+      architect_profile_type: safeProfileType,
+      office: safeOffice,
     });
 
     lsWrite(LS_BRAND_SESSION_KEY, null);
@@ -452,7 +460,8 @@
       id: data.user.id,
       name: safeName,
       email: safeEmail,
-      office: (office || "").trim(),
+      office: safeOffice,
+      architectProfileType: safeProfileType,
     };
     if (data.session) setArchitectSession(session);
     return {
@@ -487,6 +496,7 @@
       name: profile.name || data.user.email.split("@")[0],
       email: data.user.email,
       office: profile.office || "",
+      architectProfileType: profile.architect_profile_type || "individual",
     };
     setArchitectSession(session);
     return { ok: true, architect: session };

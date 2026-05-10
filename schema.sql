@@ -17,6 +17,7 @@ create table if not exists public.profiles (
   job_title text not null default '',
   primary_category text not null default '',
   office text not null default '',
+  architect_profile_type text not null default 'individual',
   created_at timestamptz default now()
 );
 
@@ -173,7 +174,9 @@ alter table public.profiles add column if not exists contact_name text default '
 alter table public.profiles add column if not exists job_title text default '';
 alter table public.profiles add column if not exists primary_category text default '';
 alter table public.profiles add column if not exists office text default '';
+alter table public.profiles add column if not exists architect_profile_type text default 'individual';
 update public.profiles set account_type = coalesce(nullif(trim(account_type), ''), 'brand') where account_type is null or trim(account_type) = '';
+update public.profiles set architect_profile_type = 'individual' where architect_profile_type is null or trim(architect_profile_type) = '';
 
 -- ── Migration: marka projeleri tablosu (bir kez çalıştır) ─────────────────
 
@@ -199,7 +202,7 @@ returns trigger as $$
 begin
   insert into public.profiles (
     id, name, email, website, account_type,
-    phone, contact_name, job_title, primary_category, office
+    phone, contact_name, job_title, primary_category, office, architect_profile_type
   )
   values (
     new.id,
@@ -211,7 +214,8 @@ begin
     coalesce(new.raw_user_meta_data->>'contact_name', ''),
     coalesce(new.raw_user_meta_data->>'job_title', ''),
     coalesce(new.raw_user_meta_data->>'primary_category', ''),
-    coalesce(new.raw_user_meta_data->>'office', '')
+    coalesce(new.raw_user_meta_data->>'office', ''),
+    coalesce(new.raw_user_meta_data->>'architect_profile_type', 'individual')
   )
   on conflict (id) do nothing;
   return new;
