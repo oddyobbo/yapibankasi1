@@ -677,6 +677,19 @@
       image: item.image || "",
       category: item.category || "",
       url: item.url || `/urun-unica-baffle.html?id=${encodeURIComponent(item.id || "")}`,
+      spec: item.spec || "",
+      description: String(item.description || "").slice(0, 280),
+      hasPdf: Boolean(item.hasPdf || item.files?.pdfUrl),
+      hasCad: Boolean(item.hasCad || item.files?.cadUrl),
+      files: item.files && item.files.bimUrl ? { bimUrl: item.files.bimUrl } : undefined,
+      technical: item.technical
+        ? {
+            usageScope: item.technical.usageScope || item.technical.usageArea || "",
+            materialType: item.technical.materialType || item.technical.malzemeTuru || "",
+            dimensions: item.technical.dimensions || "",
+            certificates: item.technical.certificates || "",
+          }
+        : undefined,
       savedAt: Date.now(),
     });
     setArchitectArray("favorite_products", session.id, list);

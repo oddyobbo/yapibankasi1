@@ -709,6 +709,63 @@
       render();
     });
 
+    function productUsageLine(p) {
+      const t = p.technical || {};
+      return String(t.usageScope || t.usageArea || t.kullanimAlani || "").trim();
+    }
+    function productMetaChipsHtml(p) {
+      const chips = [];
+      if (p.hasPdf || (p.files && p.files.pdfUrl)) {
+        chips.push(`<span class="rounded-md bg-[#f2f2f7] px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[#3a3a3c]">PDF</span>`);
+      }
+      if (p.hasCad || (p.files && p.files.cadUrl)) {
+        chips.push(`<span class="rounded-md bg-[#f2f2f7] px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[#3a3a3c]">CAD</span>`);
+      }
+      if (p.files && p.files.bimUrl) {
+        chips.push(`<span class="rounded-md bg-[#f2f2f7] px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[#3a3a3c]">BIM</span>`);
+      }
+      const cert = String((p.technical && p.technical.certificates) || "").trim();
+      if (cert) {
+        chips.push(`<span class="rounded-md border border-black/[0.1] bg-white px-1.5 py-0.5 text-[10px] font-semibold text-[#6e6e73]">Sertifika</span>`);
+      }
+      if (!chips.length) return "";
+      return `<div class="mt-2 flex flex-wrap gap-1">${chips.join("")}</div>`;
+    }
+    function productBodySnippet(p) {
+      const spec = String(p.spec || "").trim();
+      if (spec) return `<p class="mt-1.5 text-[12px] leading-snug text-[#3a3a3c] line-clamp-2">${esc(spec)}</p>`;
+      const desc = String(p.description || "").trim().replace(/\s+/g, " ");
+      if (!desc) return "";
+      const short = desc.length > 120 ? desc.slice(0, 117) + "…" : desc;
+      return `<p class="mt-1.5 text-[11px] leading-snug text-[#6e6e73] line-clamp-2">${esc(short)}</p>`;
+    }
+    function productCategoryRowHtml(p) {
+      const raw = String(p.category || "").trim();
+      const parts = raw.split(">").map((x) => (x || "").trim());
+      const main = parts[0] || raw;
+      const sub = parts[1] || "";
+      const line = sub ? `${esc(main)} · ${esc(sub)}` : esc(main);
+      if (!line) return "";
+      return `<p class="text-[11px] font-medium tracking-wide text-[#6e6e73] mt-1.5">${line}</p>`;
+    }
+    function productUsageRowHtml(p) {
+      const u = productUsageLine(p);
+      if (!u) return "";
+      return `<p class="mt-1 text-[11px] leading-snug text-[#0b0b0c]"><span class="font-medium text-[#6e6e73]">Kullanım</span> · ${esc(u)}</p>`;
+    }
+    function productMaterialRowHtml(p) {
+      const t = p.technical || {};
+      const m = String(t.materialType || t.malzemeTuru || "").trim();
+      if (!m) return "";
+      return `<p class="mt-0.5 text-[11px] text-[#6e6e73]"><span class="font-medium">Malzeme</span> · ${esc(m)}</p>`;
+    }
+    function productDimensionsRowHtml(p) {
+      const t = p.technical || {};
+      const d = String(t.dimensions || "").trim();
+      if (!d) return "";
+      return `<p class="mt-0.5 text-[11px] text-[#6e6e73]"><span class="font-medium">Ölçü</span> · ${esc(d)}</p>`;
+    }
+
     // ── renderCard ──
     function renderCard(p) {
       const isFav = favoriteProductIds.has(p.id);
@@ -742,7 +799,13 @@
           <div class="p-4 flex flex-col flex-1">
             <h3 class="text-[14px] font-semibold leading-snug">${p.name}</h3>
             <p class="text-[12px] text-[#6e6e73] mt-1">${p.brandName || ""}</p>
-            <a href="/urun-unica-baffle.html?id=${encodeURIComponent(p.id)}" class="product-detail-link mt-3 w-full h-8 flex items-center justify-center bg-[#1d1d1f] text-white text-[12px] font-medium rounded-lg hover:bg-[#3a3a3c] transition relative z-[1]">Ürün Detayı</a>
+            ${productCategoryRowHtml(p)}
+            ${productUsageRowHtml(p)}
+            ${productMaterialRowHtml(p)}
+            ${productDimensionsRowHtml(p)}
+            ${productBodySnippet(p)}
+            ${productMetaChipsHtml(p)}
+            <a href="/urun-unica-baffle.html?id=${encodeURIComponent(p.id)}" class="product-detail-link mt-auto pt-3 w-full h-8 flex items-center justify-center bg-[#1d1d1f] text-white text-[12px] font-medium rounded-lg hover:bg-[#3a3a3c] transition relative z-[1]">Ürün Detayı</a>
           </div>
           ${
             architectSession && !compareMode

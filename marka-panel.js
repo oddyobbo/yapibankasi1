@@ -164,6 +164,8 @@ const PAGE = window.__MARKA_PANEL_PAGE__ || "overview";
         dimensions:   fd.get("dimensions")?.trim()   || "",
         thickness:    fd.get("thickness")?.trim()    || "",
         certificates: fd.get("certificates")?.trim() || "",
+        usageScope:   fd.get("usageScope")?.trim()   || "",
+        materialType: fd.get("materialType")?.trim() || "",
         ...customTechnical,
       };
       return {
@@ -547,6 +549,8 @@ const PAGE = window.__MARKA_PANEL_PAGE__ || "overview";
           dimensions:   get("dimensions").trim(),
           thickness:    get("thickness").trim(),
           certificates: get("certificates").trim(),
+          usageScope:   get("usageScope").trim(),
+          materialType: get("materialType").trim(),
         };
         products.push({
           brandId:     session.id,
@@ -566,8 +570,8 @@ const PAGE = window.__MARKA_PANEL_PAGE__ || "overview";
 
     document.getElementById("download-template").addEventListener("click", () => {
       const sample = [
-        "name,sku,category,subcategory,description,fireClass,acoustic,dimensions,thickness,certificates,image,pdfUrl,cadUrl,bimUrl",
-        "\"Unica Baffle Tavan\",\"UNI-BAF-1200\",\"Mobilya ve Donatı\",\"Akustik\",\"Yüksek akustik performanslı tavan paneli\",\"B-s1,d0\",\"NRC 0.85\",\"40x1200 mm\",\"40 mm\",\"EPD;CE\",\"https://images.unsplash.com/photo-1615874959474-d609969a20ed?q=80&w=1200&auto=format&fit=crop\",\"https://example.com/datasheet.pdf\",\"https://example.com/detail.dwg\",\"https://example.com/revit.rfa\"",
+        "name,sku,category,subcategory,description,usageScope,materialType,fireClass,acoustic,dimensions,thickness,certificates,image,pdfUrl,cadUrl,bimUrl",
+        "\"Unica Baffle Tavan\",\"UNI-BAF-1200\",\"Mobilya ve Donatı\",\"Akustik\",\"Yüksek akustik performanslı tavan paneli\",\"iç mekan; tavan\",\"akustik panel\",\"B-s1,d0\",\"NRC 0.85\",\"40x1200 mm\",\"40 mm\",\"EPD;CE\",\"https://images.unsplash.com/photo-1615874959474-d609969a20ed?q=80&w=1200&auto=format&fit=crop\",\"https://example.com/datasheet.pdf\",\"https://example.com/detail.dwg\",\"https://example.com/revit.rfa\"",
       ].join("\n");
       const blob = new Blob([sample], { type: "text/csv;charset=utf-8;" });
       const a = document.createElement("a");

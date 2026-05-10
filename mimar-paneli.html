@@ -547,6 +547,49 @@
       updateTabVisual();
     }
 
+    function panelProductMetaBlock(item) {
+      if (!item || typeof item !== "object") return "";
+      const tech = item.technical || {};
+      const usage = String(tech.usageScope || tech.usageArea || tech.kullanimAlani || "").trim();
+      const rawCat = String(item.category || "").trim();
+      const parts = rawCat.split(">").map((x) => (x || "").trim());
+      const main = parts[0] || rawCat;
+      const sub = parts[1] || "";
+      let html = "";
+      if (sub) html += `<p class="text-[11px] font-medium text-[#6e6e73]">${escHtml(main)} · ${escHtml(sub)}</p>`;
+      else if (main) html += `<p class="text-[11px] font-medium text-[#6e6e73]">${escHtml(main)}</p>`;
+      if (usage) {
+        html += `<p class="mt-0.5 text-[11px] text-[#0b0b0c]"><span class="font-medium text-[#6e6e73]">Kullanım</span> · ${escHtml(usage)}</p>`;
+      }
+      const mat = String(tech.materialType || tech.malzemeTuru || "").trim();
+      if (mat) html += `<p class="mt-0.5 text-[11px] text-[#6e6e73]">Malzeme · ${escHtml(mat)}</p>`;
+      const dim = String(tech.dimensions || "").trim();
+      if (dim) html += `<p class="mt-0.5 text-[11px] text-[#6e6e73]">Ölçü · ${escHtml(dim)}</p>`;
+      const spec = String(item.spec || "").trim();
+      const desc = String(item.description || "").trim();
+      if (spec) {
+        html += `<p class="mt-1 text-[12px] leading-snug text-[#3a3a3c] line-clamp-2">${escHtml(spec)}</p>`;
+      } else if (desc) {
+        const short = desc.length > 120 ? desc.slice(0, 117) + "…" : desc;
+        html += `<p class="mt-1 text-[11px] leading-snug text-[#6e6e73] line-clamp-2">${escHtml(short)}</p>`;
+      }
+      const chips = [];
+      if (item.hasPdf || item.files?.pdfUrl) {
+        chips.push(`<span class="rounded-md bg-[#f2f2f7] px-1.5 py-0.5 text-[10px] font-semibold text-[#3a3a3c]">PDF</span>`);
+      }
+      if (item.hasCad || item.files?.cadUrl) {
+        chips.push(`<span class="rounded-md bg-[#f2f2f7] px-1.5 py-0.5 text-[10px] font-semibold text-[#3a3a3c]">CAD</span>`);
+      }
+      if (item.files?.bimUrl) {
+        chips.push(`<span class="rounded-md bg-[#f2f2f7] px-1.5 py-0.5 text-[10px] font-semibold text-[#3a3a3c]">BIM</span>`);
+      }
+      if (String(tech.certificates || "").trim()) {
+        chips.push(`<span class="rounded-md border border-black/[0.1] bg-white px-1.5 py-0.5 text-[10px] font-semibold text-[#6e6e73]">Sertifika</span>`);
+      }
+      if (chips.length) html += `<div class="mt-2 flex flex-wrap gap-1">${chips.join("")}</div>`;
+      return html;
+    }
+
     function cardTemplate(item, href, withBoardAction = false, removeFavorite = null, favCompareOpts = null) {
       const safeProduct = encodeURIComponent(JSON.stringify({ id: item.id, name: item.name, image: item.image || "" }));
       const nm = escHtml(item.name || "Öğe");
@@ -601,6 +644,7 @@
           </div>
           <div class="flex flex-1 flex-col p-4">
             <p class="text-[14px] font-semibold leading-snug text-[#0b0b0c]">${nm}</p>
+            ${removeFavorite === "product" ? panelProductMetaBlock(item) : ""}
             <p class="mt-1 text-[12px] text-[#6e6e73]">${new Date(item.savedAt || Date.now()).toLocaleDateString("tr-TR", { day: "numeric", month: "short", year: "numeric" })}</p>
           </div>
         </article>`;
@@ -617,9 +661,11 @@
             </div>
             <div class="p-4">
               <p class="text-[14px] font-semibold leading-snug text-[#0b0b0c]">${nm}</p>
+              ${removeFavorite === "product" ? panelProductMetaBlock(item) : ""}
               <p class="mt-1 text-[12px] text-[#6e6e73]">${new Date(item.savedAt || Date.now()).toLocaleDateString("tr-TR", { day: "numeric", month: "short", year: "numeric" })}</p>
             </div>
           </a>
+          ${removeFavorite === "product" ? detailBtn : ""}
           ${panoyaBtn}
         </article>`;
     }

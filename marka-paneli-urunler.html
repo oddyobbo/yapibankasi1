@@ -56,6 +56,8 @@
               <option value="">Alt kategori seç *</option>
             </select>
             <input required name="description" class="h-11 rounded-xl border border-black/10 px-4 md:col-span-2" placeholder="Kısa ürün açıklaması *">
+            <input name="usageScope" class="h-11 rounded-xl border border-black/10 px-4 md:col-span-2" placeholder="Kullanım alanları (isteğe bağlı, virgülle: iç mekan, zemin, cephe…)">
+            <input name="materialType" class="h-11 rounded-xl border border-black/10 px-4 md:col-span-2" placeholder="Malzeme türü (isteğe bağlı, örn: seramik, LED profil, kompozit panel)">
 
             <h3 class="md:col-span-2 text-[15px] font-semibold mt-2">Teknik Bilgi Başlıkları</h3>
             <label class="text-[12px] text-[#6e6e73]">Yangın Sınıfı
@@ -138,7 +140,7 @@
             </article>
             <article class="rounded-xl border border-black/10 bg-white p-4">
               <h4 class="text-[15px] font-semibold">Beklenen başlıklar</h4>
-              <p class="text-[13px] text-[#6e6e73] mt-2">name, sku, category, subcategory, description, fireClass, acoustic, dimensions, thickness, certificates, image, pdfUrl, cadUrl, bimUrl</p>
+              <p class="text-[13px] text-[#6e6e73] mt-2">name, sku, category, subcategory, description, usageScope, materialType, fireClass, acoustic, dimensions, thickness, certificates, image, pdfUrl, cadUrl, bimUrl</p>
               <div class="mt-4 rounded-lg bg-[#fbfbfd] border border-black/10 p-3 text-[12px] text-[#3a3a3c]">
                 <p class="font-semibold">Not:</p>
                 <p>- İlk 4 alan (name, sku, category, description) zorunlu.</p>
