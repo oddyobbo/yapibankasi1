@@ -1,0 +1,4 @@
+https://cool-bienenstitch-6090eb.netlify.app
+
+Mimar paneli: /mimar-paneli.html
+Ürünler: /urunler.html
