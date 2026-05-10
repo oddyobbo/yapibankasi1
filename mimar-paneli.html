@@ -86,28 +86,23 @@
         </div>
       </header>
 
-      <!-- İki kolon: sol sekmeler, sağ Projelerim -->
-      <div class="mt-10 flex items-start gap-8">
-        <!-- Sol: sekmeler + içerik -->
-        <div class="min-w-0 flex-1">
-          <div class="ag-arch-reveal ag-arch-reveal-delay-1">
-            <div class="inline-flex w-full max-w-full flex-wrap gap-1 rounded-full bg-[#f2f2f7] p-1" id="tabs" role="tablist" aria-label="Panel sekmeleri"></div>
-          </div>
-          <section class="ag-arch-reveal ag-arch-reveal-delay-2 mt-6 rounded-2xl border border-black/[0.08] bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.06)] lg:p-8">
+      <!-- Sekmeler tam genişlik; altında iki çerçeve aynı üst hizada ve aynı yükseklikte -->
+      <div class="mt-10">
+        <div class="ag-arch-reveal ag-arch-reveal-delay-1">
+          <div class="inline-flex w-full max-w-full flex-wrap gap-1 rounded-full bg-[#f2f2f7] p-1" id="tabs" role="tablist" aria-label="Panel sekmeleri"></div>
+        </div>
+        <div class="ag-arch-reveal ag-arch-reveal-delay-2 mt-6 flex flex-col gap-8 lg:flex-row lg:items-stretch lg:gap-8">
+          <section class="min-w-0 flex-1 rounded-2xl border border-black/[0.08] bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.06)] lg:p-8">
             <div id="tab-content"></div>
           </section>
-        </div>
-
-        <!-- Sağ: Projelerim (sadece ofis hesabı) -->
-        <aside id="projects-sidebar" class="hidden w-72 flex-shrink-0 sticky top-6 ag-arch-reveal ag-arch-reveal-delay-2">
-          <div class="rounded-2xl border border-black/[0.08] bg-white p-5 shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
-            <div class="mb-4 flex items-center justify-between">
-              <h2 class="text-[14px] font-semibold tracking-[-0.01em] text-[#0b0b0c]">Projelerim</h2>
-              <a href="/mimar-proje-ekle.html" class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-[#f2f2f7] text-[20px] leading-none font-light text-[#3a3a3c] transition hover:bg-[#e5e5ea]" aria-label="Proje ekle" title="Proje ekle">+</a>
+          <!-- Sağ: Projelerim (sadece ofis hesabı); sol kartla aynı üst çizgi ve stretch yükseklik -->
+          <aside id="projects-sidebar" class="hidden flex w-full shrink-0 flex-col self-stretch lg:w-72">
+            <div class="flex min-h-0 flex-1 flex-col rounded-2xl border border-black/[0.08] bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.06)] lg:p-8">
+              <h2 class="mb-4 text-[14px] font-semibold tracking-[-0.01em] text-[#0b0b0c]">Projelerim</h2>
+              <div id="projects-sidebar-content" class="min-h-0 flex-1 overflow-y-auto"></div>
             </div>
-            <div id="projects-sidebar-content"></div>
-          </div>
-        </aside>
+          </aside>
+        </div>
       </div>
     </section>
   </main>
