@@ -346,6 +346,17 @@
   const uploadBrandImage = async (file, brandId) => uploadBrandAsset(file, brandId, "product-images");
   const uploadBrandDocument = async (file, brandId) => uploadBrandAsset(file, brandId, "product-documents");
 
+  /** Mimarlık ofisi: kapak / proje görselleri için `product-images` bucket (path: mimarın kullanıcı id'si). */
+  const uploadArchitectProjectImage = async (file) => {
+    const session = await getSessionArchitect();
+    if (!session || session.architectProfileType !== "office") {
+      return { ok: false, message: "Görsel yüklemek için mimarlık ofisi hesabıyla giriş yapın." };
+    }
+    const t = (file && file.type) || "";
+    if (!t.startsWith("image/")) return { ok: false, message: "Lütfen bir görsel dosyası seçin (JPG, PNG, WebP vb.)." };
+    return uploadBrandImage(file, session.id);
+  };
+
   // ── Projects (Supabase first, local fallback) ───────────────────────────
   const dbToProject = (row) => ({
     id: row.id,
@@ -938,6 +949,7 @@
     getArchitectOfficeProjects,
     addArchitectOfficeProject,
     deleteArchitectOfficeProject,
+    uploadArchitectProjectImage,
     // products
     getProducts,
     getAllProducts,
