@@ -19,218 +19,75 @@
   <title>Ürün Detayı | Archilink</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    .gallery-main { aspect-ratio: 4/3; max-height: 520px; }
     html.ag-dark .ag-card { background: #1a1b1e; border-color: rgba(255,255,255,0.08); }
     html.ag-dark .ag-muted { color: #98989e; }
-    html.ag-dark .ag-subtle { background: #141518; }
-
-    .ag-product-detail {
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
-    }
-
-    /* ── Ürün detay tasarım sistemi (yalnızca bu sayfa) ── */
-    .ag-detail-section {
-      border: 1px solid rgba(0, 0, 0, 0.1);
-      border-radius: 16px;
-      padding: 24px 32px;
-      background: #fff;
-    }
-    html.ag-dark .ag-detail-section {
-      background: #1a1b1e;
-      border-color: rgba(255, 255, 255, 0.08);
-    }
-
-    .ag-detail-section-title {
-      font-size: 20px;
-      font-weight: 600;
-      letter-spacing: -0.02em;
-      line-height: 1.25;
-      color: #0b0b0c;
-      margin: 0 0 12px 0;
-    }
-    html.ag-dark .ag-detail-section-title {
-      color: #f5f5f7;
-    }
-
-    .ag-detail-info-table {
-      margin: 0;
-    }
-    .ag-detail-info-row {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 4px 16px;
-      padding: 10px 0;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-    }
-    html.ag-dark .ag-detail-info-row {
-      border-bottom-color: rgba(255, 255, 255, 0.08);
-    }
-    .ag-detail-info-row:last-child {
-      border-bottom: none;
-      padding-bottom: 0;
-    }
-    @media (min-width: 640px) {
-      .ag-detail-info-row {
-        grid-template-columns: minmax(180px, 240px) 1fr;
-        align-items: baseline;
-      }
-    }
-
-    /* Label: value ile aynı puntoda, daha güçlü ağırlık; soluk meta stili yok */
-    .ag-detail-label {
-      font-size: 13px;
-      font-weight: 600;
-      letter-spacing: -0.01em;
-      line-height: 1.45;
-      color: #1d1d1f;
-    }
-    html.ag-dark .ag-detail-label {
-      color: #eceef2;
-    }
-    .ag-detail-value {
-      font-size: 13px;
-      font-weight: 500;
-      letter-spacing: normal;
-      line-height: 1.45;
-      color: #3a3a3c;
-    }
-    html.ag-dark .ag-detail-value {
-      color: #c5c5c7;
-    }
-
-    .ag-detail-placeholder {
-      font-size: 13px;
-      font-weight: 500;
-      line-height: 1.45;
-      color: #6e6e73;
-      margin: 0;
-    }
-    html.ag-dark .ag-detail-placeholder {
-      color: #98989e;
-    }
-
-    .ag-detail-file-group-title {
-      font-size: 12px;
-      font-weight: 600;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      color: #1d1d1f;
-      margin: 0 0 6px 0;
-    }
-    html.ag-dark .ag-detail-file-group-title {
-      color: #eceef2;
-    }
-    .ag-detail-file-group + .ag-detail-file-group {
-      margin-top: 12px;
-    }
-    .ag-detail-file-list {
-      margin: 0;
-      padding: 0;
-      list-style: none;
-    }
-    .ag-detail-file-list li {
-      margin: 0 0 4px 0;
-    }
-    .ag-detail-file-list a {
-      font-size: 13px;
-      font-weight: 500;
-      color: #0071e3;
-      text-decoration: none;
-    }
-    .ag-detail-file-list a:hover {
-      text-decoration: underline;
-    }
-    html.ag-dark .ag-detail-file-list a {
-      color: #64b5f6;
-    }
-
-    .ag-detail-usage-list {
-      margin: 0;
-      padding: 0;
-      list-style: none;
-    }
-    .ag-detail-usage-list li {
-      display: flex;
-      gap: 8px;
-      align-items: baseline;
-      margin-bottom: 6px;
-      font-size: 13px;
-      font-weight: 500;
-      line-height: 1.45;
-      color: #3a3a3c;
-    }
-    html.ag-dark .ag-detail-usage-list li {
-      color: #c5c5c7;
-    }
-    .ag-detail-usage-list li span:first-child {
-      color: #6e6e73;
-      flex-shrink: 0;
-    }
   </style>
 </head>
-<body data-page="products" class="ag-product-detail bg-[#f5f5f7] text-[#111] font-sans min-h-screen">
+<body data-page="products" class="product-detail-page text-[#111] font-sans min-h-screen antialiased">
   <div class="w-full min-h-screen">
-    <div class="w-full min-h-screen bg-white overflow-hidden">
+    <div class="w-full min-h-screen overflow-hidden">
       <div id="site-header"></div>
 
-      <main class="w-full px-4 sm:px-6 lg:px-10 py-5 md:py-6 space-y-4 md:space-y-6">
-        <section class="space-y-4">
-          <header class="space-y-2">
-            <p id="hero-category" class="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#6e6e73] ag-muted">Kategori</p>
-            <h1 id="hero-title" class="text-[28px] sm:text-[36px] lg:text-[40px] leading-[1.12] font-semibold tracking-tight">Ürün adı</h1>
+      <main class="w-full max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-10 py-6 md:py-10 space-y-5 md:space-y-7">
+        <article class="product-detail-section product-detail-hero-panel ag-card">
+          <header class="mb-6 md:mb-8">
+            <p id="hero-category" class="product-detail-hero-kicker ag-muted">Kategori</p>
+            <h1 id="hero-title" class="product-detail-hero-title">Ürün adı</h1>
           </header>
 
-          <div class="grid lg:grid-cols-[1fr_min(400px,100%)] gap-4 lg:gap-6 items-start">
-            <div class="rounded-2xl border border-black/[0.1] bg-[#fafafa] ag-card overflow-hidden min-w-0">
-              <div class="relative gallery-main w-full bg-[#ececee]">
-                <img id="gallery-main-img" src="" alt="" class="w-full h-full object-cover">
-                <button type="button" id="gallery-prev" aria-label="Önceki görsel" class="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 shadow-md border border-black/[0.06] flex items-center justify-center hover:bg-white transition z-10">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+          <div class="product-detail-hero-grid">
+            <div class="product-detail-gallery min-w-0">
+              <div id="gallery-thumbs" class="product-detail-gallery-thumbs" aria-label="Galeri küçük görselleri"></div>
+              <div class="product-detail-gallery-main">
+                <img id="gallery-main-img" src="" alt="">
+                <button type="button" id="gallery-prev" aria-label="Önceki görsel" class="product-detail-gallery-nav product-detail-gallery-nav--prev">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
                 </button>
-                <button type="button" id="gallery-next" aria-label="Sonraki görsel" class="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 shadow-md border border-black/[0.06] flex items-center justify-center hover:bg-white transition z-10">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                <button type="button" id="gallery-next" aria-label="Sonraki görsel" class="product-detail-gallery-nav product-detail-gallery-nav--next">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
                 </button>
               </div>
-              <div id="gallery-thumbs" class="flex gap-2 p-2 overflow-x-auto ag-subtle border-t border-black/[0.06]"></div>
             </div>
 
-            <aside class="rounded-2xl border border-black/[0.1] bg-[#fbfbfd] ag-card sticky top-8 p-6 lg:p-8 self-start min-w-0">
-              <div class="flex items-start gap-2">
-                <div id="brand-avatar" class="shrink-0 w-14 h-14 rounded-2xl bg-[#1d1d1f] text-white text-[20px] font-semibold flex items-center justify-center">M</div>
-                <div class="min-w-0 space-y-2">
-                  <p class="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6e6e73] ag-muted">Marka / üretici</p>
-                  <h2 id="brand-name" class="text-[20px] font-semibold tracking-tight truncate">—</h2>
-                  <p class="ag-detail-value">Bu ürünün satıcısı. Teklif ve teknik konularda doğrudan iletişime geçebilirsiniz.</p>
-                </div>
-              </div>
-              <div class="mt-4 flex flex-col sm:flex-row gap-2">
-                <a id="btn-teklif" href="/iletisim-v2.html" class="inline-flex justify-center items-center h-11 px-5 rounded-full bg-[#1d1d1f] text-white text-[13px] font-semibold hover:bg-[#3a3a3c] transition">Teklif iste</a>
-                <a id="btn-iletisim" href="/iletisim-v2.html" class="inline-flex justify-center items-center h-11 px-5 rounded-full border border-black/[0.12] bg-white text-[13px] font-semibold hover:bg-black/[0.03] transition">İletişime geç</a>
-              </div>
-            </aside>
-          </div>
-        </section>
+            <div class="product-detail-hero-info">
+              <h2 class="product-detail-section-title">Ürün Açıklaması</h2>
+              <p id="product-description" class="product-detail-lead">—</p>
+              <p id="product-spec-snippet" class="hidden product-detail-muted mt-4 pt-4 border-t border-black/[0.06]"></p>
 
-        <section class="ag-detail-section ag-card space-y-2">
-          <h2 class="ag-detail-section-title">Ürün Açıklaması</h2>
-          <p id="product-description" class="ag-detail-value max-w-[820px]">—</p>
-          <p id="product-spec-snippet" class="hidden ag-detail-value max-w-[820px] border-t border-black/[0.06] pt-3 mt-3"></p>
-        </section>
+              <div class="product-detail-brand-panel">
+                <div class="product-detail-brand-row">
+                  <img id="brand-logo" class="product-detail-brand-logo is-hidden" src="" alt="">
+                  <div id="brand-avatar" class="product-detail-brand-avatar" aria-hidden="true">M</div>
+                  <div class="product-detail-brand-meta">
+                    <p class="product-detail-brand-label">Marka / üretici</p>
+                    <p id="brand-name" class="product-detail-brand-name">—</p>
+                    <p class="product-detail-brand-copy">Bu ürünün satıcısıdır. Teklif, teknik doküman ve numune taleplerinde doğrudan iletişime geçebilirsiniz.</p>
+                  </div>
+                </div>
+                <div class="product-detail-brand-actions">
+                  <a id="btn-teklif" href="/iletisim-v2.html" class="product-detail-btn-primary">Teklif iste</a>
+                  <a id="btn-iletisim" href="/iletisim-v2.html" class="product-detail-btn-secondary">İletişime geç</a>
+                </div>
+                <p class="product-detail-brand-more">
+                  <a id="brand-more-products" href="/urunler.html">Bu markanın diğer ürünlerini gör</a>
+                </p>
+              </div>
+            </div>
+          </div>
+        </article>
 
         <div id="inject-technical"></div>
         <div id="inject-other"></div>
 
-        <section class="ag-detail-section ag-card">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10">
-            <div class="min-w-0">
-              <h2 class="ag-detail-section-title">Teknik Dosyalar</h2>
-              <div id="inject-files"></div>
-            </div>
-            <div class="min-w-0">
-              <h2 class="ag-detail-section-title">Kullanım Alanları</h2>
-              <ul id="usage-list" class="ag-detail-usage-list"></ul>
-            </div>
-          </div>
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-5">
+          <article class="product-detail-section ag-card">
+            <h2 class="product-detail-section-title">Teknik Dosyalar</h2>
+            <div id="inject-files"></div>
+          </article>
+          <article class="product-detail-section ag-card">
+            <h2 class="product-detail-section-title">Kullanım Alanları</h2>
+            <ul id="usage-list" class="product-detail-usage-list"></ul>
+          </article>
         </section>
       </main>
       <div id="site-footer"></div>
@@ -245,6 +102,11 @@
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;");
+    }
+
+    function valOrBelirtilmedi(v) {
+      if (v == null || String(v).trim() === "") return "Belirtilmedi";
+      return String(v);
     }
 
     const STATIC = [
@@ -327,34 +189,6 @@
       },
     ];
 
-    const KEY_LABELS = {
-      acoustic: "Akustik performans",
-      fireClass: "Yangın sınıfı",
-      thickness: "Kalınlık",
-      usageScope: "Kullanım alanı",
-      kullanimAlani: "Kullanım alanı",
-      materialType: "Malzeme türü",
-      malzemeTuru: "Malzeme türü",
-      dimensions: "Ölçü / ebat",
-      certificates: "Sertifikalar",
-      watt: "Güç (W)",
-      lumen: "Işık akısı (lm)",
-      kelvin: "Renk sıcaklığı (K)",
-      cri: "CRI",
-      ipClass: "IP sınıfı",
-      dimmable: "Dim",
-      slipResistance: "Kaymazlık",
-      waterAbsorption: "Su emme",
-      rectified: "Rektifiye",
-      stoneType: "Taş türü",
-      origin: "Menşei",
-    };
-
-    const RESERVED = new Set([
-      "other", "customFields", "diğerÖzellikler", "digerOzellikler", "additionalProperties",
-      "gallery", "galleryUrls",
-    ]);
-
     function usageByCategory(category) {
       const c = (category || "").toLowerCase();
       if (c.includes("akustik")) return ["Açık ofis", "Toplantı odaları", "Eğitim yapıları", "Otel ortak alanları"];
@@ -377,43 +211,6 @@
       return u.pathname + u.search;
     }
 
-    function categoryKind(cat) {
-      const c = (cat || "").toLowerCase();
-      if (c.includes("akustik")) return "acoustic";
-      if (c.includes("aydınlatma") || c.includes("led") || c.includes("armatür")) return "lighting";
-      if (c.includes("seramik") || c.includes("karo") || c.includes("porselen")) return "ceramic";
-      if (c.includes("cephe") || c.includes("panel")) return "facade";
-      return "general";
-    }
-
-    function sectionKeysForKind(kind, technical) {
-      const keys = Object.keys(technical || {}).filter((k) => !RESERVED.has(k));
-      if (kind === "acoustic") {
-        const order = ["acoustic", "fireClass", "thickness", "usageScope", "kullanimAlani", "materialType", "malzemeTuru", "dimensions", "certificates"];
-        return order.filter((k) => keys.includes(k)).concat(keys.filter((k) => !order.includes(k)));
-      }
-      if (kind === "lighting") {
-        const order = ["watt", "lumen", "kelvin", "cri", "ipClass", "dimmable", "usageScope", "certificates"];
-        return order.filter((k) => keys.includes(k)).concat(keys.filter((k) => !order.includes(k)));
-      }
-      return keys;
-    }
-
-    function renderInfoRows(keys, technical) {
-      const rows = keys
-        .map((k) => {
-          const v = technical[k];
-          if (v == null || v === "") return null;
-          const label = KEY_LABELS[k] || k.replace(/([A-Z])/g, " $1").replace(/^./, (s) => s.toUpperCase());
-          return `<div class="ag-detail-info-row">
-            <div class="ag-detail-label">${esc(label)}</div>
-            <div class="ag-detail-value">${esc(String(v))}</div>
-          </div>`;
-        })
-        .filter(Boolean);
-      return rows.join("");
-    }
-
     function parseOther(technical) {
       const o = technical.other ?? technical.customFields ?? technical.diğerÖzellikler ?? technical.digerOzellikler;
       if (!o) return [];
@@ -430,36 +227,56 @@
     }
 
     function buildTechnicalSection(product) {
-      const technical = product.technical || {};
-      const kind = categoryKind(product.category);
-      const keys = sectionKeysForKind(kind, technical);
-      const body = renderInfoRows(keys, technical);
-      const inner = body
-        ? `<div class="ag-detail-info-table">${body}</div>`
-        : `<p class="ag-detail-placeholder">Bu ürün için teknik alanlar henüz girilmemiş.</p>`;
-      return `<section class="ag-detail-section ag-card">
-        <h2 class="ag-detail-section-title">Teknik Bilgiler</h2>
-        ${inner}
-      </section>`;
+      const t = product.technical || {};
+      const acoustic = valOrBelirtilmedi(t.acoustic);
+      const fire = valOrBelirtilmedi(t.fireClass);
+      const thickness = valOrBelirtilmedi(t.thickness);
+      const dimensions = valOrBelirtilmedi(t.dimensions);
+      const certificates = valOrBelirtilmedi(t.certificates);
+      return `<article class="product-detail-section ag-card">
+        <h2 class="product-detail-section-title">Teknik Bilgiler</h2>
+        <div class="product-detail-info-table">
+          <div class="product-detail-info-row">
+            <div class="product-detail-info-label">Akustik performans</div>
+            <div class="product-detail-info-value" id="detail-acoustic">${esc(acoustic)}</div>
+          </div>
+          <div class="product-detail-info-row">
+            <div class="product-detail-info-label">Yangın sınıfı</div>
+            <div class="product-detail-info-value" id="detail-fire">${esc(fire)}</div>
+          </div>
+          <div class="product-detail-info-row">
+            <div class="product-detail-info-label">Kalınlık</div>
+            <div class="product-detail-info-value" id="detail-thickness">${esc(thickness)}</div>
+          </div>
+          <div class="product-detail-info-row">
+            <div class="product-detail-info-label">Ölçü</div>
+            <div class="product-detail-info-value" id="detail-dimensions">${esc(dimensions)}</div>
+          </div>
+          <div class="product-detail-info-row">
+            <div class="product-detail-info-label">Sertifikalar</div>
+            <div class="product-detail-info-value" id="detail-certificates">${esc(certificates)}</div>
+          </div>
+        </div>
+      </article>`;
     }
 
     function buildOtherSection(product) {
       const other = parseOther(product.technical || {});
       let inner;
       if (other.length) {
-        const rows = other.map(({ label, value }) => `
-          <div class="ag-detail-info-row">
-            <div class="ag-detail-label">${esc(label)}</div>
-            <div class="ag-detail-value">${esc(String(value))}</div>
+        inner = other.map(({ label, value }) => `
+          <div class="product-detail-info-row">
+            <div class="product-detail-info-label">${esc(label)}</div>
+            <div class="product-detail-info-value">${esc(String(value))}</div>
           </div>`).join("");
-        inner = `<div class="ag-detail-info-table">${rows}</div>`;
+        inner = `<div class="product-detail-info-table">${inner}</div>`;
       } else {
-        inner = `<p class="ag-detail-placeholder">Henüz bilgi eklenmedi.</p>`;
+        inner = `<p class="product-detail-muted">Bu ürün için ek özellik bilgisi henüz eklenmedi.</p>`;
       }
-      return `<section class="ag-detail-section ag-card">
-        <h2 class="ag-detail-section-title">Diğer Özellikler</h2>
+      return `<article class="product-detail-section ag-card">
+        <h2 class="product-detail-section-title">Diğer Özellikler</h2>
         ${inner}
-      </section>`;
+      </article>`;
     }
 
     function fallbackDocHref() {
@@ -482,14 +299,14 @@
           else pushPdf(x.url, x.label || x.name);
         });
       }
-      if (f.pdfUrl) pushPdf(f.pdfUrl, f.pdfLabel || "Teknik föy (PDF)");
+      if (f.pdfUrl) pushPdf(f.pdfUrl, f.pdfLabel || "PDF");
       if (Array.isArray(f.pdfUrls)) f.pdfUrls.forEach((u, i) => pushPdf(u, `PDF ${i + 1}`));
 
       const pushDwg = (url, label) => {
         if (!url || !String(url).trim()) return;
         dwg.push({ href: String(url).trim(), label: label || "DWG" });
       };
-      if (f.cadUrl) pushDwg(f.cadUrl, f.cadLabel || "2D çizim");
+      if (f.cadUrl) pushDwg(f.cadUrl, f.cadLabel || "DWG");
       if (Array.isArray(f.dwgs)) f.dwgs.forEach((x, i) => {
         if (typeof x === "string") pushDwg(x, `DWG ${i + 1}`);
         else pushDwg(x?.url, x?.label || `DWG ${i + 1}`);
@@ -499,7 +316,7 @@
         if (!url || !String(url).trim()) return;
         threeD.push({ href: String(url).trim(), label: label || "3D" });
       };
-      if (f.bimUrl) push3d(f.bimUrl, f.bimLabel || "3D / BIM");
+      if (f.bimUrl) push3d(f.bimUrl, f.bimLabel || "3D");
       if (Array.isArray(f.models3d)) f.models3d.forEach((x, i) => {
         if (typeof x === "string") push3d(x, `3D ${i + 1}`);
         else push3d(x?.url, x?.label || `3D ${i + 1}`);
@@ -511,26 +328,49 @@
       return { pdf, dwg, threeD };
     }
 
-    function renderFileGroup(title, items) {
-      const lis = items.length
-        ? items.map((it) => {
-            const href = it.href;
-            const target = href.startsWith("http") ? "_blank" : "_self";
-            return `<li><a href="${esc(href)}" target="${target}" rel="noopener noreferrer">${esc(it.label)}</a></li>`;
-          }).join("")
-        : `<li><span class="ag-detail-placeholder">Henüz dosya eklenmedi</span></li>`;
-      return `<div class="ag-detail-file-group">
-        <h3 class="ag-detail-file-group-title">${esc(title)}</h3>
-        <ul class="ag-detail-file-list">${lis}</ul>
+    const FILE_ICON_SVG = {
+      pdf: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8M16 17H8M10 9H8"/></svg>`,
+      dwg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>`,
+      three: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="M3.27 6.96L12 12.01l8.73-5.05M12 22.08V12"/></svg>`,
+    };
+
+    const FILE_CHEVRON = `<span class="product-detail-file-item-chevron" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></span>`;
+
+    function renderFileGroup(kind, title, items) {
+      const iconClass =
+        kind === "pdf" ? "product-detail-file-icon product-detail-file-icon--pdf" :
+        kind === "dwg" ? "product-detail-file-icon product-detail-file-icon--dwg" :
+        "product-detail-file-icon product-detail-file-icon--3d";
+      const iconSvg = FILE_ICON_SVG[kind === "three" ? "three" : kind] || FILE_ICON_SVG.pdf;
+      if (!items.length) {
+        return `<div class="product-detail-file-group">
+          <div class="product-detail-file-group-head">
+            <span class="${iconClass}">${iconSvg}</span>
+            <p class="product-detail-file-title">${esc(title)}</p>
+          </div>
+          <span class="product-detail-file-placeholder">Henüz dosya eklenmedi</span>
+        </div>`;
+      }
+      const lis = items.map((it) => {
+        const href = it.href;
+        const target = href.startsWith("http") ? "_blank" : "_self";
+        return `<li><a class="product-detail-file-item" href="${esc(href)}" target="${target}" rel="noopener noreferrer"><span>${esc(it.label)}</span>${FILE_CHEVRON}</a></li>`;
+      }).join("");
+      return `<div class="product-detail-file-group">
+        <div class="product-detail-file-group-head">
+          <span class="${iconClass}">${iconSvg}</span>
+          <p class="product-detail-file-title">${esc(title)}</p>
+        </div>
+        <ul class="product-detail-file-list">${lis}</ul>
       </div>`;
     }
 
     function buildFilesColumn(product) {
       const { pdf, dwg, threeD } = collectFilesByType(product);
       return (
-        renderFileGroup("PDF Dosyaları", pdf) +
-        renderFileGroup("DWG Dosyaları", dwg) +
-        renderFileGroup("3D Dosyaları", threeD)
+        renderFileGroup("pdf", "PDF Dosyaları", pdf) +
+        renderFileGroup("dwg", "DWG / 2D Dosyaları", dwg) +
+        renderFileGroup("three", "3D Dosyaları", threeD)
       );
     }
 
@@ -544,10 +384,10 @@
 
       function renderThumbs() {
         thumbs.innerHTML = images.map((src, i) => `
-          <button type="button" data-i="${i}" class="gallery-thumb shrink-0 w-16 h-16 sm:w-[72px] sm:h-[72px] rounded-xl overflow-hidden border-2 transition ${i === idx ? "border-[#1d1d1f] ring-2 ring-black/5" : "border-transparent opacity-70 hover:opacity-100"}">
-            <img src="${esc(src)}" alt="" class="w-full h-full object-cover">
+          <button type="button" data-i="${i}" class="product-detail-gallery-thumb${i === idx ? " is-active" : ""}" aria-label="Görsel ${i + 1}">
+            <img src="${esc(src)}" alt="">
           </button>`).join("");
-        thumbs.querySelectorAll(".gallery-thumb").forEach((btn) => {
+        thumbs.querySelectorAll(".product-detail-gallery-thumb").forEach((btn) => {
           btn.addEventListener("click", () => { idx = +btn.getAttribute("data-i"); update(); });
         });
       }
@@ -593,7 +433,22 @@
       const brand = product.brandName || "—";
       document.getElementById("brand-name").textContent = brand;
       const av = document.getElementById("brand-avatar");
-      av.textContent = (brand.trim().charAt(0) || "M").toUpperCase();
+      const logoEl = document.getElementById("brand-logo");
+      const logoUrl = String(product.brandLogo || product.logoUrl || product.logo || "").trim();
+      if (logoUrl) {
+        logoEl.src = logoUrl;
+        logoEl.alt = brand;
+        logoEl.classList.remove("is-hidden");
+        av.classList.add("is-hidden");
+      } else {
+        logoEl.removeAttribute("src");
+        logoEl.classList.add("is-hidden");
+        av.classList.remove("is-hidden");
+        av.textContent = (brand.trim().charAt(0) || "M").toUpperCase();
+      }
+
+      const brandListHref = "/urunler.html?q=" + encodeURIComponent(brand.trim() || "marka");
+      document.getElementById("brand-more-products").href = brandListHref;
 
       const q = {
         konu: "urun",
@@ -613,7 +468,7 @@
 
       const usageEl = document.getElementById("usage-list");
       usageEl.innerHTML = usageByCategory(product.category).map((u) =>
-        `<li><span>•</span><span>${esc(u)}</span></li>`).join("");
+        `<li>${esc(u)}</li>`).join("");
     });
   </script>
 </body>
