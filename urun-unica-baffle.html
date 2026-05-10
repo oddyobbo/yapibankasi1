@@ -18,47 +18,77 @@
   </script>
   <title>Ürün Detayı | Archilink</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .gallery-main { aspect-ratio: 4/3; max-height: 520px; }
+    html.ag-dark .ag-card { background: #1a1b1e; border-color: rgba(255,255,255,0.08); }
+    html.ag-dark .ag-muted { color: #98989e; }
+    html.ag-dark .ag-subtle { background: #141518; }
+  </style>
 </head>
 <body data-page="products" class="bg-[#f5f5f7] text-[#111] font-sans min-h-screen">
   <div class="w-full min-h-screen">
     <div class="w-full min-h-screen bg-white overflow-hidden">
       <div id="site-header"></div>
 
-      <main class="p-6 lg:p-8 space-y-6">
-        <section class="grid lg:grid-cols-[1fr_420px] gap-6">
-          <div class="rounded-2xl overflow-hidden border border-black/10">
-            <img id="product-image" src="https://images.unsplash.com/photo-1615874959474-d609969a20ed?q=80&w=1932&auto=format&fit=crop" alt="Ürün görseli" class="w-full h-[420px] object-cover">
-          </div>
-          <aside class="rounded-2xl border border-black/10 p-5 bg-[#fbfbfd]">
-            <p id="product-category" class="text-[12px] text-[#6e6e73]">Kategori</p>
-            <h1 id="product-name" class="text-[30px] leading-[1.1] font-semibold mt-2">Ürün Adı</h1>
-            <p id="product-description" class="text-[14px] text-[#6e6e73] mt-3">Ürün açıklaması.</p>
-            <div class="mt-4 space-y-2 text-[14px]">
-              <p><span class="font-medium">Marka:</span> <span id="detail-brand">—</span></p>
-              <p><span class="font-medium">NRC:</span> <span id="detail-acoustic">—</span></p>
-              <p><span class="font-medium">Yangın:</span> <span id="detail-fire">—</span></p>
-              <p><span class="font-medium">Kalınlık:</span> <span id="detail-thickness">—</span></p>
+      <main class="p-6 lg:p-10 max-w-[1280px] mx-auto space-y-10 lg:space-y-12">
+        <!-- Üst: galeri + marka kartı -->
+        <section class="grid lg:grid-cols-[1fr_min(380px,100%)] gap-8 lg:gap-10 items-start">
+          <div>
+            <p id="hero-category" class="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#6e6e73] ag-muted">Kategori</p>
+            <h1 id="hero-title" class="text-[28px] sm:text-[34px] leading-[1.12] font-semibold tracking-tight mt-2">Ürün adı</h1>
+
+            <div class="mt-6 rounded-2xl border border-black/[0.1] bg-[#fafafa] ag-card overflow-hidden">
+              <div class="relative gallery-main w-full bg-[#ececee]">
+                <img id="gallery-main-img" src="" alt="" class="w-full h-full object-cover">
+                <button type="button" id="gallery-prev" aria-label="Önceki görsel" class="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 shadow-md border border-black/[0.06] flex items-center justify-center hover:bg-white transition z-10">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+                </button>
+                <button type="button" id="gallery-next" aria-label="Sonraki görsel" class="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 shadow-md border border-black/[0.06] flex items-center justify-center hover:bg-white transition z-10">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                </button>
+              </div>
+              <div id="gallery-thumbs" class="flex gap-2 p-3 overflow-x-auto ag-subtle border-t border-black/[0.06]"></div>
             </div>
-            <div class="mt-5 flex flex-wrap gap-2">
-              <a href="/iletisim-v2.html" class="px-4 py-2 rounded-full bg-black text-white text-[13px] font-semibold">Teklif İste</a>
-              <a href="/iletisim-v2.html" class="px-4 py-2 rounded-full border border-black/15 bg-white text-[13px] font-semibold">Markaya Mesaj</a>
+          </div>
+
+          <aside class="rounded-2xl border border-black/[0.1] p-6 bg-[#fbfbfd] ag-card sticky top-6">
+            <div class="flex items-start gap-4">
+              <div id="brand-avatar" class="shrink-0 w-14 h-14 rounded-2xl bg-[#1d1d1f] text-white text-[20px] font-semibold flex items-center justify-center">M</div>
+              <div class="min-w-0">
+                <p class="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6e6e73] ag-muted">Marka / üretici</p>
+                <h2 id="brand-name" class="text-[20px] font-semibold tracking-tight mt-1 truncate">—</h2>
+                <p class="text-[13px] text-[#6e6e73] ag-muted mt-2 leading-snug">Bu ürünün satıcısı. Teklif ve teknik konularda doğrudan iletişime geçebilirsiniz.</p>
+              </div>
+            </div>
+            <div class="mt-6 flex flex-col sm:flex-row gap-2">
+              <a id="btn-teklif" href="/iletisim-v2.html" class="inline-flex justify-center items-center h-11 px-5 rounded-full bg-[#1d1d1f] text-white text-[13px] font-semibold hover:bg-[#3a3a3c] transition">Teklif iste</a>
+              <a id="btn-iletisim" href="/iletisim-v2.html" class="inline-flex justify-center items-center h-11 px-5 rounded-full border border-black/[0.12] bg-white text-[13px] font-semibold hover:bg-black/[0.03] transition">İletişime geç</a>
             </div>
           </aside>
         </section>
 
-        <section class="grid lg:grid-cols-2 gap-4">
-          <article class="rounded-2xl border border-black/10 p-5">
-            <h2 class="text-[20px] font-semibold">Teknik Dokümanlar</h2>
-            <div id="product-docs" class="mt-3 space-y-2 text-[14px]">
-              <p class="text-[#6e6e73]">Doküman bilgisi yükleniyor…</p>
-            </div>
-          </article>
-          <article class="rounded-2xl border border-black/10 p-5">
-            <h2 class="text-[20px] font-semibold">Kullanım Alanları</h2>
-            <ul id="usage-list" class="mt-3 space-y-2 text-[14px] text-[#333]">
-              <li>• Kullanım alanları yükleniyor…</li>
-            </ul>
-          </article>
+        <!-- Açıklama -->
+        <section class="rounded-2xl border border-black/[0.1] p-6 lg:p-8 ag-card">
+          <h2 class="text-[13px] font-semibold uppercase tracking-[0.14em] text-[#6e6e73] ag-muted">Ürün açıklaması</h2>
+          <p id="product-description" class="text-[16px] leading-relaxed text-[#2d2d2f] mt-4 max-w-[820px]">—</p>
+          <p id="product-spec-snippet" class="hidden text-[14px] text-[#6e6e73] ag-muted mt-4 max-w-[820px] leading-relaxed border-t border-black/[0.06] pt-4"></p>
+        </section>
+
+        <!-- Teknik bloklar -->
+        <div id="technical-sections" class="space-y-6"></div>
+
+        <!-- Dosyalar -->
+        <section class="rounded-2xl border border-black/[0.1] p-6 lg:p-8 ag-card">
+          <h2 class="text-[20px] font-semibold tracking-tight">Teknik dosyalar</h2>
+          <p class="text-[14px] text-[#6e6e73] ag-muted mt-1">PDF, 2D çizim ve 3D modeller — indirmek için tıklayın.</p>
+          <div id="files-row" class="mt-5 flex flex-wrap gap-3"></div>
+          <p id="files-empty" class="hidden mt-4 text-[14px] text-[#6e6e73]">Bu ürün için yüklenmiş dosya yok. Talep için marka ile iletişime geçebilirsiniz.</p>
+        </section>
+
+        <!-- Kullanım alanları -->
+        <section class="rounded-2xl border border-black/[0.1] p-6 lg:p-8 ag-card">
+          <h2 class="text-[20px] font-semibold tracking-tight">Kullanım alanları</h2>
+          <ul id="usage-list" class="mt-4 grid sm:grid-cols-2 gap-2 text-[15px] text-[#333]"></ul>
         </section>
       </main>
       <div id="site-footer"></div>
@@ -67,32 +97,367 @@
   <script src="/core.js"></script>
   <script src="/layout.js"></script>
   <script>
+    function esc(s) {
+      return String(s ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
     const STATIC = [
-      { id: "s1", name: "Unica Baffle Tavan Paneli", brandName: "Unica Acoustic", category: "Mobilya ve Donatı > Akustik", description: "Ofis, eğitim ve konferans alanları için yüksek ses yutumu sağlayan lineer akustik panel sistemi.", image: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=800&auto=format&fit=crop", technical: { acoustic: "NRC 0.85", fireClass: "B-s1,d0", thickness: "12 mm" }, files: { pdfUrl: "", cadUrl: "", bimUrl: "" } },
-      { id: "s2", name: "Akustik Keçe Duvar Paneli", brandName: "Unica Acoustic", category: "Malzemeler > Duvar Kaplama", description: "Duvar yüzeylerinde ses emilimi ve estetik çözüm sağlar.", image: "https://images.unsplash.com/photo-1616594039964-3f7f89d7a5d8?q=80&w=800&auto=format&fit=crop", technical: { acoustic: "NRC 0.75", fireClass: "A2-s1,d0", thickness: "10 mm" }, files: { pdfUrl: "", cadUrl: "", bimUrl: "" } },
-      { id: "s3", name: "V-Cut Akustik Bulut Panel", brandName: "Unica Acoustic", category: "Mimari > Tavan", description: "Asma tavan için yüksek performanslı bulut akustik panel.", image: "https://images.unsplash.com/photo-1617104551722-3b2d51366443?q=80&w=800&auto=format&fit=crop", technical: { acoustic: "NRC 0.90", fireClass: "B-s1,d0", thickness: "20 mm" }, files: { pdfUrl: "", cadUrl: "", bimUrl: "" } },
+      {
+        id: "s1",
+        name: "Unica Baffle Tavan Paneli",
+        brandName: "Unica Acoustic",
+        category: "Mobilya ve Donatı > Akustik",
+        description: "Ofis, eğitim ve konferans alanları için yüksek ses yutumu sağlayan lineer akustik panel sistemi. T24 taşıyıcı ile uyumlu modüler montaj.",
+        image: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=1200&auto=format&fit=crop",
+        gallery: [
+          "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=1200&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=1200&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1615874959474-d609969a20ed?q=80&w=1200&auto=format&fit=crop",
+        ],
+        technical: {
+          acoustic: "NRC 0,85",
+          fireClass: "B-s1, d0",
+          thickness: "12 mm",
+          usageScope: "İç mekan",
+          materialType: "Yünlü yüzey + MDF gövde",
+          certificates: "CE, LEED katkısı",
+          other: [
+            { label: "Montaj tipi", value: "Askılı T24" },
+            { label: "Renk varyantları", value: "12 melamin seçeneği" },
+          ],
+        },
+        spec: "Lineer baffle · yüksek NRC · ofis ve eğitim",
+        files: {
+          pdfs: [
+            { url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf", label: "Ürün kataloğu (PDF)" },
+            { url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf", label: "Montaj şeması (PDF)" },
+          ],
+          cadUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+          bimUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+        },
+        hasPdf: true,
+        hasCad: true,
+      },
+      {
+        id: "s2",
+        name: "Akustik Keçe Duvar Paneli",
+        brandName: "Unica Acoustic",
+        category: "Malzemeler > Duvar Kaplama",
+        description: "Duvar yüzeylerinde ses emilimi ve estetik çözüm sağlar.",
+        image: "https://images.unsplash.com/photo-1616594039964-3f7f89d7a5d8?q=80&w=1200&auto=format&fit=crop",
+        gallery: [
+          "https://images.unsplash.com/photo-1616594039964-3f7f89d7a5d8?q=80&w=1200&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1618211465998-61d291936d1c?q=80&w=1200&auto=format&fit=crop",
+        ],
+        technical: { acoustic: "NRC 0,75", fireClass: "A2-s1, d0", thickness: "10 mm", other: { "Kenar profili": "Düz", "Yüzey": "Dokulu keçe" } },
+        files: { pdfUrl: "", cadUrl: "", bimUrl: "" },
+      },
+      {
+        id: "s3",
+        name: "Lineer LED Profil Armatür",
+        brandName: "Lumen Studio",
+        category: "Mobilya ve Donatı > Aydınlatma",
+        description: "Asma tavan ve yüzey montajına uygun, UGR düşük lineer LED profil. Ofis ve perakende için homojen ışık bandı.",
+        image: "https://images.unsplash.com/photo-1565814329452-e1efa1c31789?q=80&w=1200&auto=format&fit=crop",
+        gallery: [
+          "https://images.unsplash.com/photo-1565814329452-e1efa1c31789?q=80&w=1200&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?q=80&w=1200&auto=format&fit=crop",
+        ],
+        technical: {
+          watt: "36 W / m",
+          lumen: "4200 lm / m",
+          kelvin: "3000K · 4000K · 5700K",
+          cri: "CRI 90+",
+          ipClass: "IP40 (iç mekan)",
+          dimmable: "0–10V ve DALI",
+          certificates: "ENEC",
+          other: [{ label: "Montaj", value: "Tavan yüzeyi / pendant" }],
+        },
+        files: {
+          pdfs: [{ url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf", label: "Photometrik özet (PDF)" }],
+          models3d: [{ url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf", label: "3D blok (örnek)" }],
+        },
+        hasPdf: true,
+      },
     ];
+
+    const KEY_LABELS = {
+      acoustic: "Akustik performans",
+      fireClass: "Yangın sınıfı",
+      thickness: "Kalınlık",
+      usageScope: "Kullanım alanı",
+      kullanimAlani: "Kullanım alanı",
+      materialType: "Malzeme türü",
+      malzemeTuru: "Malzeme türü",
+      dimensions: "Ölçü / ebat",
+      certificates: "Sertifikalar",
+      watt: "Güç (W)",
+      lumen: "Işık akısı (lm)",
+      kelvin: "Renk sıcaklığı (K)",
+      cri: "CRI",
+      ipClass: "IP sınıfı",
+      dimmable: "Dim",
+      slipResistance: "Kaymazlık",
+      waterAbsorption: "Su emme",
+      rectified: "Rektifiye",
+      stoneType: "Taş türü",
+      origin: "Menşei",
+    };
+
+    const RESERVED = new Set([
+      "other", "customFields", "diğerÖzellikler", "digerOzellikler", "additionalProperties",
+      "gallery", "galleryUrls",
+    ]);
 
     function usageByCategory(category) {
       const c = (category || "").toLowerCase();
       if (c.includes("akustik")) return ["Açık ofis", "Toplantı odaları", "Eğitim yapıları", "Otel ortak alanları"];
+      if (c.includes("aydınlatma") || c.includes("led")) return ["Ofis genel aydınlatma", "Perakende vitrin", "Koridor ve geçiş", "Toplantı alanları"];
       if (c.includes("cephe")) return ["Dış cephe kaplama", "Kurumsal binalar", "Ticari projeler", "Karma kullanım yapıları"];
       if (c.includes("zemin")) return ["Konut projeleri", "Perakende alanları", "Lobi ve geçiş alanları", "Eğitim yapıları"];
       return ["Konut projeleri", "Ticari projeler", "Ofis alanları", "Karma kullanım yapıları"];
     }
 
-    function docLinks(p) {
-      const docs = [];
-      if (p.files?.pdfUrl || p.hasPdf) docs.push({ label: "Ürün Teknik Föyü (PDF)", href: p.files?.pdfUrl || "/iletisim-v2.html" });
-      if (p.files?.cadUrl || p.hasCad) docs.push({ label: "Kesit Detayı (DWG)", href: p.files?.cadUrl || "/iletisim-v2.html" });
-      if (p.files?.bimUrl) docs.push({ label: "Revit Ailesi (RFA)", href: p.files.bimUrl });
-      if (!docs.length) docs.push({ label: "Doküman talebi için markayla iletişime geçin", href: "/iletisim-v2.html" });
-      return docs;
+    function productGalleryUrls(p) {
+      const t = p.technical || {};
+      const g = p.gallery || t.gallery || t.galleryUrls;
+      if (Array.isArray(g) && g.length) return g.map(String).filter(Boolean);
+      return [p.image].filter(Boolean);
     }
 
-    function setText(id, value) {
-      const el = document.getElementById(id);
-      if (el) el.textContent = value || "—";
+    function contactHref(extra) {
+      const u = new URL("/iletisim-v2.html", location.origin);
+      Object.entries(extra || {}).forEach(([k, v]) => { if (v != null && v !== "") u.searchParams.set(k, String(v)); });
+      return u.pathname + u.search;
+    }
+
+    function categoryKind(cat) {
+      const c = (cat || "").toLowerCase();
+      if (c.includes("akustik")) return "acoustic";
+      if (c.includes("aydınlatma") || c.includes("led") || c.includes("armatür")) return "lighting";
+      if (c.includes("seramik") || c.includes("karo") || c.includes("porselen")) return "ceramic";
+      if (c.includes("cephe") || c.includes("panel")) return "facade";
+      return "general";
+    }
+
+    function sectionKeysForKind(kind, technical) {
+      const keys = Object.keys(technical || {}).filter((k) => !RESERVED.has(k));
+      if (kind === "acoustic") {
+        const order = ["acoustic", "fireClass", "thickness", "usageScope", "kullanimAlani", "materialType", "malzemeTuru", "dimensions", "certificates"];
+        return order.filter((k) => keys.includes(k)).concat(keys.filter((k) => !order.includes(k)));
+      }
+      if (kind === "lighting") {
+        const order = ["watt", "lumen", "kelvin", "cri", "ipClass", "dimmable", "usageScope", "certificates"];
+        return order.filter((k) => keys.includes(k)).concat(keys.filter((k) => !order.includes(k)));
+      }
+      return keys;
+    }
+
+    function sectionTitleForKind(kind) {
+      if (kind === "acoustic") return "Akustik ve yapısal özellikler";
+      if (kind === "lighting") return "Aydınlatma teknik özellikleri";
+      if (kind === "ceramic") return "Seramik / kaplama özellikleri";
+      if (kind === "facade") return "Cephe / panel özellikleri";
+      return "Teknik özellikler";
+    }
+
+    function renderDlRows(keys, technical) {
+      const rows = keys
+        .map((k) => {
+          const v = technical[k];
+          if (v == null || v === "") return null;
+          const label = KEY_LABELS[k] || k.replace(/([A-Z])/g, " $1").replace(/^./, (s) => s.toUpperCase());
+          return `<div class="grid grid-cols-1 sm:grid-cols-[200px_1fr] gap-1 sm:gap-4 py-3 border-b border-black/[0.06] last:border-0">
+            <dt class="text-[13px] font-medium text-[#6e6e73] ag-muted">${esc(label)}</dt>
+            <dd class="text-[15px] text-[#1d1d1f]">${esc(String(v))}</dd>
+          </div>`;
+        })
+        .filter(Boolean);
+      return rows.length ? `<dl class="mt-2">${rows.join("")}</dl>` : "";
+    }
+
+    function parseOther(technical) {
+      const o = technical.other ?? technical.customFields ?? technical.diğerÖzellikler ?? technical.digerOzellikler;
+      if (!o) return [];
+      if (Array.isArray(o)) {
+        return o.map((x) => {
+          if (x && typeof x === "object") return { label: x.label || x.name || "Özellik", value: x.value ?? "—" };
+          return null;
+        }).filter(Boolean);
+      }
+      if (typeof o === "object") {
+        return Object.entries(o).map(([label, value]) => ({ label, value: value ?? "—" }));
+      }
+      return [];
+    }
+
+    function renderTechnicalSections(product) {
+      const technical = product.technical || {};
+      const kind = categoryKind(product.category);
+      const keys = sectionKeysForKind(kind, technical);
+      const mainDl = renderDlRows(keys, technical);
+      const other = parseOther(technical);
+      const blocks = [];
+
+      if (mainDl) {
+        blocks.push(`
+          <section class="rounded-2xl border border-black/[0.1] p-6 lg:p-8 ag-card">
+            <h2 class="text-[20px] font-semibold tracking-tight">${esc(sectionTitleForKind(kind))}</h2>
+            ${mainDl}
+          </section>`);
+      }
+
+      if (other.length) {
+        const rows = other.map(({ label, value }) => `
+          <div class="grid grid-cols-1 sm:grid-cols-[200px_1fr] gap-1 sm:gap-4 py-3 border-b border-black/[0.06] last:border-0">
+            <dt class="text-[13px] font-medium text-[#6e6e73] ag-muted">${esc(label)}</dt>
+            <dd class="text-[15px] text-[#1d1d1f]">${esc(String(value))}</dd>
+          </div>`).join("");
+        blocks.push(`
+          <section class="rounded-2xl border border-black/[0.1] p-6 lg:p-8 ag-card">
+            <h2 class="text-[20px] font-semibold tracking-tight">Diğer özellikler</h2>
+            <p class="text-[14px] text-[#6e6e73] ag-muted mt-1">Şablonda ayrı alanı olmayan ek bilgiler.</p>
+            <dl class="mt-3">${rows}</dl>
+          </section>`);
+      }
+
+      if (!blocks.length) {
+        blocks.push(`
+          <section class="rounded-2xl border border-black/[0.1] p-6 lg:p-8 ag-card">
+            <h2 class="text-[20px] font-semibold tracking-tight">Teknik özellikler</h2>
+            <p class="text-[15px] text-[#6e6e73] ag-muted mt-3">Bu ürün için detaylı teknik alanlar henüz girilmemiş. Markadan talep edebilirsiniz.</p>
+          </section>`);
+      }
+
+      return blocks.join("");
+    }
+
+    function fallbackDocHref() {
+      return contactHref({ konu: "dokuman", kaynak: "urun-detay" });
+    }
+
+    function collectFileCards(p) {
+      const f = p.files || {};
+      const items = [];
+      const pushPdf = (url, label) => {
+        if (!url || !String(url).trim()) return;
+        items.push({ type: "pdf", href: String(url).trim(), label: label || "PDF doküman" });
+      };
+      if (Array.isArray(f.pdfs)) {
+        f.pdfs.forEach((x) => {
+          if (!x) return;
+          if (typeof x === "string") pushPdf(x, "PDF");
+          else pushPdf(x.url, x.label || x.name);
+        });
+      }
+      if (f.pdfUrl) pushPdf(f.pdfUrl, f.pdfLabel || "Teknik föy (PDF)");
+      if (Array.isArray(f.pdfUrls)) f.pdfUrls.forEach((u, i) => pushPdf(u, `PDF ${i + 1}`));
+
+      const pushDwg = (url, label) => {
+        if (!url || !String(url).trim()) return;
+        items.push({ type: "dwg2d", href: String(url).trim(), label: label || "2D çizim (DWG/DXF)" });
+      };
+      if (f.cadUrl) pushDwg(f.cadUrl, f.cadLabel || "2D çizim (DWG)");
+      if (Array.isArray(f.dwgs)) f.dwgs.forEach((x, i) => {
+        if (typeof x === "string") pushDwg(x, `2D çizim ${i + 1}`);
+        else pushDwg(x?.url, x?.label || `2D çizim ${i + 1}`);
+      });
+
+      const push3d = (url, label) => {
+        if (!url || !String(url).trim()) return;
+        items.push({ type: "model3d", href: String(url).trim(), label: label || "3D model / BIM" });
+      };
+      if (f.bimUrl) push3d(f.bimUrl, f.bimLabel || "3D / BIM");
+      if (Array.isArray(f.models3d)) f.models3d.forEach((x, i) => {
+        if (typeof x === "string") push3d(x, `3D dosya ${i + 1}`);
+        else push3d(x?.url, x?.label || `3D dosya ${i + 1}`);
+      });
+
+      if (!items.length && (p.hasPdf || p.hasCad)) {
+        if (p.hasPdf) items.push({ type: "pdf", href: fallbackDocHref(), label: "PDF (talep üzerine)" });
+        if (p.hasCad) items.push({ type: "dwg2d", href: fallbackDocHref(), label: "2D çizim (talep üzerine)" });
+      }
+
+      return items;
+    }
+
+    function fileCardIcon(type) {
+      if (type === "pdf") {
+        return `<span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-red-500/10 text-red-600">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 15h6M9 11h6"/></svg>
+        </span>`;
+      }
+      if (type === "dwg2d") {
+        return `<span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-cyan-500/10 text-cyan-700">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        </span>`;
+      }
+      return `<span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-violet-500/10 text-violet-700">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l10 6v8l-10 6-10-6V8z"/><path d="M12 22V12M2 8l10 6 10-6"/></svg>
+      </span>`;
+    }
+
+    function renderFileCards(product) {
+      const items = collectFileCards(product);
+      const row = document.getElementById("files-row");
+      const empty = document.getElementById("files-empty");
+      if (!items.length) {
+        row.innerHTML = "";
+        empty.classList.remove("hidden");
+        return;
+      }
+      empty.classList.add("hidden");
+      row.innerHTML = items.map((it) => {
+        const href = it.href;
+        const target = href.startsWith("http") ? "_blank" : "_self";
+        const typeLabel = it.type === "pdf" ? "PDF" : it.type === "dwg2d" ? "2D" : "3D";
+        return `<a href="${esc(href)}" target="${target}" rel="noopener noreferrer"
+          class="group flex min-w-[200px] max-w-[260px] flex-1 flex-col rounded-2xl border border-black/[0.1] bg-[#fafafa] ag-subtle p-4 transition hover:border-black/[0.2] hover:shadow-sm">
+          <div class="flex items-start gap-3">
+            ${fileCardIcon(it.type)}
+            <div class="min-w-0 flex-1">
+              <p class="text-[10px] font-semibold uppercase tracking-wider text-[#6e6e73]">${esc(typeLabel)}</p>
+              <p class="text-[14px] font-semibold leading-snug text-[#1d1d1f] mt-0.5 line-clamp-2">${esc(it.label)}</p>
+            </div>
+          </div>
+          <span class="mt-3 text-[12px] font-medium text-[#0071e3] group-hover:underline">İndir / aç →</span>
+        </a>`;
+      }).join("");
+    }
+
+    function wireGallery(images, productName) {
+      const main = document.getElementById("gallery-main-img");
+      const thumbs = document.getElementById("gallery-thumbs");
+      const prev = document.getElementById("gallery-prev");
+      const next = document.getElementById("gallery-next");
+      let idx = 0;
+      const n = images.length;
+
+      function renderThumbs() {
+        thumbs.innerHTML = images.map((src, i) => `
+          <button type="button" data-i="${i}" class="gallery-thumb shrink-0 w-16 h-16 sm:w-[72px] sm:h-[72px] rounded-xl overflow-hidden border-2 transition ${i === idx ? "border-[#1d1d1f] ring-2 ring-black/5" : "border-transparent opacity-70 hover:opacity-100"}">
+            <img src="${esc(src)}" alt="" class="w-full h-full object-cover">
+          </button>`).join("");
+        thumbs.querySelectorAll(".gallery-thumb").forEach((btn) => {
+          btn.addEventListener("click", () => { idx = +btn.getAttribute("data-i"); update(); });
+        });
+      }
+
+      function update() {
+        main.src = images[idx];
+        main.alt = productName || "Ürün görseli";
+        prev.style.display = n <= 1 ? "none" : "";
+        next.style.display = n <= 1 ? "none" : "";
+        renderThumbs();
+      }
+
+      prev.addEventListener("click", () => { idx = (idx - 1 + n) % n; update(); });
+      next.addEventListener("click", () => { idx = (idx + 1) % n; update(); });
+      update();
     }
 
     AG.ready.then(async () => {
@@ -104,22 +469,44 @@
       if (product?.id) AG.incrementView(product.id).catch(() => {});
 
       document.title = `${product.name || "Ürün Detayı"} | Archilink`;
-      document.getElementById("product-image").src = product.image || "https://images.unsplash.com/photo-1600607686527-6fb886090705?q=80&w=1200&auto=format&fit=crop";
-      document.getElementById("product-image").alt = product.name || "Ürün";
 
-      setText("product-category", product.category || "Kategori");
-      setText("product-name", product.name || "Ürün Adı");
-      setText("product-description", product.description || "Bu ürün için açıklama henüz eklenmedi.");
-      setText("detail-brand", product.brandName || "—");
-      setText("detail-acoustic", product.technical?.acoustic || "—");
-      setText("detail-fire", product.technical?.fireClass || "—");
-      setText("detail-thickness", product.technical?.thickness || "—");
+      document.getElementById("hero-category").textContent = product.category || "Kategori";
+      document.getElementById("hero-title").textContent = product.name || "Ürün";
 
-      const docsEl = document.getElementById("product-docs");
-      docsEl.innerHTML = docLinks(product).map((d) => `<a href="${d.href}" target="${d.href.startsWith('http') ? '_blank' : '_self'}" class="block rounded-xl bg-[#fbfbfd] border border-black/10 p-3 hover:border-black/20 transition">${d.label}</a>`).join("");
+      const descEl = document.getElementById("product-description");
+      descEl.textContent = product.description || "Bu ürün için açıklama henüz eklenmedi.";
+
+      const specEl = document.getElementById("product-spec-snippet");
+      const spec = String(product.spec || "").trim();
+      if (spec) {
+        specEl.textContent = spec;
+        specEl.classList.remove("hidden");
+      } else {
+        specEl.classList.add("hidden");
+      }
+
+      const brand = product.brandName || "—";
+      document.getElementById("brand-name").textContent = brand;
+      const av = document.getElementById("brand-avatar");
+      av.textContent = (brand.trim().charAt(0) || "M").toUpperCase();
+
+      const q = {
+        konu: "urun",
+        urun: product.name || "",
+        marka: product.brandName || "",
+        urunId: product.id != null ? String(product.id) : "",
+      };
+      document.getElementById("btn-teklif").href = contactHref({ ...q, talep: "teklif" });
+      document.getElementById("btn-iletisim").href = contactHref({ ...q, talep: "iletisim" });
+
+      const images = productGalleryUrls(product);
+      wireGallery(images.length ? images : ["https://images.unsplash.com/photo-1600607686527-6fb886090705?q=80&w=1200"], product.name);
+
+      document.getElementById("technical-sections").innerHTML = renderTechnicalSections(product);
+      renderFileCards(product);
 
       const usageEl = document.getElementById("usage-list");
-      usageEl.innerHTML = usageByCategory(product.category).map((u) => `<li>• ${u}</li>`).join("");
+      usageEl.innerHTML = usageByCategory(product.category).map((u) => `<li class="flex gap-2 items-baseline"><span class="text-[#6e6e73]">•</span><span>${esc(u)}</span></li>`).join("");
     });
   </script>
 </body>

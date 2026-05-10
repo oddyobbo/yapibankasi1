@@ -233,12 +233,18 @@
     const sb = getSB();
     if (!sb) return;
     const dbPatch = {};
-    if (patch.status    !== undefined) dbPatch.status    = patch.status;
-    if (patch.name      !== undefined) dbPatch.name      = patch.name;
-    if (patch.views     !== undefined) dbPatch.views     = patch.views;
-    if (patch.technical !== undefined) dbPatch.technical = patch.technical;
-    if (patch.image     !== undefined) dbPatch.image     = patch.image;
-    if (patch.spec      !== undefined) dbPatch.spec      = patch.spec;
+    if (patch.status      !== undefined) dbPatch.status       = patch.status;
+    if (patch.name        !== undefined) dbPatch.name         = patch.name;
+    if (patch.views       !== undefined) dbPatch.views        = patch.views;
+    if (patch.technical   !== undefined) dbPatch.technical    = patch.technical;
+    if (patch.image       !== undefined) dbPatch.image        = patch.image;
+    if (patch.spec        !== undefined) dbPatch.spec         = patch.spec;
+    if (patch.description !== undefined) dbPatch.description  = patch.description;
+    if (patch.category    !== undefined) dbPatch.category     = patch.category;
+    if (patch.files       !== undefined) dbPatch.files        = patch.files;
+    if (patch.brandName   !== undefined) dbPatch.brand_name   = patch.brandName;
+    if (patch.hasPdf      !== undefined) dbPatch.has_pdf      = Boolean(patch.hasPdf);
+    if (patch.hasCad      !== undefined) dbPatch.has_cad      = Boolean(patch.hasCad);
     await sb.from("products").update(dbPatch).eq("id", id);
   };
 
@@ -877,40 +883,56 @@
   };
 
   // ── DB mapping ──────────────────────────────────────────────────────────
-  const dbToProduct = (row) => ({
-    id:          row.id,
-    brandId:     row.brand_id,
-    brandName:   row.brand_name,
-    name:        row.name,
-    sku:         row.sku,
-    category:    row.category,
-    description: row.description,
-    technical:   row.technical  || {},
-    spec:        row.spec,
-    image:       row.image,
-    files:       row.files      || {},
-    hasPdf:      row.has_pdf,
-    hasCad:      row.has_cad,
-    status:      row.status,
-    views:       row.views,
-    createdAt:   new Date(row.created_at).getTime(),
-  });
+  const dbToProduct = (row) => {
+    const technical = row.technical || {};
+    const gallery = row.gallery || technical.gallery || technical.galleryUrls || null;
+    return {
+      id:          row.id,
+      brandId:     row.brand_id,
+      brandName:   row.brand_name,
+      name:        row.name,
+      sku:         row.sku,
+      category:    row.category,
+      description: row.description,
+      technical,
+      spec:        row.spec,
+      image:       row.image,
+      gallery:     Array.isArray(gallery) ? gallery : undefined,
+      files:       row.files      || {},
+      hasPdf:      row.has_pdf,
+      hasCad:      row.has_cad,
+      status:      row.status,
+      views:       row.views,
+      createdAt:   new Date(row.created_at).getTime(),
+    };
+  };
 
-  const productToDB = (p) => ({
-    brand_id:    p.brandId,
-    brand_name:  p.brandName  || "",
-    name:        p.name       || "",
-    sku:         p.sku        || "",
-    category:    p.category   || "",
-    description: p.description || "",
-    technical:   p.technical  || {},
-    spec:        p.spec       || "",
-    image:       p.image      || "",
-    files:       p.files      || {},
-    has_pdf:     Boolean(p.hasPdf || p.files?.pdfUrl),
-    has_cad:     Boolean(p.hasCad || p.files?.cadUrl),
-    status:      p.status     || "draft",
-  });
+  const productToDB = (p) => {
+    const technical = { ...(p.technical || {}) };
+    if (Array.isArray(p.gallery) && p.gallery.length) technical.gallery = p.gallery;
+    const files = p.files || {};
+    const hasPdf = Boolean(
+      p.hasPdf || files.pdfUrl || (Array.isArray(files.pdfs) && files.pdfs.length),
+    );
+    const hasCad = Boolean(
+      p.hasCad || files.cadUrl || (Array.isArray(files.dwgs) && files.dwgs.length),
+    );
+    return {
+      brand_id:    p.brandId,
+      brand_name:  p.brandName  || "",
+      name:        p.name       || "",
+      sku:         p.sku        || "",
+      category:    p.category   || "",
+      description: p.description || "",
+      technical,
+      spec:        p.spec       || "",
+      image:       p.image      || "",
+      files,
+      has_pdf:     hasPdf,
+      has_cad:     hasCad,
+      status:      p.status     || "draft",
+    };
+  };
 
   // ── Visit tracking ──────────────────────────────────────────────────────
   const trackVisit = async () => {
