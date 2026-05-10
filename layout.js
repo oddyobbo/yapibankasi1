@@ -241,7 +241,7 @@
               Boardlarım
             </a>
             <div class="border-t border-black/[0.07] my-1"></div>
-            <button id="arch-logout-btn" data-arch-logout="1" type="button" class="w-full flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-[#1d1d1f] hover:bg-[#f5f5f7]">${logoutIcon} Çıkış Yap</button>
+            <button id="arch-logout-btn" type="button" class="w-full flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-[#1d1d1f] hover:bg-[#f5f5f7]">${logoutIcon} Çıkış Yap</button>
           </div>
         </div>`
       : brandSession
@@ -264,7 +264,7 @@
               Analizler
             </a>
             <div class="border-t border-black/[0.07] my-1"></div>
-            <button id="brand-logout-btn" data-brand-logout="1" type="button" class="w-full flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-[#1d1d1f] hover:bg-[#f5f5f7]">${logoutIcon} Çıkış Yap</button>
+            <button id="brand-logout-btn" type="button" class="w-full flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-[#1d1d1f] hover:bg-[#f5f5f7]">${logoutIcon} Çıkış Yap</button>
           </div>
         </div>`
       : `<a href="/giris.html" class="inline-flex items-center gap-2 h-9 px-3 rounded-full border border-black/[0.12] text-[13px] hover:bg-black/[0.04] transition">
@@ -290,21 +290,7 @@
           <div class="mt-4 space-y-2">
             <a href="/mimar-paneli.html" class="h-11 px-4 inline-flex items-center rounded-xl border border-black/[0.10] text-[15px] font-medium w-full">Mimar Paneli</a>
             <a href="/moodboard.html" class="h-11 px-4 inline-flex items-center rounded-xl bg-black text-white text-[15px] font-semibold w-full">Moodboard</a>
-            <button data-arch-logout="1" type="button" class="h-11 px-4 inline-flex items-center rounded-xl border border-black/[0.10] text-[15px] font-medium w-full">Çıkış Yap</button>
-          </div>
-        </div>
-      `
-      : brandSession
-      ? `
-        <div class="pt-4 border-t border-black/[0.08]">
-          <div class="flex items-center justify-between">
-            <p class="text-[12px] uppercase tracking-[0.14em] text-[#6e6e73] font-semibold">Tercihler</p>
-            ${themeToggleBtn}
-          </div>
-          <div class="mt-4 space-y-2">
-            <a href="/marka-paneli.html" class="h-11 px-4 inline-flex items-center rounded-xl border border-black/[0.10] text-[15px] font-medium w-full">Marka Paneli</a>
-            <a href="/marka-paneli-urunler.html" class="h-11 px-4 inline-flex items-center rounded-xl bg-black text-white text-[15px] font-semibold w-full">Ürünlerim</a>
-            <button data-brand-logout="1" type="button" class="h-11 px-4 inline-flex items-center rounded-xl border border-black/[0.10] text-[15px] font-medium w-full">Çıkış Yap</button>
+            <a href="/marka-giris.html" class="h-11 px-4 inline-flex items-center rounded-xl border border-black/[0.10] text-[15px] font-medium w-full">Marka Girişi</a>
           </div>
         </div>
       `
@@ -430,13 +416,14 @@
       archDropBtn.addEventListener("click", (e) => { e.stopPropagation(); archDropPanel.classList.toggle("hidden"); });
       archDropPanel.addEventListener("click", (e) => e.stopPropagation());
       document.addEventListener("click", () => archDropPanel.classList.add("hidden"));
+      const archLogoutBtn = document.getElementById("arch-logout-btn");
+      if (archLogoutBtn) {
+        archLogoutBtn.addEventListener("click", async () => {
+          await AG.logoutArchitect();
+          location.href = "/";
+        });
+      }
     }
-    document.querySelectorAll("[data-arch-logout='1']").forEach((btn) => {
-      btn.addEventListener("click", async () => {
-        await AG.logoutArchitect();
-        location.href = "/";
-      });
-    });
 
     const brandDropBtn = document.getElementById("brand-dropdown-btn");
     const brandDropPanel = document.getElementById("brand-dropdown-panel");
@@ -444,14 +431,15 @@
       brandDropBtn.addEventListener("click", (e) => { e.stopPropagation(); brandDropPanel.classList.toggle("hidden"); });
       brandDropPanel.addEventListener("click", (e) => e.stopPropagation());
       document.addEventListener("click", () => brandDropPanel.classList.add("hidden"));
+      const brandLogoutBtn = document.getElementById("brand-logout-btn");
+      if (brandLogoutBtn) {
+        brandLogoutBtn.addEventListener("click", async () => {
+          try { localStorage.removeItem("ag_brand_session_v1"); } catch {}
+          await AG.logoutBrand();
+          location.href = "/";
+        });
+      }
     }
-    document.querySelectorAll("[data-brand-logout='1']").forEach((btn) => {
-      btn.addEventListener("click", async () => {
-        try { localStorage.removeItem("ag_brand_session_v1"); } catch {}
-        await AG.logoutBrand();
-        location.href = "/";
-      });
-    });
   }
 
   const footerTarget = document.getElementById("site-footer");
@@ -568,24 +556,6 @@
       { threshold: 0.1 }
     );
     revealEls.forEach((el) => io.observe(el));
-  }
-
-  if (!architectSession && !brandSession && window.AG?.ready) {
-    window.AG.ready.then(async () => {
-      try {
-        const liveArchitect = await window.AG.getSessionArchitect?.();
-        if (liveArchitect) {
-          localStorage.setItem("ag_architect_session_v1", JSON.stringify(liveArchitect));
-          window.location.reload();
-          return;
-        }
-        const liveBrand = await window.AG.getSessionBrand?.();
-        if (liveBrand) {
-          localStorage.setItem("ag_brand_session_v1", JSON.stringify(liveBrand));
-          window.location.reload();
-        }
-      } catch {}
-    });
   }
 
 })();

@@ -5,65 +5,115 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Archilink | Ofis projesi ekle</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- UI: Apple-esque (web-design) + drop zone / layout polish (frontend-design skill) -->
+  <style>
+    .ag-arch-ui { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+    @keyframes ag-cover-pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(0, 113, 227, 0); }
+      50% { box-shadow: 0 0 0 8px rgba(0, 113, 227, 0.12); }
+    }
+    #cover-drop.ag-drop-active {
+      border-color: #0071e3;
+      background: rgba(0, 113, 227, 0.06);
+      animation: ag-cover-pulse 1.2s ease-in-out infinite;
+    }
+  </style>
 </head>
-<body data-page="architect-project-add" class="bg-[#f5f5f7] text-[#111] min-h-screen">
+<body data-page="architect-project-add" class="ag-arch-ui min-h-screen bg-[#f5f5f7] text-[#1d1d1f]">
   <div id="site-header"></div>
-  <div id="toast" class="hidden fixed top-5 right-5 z-50 px-4 py-2 rounded-xl bg-black text-white text-[13px] shadow-lg"></div>
-  <main class="px-6 lg:px-10 py-8">
-    <section class="max-w-[720px] mx-auto">
-      <a href="/mimar-paneli.html?tab=office-projects" class="inline-flex items-center gap-2 text-[13px] text-[#6e6e73] hover:text-black mb-4">← Mimar paneline dön</a>
-      <h1 class="text-[28px] font-semibold tracking-tight">Ofis projesi ekle</h1>
-      <p class="text-[14px] text-[#6e6e73] mt-2">Yayınladığın proje <a href="/projeler.html" class="underline hover:text-black">Referans Projeler</a> listesinde görünür.</p>
+  <div id="toast" class="hidden fixed bottom-8 left-1/2 z-50 max-w-[min(92vw,400px)] -translate-x-1/2 rounded-2xl border border-black/[0.06] bg-[#1d1d1f]/95 px-5 py-3 text-center text-[14px] font-medium text-white shadow-[0_12px_48px_rgba(0,0,0,0.16)] backdrop-blur-md"></div>
 
-      <form id="office-project-form" class="mt-8 rounded-2xl border border-black/10 bg-white p-6 grid sm:grid-cols-2 gap-4 shadow-sm">
-        <div class="sm:col-span-2">
-          <label class="text-[12px] text-[#6e6e73]">Başlık *</label>
-          <input name="title" required class="mt-1 w-full h-11 rounded-xl border border-black/15 px-3 text-[15px]" placeholder="Örn. Ofis cephesi yenileme">
-        </div>
-        <div>
-          <label class="text-[12px] text-[#6e6e73]">Konum</label>
-          <input name="location" class="mt-1 w-full h-11 rounded-xl border border-black/15 px-3 text-[15px]" placeholder="İl / semt">
-        </div>
-        <div>
-          <label class="text-[12px] text-[#6e6e73]">Yıl</label>
-          <input name="year" class="mt-1 w-full h-11 rounded-xl border border-black/15 px-3 text-[15px]" placeholder="2024">
-        </div>
-        <div class="sm:col-span-2">
-          <label class="text-[12px] text-[#6e6e73]">Mimar / proje ekibi</label>
-          <input name="architectName" class="mt-1 w-full h-11 rounded-xl border border-black/15 px-3 text-[15px]" placeholder="Listede görünecek isim">
-        </div>
-        <div class="sm:col-span-2">
-          <label class="text-[12px] text-[#6e6e73]">Kapak görseli</label>
-          <p class="text-[12px] text-[#6e6e73] mt-1">Görseli buraya sürükleyip bırak veya tıklayarak seç. İstersen aşağıya doğrudan URL de yazabilirsin.</p>
-          <input type="file" id="cover-file-input" class="hidden" accept="image/*" multiple>
-          <div
-            id="cover-drop"
-            class="mt-2 flex min-h-[140px] cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-black/20 bg-[#fafafa] px-4 py-6 text-center transition hover:border-black/35 hover:bg-black/[0.02]"
-            role="button"
-            tabindex="0"
-            aria-label="Kapak görseli yükle"
-          >
-            <span id="cover-drop-label" class="text-[14px] font-medium text-[#111]">Sürükle bırak veya seç</span>
-            <span class="text-[12px] text-[#6e6e73]">JPG, PNG, WebP · birden fazla seçersen kapak olarak ilk görsel kullanılır</span>
-            <span id="cover-upload-status" class="hidden text-[12px] text-[#6e6e73]">Yükleniyor…</span>
+  <main class="px-6 pb-16 pt-8 lg:px-10 lg:pb-24 lg:pt-12">
+    <div class="mx-auto max-w-[1120px]">
+      <a href="/mimar-paneli.html?tab=office-projects" class="inline-flex items-center gap-2 text-[14px] font-medium text-[#0071e3] transition hover:underline underline-offset-4">← Mimar paneline dön</a>
+
+      <header class="mt-8">
+        <h1 class="text-[32px] font-semibold leading-tight tracking-[-0.03em] lg:text-[40px]">Ofis projesi ekle</h1>
+        <p class="mt-3 max-w-2xl text-[16px] leading-relaxed text-[#6e6e73]">Kapak ve metinler <a href="/projeler.html" class="font-medium text-[#0071e3] underline decoration-[#0071e3]/30 underline-offset-2 hover:decoration-[#0071e3]">Referans Projeler</a> listesinde yayınlanır.</p>
+      </header>
+
+      <div class="mt-10 grid gap-8 lg:grid-cols-[1fr_min(320px,100%)] lg:gap-10">
+        <form id="office-project-form" class="rounded-2xl border border-black/[0.06] bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08)] lg:p-8">
+          <div class="grid gap-6 sm:grid-cols-2">
+            <div class="sm:col-span-2">
+              <label class="text-[12px] font-medium uppercase tracking-[0.06em] text-[#6e6e73]">Başlık <span class="text-[#b00020]">*</span></label>
+              <input name="title" required class="mt-2 h-11 w-full rounded-lg border border-[#d2d2d7] px-4 text-[16px] outline-none transition placeholder:text-[#aeaeb2] focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20" placeholder="Örn. Ofis cephesi yenileme" autocomplete="off">
+            </div>
+            <div>
+              <label class="text-[12px] font-medium uppercase tracking-[0.06em] text-[#6e6e73]">Konum</label>
+              <input name="location" class="mt-2 h-11 w-full rounded-lg border border-[#d2d2d7] px-4 text-[16px] outline-none transition focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20" placeholder="İl / semt">
+            </div>
+            <div>
+              <label class="text-[12px] font-medium uppercase tracking-[0.06em] text-[#6e6e73]">Yıl</label>
+              <input name="year" class="mt-2 h-11 w-full rounded-lg border border-[#d2d2d7] px-4 text-[16px] outline-none transition focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20" placeholder="2024" inputmode="numeric">
+            </div>
+            <div class="sm:col-span-2">
+              <label class="text-[12px] font-medium uppercase tracking-[0.06em] text-[#6e6e73]">Mimar / proje ekibi</label>
+              <input name="architectName" class="mt-2 h-11 w-full rounded-lg border border-[#d2d2d7] px-4 text-[16px] outline-none transition focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20" placeholder="Listede görünecek isim">
+            </div>
+
+            <div class="sm:col-span-2">
+              <div class="flex flex-wrap items-end justify-between gap-2">
+                <label class="text-[12px] font-medium uppercase tracking-[0.06em] text-[#6e6e73]">Kapak görseli</label>
+                <button type="button" id="cover-clear-btn" class="hidden text-[13px] font-medium text-[#0071e3] transition hover:underline">Kaldır</button>
+              </div>
+              <p class="mt-1 text-[13px] leading-relaxed text-[#6e6e73]">Sürükleyip bırak, ortadaki <strong class="font-medium text-[#1d1d1f]">+</strong> ile seç veya alttan URL gir.</p>
+              <input type="file" id="cover-file-input" class="hidden" accept="image/*" multiple>
+              <div
+                id="cover-drop"
+                class="relative mt-4 flex min-h-[200px] cursor-pointer flex-col items-center justify-center gap-4 rounded-2xl border-2 border-dashed border-[#d2d2d7] bg-[#fafafa] px-6 py-10 text-center transition hover:border-[#b0b0b5] hover:bg-[#f5f5f7] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3]/35"
+                role="button"
+                tabindex="0"
+                aria-label="Kapak görseli yükle"
+              >
+                <div class="flex h-16 w-16 items-center justify-center rounded-full bg-white shadow-[0_2px_12px_rgba(0,0,0,0.08)] ring-1 ring-black/[0.04]">
+                  <svg id="cover-plus-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#0071e3" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+                  <svg id="cover-loading-icon" class="hidden h-8 w-8 animate-spin text-[#0071e3]" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                </div>
+                <div>
+                  <p id="cover-drop-title" class="text-[16px] font-semibold text-[#1d1d1f]">Görseli buraya bırak</p>
+                  <p class="mt-1 text-[14px] text-[#6e6e73]">veya tıklayıp dosya seç · JPG, PNG, WebP</p>
+                  <p class="mt-2 text-[12px] text-[#6e6e73]">Birden fazla dosyada kapak için ilki kullanılır.</p>
+                </div>
+              </div>
+              <div id="cover-preview-wrap" class="mt-4 hidden overflow-hidden rounded-xl border border-black/[0.06] bg-[#fafafa] shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
+                <img id="cover-preview" src="" alt="Kapak önizleme" class="max-h-56 w-full object-cover">
+              </div>
+              <label class="mt-6 block text-[12px] font-medium uppercase tracking-[0.06em] text-[#6e6e73]">Görsel URL <span class="font-normal normal-case text-[#aeaeb2]">(isteğe bağlı)</span></label>
+              <input name="image" type="url" class="mt-2 h-11 w-full rounded-lg border border-[#d2d2d7] px-4 text-[15px] outline-none transition focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20" placeholder="https://…">
+            </div>
+
+            <div class="sm:col-span-2">
+              <div class="flex items-baseline justify-between gap-2">
+                <label class="text-[12px] font-medium uppercase tracking-[0.06em] text-[#6e6e73]">Açıklama</label>
+                <span id="desc-count" class="text-[12px] tabular-nums text-[#aeaeb2]">0 / 2000</span>
+              </div>
+              <textarea name="description" id="field-description" maxlength="2000" rows="5" class="mt-2 w-full resize-y rounded-lg border border-[#d2d2d7] px-4 py-3 text-[16px] leading-relaxed outline-none transition focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20" placeholder="Proje özeti, kullanılan malzeme yaklaşımı, kısa bağlam…"></textarea>
+            </div>
           </div>
-          <div id="cover-preview-wrap" class="mt-3 hidden">
-            <p class="text-[12px] text-[#6e6e73] mb-1">Önizleme</p>
-            <img id="cover-preview" src="" alt="" class="max-h-40 w-full max-w-md rounded-xl border border-black/10 object-cover">
+
+          <div class="mt-8 flex flex-wrap items-center justify-end gap-3 border-t border-black/[0.06] pt-8">
+            <a href="/mimar-paneli.html?tab=office-projects" class="inline-flex h-11 items-center rounded-lg px-5 text-[15px] font-medium text-[#0071e3] transition hover:bg-black/[0.04]">Vazgeç</a>
+            <button type="submit" id="submit-btn" class="inline-flex h-11 items-center rounded-lg bg-[#0071e3] px-8 text-[15px] font-medium text-white shadow-[0_2px_8px_rgba(0,113,227,0.35)] transition hover:bg-[#0077ed] disabled:pointer-events-none disabled:opacity-45">Yayınla</button>
           </div>
-          <label class="text-[12px] text-[#6e6e73] mt-3 block">Görsel URL (isteğe bağlı)</label>
-          <input name="image" type="url" class="mt-1 w-full h-11 rounded-xl border border-black/15 px-3 text-[15px]" placeholder="https://... veya yukarıdan yükle">
-        </div>
-        <div class="sm:col-span-2">
-          <label class="text-[12px] text-[#6e6e73]">Açıklama</label>
-          <textarea name="description" rows="4" class="mt-1 w-full rounded-xl border border-black/15 px-3 py-2 text-[15px]" placeholder="Proje özeti"></textarea>
-        </div>
-        <div class="sm:col-span-2 flex flex-wrap gap-2 justify-end pt-2">
-          <a href="/mimar-paneli.html?tab=office-projects" class="inline-flex h-11 items-center px-5 rounded-full border border-black/15 text-[13px]">Vazgeç</a>
-          <button type="submit" id="submit-btn" class="h-11 px-6 rounded-full bg-black text-white text-[13px] font-semibold disabled:opacity-50">Yayınla</button>
-        </div>
-      </form>
-    </section>
+        </form>
+
+        <aside class="lg:sticky lg:top-8 lg:self-start">
+          <div class="rounded-2xl border border-black/[0.06] bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08)]">
+            <h2 class="text-[13px] font-semibold uppercase tracking-[0.08em] text-[#6e6e73]">İpuçları</h2>
+            <ul class="mt-4 space-y-4 text-[14px] leading-relaxed text-[#6e6e73]">
+              <li class="flex gap-3"><span class="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#0071e3]"></span>Kapak için yatay veya kare, <strong class="font-medium text-[#1d1d1f]">güneşli, net</strong> bir fotoğraf seç; liste kartlarında kırpılır.</li>
+              <li class="flex gap-3"><span class="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#0071e3]"></span>URL kullanacaksan görselin <strong class="font-medium text-[#1d1d1f]">doğrudan erişilebilir</strong> (403 olmayan) bir adreste olduğundan emin ol.</li>
+              <li class="flex gap-3"><span class="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#0071e3]"></span>Yükleme başarısız olursa depolama izinlerini kontrol et; yine de URL ile devam edebilirsin.</li>
+            </ul>
+          </div>
+          <p class="mt-6 text-center text-[12px] text-[#aeaeb2] lg:text-left">Değişiklikleri yayınlamadan önce metni gözden geçir.</p>
+        </aside>
+      </div>
+    </div>
   </main>
   <div id="site-footer"></div>
 
@@ -74,7 +124,7 @@
       const t = document.getElementById("toast");
       t.textContent = text;
       t.classList.remove("hidden");
-      setTimeout(() => t.classList.add("hidden"), 2200);
+      setTimeout(() => t.classList.add("hidden"), 2400);
     }
 
     async function boot() {
@@ -93,13 +143,50 @@
       const submitBtn = document.getElementById("submit-btn");
       const coverDrop = document.getElementById("cover-drop");
       const coverFileInput = document.getElementById("cover-file-input");
-      const coverUploadStatus = document.getElementById("cover-upload-status");
-      const coverDropLabel = document.getElementById("cover-drop-label");
       const coverPreviewWrap = document.getElementById("cover-preview-wrap");
       const coverPreview = document.getElementById("cover-preview");
+      const coverClearBtn = document.getElementById("cover-clear-btn");
+      const coverPlusIcon = document.getElementById("cover-plus-icon");
+      const coverLoadingIcon = document.getElementById("cover-loading-icon");
+      const coverDropTitle = document.getElementById("cover-drop-title");
       const imageUrlInput = form.querySelector('input[name="image"]');
+      const descField = document.getElementById("field-description");
+      const descCount = document.getElementById("desc-count");
+
+      function syncDescCount() {
+        const n = (descField.value || "").length;
+        descCount.textContent = `${n} / 2000`;
+      }
+      descField.addEventListener("input", syncDescCount);
+      syncDescCount();
 
       let coverBusy = false;
+
+      function setDropLoading(on) {
+        if (on) {
+          coverPlusIcon.classList.add("hidden");
+          coverLoadingIcon.classList.remove("hidden");
+          coverDropTitle.textContent = "Yükleniyor…";
+          coverDrop.classList.add("pointer-events-none", "opacity-80");
+        } else {
+          coverPlusIcon.classList.remove("hidden");
+          coverLoadingIcon.classList.add("hidden");
+          coverDropTitle.textContent = "Görseli buraya bırak";
+          coverDrop.classList.remove("pointer-events-none", "opacity-80");
+        }
+      }
+
+      function clearCover() {
+        imageUrlInput.value = "";
+        coverPreview.src = "";
+        coverPreviewWrap.classList.add("hidden");
+        coverClearBtn.classList.add("hidden");
+      }
+
+      coverClearBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        clearCover();
+      });
 
       async function handleImageFiles(files) {
         const list = Array.from(files || []).filter((f) => f.type && f.type.startsWith("image/"));
@@ -113,12 +200,10 @@
         const file = list[0];
         if (coverBusy) return;
         coverBusy = true;
-        coverUploadStatus.classList.remove("hidden");
-        coverDropLabel.classList.add("opacity-40");
+        setDropLoading(true);
         const res = await AG.uploadArchitectProjectImage(file);
         coverBusy = false;
-        coverUploadStatus.classList.add("hidden");
-        coverDropLabel.classList.remove("opacity-40");
+        setDropLoading(false);
         if (!res.ok) {
           showToast(res.message || "Yükleme başarısız");
           return;
@@ -126,38 +211,49 @@
         imageUrlInput.value = res.url || "";
         coverPreview.src = res.url || "";
         coverPreviewWrap.classList.remove("hidden");
+        coverClearBtn.classList.remove("hidden");
         showToast("Görsel yüklendi");
       }
 
-      coverDrop.addEventListener("click", () => coverFileInput.click());
+      coverDrop.addEventListener("click", () => {
+        if (!coverBusy) coverFileInput.click();
+      });
       coverDrop.addEventListener("keydown", (e) => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
-          coverFileInput.click();
+          if (!coverBusy) coverFileInput.click();
         }
       });
       coverFileInput.addEventListener("change", () => {
         handleImageFiles(coverFileInput.files);
         coverFileInput.value = "";
       });
-      ["dragenter", "dragover"].forEach((ev) => {
-        coverDrop.addEventListener(ev, (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          coverDrop.classList.add("border-black/40", "bg-black/[0.04]");
-        });
+
+      function dragActive(on) {
+        if (on) coverDrop.classList.add("ag-drop-active");
+        else coverDrop.classList.remove("ag-drop-active");
+      }
+
+      coverDrop.addEventListener("dragenter", (e) => {
+        e.preventDefault();
+        dragActive(true);
       });
-      ["dragleave", "drop"].forEach((ev) => {
-        coverDrop.addEventListener(ev, (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          coverDrop.classList.remove("border-black/40", "bg-black/[0.04]");
-        });
+      coverDrop.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        dragActive(true);
+      });
+      coverDrop.addEventListener("dragleave", (e) => {
+        e.preventDefault();
+        const rel = e.relatedTarget;
+        if (!rel || !coverDrop.contains(rel)) dragActive(false);
       });
       coverDrop.addEventListener("drop", (e) => {
+        e.preventDefault();
+        dragActive(false);
         const dt = e.dataTransfer;
         if (dt && dt.files && dt.files.length) handleImageFiles(dt.files);
       });
+      document.addEventListener("dragend", () => dragActive(false));
 
       form.addEventListener("submit", async (e) => {
         e.preventDefault();

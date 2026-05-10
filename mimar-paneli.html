@@ -5,44 +5,67 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Archilink | Mimar Paneli</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- UI: Apple-esque (web-design) + refined hierarchy / motion (frontend-design skill) -->
+  <style>
+    .ag-arch-ui { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+    @keyframes ag-arch-fade-up {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .ag-arch-reveal { animation: ag-arch-fade-up 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+    .ag-arch-reveal-delay-1 { animation-delay: 0.06s; }
+    .ag-arch-reveal-delay-2 { animation-delay: 0.12s; }
+  </style>
 </head>
-<body data-page="architect-panel" class="bg-[#f5f5f7] text-[#111] min-h-screen">
+<body data-page="architect-panel" class="ag-arch-ui min-h-screen bg-[#f5f5f7] text-[#1d1d1f] antialiased">
   <div id="site-header"></div>
-  <div id="toast" class="hidden fixed top-5 right-5 z-50 px-4 py-2 rounded-xl bg-black text-white text-[13px] shadow-lg"></div>
-  <main class="px-6 lg:px-10 py-8">
-    <section class="max-w-[1250px] mx-auto">
-      <div class="flex flex-wrap items-center justify-between gap-3">
+  <div id="toast" class="hidden fixed bottom-8 left-1/2 z-50 max-w-[min(92vw,400px)] -translate-x-1/2 rounded-2xl border border-black/[0.06] bg-[#1d1d1f]/95 px-5 py-3 text-center text-[14px] font-medium text-white shadow-[0_12px_48px_rgba(0,0,0,0.16)] backdrop-blur-md"></div>
+
+  <main class="px-6 pb-16 pt-8 lg:px-10 lg:pb-24 lg:pt-12">
+    <section class="mx-auto max-w-[1200px]">
+      <header class="ag-arch-reveal flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <p id="welcome" class="text-[13px] text-[#6e6e73]"></p>
-          <h1 class="text-[30px] font-semibold">Mimar Paneli</h1>
+          <p id="welcome" class="text-[12px] font-medium uppercase tracking-[0.08em] text-[#6e6e73]"></p>
+          <h1 class="mt-2 text-[32px] font-semibold leading-tight tracking-[-0.03em] lg:text-[40px]">Mimar Paneli</h1>
+          <p class="mt-3 max-w-md text-[15px] leading-relaxed text-[#6e6e73]">Favoriler, koleksiyonlar ve tasarım panoların tek yerde.</p>
         </div>
-        <div class="flex flex-wrap justify-end gap-2">
-          <a id="office-project-add-btn" href="/mimar-proje-ekle.html" class="hidden h-10 px-4 rounded-full border border-black/15 bg-white text-[13px] font-medium hover:bg-black/[0.04] transition inline-flex items-center">Proje ekle</a>
-          <button id="new-moodboard-btn" class="h-10 px-4 rounded-full bg-black text-white text-[13px] font-semibold">+ Yeni Tasarım Panosu</button>
-          <button id="logout-btn" class="h-10 px-4 rounded-full border border-black/15 text-[13px]">Çıkış</button>
+        <div class="flex flex-shrink-0 flex-wrap items-center gap-3">
+          <a id="office-project-add-btn" href="/mimar-proje-ekle.html" class="hidden h-11 items-center gap-2 rounded-lg border border-[#d2d2d7] bg-white px-5 text-[15px] font-medium text-[#1d1d1f] shadow-[0_2px_8px_rgba(0,0,0,0.06)] transition hover:border-[#b0b0b5] hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3]/40">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+            Proje ekle
+          </a>
+          <button type="button" id="new-moodboard-btn" class="inline-flex h-11 items-center gap-2 rounded-lg bg-[#0071e3] px-5 text-[15px] font-medium text-white shadow-[0_2px_8px_rgba(0,113,227,0.35)] transition hover:bg-[#0077ed] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3]/50">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+            Yeni tasarım panosu
+          </button>
+          <button type="button" id="logout-btn" class="h-11 rounded-lg px-4 text-[15px] font-medium text-[#0071e3] transition hover:bg-black/[0.04] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3]/30">Çıkış</button>
         </div>
+      </header>
+
+      <div class="ag-arch-reveal ag-arch-reveal-delay-1 mt-10">
+        <div class="inline-flex w-full max-w-full flex-wrap gap-1 rounded-2xl bg-black/[0.04] p-1 lg:inline-flex" id="tabs" role="tablist" aria-label="Panel sekmeleri"></div>
       </div>
 
-      <div class="mt-6 flex flex-wrap gap-2" id="tabs"></div>
-      <section class="mt-4 rounded-2xl border border-black/10 bg-white p-5">
+      <section class="ag-arch-reveal ag-arch-reveal-delay-2 mt-6 rounded-2xl border border-black/[0.06] bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.08)] lg:p-8">
         <div id="tab-content"></div>
       </section>
     </section>
   </main>
   <div id="site-footer"></div>
+
   <div id="board-modal" class="hidden fixed inset-0 z-50">
-    <div class="absolute inset-0 bg-black/35" data-board-close="1"></div>
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-[2px]" data-board-close="1" aria-hidden="true"></div>
     <div class="absolute inset-0 flex items-center justify-center p-4">
-      <div class="w-full max-w-[460px] rounded-2xl bg-white border border-black/10 p-5">
-        <h3 class="text-[19px] font-semibold">Board'a ekle</h3>
-        <p class="text-[13px] text-[#6e6e73] mt-1">Var olan bir board seç veya hızlıca yeni board oluştur.</p>
-        <div id="board-list" class="mt-4 space-y-2 max-h-[220px] overflow-auto"></div>
-        <form id="quick-board-form" class="mt-4 flex gap-2">
-          <input id="quick-board-name" class="flex-1 h-10 rounded-xl border border-black/15 px-3 text-[14px]" placeholder="Yeni board adı">
-          <button class="h-10 px-3 rounded-xl bg-black text-white text-[13px]">Oluştur + Ekle</button>
+      <div class="w-full max-w-[440px] rounded-2xl border border-black/[0.06] bg-white p-6 shadow-[0_12px_48px_rgba(0,0,0,0.16)]" role="dialog" aria-modal="true" aria-labelledby="board-modal-title">
+        <h3 id="board-modal-title" class="text-[21px] font-semibold tracking-[-0.02em]">Panoya ekle</h3>
+        <p class="mt-2 text-[14px] leading-relaxed text-[#6e6e73]">Mevcut bir pano seç veya hızlıca yeni oluştur.</p>
+        <div id="board-list" class="mt-5 max-h-[220px] space-y-2 overflow-auto"></div>
+        <form id="quick-board-form" class="mt-5 flex gap-2">
+          <input id="quick-board-name" class="h-11 min-w-0 flex-1 rounded-lg border border-[#d2d2d7] px-4 text-[15px] outline-none transition focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20" placeholder="Yeni pano adı" autocomplete="off">
+          <button type="submit" class="h-11 shrink-0 rounded-lg bg-[#0071e3] px-4 text-[14px] font-medium text-white transition hover:bg-[#0077ed]">Oluştur</button>
         </form>
-        <div class="mt-4 flex justify-end">
-          <button id="board-cancel-btn" class="h-10 px-4 rounded-xl border border-black/15 text-[13px]">Vazgeç</button>
+        <div class="mt-6 flex justify-end">
+          <button type="button" id="board-cancel-btn" class="h-11 rounded-lg px-5 text-[15px] font-medium text-[#0071e3] transition hover:bg-black/[0.04]">Vazgeç</button>
         </div>
       </div>
     </div>
@@ -52,11 +75,11 @@
   <script src="/layout.js"></script>
   <script>
     const TAB_LABELS = {
-      "fav-products": "Favori Ürünler",
-      "fav-projects": "Favori Projeler",
+      "fav-products": "Favori ürünler",
+      "fav-projects": "Favori projeler",
       "office-projects": "Ofis projeleri",
       "collections": "Koleksiyonlar",
-      "moodboards": "Tasarım Panoları"
+      "moodboards": "Tasarım panoları"
     };
     let TAB_IDS = ["fav-products", "fav-projects", "collections", "moodboards"];
 
@@ -91,31 +114,38 @@
           renderContent();
         });
       }
-      el.innerHTML = TAB_IDS.map((id) =>
-        `<button type="button" data-tab="${id}" class="h-9 px-4 rounded-full text-[13px] ${activeTab === id ? "bg-black text-white" : "bg-white border border-black/15"}">${TAB_LABELS[id]}</button>`
-      ).join("");
+      el.innerHTML = TAB_IDS.map((id) => {
+        const on = activeTab === id;
+        return `<button type="button" role="tab" aria-selected="${on}" data-tab="${id}" class="rounded-xl px-4 py-2.5 text-[14px] font-medium transition sm:px-5 ${on ? "bg-white text-[#1d1d1f] shadow-[0_1px_4px_rgba(0,0,0,0.08)]" : "text-[#6e6e73] hover:text-[#1d1d1f]"}">${TAB_LABELS[id]}</button>`;
+      }).join("");
     }
 
     function cardTemplate(item, href, withBoardAction = false) {
       const safeProduct = encodeURIComponent(JSON.stringify({ id: item.id, name: item.name, image: item.image || "" }));
+      const nm = escHtml(item.name || "Öğe");
       return `
-        <div class="block rounded-xl border border-black/10 hover:border-black/25 transition overflow-hidden relative">
-          <a href="${href}" class="block">
-            <img src="${item.image || "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?q=80&w=1200&auto=format&fit=crop"}" class="w-full h-36 object-cover" alt="${item.name}">
-            <div class="p-3">
-              <p class="text-[14px] font-medium">${item.name}</p>
-              <p class="text-[12px] text-[#6e6e73] mt-1">${new Date(item.savedAt || Date.now()).toLocaleDateString("tr-TR")}</p>
+        <article class="group relative overflow-hidden rounded-xl border border-black/[0.06] bg-white shadow-[0_2px_8px_rgba(0,0,0,0.06)] transition duration-300 hover:-translate-y-0.5 hover:border-black/[0.1] hover:shadow-[0_8px_24px_rgba(0,0,0,0.1)]">
+          <a href="${href}" class="block outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#0071e3]/40">
+            <div class="aspect-[4/3] w-full overflow-hidden bg-[#f5f5f7]">
+              <img src="${item.image || "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?q=80&w=1200&auto=format&fit=crop"}" class="h-full w-full object-cover transition duration-500 group-hover:scale-[1.02]" alt="${nm}">
+            </div>
+            <div class="p-4">
+              <p class="text-[16px] font-semibold leading-snug tracking-[-0.01em] text-[#1d1d1f]">${nm}</p>
+              <p class="mt-2 text-[12px] font-medium uppercase tracking-[0.06em] text-[#6e6e73]">${new Date(item.savedAt || Date.now()).toLocaleDateString("tr-TR", { day: "numeric", month: "short", year: "numeric" })}</p>
             </div>
           </a>
-          ${withBoardAction ? `<button data-add-board="${safeProduct}" class="absolute top-3 right-3 px-2.5 h-8 rounded-full text-[12px] border border-black/15 bg-white/95 hover:bg-black hover:text-white transition">Add to Board</button>` : ""}
-        </div>`;
+          ${withBoardAction ? `<button type="button" data-add-board="${safeProduct}" class="absolute right-3 top-3 inline-flex h-9 items-center gap-1.5 rounded-full border border-black/[0.08] bg-white/95 px-3 text-[12px] font-semibold text-[#1d1d1f] shadow-sm backdrop-blur-sm transition hover:bg-[#0071e3] hover:text-white hover:border-transparent focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3]">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+            Panoya
+          </button>` : ""}
+        </article>`;
     }
 
     function showToast(text) {
       const t = document.getElementById("toast");
       t.textContent = text;
       t.classList.remove("hidden");
-      setTimeout(() => t.classList.add("hidden"), 1700);
+      setTimeout(() => t.classList.add("hidden"), 2200);
     }
 
     function closeBoardModal() {
@@ -126,11 +156,11 @@
     function renderBoardList() {
       const wrap = document.getElementById("board-list");
       if (!moodboards.length) {
-        wrap.innerHTML = `<p class="text-[13px] text-[#6e6e73]">Henüz board yok. Aşağıdan hızlıca oluşturabilirsin.</p>`;
+        wrap.innerHTML = `<p class="rounded-lg border border-dashed border-[#d2d2d7] bg-[#fafafa] px-4 py-6 text-center text-[14px] text-[#6e6e73]">Henüz pano yok. Aşağıdan oluşturabilirsin.</p>`;
         return;
       }
       wrap.innerHTML = moodboards.map((m) => `
-        <button data-board-id="${m.id}" class="w-full h-10 rounded-xl border border-black/15 text-[13px] text-left px-3 hover:border-black/35">${m.name || "Moodboard"}</button>
+        <button type="button" data-board-id="${m.id}" class="w-full rounded-lg border border-[#d2d2d7] px-4 py-3 text-left text-[15px] font-medium text-[#1d1d1f] transition hover:border-[#0071e3] hover:bg-[#0071e3]/[0.04]">${m.name || "Tasarım panosu"}</button>
       `).join("");
       wrap.querySelectorAll("[data-board-id]").forEach((btn) => {
         btn.addEventListener("click", async () => {
@@ -139,7 +169,7 @@
           if (!res.ok) return;
           moodboards = await AG.getMoodboards();
           closeBoardModal();
-          showToast("Board'a eklendi");
+          showToast("Panoya eklendi");
         });
       });
     }
@@ -166,15 +196,22 @@
       if (activeTab === "fav-products") {
         const list = await AG.getFavoriteProducts();
         content.innerHTML = list.length
-          ? `<div class="flex flex-wrap items-center justify-between gap-3 mb-4">
-              <p class="text-[13px] text-[#6e6e73]">Seçtiğin ürünleri yan yana teknik özelliklerle karşılaştır.</p>
-              <a href="/urunler.html?compare=favorites" class="inline-flex h-9 items-center gap-2 px-4 rounded-full border border-black/15 text-[13px] font-medium hover:bg-black/[0.04] transition">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="3" y="3" width="7" height="18" rx="1.5"/><rect x="14" y="3" width="7" height="18" rx="1.5"/></svg>
+          ? `<div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <p class="max-w-xl text-[15px] leading-relaxed text-[#6e6e73]">Seçtiğin ürünleri teknik özelliklerle yan yana karşılaştır.</p>
+              <a href="/urunler.html?compare=favorites" class="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-lg border border-[#d2d2d7] bg-white px-5 text-[15px] font-medium text-[#1d1d1f] shadow-[0_2px_8px_rgba(0,0,0,0.06)] transition hover:border-[#b0b0b5]">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="3" y="3" width="7" height="18" rx="1.5"/><rect x="14" y="3" width="7" height="18" rx="1.5"/></svg>
                 Karşılaştır
               </a>
             </div>
-            <div class="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">${list.map((x) => cardTemplate(x, x.url || "/urunler.html", true)).join("")}</div>`
-          : `<p class="text-[14px] text-[#6e6e73]">Henüz favori ürün yok. Ürünler sayfasından yıldız ile ekleyebilirsin.</p>`;
+            <div class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">${list.map((x) => cardTemplate(x, x.url || "/urunler.html", true)).join("")}</div>`
+          : `<div class="rounded-2xl border border-dashed border-[#d2d2d7] bg-[#fafafa] px-8 py-16 text-center">
+              <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-white shadow-[0_2px_8px_rgba(0,0,0,0.06)] text-[#6e6e73]">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+              </div>
+              <p class="text-[16px] font-semibold text-[#1d1d1f]">Henüz favori ürün yok</p>
+              <p class="mt-2 text-[15px] text-[#6e6e73]">Ürünler sayfasından kalp ile ekleyebilirsin.</p>
+              <a href="/urunler.html" class="mt-6 inline-flex h-11 items-center rounded-lg bg-[#0071e3] px-6 text-[15px] font-medium text-white transition hover:bg-[#0077ed]">Ürünlere git</a>
+            </div>`;
         bindBoardButtons(content);
         return;
       }
@@ -182,38 +219,52 @@
       if (activeTab === "fav-projects") {
         const list = await AG.getFavoriteProjects();
         content.innerHTML = list.length
-          ? `<div class="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">${list.map((x) => cardTemplate(x, x.url || "/projeler.html")).join("")}</div>`
-          : `<p class="text-[14px] text-[#6e6e73]">Henüz favori proje yok. Projeler sayfasından favorileyebilirsin.</p>`;
+          ? `<div class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">${list.map((x) => cardTemplate(x, x.url || "/projeler.html")).join("")}</div>`
+          : `<div class="rounded-2xl border border-dashed border-[#d2d2d7] bg-[#fafafa] px-8 py-16 text-center">
+              <p class="text-[16px] font-semibold text-[#1d1d1f]">Henüz favori proje yok</p>
+              <p class="mt-2 text-[15px] text-[#6e6e73]">Referans projelerden favorileyebilirsin.</p>
+              <a href="/projeler.html" class="mt-6 inline-flex h-11 items-center rounded-lg bg-[#0071e3] px-6 text-[15px] font-medium text-white transition hover:bg-[#0077ed]">Projelere git</a>
+            </div>`;
         return;
       }
 
       if (activeTab === "office-projects") {
         const list = await AG.getArchitectOfficeProjects();
         content.innerHTML = `
-          <div class="flex flex-wrap items-start justify-between gap-3 mb-5">
+          <div class="mb-8 flex flex-col gap-4 border-b border-black/[0.06] pb-8 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <p class="text-[15px] font-medium">Ofis portföyü</p>
-              <p class="text-[13px] text-[#6e6e73] mt-1 max-w-xl">Yayınladığın projeler sitede <a href="/projeler.html" class="underline hover:text-black">Referans Projeler</a> ile aynı listede görünür. Yeni kayıt için <a href="/mimar-proje-ekle.html" class="font-medium text-[#111] underline hover:text-black">Proje ekle</a> sayfasına git.</p>
+              <h2 class="text-[22px] font-semibold tracking-[-0.02em] text-[#1d1d1f]">Ofis portföyü</h2>
+              <p class="mt-2 max-w-xl text-[15px] leading-relaxed text-[#6e6e73]">Yayınladığın projeler <a href="/projeler.html" class="font-medium text-[#0071e3] underline decoration-[#0071e3]/30 underline-offset-2 hover:decoration-[#0071e3]">Referans Projeler</a> ile aynı listede görünür.</p>
             </div>
+            <a href="/mimar-proje-ekle.html" class="inline-flex h-11 shrink-0 items-center gap-2 self-start rounded-lg bg-[#0071e3] px-5 text-[15px] font-medium text-white shadow-[0_2px_8px_rgba(0,113,227,0.3)] transition hover:bg-[#0077ed] sm:self-center">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+              Yeni proje
+            </a>
           </div>
           ${
             list.length
-              ? `<div class="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">${list
+              ? `<div class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">${list
                   .map(
                     (p) => `
-                <div class="rounded-xl border border-black/10 overflow-hidden relative">
-                  <a href="/proje-detay.html?id=${encodeURIComponent(p.id)}" class="block">
-                    <img src="${escHtml(p.image) || "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?q=80&w=1200&auto=format&fit=crop"}" class="w-full h-36 object-cover" alt="">
-                    <div class="p-3">
-                      <p class="text-[14px] font-medium">${escHtml(p.title)}</p>
-                      <p class="text-[12px] text-[#6e6e73] mt-1">${escHtml(p.location || "—")} · ${escHtml(p.year || "—")}</p>
+                <article class="group relative overflow-hidden rounded-xl border border-black/[0.06] bg-white shadow-[0_2px_8px_rgba(0,0,0,0.06)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(0,0,0,0.1)]">
+                  <a href="/proje-detay.html?id=${encodeURIComponent(p.id)}" class="block outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#0071e3]/40">
+                    <div class="aspect-[4/3] w-full overflow-hidden bg-[#f5f5f7]">
+                      <img src="${escHtml(p.image) || "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?q=80&w=1200&auto=format&fit=crop"}" class="h-full w-full object-cover transition duration-500 group-hover:scale-[1.02]" alt="">
+                    </div>
+                    <div class="p-4">
+                      <p class="text-[16px] font-semibold leading-snug text-[#1d1d1f]">${escHtml(p.title)}</p>
+                      <p class="mt-2 text-[13px] text-[#6e6e73]">${escHtml(p.location || "—")} · ${escHtml(p.year || "—")}</p>
                     </div>
                   </a>
-                  <button type="button" data-delete-office-project="${encodeURIComponent(p.id)}" class="absolute top-2 right-2 px-2.5 h-8 rounded-full text-[12px] border border-black/15 bg-white/95 hover:bg-red-600 hover:text-white hover:border-red-600 transition">Sil</button>
-                </div>`
+                  <button type="button" data-delete-office-project="${encodeURIComponent(p.id)}" class="absolute right-3 top-3 rounded-full border border-black/[0.08] bg-white/95 px-3 py-1.5 text-[12px] font-semibold text-[#b00020] shadow-sm backdrop-blur-sm transition hover:bg-[#b00020] hover:text-white hover:border-transparent">Sil</button>
+                </article>`
                   )
                   .join("")}</div>`
-              : `<p class="text-[14px] text-[#6e6e73]">Henüz yayınlanmış ofis projen yok. <a href="/mimar-proje-ekle.html" class="font-medium text-[#111] underline hover:text-black">Proje ekle</a> sayfasından başlayabilirsin.</p>`
+              : `<div class="rounded-2xl border border-dashed border-[#d2d2d7] bg-[#fafafa] px-8 py-16 text-center">
+                  <p class="text-[16px] font-semibold text-[#1d1d1f]">Henüz yayınlanmış proje yok</p>
+                  <p class="mt-2 text-[15px] text-[#6e6e73]">İlk projeni ekleyerek portföyünü oluştur.</p>
+                  <a href="/mimar-proje-ekle.html" class="mt-6 inline-flex h-11 items-center rounded-lg bg-[#0071e3] px-6 text-[15px] font-medium text-white transition hover:bg-[#0077ed]">Proje ekle</a>
+                </div>`
           }
         `;
         return;
@@ -222,14 +273,14 @@
       if (activeTab === "collections") {
         const collections = await AG.getCollections();
         content.innerHTML = `
-          <form id="collection-form" class="flex gap-2 mb-4">
-            <input name="name" required placeholder="Yeni koleksiyon adı (örn. Ofis Lobi Referansları)" class="flex-1 h-10 rounded-xl border border-black/15 px-3 text-[14px]">
-            <button class="h-10 px-4 rounded-xl bg-black text-white text-[13px]">Oluştur</button>
+          <form id="collection-form" class="mb-8 flex flex-col gap-3 sm:flex-row">
+            <input name="name" required placeholder="Örn. Ofis lobi referansları" class="h-11 min-w-0 flex-1 rounded-lg border border-[#d2d2d7] px-4 text-[15px] outline-none transition focus:border-[#0071e3] focus:ring-2 focus:ring-[#0071e3]/20">
+            <button type="submit" class="h-11 shrink-0 rounded-lg bg-[#0071e3] px-6 text-[15px] font-medium text-white transition hover:bg-[#0077ed]">Koleksiyon oluştur</button>
           </form>
           ${
             collections.length
-              ? `<div class="space-y-3">${collections.map((c) => `<article class="rounded-xl border border-black/10 p-3"><p class="font-medium">${c.name}</p><p class="text-[12px] text-[#6e6e73] mt-1">${(c.items || []).length} kayıt</p></article>`).join("")}</div>`
-              : `<p class="text-[14px] text-[#6e6e73]">Henüz koleksiyon yok.</p>`
+              ? `<ul class="space-y-3">${collections.map((c) => `<li class="flex items-center justify-between rounded-xl border border-black/[0.06] bg-[#fafafa] px-5 py-4 transition hover:bg-white hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)]"><div><p class="text-[16px] font-semibold text-[#1d1d1f]">${c.name}</p><p class="mt-1 text-[13px] text-[#6e6e73]">${(c.items || []).length} kayıt</p></div></li>`).join("")}</ul>`
+              : `<p class="rounded-2xl border border-dashed border-[#d2d2d7] bg-[#fafafa] px-6 py-12 text-center text-[15px] text-[#6e6e73]">Henüz koleksiyon yok.</p>`
           }
         `;
         document.getElementById("collection-form").addEventListener("submit", async (e) => {
@@ -243,14 +294,17 @@
 
       const list = await AG.getMoodboards();
       content.innerHTML = list.length
-        ? `<div class="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">
+        ? `<div class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
             ${list.map((m) => `
-              <a href="/tasarim-panosu.html?id=${encodeURIComponent(m.id)}" class="rounded-xl border border-black/10 p-4 hover:border-black/25 transition block">
-                <p class="font-medium">${m.name || "Moodboard"}</p>
-                <p class="text-[12px] text-[#6e6e73] mt-1">${(m.items || []).length} kart</p>
+              <a href="/tasarim-panosu.html?id=${encodeURIComponent(m.id)}" class="block rounded-xl border border-black/[0.06] bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.06)] transition duration-300 hover:-translate-y-0.5 hover:border-black/[0.1] hover:shadow-[0_8px_24px_rgba(0,0,0,0.1)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3]/40">
+                <p class="text-[17px] font-semibold tracking-[-0.01em] text-[#1d1d1f]">${m.name || "Tasarım panosu"}</p>
+                <p class="mt-2 text-[13px] font-medium uppercase tracking-[0.06em] text-[#6e6e73]">${(m.items || []).length} kart</p>
               </a>`).join("")}
           </div>`
-        : `<p class="text-[14px] text-[#6e6e73]">Henüz tasarım panosu yok. Yukarıdan yeni pano oluşturabilirsin.</p>`;
+        : `<div class="rounded-2xl border border-dashed border-[#d2d2d7] bg-[#fafafa] px-8 py-16 text-center">
+            <p class="text-[16px] font-semibold text-[#1d1d1f]">Henüz tasarım panosu yok</p>
+            <p class="mt-2 text-[15px] text-[#6e6e73]">Üstteki <span class="font-medium text-[#1d1d1f]">Yeni tasarım panosu</span> ile başlayabilirsin.</p>
+          </div>`;
     }
 
     async function boot() {
@@ -293,7 +347,7 @@
         moodboards = await AG.getMoodboards();
         document.getElementById("quick-board-name").value = "";
         closeBoardModal();
-        showToast("Board'a eklendi");
+        showToast("Panoya eklendi");
       });
 
       const tabContent = document.getElementById("tab-content");
