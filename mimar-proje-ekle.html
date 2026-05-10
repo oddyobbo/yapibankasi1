@@ -25,7 +25,7 @@
 
   <main class="px-6 pb-16 pt-8 lg:px-10 lg:pb-24 lg:pt-12">
     <div class="mx-auto w-full max-w-[1200px]">
-      <a href="/mimar-paneli.html#office-projects-panel" class="inline-flex items-center gap-2 text-[14px] font-medium text-[#0071e3] transition hover:underline underline-offset-4">← Mimar paneline dön</a>
+      <a href="/mimar-paneli.html?tab=office-projects" class="inline-flex items-center gap-2 text-[14px] font-medium text-[#0071e3] transition hover:underline underline-offset-4">← Mimar paneline dön</a>
 
       <header class="mt-8">
         <h1 class="text-[32px] font-semibold leading-tight tracking-[-0.03em] lg:text-[40px]">Ofis projesi ekle</h1>
@@ -99,7 +99,7 @@
           </div>
 
           <div class="mt-8 flex flex-wrap items-center justify-end gap-3 border-t border-black/[0.06] pt-8">
-            <a href="/mimar-paneli.html#office-projects-panel" class="inline-flex h-11 items-center rounded-lg px-5 text-[15px] font-medium text-[#0071e3] transition hover:bg-black/[0.04]">Vazgeç</a>
+            <a href="/mimar-paneli.html?tab=office-projects" class="inline-flex h-11 items-center rounded-lg px-5 text-[15px] font-medium text-[#0071e3] transition hover:bg-black/[0.04]">Vazgeç</a>
             <button type="submit" id="submit-btn" class="inline-flex h-11 items-center rounded-lg bg-[#0071e3] px-8 text-[15px] font-medium text-white shadow-[0_2px_8px_rgba(0,113,227,0.35)] transition hover:bg-[#0077ed] disabled:pointer-events-none disabled:opacity-45">Yayınla</button>
           </div>
         </form>
@@ -264,7 +264,7 @@
           return;
         }
         showToast("Proje yayınlandı");
-        location.href = "/mimar-paneli.html#office-projects-panel";
+        location.href = "/mimar-paneli.html?tab=office-projects";
       });
     }
 
