@@ -11,6 +11,11 @@ alwaysApply: true
 - **GitHub:** `https://github.com/oddyobbo/yapibankasi1` (`origin`), dal **`main`**. Netlify bu repoya bağlı; **`git push origin main`** canlı deploy’u tetikler (CLI `netlify deploy` şart değil).
 - Referans dosya: kökte `canli-site-url.txt`.
 
+# Yatay margin — ürün kataloğu sayfaları (`urunler.html` referans)
+
+- **Kural:** Ürün listesi ve ürün detay gibi “katalog” içerikleri, anasayfa (`mvp-taslak-v1.html`) bölümlerindeki geniş `px-8 lg:px-20` yerine **`urunler.html` ile aynı** sıkı kenar boşluğu kullanmalı: ana içerik sarmalayıcıda **`px-5`** (filtre çubuğu ve `#products-grid-wrapper` ile uyumlu).
+- Yeni sayfa eklerken önce `urunler.html` içindeki padding sınıfına bak; katalog hissi tutarlı kalsın.
+
 # Archilink teslim standardı
 
 - **Kullanıcı GitHub veya Netlify arayüzüne girmiyor.** “GitHub’da diff’e bak / Netlify’dan deploy et” gibi yönlendirmeler yapma; varsayılan hedef **canlı sitede güncel kod**.
