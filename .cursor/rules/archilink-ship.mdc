@@ -1,0 +1,15 @@
+---
+description: Archilink (katalog-projesi) — canlıya alma ve kullanıcıya teslim; GitHub/Netlify UI varsayma
+globs: "**/*"
+alwaysApply: true
+---
+
+# Archilink teslim standardı
+
+- **Kullanıcı GitHub veya Netlify arayüzüne girmiyor.** “GitHub’da diff’e bak / Netlify’dan deploy et” gibi yönlendirmeler yapma; varsayılan hedef **canlı sitede güncel kod**.
+- **Kod değişikliğinden sonra** (HTML/CSS/JS, `layout.js`, `core.js` vb.) mümkünse **aynı oturumda** production deploy dene:
+  - Proje kökünde: `./deploy-netlify.sh` veya `netlify deploy --prod --dir=.`
+- Deploy **başarısız** olursa (ör. `Forbidden`, auth):
+  - Kullanıcıya **bir kez** şunu söyle: kendi Mac’inde Terminal’de proje klasöründe `netlify login` çalıştırsın; bittikten sonra agent tekrar `./deploy-netlify.sh` çalıştırabilir.
+  - **Geçici önizleme** (sadece arayüz): `npx --yes serve . -l 4173` ile `http://localhost:4173` — Cursor Simple Browser veya tarayıcı; auth/Supabase yönlendirmeleri canlıdan farklı olabilir, buna kısa not düş.
+- **Push:** Repo yedeklemesi için `git push` yapılabilir; kullanıcıya “GitHub’a gir” diye bir şey **önerme**.
