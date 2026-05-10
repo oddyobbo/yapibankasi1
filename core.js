@@ -437,16 +437,17 @@
     });
 
     lsWrite(LS_BRAND_SESSION_KEY, null);
-    setArchitectSession(null);
+    const session = {
+      id: data.user.id,
+      name: safeName,
+      email: safeEmail,
+      office: (office || "").trim(),
+    };
+    if (data.session) setArchitectSession(session);
     return {
       ok: true,
       sessionReady: Boolean(data.session),
-      architect: {
-        id: data.user.id,
-        name: safeName,
-        email: safeEmail,
-        office: (office || "").trim(),
-      },
+      architect: session,
     };
   };
 
@@ -476,6 +477,7 @@
       email: data.user.email,
       office: profile.office || "",
     };
+    setArchitectSession(session);
     return { ok: true, architect: session };
   };
 
