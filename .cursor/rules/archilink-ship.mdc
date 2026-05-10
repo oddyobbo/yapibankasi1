@@ -4,6 +4,13 @@ globs: "**/*"
 alwaysApply: true
 ---
 
+# Tek doğru proje (karışıklık yok)
+
+- **Canlı site (production):** `https://cool-bienenstitch-6090eb.netlify.app/` — tüm “webde aç” URL’leri bu kökten türet (`/mimar-paneli.html`, `/urunler.html`, vb.).
+- **Yerel çalışma klasörü:** `~/Desktop/katalog-projesi` — başka kopya (`antigravity`, yedek klasörler) varsayılan olarak **kullanılmaz**; kullanıcı özellikle istemedikçe oralara dokunma, oralardan deploy/push anlatma.
+- **GitHub:** `https://github.com/oddyobbo/yapibankasi1` (`origin`), dal **`main`**. Netlify bu repoya bağlı; **`git push origin main`** canlı deploy’u tetikler (CLI `netlify deploy` şart değil).
+- Referans dosya: kökte `canli-site-url.txt`.
+
 # Archilink teslim standardı
 
 - **Kullanıcı GitHub veya Netlify arayüzüne girmiyor.** “GitHub’da diff’e bak / Netlify’dan deploy et” gibi yönlendirmeler yapma; varsayılan hedef **canlı sitede güncel kod**.
