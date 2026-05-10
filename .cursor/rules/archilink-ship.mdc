@@ -13,8 +13,19 @@ alwaysApply: true
 
 # Yatay margin — header ile hizalı içerik (`layout.js` referans)
 
-- **Kural:** Logo ile sağdaki tema / giriş–profil alanının yatay sınırları `layout.js` içindeki site header satırında: **`px-4 sm:px-6 lg:px-10`** (`h-[72px]` flex satırı). Ürün listesi (`urunler.html`), ürün detayı (`urun-unica-baffle.html`) ve benzeri tam genişlik içerik bu **aynı** yatay padding ile hizalanmalı; böylece sol kenar logo ile, sağ kenar profil butonunun bittiği yerle çakışır.
-- Anasayfa (`mvp-taslak-v1.html`) bölümlerindeki daha geniş `px-8 lg:px-20` katalog sayfalarına kopyalanmamalı (header ile kayar).
+- **Kural:** Logo ile sağdaki tema / giriş–profil alanının yatay sınırları `layout.js` içindeki site header satırında: **`px-4 sm:px-6 lg:px-10`** (`h-[72px]` flex satırı).
+- **Uygulama kapsamı:** Yeni veya güncellenen **tam genişlik** katalog / iç sayfaların ana içerik sarıcılarında (üst şerit, grid, detay `main`, sabit alt bar vb.) varsayılan olarak **bu aynı** yatay padding kullanılmalı; böylece sol logo hizası ve sağ profil hizası tüm sitede tutarlı kalır.
+- Referans dosyalar: `urunler.html`, `urun-unica-baffle.html` (`<main>` ve ilgili yatay bantlar).
+- Anasayfa (`mvp-taslak-v1.html`) bölümlerindeki daha geniş `px-8 lg:px-20` **katalog sayfalarına** kopyalanmamalı (header ile kayar).
+
+# Katalog tipografi — ürünler kategori pill ile uyum (`urunler.html` `.cat-pill`)
+
+- **Kaynak:** `urunler.html` içindeki `.cat-pill` ve `.pill-count` (satır ~86–109).
+- **Gövde / paragraflar / değer metni:** `13px`, `font-weight: 500`, `color: #3a3a3c`, `letter-spacing: normal`, `line-height` ~1.45. Ürün detayında sınıf: **`ag-pill-body`** (`urun-unica-baffle.html`).
+- **İkincil / etiket / sayı hissi:** `11px`, `font-weight: 400`, `opacity: 0.6`, `letter-spacing: normal`. Sınıf: **`ag-pill-meta`**.
+- **Aralık ritmi (pill satırı ile uyum):** Pill’ler arası `gap: 8px` (Tailwind `gap-2`); pill içi etiket–sayı `gap: 5px`. Bölüm içinde üst üste bloklar için **`space-y-2` / `mt-2` / `gap-2`** tercih edilir (8px ve katları).
+- **Başlıklar:** Sayfa `h1` ve bölüm `h2` puntosu **bilinçli olarak daha büyük** kalabilir (ör. mevcut `ag-section-title` ~20px). Başlık altındaki ilk gövde satırına pill ritmine uygun **`mt-2` veya `space-y-2`** kullan; başlıklara pill ile aynı punto zorunlu değil.
+- **Font stack:** Katalog gövdesinde `body`/sayfa için `urunler.html` ile aynı sistem fontları: `-apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif`.
 
 # Archilink teslim standardı
 
