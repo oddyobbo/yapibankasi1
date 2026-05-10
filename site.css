@@ -178,9 +178,9 @@ html.ag-dark .hover\:bg-black\/\[0\.06\]:hover {
   max-width: none;
 }
 
-/* Hero: gallery + editorial info */
-.product-detail-hero-panel {
-  padding-bottom: 32px;
+/* Hero: gallery + editorial info (hero card padding only — does not affect other sections) */
+.product-detail-section.product-detail-hero-panel {
+  padding: 32px min(32px, 3vw) 40px;
 }
 
 .product-detail-hero-grid {
@@ -191,42 +191,51 @@ html.ag-dark .hover\:bg-black\/\[0\.06\]:hover {
 
 @media (min-width: 1024px) {
   .product-detail-hero-grid {
-    grid-template-columns: minmax(0, 1fr) minmax(280px, 380px);
-    gap: 36px;
+    grid-template-columns: minmax(0, 1.22fr) minmax(300px, 440px);
+    gap: clamp(28px, 3vw, 44px);
   }
 }
 
+/* Gallery: vertical rail + large main frame (reference-style PDP) */
 .product-detail-gallery {
   display: flex;
   flex-direction: row;
-  align-items: stretch;
-  gap: 14px;
-  min-height: min(72vw, 520px);
+  align-items: flex-start;
+  gap: 10px;
 }
 
 @media (min-width: 640px) {
   .product-detail-gallery {
-    gap: 18px;
-    min-height: 480px;
+    gap: 12px;
   }
 }
 
 .product-detail-gallery-thumbs {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
   flex-shrink: 0;
-  width: 72px;
-  max-height: min(520px, 70vh);
+  width: 76px;
+  max-height: min(640px, 72vh);
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 2px 4px 2px 0;
+  padding: 4px 6px 4px 2px;
+  margin: -2px 0;
   scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
 }
 
 @media (min-width: 640px) {
   .product-detail-gallery-thumbs {
-    width: 84px;
+    width: 88px;
+    gap: 9px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .product-detail-gallery-thumbs {
+    width: 96px;
+    gap: 10px;
   }
 }
 
@@ -234,30 +243,34 @@ html.ag-dark .hover\:bg-black\/\[0\.06\]:hover {
   flex-shrink: 0;
   width: 100%;
   aspect-ratio: 1;
-  border-radius: 12px;
+  border-radius: 14px;
   overflow: hidden;
-  border: 2px solid transparent;
   padding: 0;
   cursor: pointer;
-  background: #ececee;
-  transition: border-color 0.2s ease, opacity 0.2s ease, box-shadow 0.2s ease;
-  opacity: 0.72;
+  background: #e8e8ec;
+  border: 1px solid rgba(0, 0, 0, 0.07);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease, opacity 0.2s ease;
+  opacity: 0.88;
 }
 
 .product-detail-gallery-thumb:hover {
   opacity: 1;
+  border-color: rgba(0, 0, 0, 0.14);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .product-detail-gallery-thumb.is-active {
   opacity: 1;
   border-color: #1d1d1f;
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.06), 0 4px 14px rgba(0, 0, 0, 0.08);
 }
 
 .product-detail-gallery-thumb img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
   display: block;
 }
 
@@ -265,17 +278,23 @@ html.ag-dark .hover\:bg-black\/\[0\.06\]:hover {
   position: relative;
   flex: 1;
   min-width: 0;
-  border-radius: 18px;
-  background: #f0f0f2;
+  align-self: stretch;
+  border-radius: 20px;
+  background: #ebebed;
   overflow: hidden;
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  aspect-ratio: 4 / 3;
+  max-height: min(720px, 78vh);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.05);
 }
 
 .product-detail-gallery-main img {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
-  min-height: 280px;
   object-fit: cover;
+  object-position: center;
   display: block;
 }
 
@@ -284,23 +303,23 @@ html.ag-dark .hover\:bg-black\/\[0\.06\]:hover {
   top: 50%;
   transform: translateY(-50%);
   z-index: 4;
-  width: 44px;
-  height: 44px;
+  width: 46px;
+  height: 46px;
   border-radius: 999px;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(0, 0, 0, 0.07);
+  background: rgba(255, 255, 255, 0.94);
   color: #1d1d1f;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 28px rgba(0, 0, 0, 0.1);
   transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
 }
 
 .product-detail-gallery-nav:hover {
   background: #fff;
-  box-shadow: 0 6px 28px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
 }
 
 .product-detail-gallery-nav:active {
@@ -308,11 +327,43 @@ html.ag-dark .hover\:bg-black\/\[0\.06\]:hover {
 }
 
 .product-detail-gallery-nav--prev {
-  left: 16px;
+  left: 14px;
 }
 
 .product-detail-gallery-nav--next {
-  right: 16px;
+  right: 14px;
+}
+
+@media (max-width: 639px) {
+  .product-detail-gallery {
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .product-detail-gallery-main {
+    order: 1;
+    max-height: none;
+    aspect-ratio: 4 / 3;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.06);
+  }
+
+  .product-detail-gallery-thumbs {
+    order: 2;
+    flex-direction: row;
+    width: 100%;
+    max-height: none;
+    padding: 0 0 6px;
+    margin: 0;
+    gap: 8px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .product-detail-gallery-thumb {
+    flex: 0 0 72px;
+    width: 72px;
+  }
 }
 
 .product-detail-hero-info {
@@ -470,6 +521,94 @@ html.ag-dark .hover\:bg-black\/\[0\.06\]:hover {
 
 .product-detail-brand-more a:hover {
   border-bottom-color: #1d1d1f;
+}
+
+.product-detail-brand-more-block {
+  margin-top: 18px;
+}
+
+.product-detail-brand-more-block .product-detail-brand-more {
+  margin-top: 0;
+}
+
+/* Compact “more from brand” preview rail (hero only) */
+.product-detail-brand-preview {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 12px;
+  margin-top: 14px;
+  padding: 2px 2px 6px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.18) transparent;
+}
+
+.product-detail-brand-preview-item {
+  flex: 0 0 auto;
+  width: 100px;
+  text-decoration: none;
+  color: inherit;
+  transition: opacity 0.15s ease;
+}
+
+@media (min-width: 640px) {
+  .product-detail-brand-preview-item {
+    width: 108px;
+  }
+}
+
+.product-detail-brand-preview-item:hover {
+  opacity: 0.92;
+}
+
+.product-detail-brand-preview-thumb {
+  display: block;
+  aspect-ratio: 1;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #e8e8ec;
+  border: 1px solid rgba(0, 0, 0, 0.07);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.product-detail-brand-preview-item:hover .product-detail-brand-preview-thumb {
+  border-color: rgba(0, 0, 0, 0.14);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.07);
+}
+
+.product-detail-brand-preview-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+.product-detail-brand-preview-name {
+  display: -webkit-box;
+  margin-top: 7px;
+  font-size: 11px;
+  line-height: 1.35;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: #1d1d1f;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.product-detail-brand-preview-empty {
+  font-size: 12px;
+  line-height: 1.45;
+  color: #86868b;
+  margin: 6px 0 0;
+}
+
+/* Hero copy rhythm (does not affect injected lower sections) */
+.product-detail-hero-info .product-detail-lead {
+  margin-top: 0;
 }
 
 /* Specification table — editorial spec sheet */
@@ -682,10 +821,13 @@ html.ag-dark .product-detail-gallery-main {
 
 html.ag-dark .product-detail-gallery-thumb {
   background: #2a2d35;
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
 }
 
 html.ag-dark .product-detail-gallery-thumb.is-active {
   border-color: #eceef2;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.08), 0 6px 20px rgba(0, 0, 0, 0.35);
 }
 
 html.ag-dark .product-detail-gallery-nav {
@@ -733,6 +875,24 @@ html.ag-dark .product-detail-btn-secondary:hover {
 html.ag-dark .product-detail-brand-more a {
   color: #eceef2;
   border-bottom-color: rgba(255, 255, 255, 0.25);
+}
+
+html.ag-dark .product-detail-brand-preview-thumb {
+  background: #2a2d35;
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+html.ag-dark .product-detail-brand-preview-name {
+  color: #eceef2;
+}
+
+html.ag-dark .product-detail-brand-preview-empty {
+  color: #8e9299;
+}
+
+html.ag-dark .product-detail-brand-preview {
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
 }
 
 html.ag-dark .product-detail-info-table {

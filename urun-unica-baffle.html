@@ -28,7 +28,7 @@
     <div class="w-full min-h-screen overflow-hidden">
       <div id="site-header"></div>
 
-      <main class="w-full max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-10 py-6 md:py-10 space-y-5 md:space-y-7">
+      <main class="w-full max-w-[1440px] mx-auto px-6 lg:px-8 py-6 md:py-10 space-y-5 md:space-y-7">
         <article class="product-detail-section product-detail-hero-panel ag-card">
           <header class="mb-6 md:mb-8">
             <p id="hero-category" class="product-detail-hero-kicker ag-muted">Kategori</p>
@@ -68,9 +68,12 @@
                   <a id="btn-teklif" href="/iletisim-v2.html" class="product-detail-btn-primary">Teklif iste</a>
                   <a id="btn-iletisim" href="/iletisim-v2.html" class="product-detail-btn-secondary">İletişime geç</a>
                 </div>
-                <p class="product-detail-brand-more">
-                  <a id="brand-more-products" href="/urunler.html">Bu markanın diğer ürünlerini gör</a>
-                </p>
+                <div class="product-detail-brand-more-block">
+                  <p class="product-detail-brand-more">
+                    <a id="brand-more-products" href="/urunler.html">Bu markanın diğer ürünlerini gör</a>
+                  </p>
+                  <div id="brand-preview-strip" class="product-detail-brand-preview" aria-label="Markanın diğer ürünleri"></div>
+                </div>
               </div>
             </div>
           </div>
@@ -374,6 +377,59 @@
       );
     }
 
+    const GALLERY_IMG_FALLBACK =
+      "https://images.unsplash.com/photo-1600607686527-6fb886090705?q=80&w=1600&auto=format&fit=crop";
+    const PREVIEW_IMG_FALLBACK =
+      "https://images.unsplash.com/photo-1600607686527-6fb886090705?q=80&w=400&auto=format&fit=crop";
+
+    function mergeProductCatalog(dbProducts, staticList) {
+      const seen = new Set();
+      const out = [];
+      for (const p of [...(dbProducts || []), ...staticList]) {
+        const k = String(p.id);
+        if (seen.has(k)) continue;
+        seen.add(k);
+        out.push(p);
+      }
+      return out;
+    }
+
+    function renderBrandPreviewStrip(allProducts, product) {
+      const el = document.getElementById("brand-preview-strip");
+      const brand = String(product.brandName || "").trim();
+      if (!brand) {
+        el.innerHTML = "";
+        return;
+      }
+      const others = allProducts.filter(
+        (p) => String(p.id) !== String(product.id) && String(p.brandName || "").trim() === brand
+      ).slice(0, 8);
+      if (!others.length) {
+        el.innerHTML = `<p class="product-detail-brand-preview-empty">Bu markaya ait başka ürün bulunmuyor.</p>`;
+        return;
+      }
+      el.innerHTML = others
+        .map((p) => {
+          const url = productGalleryUrls(p)[0] || PREVIEW_IMG_FALLBACK;
+          const href = `/urun-unica-baffle.html?id=${encodeURIComponent(p.id)}`;
+          return `<a class="product-detail-brand-preview-item" href="${href}">
+      <span class="product-detail-brand-preview-thumb"><img src="${esc(url)}" alt="" loading="lazy" decoding="async"></span>
+      <span class="product-detail-brand-preview-name">${esc(p.name || "")}</span>
+    </a>`;
+        })
+        .join("");
+      el.querySelectorAll(".product-detail-brand-preview-thumb img").forEach((img) => {
+        img.addEventListener(
+          "error",
+          function handlePreviewImgErr() {
+            img.removeEventListener("error", handlePreviewImgErr);
+            if (img.src !== PREVIEW_IMG_FALLBACK) img.src = PREVIEW_IMG_FALLBACK;
+          },
+          { once: true }
+        );
+      });
+    }
+
     function wireGallery(images, productName) {
       const main = document.getElementById("gallery-main-img");
       const thumbs = document.getElementById("gallery-thumbs");
@@ -383,16 +439,37 @@
       const n = images.length;
 
       function renderThumbs() {
-        thumbs.innerHTML = images.map((src, i) => `
+        thumbs.innerHTML = images
+          .map(
+            (src, i) => `
           <button type="button" data-i="${i}" class="product-detail-gallery-thumb${i === idx ? " is-active" : ""}" aria-label="Görsel ${i + 1}">
-            <img src="${esc(src)}" alt="">
-          </button>`).join("");
+            <img src="${esc(src)}" alt="" loading="${i > 2 ? "lazy" : "eager"}" decoding="async">
+          </button>`
+          )
+          .join("");
         thumbs.querySelectorAll(".product-detail-gallery-thumb").forEach((btn) => {
-          btn.addEventListener("click", () => { idx = +btn.getAttribute("data-i"); update(); });
+          btn.addEventListener("click", () => {
+            idx = +btn.getAttribute("data-i");
+            update();
+          });
+        });
+        thumbs.querySelectorAll(".product-detail-gallery-thumb img").forEach((img) => {
+          img.addEventListener(
+            "error",
+            function onThumbErr() {
+              img.removeEventListener("error", onThumbErr);
+              img.src = GALLERY_IMG_FALLBACK;
+            },
+            { once: true }
+          );
         });
       }
 
       function update() {
+        main.onerror = function () {
+          main.onerror = null;
+          main.src = GALLERY_IMG_FALLBACK;
+        };
         main.src = images[idx];
         main.alt = productName || "Ürün görseli";
         prev.style.display = n <= 1 ? "none" : "";
@@ -400,8 +477,14 @@
         renderThumbs();
       }
 
-      prev.addEventListener("click", () => { idx = (idx - 1 + n) % n; update(); });
-      next.addEventListener("click", () => { idx = (idx + 1) % n; update(); });
+      prev.addEventListener("click", () => {
+        idx = (idx - 1 + n) % n;
+        update();
+      });
+      next.addEventListener("click", () => {
+        idx = (idx + 1) % n;
+        update();
+      });
       update();
     }
 
@@ -409,7 +492,8 @@
       const params = new URLSearchParams(location.search);
       const id = params.get("id");
       const dbProducts = await AG.getProducts();
-      const product = [...dbProducts, ...STATIC].find((x) => String(x.id) === String(id)) || STATIC[0];
+      const catalog = mergeProductCatalog(dbProducts, STATIC);
+      const product = catalog.find((x) => String(x.id) === String(id)) || STATIC[0];
 
       if (product?.id) AG.incrementView(product.id).catch(() => {});
 
@@ -449,6 +533,7 @@
 
       const brandListHref = "/urunler.html?q=" + encodeURIComponent(brand.trim() || "marka");
       document.getElementById("brand-more-products").href = brandListHref;
+      renderBrandPreviewStrip(catalog, product);
 
       const q = {
         konu: "urun",
