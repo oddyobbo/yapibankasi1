@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Archilink | Ofis projesi ekle</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body data-page="architect-project-add" class="bg-[#f5f5f7] text-[#111] min-h-screen">
+  <div id="site-header"></div>
+  <div id="toast" class="hidden fixed top-5 right-5 z-50 px-4 py-2 rounded-xl bg-black text-white text-[13px] shadow-lg"></div>
+  <main class="px-6 lg:px-10 py-8">
+    <section class="max-w-[720px] mx-auto">
+      <a href="/mimar-paneli.html?tab=office-projects" class="inline-flex items-center gap-2 text-[13px] text-[#6e6e73] hover:text-black mb-4">← Mimar paneline dön</a>
+      <h1 class="text-[28px] font-semibold tracking-tight">Ofis projesi ekle</h1>
+      <p class="text-[14px] text-[#6e6e73] mt-2">Yayınladığın proje <a href="/projeler.html" class="underline hover:text-black">Referans Projeler</a> listesinde görünür.</p>
+
+      <form id="office-project-form" class="mt-8 rounded-2xl border border-black/10 bg-white p-6 grid sm:grid-cols-2 gap-4 shadow-sm">
+        <div class="sm:col-span-2">
+          <label class="text-[12px] text-[#6e6e73]">Başlık *</label>
+          <input name="title" required class="mt-1 w-full h-11 rounded-xl border border-black/15 px-3 text-[15px]" placeholder="Örn. Ofis cephesi yenileme">
+        </div>
+        <div>
+          <label class="text-[12px] text-[#6e6e73]">Konum</label>
+          <input name="location" class="mt-1 w-full h-11 rounded-xl border border-black/15 px-3 text-[15px]" placeholder="İl / semt">
+        </div>
+        <div>
+          <label class="text-[12px] text-[#6e6e73]">Yıl</label>
+          <input name="year" class="mt-1 w-full h-11 rounded-xl border border-black/15 px-3 text-[15px]" placeholder="2024">
+        </div>
+        <div class="sm:col-span-2">
+          <label class="text-[12px] text-[#6e6e73]">Mimar / proje ekibi</label>
+          <input name="architectName" class="mt-1 w-full h-11 rounded-xl border border-black/15 px-3 text-[15px]" placeholder="Listede görünecek isim">
+        </div>
+        <div class="sm:col-span-2">
+          <label class="text-[12px] text-[#6e6e73]">Kapak görseli URL</label>
+          <input name="image" type="url" class="mt-1 w-full h-11 rounded-xl border border-black/15 px-3 text-[15px]" placeholder="https://...">
+        </div>
+        <div class="sm:col-span-2">
+          <label class="text-[12px] text-[#6e6e73]">Açıklama</label>
+          <textarea name="description" rows="4" class="mt-1 w-full rounded-xl border border-black/15 px-3 py-2 text-[15px]" placeholder="Proje özeti"></textarea>
+        </div>
+        <div class="sm:col-span-2 flex flex-wrap gap-2 justify-end pt-2">
+          <a href="/mimar-paneli.html?tab=office-projects" class="inline-flex h-11 items-center px-5 rounded-full border border-black/15 text-[13px]">Vazgeç</a>
+          <button type="submit" id="submit-btn" class="h-11 px-6 rounded-full bg-black text-white text-[13px] font-semibold disabled:opacity-50">Yayınla</button>
+        </div>
+      </form>
+    </section>
+  </main>
+  <div id="site-footer"></div>
+
+  <script src="/core.js"></script>
+  <script src="/layout.js"></script>
+  <script>
+    function showToast(text) {
+      const t = document.getElementById("toast");
+      t.textContent = text;
+      t.classList.remove("hidden");
+      setTimeout(() => t.classList.add("hidden"), 2200);
+    }
+
+    async function boot() {
+      await AG.ready;
+      const session = await AG.getSessionArchitect();
+      if (!session) {
+        location.href = "/mimar-giris.html";
+        return;
+      }
+      if (session.architectProfileType !== "office") {
+        location.href = "/mimar-paneli.html";
+        return;
+      }
+
+      const form = document.getElementById("office-project-form");
+      const submitBtn = document.getElementById("submit-btn");
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        submitBtn.disabled = true;
+        const fd = new FormData(form);
+        const res = await AG.addArchitectOfficeProject({
+          title: fd.get("title"),
+          location: fd.get("location"),
+          year: fd.get("year"),
+          architectName: fd.get("architectName"),
+          description: fd.get("description"),
+          image: fd.get("image"),
+        });
+        submitBtn.disabled = false;
+        if (!res.ok) {
+          showToast(res.message || "Kayıt başarısız");
+          return;
+        }
+        showToast("Proje yayınlandı");
+        location.href = "/mimar-paneli.html?tab=office-projects";
+      });
+    }
+
+    boot();
+  </script>
+</body>
+</html>

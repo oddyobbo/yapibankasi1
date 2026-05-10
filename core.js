@@ -408,26 +408,58 @@
   };
 
   // ── Architect auth (Supabase) + moodboard verisi (localStorage / kullanıcı id) ─
-  const setArchitectSession = (session) => lsWrite(LS_ARCHITECT_SESSION_KEY, session || null);
+  let _architectSessionCache = null;
+  let _architectSessionInflight = null;
+  const ARCH_SESSION_CACHE_MS = 90_000;
+
+  const clearArchitectSessionCache = () => {
+    _architectSessionCache = null;
+    _architectSessionInflight = null;
+  };
+
+  const setArchitectSession = (session) => {
+    clearArchitectSessionCache();
+    lsWrite(LS_ARCHITECT_SESSION_KEY, session || null);
+  };
   const nsKey = (suffix, architectId) => `ag_architect_${suffix}_${architectId}`;
 
   const getSessionArchitect = async () => {
     await ready;
-    const sb = getSB();
-    if (!sb) return null;
-    const { data: { user } } = await sb.auth.getUser();
-    if (!user || user.email === ADMIN_EMAIL) return null;
-    const { data: profile } = await sb.from("profiles").select("*").eq("id", user.id).single();
-    if (!profile || profile.account_type !== "architect") return null;
-    const synced = await syncArchitectProfileFromMetadata(user, profile);
-    const t = (synced.architect_profile_type || "individual") === "office" ? "office" : "individual";
-    return {
-      id: user.id,
-      email: user.email,
-      name: synced.name || user.email.split("@")[0],
-      office: synced.office || "",
-      architectProfileType: t,
-    };
+    const now = Date.now();
+    if (_architectSessionCache && _architectSessionCache.exp > Date.now()) {
+      return _architectSessionCache.val;
+    }
+    if (_architectSessionInflight) return _architectSessionInflight;
+
+    _architectSessionInflight = (async () => {
+      const sb = getSB();
+      if (!sb) return null;
+      const { data: { user } } = await sb.auth.getUser();
+      if (!user || user.email === ADMIN_EMAIL) {
+        _architectSessionCache = { val: null, exp: now + 15_000 };
+        return null;
+      }
+      const { data: profile } = await sb.from("profiles").select("*").eq("id", user.id).single();
+      if (!profile || profile.account_type !== "architect") {
+        _architectSessionCache = { val: null, exp: now + 15_000 };
+        return null;
+      }
+      const synced = await syncArchitectProfileFromMetadata(user, profile);
+      const t = (synced.architect_profile_type || "individual") === "office" ? "office" : "individual";
+      const val = {
+        id: user.id,
+        email: user.email,
+        name: synced.name || user.email.split("@")[0],
+        office: synced.office || "",
+        architectProfileType: t,
+      };
+      _architectSessionCache = { val, exp: Date.now() + ARCH_SESSION_CACHE_MS };
+      return val;
+    })().finally(() => {
+      _architectSessionInflight = null;
+    });
+
+    return _architectSessionInflight;
   };
 
   const registerArchitect = async ({ name, email, password, office, architectProfileType }) => {
