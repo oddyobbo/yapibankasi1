@@ -218,7 +218,9 @@
     #sort-dropdown .sort-opt:hover { background: #f5f5f7; }
     body.compare-mode-active #products-grid-wrapper { padding-bottom: 5.5rem; }
     #compare-open-btn[data-compare-on="1"] { background: #0b0b0c; color: #fff; border-color: #0b0b0c; }
-    [data-product-id].compare-card-shell { transition: box-shadow 0.22s ease; }
+    /* compare mode: cards transition smoothly */
+    body.compare-mode-active [data-product-id] { transition: outline-color 0.18s ease, transform 0.2s ease; }
+    body.compare-mode-active [data-product-id]:hover { transform: translateY(-2px); }
   </style>
 </head>
 <body data-page="products" class="bg-white text-[#0b0b0c] min-h-screen">
@@ -229,42 +231,7 @@
 
     <!-- ── Top filter bar ── -->
     <div class="bg-white border-b border-black/[0.06]">
-      <div class="px-5 py-2.5">
-        <div class="flex items-center gap-1.5">
-          <button id="sidebar-toggle" class="flex items-center gap-1.5 px-3 h-[34px] rounded-full border border-black/[0.14] text-[13px] font-medium hover:bg-black/[0.04] transition-all flex-shrink-0">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="4" y1="6" x2="20" y2="6"/><circle cx="16" cy="6" r="3" fill="currentColor" stroke="none"/>
-              <line x1="4" y1="12" x2="20" y2="12"/><circle cx="8" cy="12" r="3" fill="currentColor" stroke="none"/>
-              <line x1="4" y1="18" x2="20" y2="18"/><circle cx="16" cy="18" r="3" fill="currentColor" stroke="none"/>
-            </svg>
-            <span>Filtreler</span>
-          </button>
-          <div class="relative">
-            <button id="sort-toggle" type="button" class="flex items-center gap-1.5 px-3 h-[34px] rounded-full border border-black/[0.12] text-[12px] font-medium hover:bg-black/[0.04] transition">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M3 6h18M7 12h10M10 18h4"/>
-              </svg>
-              Sırala
-            </button>
-            <div id="sort-dropdown" class="hidden absolute left-0 top-10 w-56 rounded-xl border border-black/[0.1] bg-white shadow-xl py-1 z-40 text-[13px]">
-              <button type="button" data-sort="name_asc" class="sort-opt w-full text-left px-3 py-2">İsme göre (A → Z)</button>
-              <button type="button" data-sort="name_desc" class="sort-opt w-full text-left px-3 py-2">İsme göre (Z → A)</button>
-              <button type="button" data-sort="brand_asc" class="sort-opt w-full text-left px-3 py-2">Markaya göre (A → Z)</button>
-              <button type="button" data-sort="views_desc" class="sort-opt w-full text-left px-3 py-2">En çok görüntülenen</button>
-              <button type="button" data-sort="price_asc" class="sort-opt w-full text-left px-3 py-2">Fiyat (düşük → yüksek)</button>
-              <button type="button" data-sort="price_desc" class="sort-opt w-full text-left px-3 py-2">Fiyat (yüksek → düşük)</button>
-            </div>
-          </div>
-          <button id="compare-open-btn" type="button" title="Karşılaştırma modu: kartları işaretle" class="flex items-center gap-1.5 px-3 h-[34px] rounded-full border border-black/[0.12] text-[12px] font-medium hover:bg-black/[0.04] transition">
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="3" y="3" width="7" height="18" rx="1.5"/><rect x="14" y="3" width="7" height="18" rx="1.5"/>
-            </svg>
-            Karşılaştır
-          </button>
-        </div>
-      </div>
-
-      <div class="px-5 pb-2 flex items-center gap-2">
+      <div class="px-5 pb-2 pt-3 flex items-center gap-2">
         <div class="relative flex-1">
           <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8e8e93] pointer-events-none" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
@@ -274,8 +241,47 @@
             style="font-size:16px;">
         </div>
       </div>
-      <div class="px-5 pb-2.5">
-        <div id="category-pills" class="flex items-center gap-2 py-0.5"></div>
+
+      <!-- Pills row: Filtreler — pills — Sırala | Karşılaştır -->
+      <div class="px-5 pb-2.5 flex items-center gap-2">
+        <!-- Filtreler (sol) -->
+        <button id="sidebar-toggle" class="flex items-center gap-1.5 px-3 h-[34px] rounded-full border border-black/[0.14] text-[12px] font-medium hover:bg-black/[0.04] transition-all flex-shrink-0">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="4" y1="6" x2="20" y2="6"/><circle cx="16" cy="6" r="3" fill="currentColor" stroke="none"/>
+            <line x1="4" y1="12" x2="20" y2="12"/><circle cx="8" cy="12" r="3" fill="currentColor" stroke="none"/>
+            <line x1="4" y1="18" x2="20" y2="18"/><circle cx="16" cy="18" r="3" fill="currentColor" stroke="none"/>
+          </svg>
+          <span>Filtreler</span>
+        </button>
+
+        <!-- Scrollable pills -->
+        <div id="category-pills" class="flex items-center gap-2 py-0.5 flex-1 min-w-0"></div>
+
+        <!-- Sağ araçlar -->
+        <div class="flex items-center gap-1.5 flex-shrink-0">
+          <div class="relative">
+            <button id="sort-toggle" type="button" class="flex items-center gap-1.5 px-3 h-[34px] rounded-full border border-black/[0.12] text-[12px] font-medium hover:bg-black/[0.04] transition">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 6h18M7 12h10M10 18h4"/>
+              </svg>
+              Sırala
+            </button>
+            <div id="sort-dropdown" class="hidden absolute right-0 top-10 w-56 rounded-xl border border-black/[0.1] bg-white shadow-xl py-1 z-40 text-[13px]">
+              <button type="button" data-sort="name_asc" class="sort-opt w-full text-left px-3 py-2">İsme göre (A → Z)</button>
+              <button type="button" data-sort="name_desc" class="sort-opt w-full text-left px-3 py-2">İsme göre (Z → A)</button>
+              <button type="button" data-sort="brand_asc" class="sort-opt w-full text-left px-3 py-2">Markaya göre (A → Z)</button>
+              <button type="button" data-sort="views_desc" class="sort-opt w-full text-left px-3 py-2">En çok görüntülenen</button>
+              <button type="button" data-sort="price_asc" class="sort-opt w-full text-left px-3 py-2">Fiyat (düşük → yüksek)</button>
+              <button type="button" data-sort="price_desc" class="sort-opt w-full text-left px-3 py-2">Fiyat (yüksek → düşük)</button>
+            </div>
+          </div>
+          <button id="compare-open-btn" type="button" class="flex items-center gap-1.5 px-3 h-[34px] rounded-full border border-black/[0.12] text-[12px] font-medium hover:bg-black/[0.04] transition">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="7" height="18" rx="1.5"/><rect x="14" y="3" width="7" height="18" rx="1.5"/>
+            </svg>
+            Karşılaştır
+          </button>
+        </div>
       </div>
 
       <!-- Active filter chips -->
@@ -420,6 +426,10 @@
     let compareMode = false;
     let comparePickOrder = [];
     let lastCompareProducts = [];
+    /** true: ürün grid'i yalnızca mimar favorilerini listeler (panelden ?compare=favorites). */
+    let compareFavoritesGridOnly = false;
+    /** Favori karşılaştırmasında grid + modal için birleşik ürün nesneleri (katalogda olmayan favoriler dahil). */
+    let compareFavoritesProductList = null;
 
     const FB_IMAGES = ['https://images.unsplash.com/photo-1600607686527-6fb886090705?q=80&w=800','https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?q=80&w=800','https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=800','https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=800','https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=800','https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?q=80&w=800'];
     function productImageUrl(p) {
@@ -451,27 +461,41 @@
     function closeCompareResult() {
       document.getElementById("compare-result-modal").classList.add("hidden");
     }
-    /** Seçimi güncelle, grid'i baştan yazma — görseller yanıp sönmesin */
+    /** Seçimi güncelle — grid'i baştan yazmadan badge + outline güncelle */
     function syncCompareCardVisuals() {
       document.querySelectorAll("#products-grid [data-product-id]").forEach((cardEl) => {
         let id = "";
-        try {
-          id = decodeURIComponent(cardEl.getAttribute("data-product-id") || "");
-        } catch (_) {}
+        try { id = decodeURIComponent(cardEl.getAttribute("data-product-id") || ""); } catch (_) {}
         const on = Boolean(id && comparePickOrder.includes(id));
-        const cb = cardEl.querySelector("input[data-compare-card]");
-        if (cb) cb.checked = on;
+
+        /* outline */
         if (!compareMode) {
-          cardEl.classList.remove("ring-2", "ring-transparent", "ring-black/75", "compare-card-shell");
-          return;
-        }
-        cardEl.classList.add("ring-2", "compare-card-shell");
-        if (on) {
-          cardEl.classList.add("ring-black/75");
-          cardEl.classList.remove("ring-transparent");
+          cardEl.classList.remove("outline", "outline-2", "outline-black", "outline-black/[0.08]");
+        } else if (on) {
+          cardEl.classList.add("outline", "outline-2", "outline-black");
+          cardEl.classList.remove("outline-black/[0.08]");
         } else {
-          cardEl.classList.remove("ring-black/75");
-          cardEl.classList.add("ring-transparent");
+          cardEl.classList.add("outline", "outline-2", "outline-black/[0.08]");
+          cardEl.classList.remove("outline-black");
+        }
+
+        /* overlay */
+        const overlay = cardEl.querySelector(".compare-overlay");
+        if (overlay) overlay.style.display = on ? "block" : "none";
+
+        /* badge — replace entirely */
+        const oldBadge = cardEl.querySelector(".compare-badge");
+        if (oldBadge) oldBadge.remove();
+        if (compareMode) {
+          const badge = document.createElement("span");
+          badge.className = "compare-badge absolute top-2.5 right-2.5 z-20 pointer-events-none flex h-6 w-6 items-center justify-center rounded-md shadow";
+          if (on) {
+            badge.style.cssText = "background:#1d1d1f;";
+            badge.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+          } else {
+            badge.style.cssText = "background:rgba(255,255,255,0.9);border:2px solid rgba(0,0,0,0.18);";
+          }
+          cardEl.appendChild(badge);
         }
       });
       updateCompareBar();
@@ -574,8 +598,12 @@
       doc.save(`archilink-karsilastirma-${Date.now()}.pdf`);
       showToast("PDF indirildi");
     }
+    function productByIdForCompare(id) {
+      return allProducts.find((x) => x.id === id) || (compareFavoritesProductList && compareFavoritesProductList.find((x) => x.id === id)) || null;
+    }
+
     function openCompareResult() {
-      const prods = comparePickOrder.map(id => allProducts.find(x => x.id === id)).filter(Boolean);
+      const prods = comparePickOrder.map((id) => productByIdForCompare(id)).filter(Boolean);
       if (prods.length < 2) return;
       lastCompareProducts = prods;
       const tech = (p) => p.technical || {};
@@ -640,6 +668,10 @@
           window.location.href = "/mimar-giris.html";
           return;
         }
+        activeCategory = "";
+        searchQuery = "";
+        const siMain = document.getElementById("search-input");
+        if (siMain) siMain.value = "";
         const favs = await AG.getFavoriteProducts();
         const merged = (favs || []).map(f => {
           const full = allProducts.find(x => x.id === f.id);
@@ -659,6 +691,8 @@
           };
         });
         compareMode = true;
+        compareFavoritesGridOnly = true;
+        compareFavoritesProductList = merged;
         comparePickOrder = merged.slice(0, 5).map((x) => x.id);
         updateCompareBar();
         renderCategoryPills();
@@ -681,22 +715,29 @@
       const fb = FB_IMAGES[Math.abs(String(p.id || "").split("").reduce((a, c) => a + c.charCodeAt(0), 0) || 0) % FB_IMAGES.length];
       const imgSrc = esc(p.image || fb);
       const inCompare = comparePickOrder.includes(p.id);
-      const ringShell = compareMode ? `ring-2 compare-card-shell ${inCompare ? "ring-black/75" : "ring-transparent"}` : "";
-      const compareLabel = compareMode
-        ? `<label data-compare-label class="absolute bottom-2 left-2 z-20 flex items-center gap-1.5 rounded-lg bg-white/95 border border-black/12 px-2 py-1 shadow-sm cursor-pointer text-[11px] font-medium text-[#1d1d1f]">
-             <input type="checkbox" class="w-3.5 h-3.5 rounded border-black/20 accent-black pointer-events-none" data-compare-card="${encodeURIComponent(p.id)}" ${inCompare ? "checked" : ""}>
-             Seç</label>`
+      const ringShell = compareMode ? `outline outline-2 ${inCompare ? "outline-black" : "outline-black/[0.08]"}` : "";
+      /* Karşılaştır modu: sağ üst checkmark badge + tüm kart overlay */
+      const compareBadge = compareMode
+        ? (inCompare
+            ? `<span class="absolute top-2.5 right-2.5 z-20 flex h-6 w-6 items-center justify-center rounded-md bg-[#1d1d1f] shadow pointer-events-none">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+               </span>`
+            : `<span class="absolute top-2.5 right-2.5 z-20 flex h-6 w-6 items-center justify-center rounded-md bg-white/90 border-2 border-black/[0.18] shadow pointer-events-none"></span>`)
+        : "";
+      const compareOverlay = compareMode
+        ? `<span class="compare-overlay absolute inset-0 z-10 bg-black/[0.04] pointer-events-none rounded-2xl" style="${inCompare ? "" : "display:none"}"></span>`
         : "";
       const imgHover = compareMode ? "" : "group-hover:scale-[1.03]";
       return `
-        <div data-product-id="${encodeURIComponent(p.id)}" class="card-lift group rounded-2xl overflow-hidden border border-black/[0.08] bg-white flex flex-col relative ${ringShell} ${compareMode ? "cursor-pointer" : ""}">
+        <div data-product-id="${encodeURIComponent(p.id)}" class="card-lift group rounded-2xl overflow-hidden border border-black/[0.08] bg-white flex flex-col relative ${ringShell} ${compareMode ? "cursor-pointer select-none" : ""}">
+          ${compareOverlay}
+          ${compareBadge}
           <div class="relative h-48 bg-[#f5f5f7] overflow-hidden">
           <a href="/urun-unica-baffle.html?id=${encodeURIComponent(p.id)}" data-view="${p.id}" class="block h-full w-full">
             <img src="${imgSrc}"
               onerror="const fb=['https://images.unsplash.com/photo-1600607686527-6fb886090705?q=80&w=800','https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?q=80&w=800','https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=800','https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=800','https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=800','https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?q=80&w=800'];this.onerror=null;this.src=fb[Math.abs((this.alt||'').split('').reduce((a,c)=>a+c.charCodeAt(0),0))%fb.length];"
               alt="${esc(p.name)}" class="w-full h-full object-cover ${imgHover} transition-transform duration-500 ease-out">
           </a>
-          ${compareLabel}
           </div>
           <div class="p-4 flex flex-col flex-1">
             <h3 class="text-[14px] font-semibold leading-snug">${p.name}</h3>
@@ -704,7 +745,7 @@
             <a href="/urun-unica-baffle.html?id=${encodeURIComponent(p.id)}" class="product-detail-link mt-3 w-full h-8 flex items-center justify-center bg-[#1d1d1f] text-white text-[12px] font-medium rounded-lg hover:bg-[#3a3a3c] transition relative z-[1]">Ürün Detayı</a>
           </div>
           ${
-            architectSession
+            architectSession && !compareMode
               ? `<button data-fav-product="${p.id}" title="${isFav ? "Favorilerden çıkar" : "Favorilere ekle"}" class="absolute top-3 left-3 w-8 h-8 rounded-full border border-black/15 bg-white/95 flex items-center justify-center transition-all opacity-0 group-hover:opacity-100" style="color:${isFav ? '#111' : '#bbb'}">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="${isFav ? "#111" : "none"}" stroke="${isFav ? "#111" : "#bbb"}" stroke-width="2"
                     onmouseover="this.setAttribute('fill','#555');this.setAttribute('stroke','#555')"
@@ -715,7 +756,7 @@
               : ""
           }
           ${
-            architectSession
+            architectSession && !compareMode
               ? `<button data-add-board="${p.id}" class="absolute top-3 right-3 w-8 h-8 rounded-full border border-black/15 bg-white/95 text-[#6e6e73] opacity-0 group-hover:opacity-100 hover:bg-black hover:text-white hover:border-black transition flex items-center justify-center" title="Panoya ekle">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                 </button>`
@@ -1013,12 +1054,16 @@
       // Toggle behavior: second click exits compare mode directly.
       if (!compareMode) {
         compareMode = true;
+        compareFavoritesGridOnly = false;
+        compareFavoritesProductList = null;
         updateCompareBar();
         render();
         showToast("Karşılaştırmak için kartlardaki kutucuğu işaretle (en fazla 5).");
         return;
       }
       compareMode = false;
+      compareFavoritesGridOnly = false;
+      compareFavoritesProductList = null;
       comparePickOrder = [];
       updateCompareBar();
       render();
@@ -1026,6 +1071,8 @@
 
     document.getElementById("compare-bar-cancel").addEventListener("click", () => {
       compareMode = false;
+      compareFavoritesGridOnly = false;
+      compareFavoritesProductList = null;
       comparePickOrder = [];
       updateCompareBar();
       render(); /* mod kapandı — kutucukları kaldırmak için tam çizim */
@@ -1038,7 +1085,6 @@
     document.getElementById("products-grid").addEventListener("click", e => {
       if (!compareMode) return;
       if (e.target.closest("[data-fav-product], [data-add-board]")) return;
-      if (e.target.closest("[data-compare-label], [data-compare-card]")) return;
       if (e.target.closest("a.product-detail-link")) return;
       const card = e.target.closest("[data-product-id]");
       if (!card) return;
@@ -1049,23 +1095,6 @@
       e.preventDefault();
       e.stopPropagation();
     }, true);
-
-    document.getElementById("products-grid").addEventListener("change", e => {
-      const cb = e.target.closest("[data-compare-card]");
-      if (!cb || !compareMode) return;
-      const id = decodeURIComponent(cb.getAttribute("data-compare-card") || "");
-      if (cb.checked) {
-        if (comparePickOrder.length >= 5 && !comparePickOrder.includes(id)) {
-          cb.checked = false;
-          showToast("En fazla 5 ürün seçebilirsin.");
-          return;
-        }
-        if (!comparePickOrder.includes(id)) comparePickOrder.push(id);
-      } else {
-        comparePickOrder = comparePickOrder.filter((x) => x !== id);
-      }
-      syncCompareCardVisuals();
-    });
 
     document.getElementById("compare-result-modal").addEventListener("click", e => {
       if (e.target.closest("[data-compare-result-close]")) closeCompareResult();
@@ -1141,27 +1170,33 @@
       return set.has(boolVal ? "Var" : "Yok");
     }
 
+    function productMatchesActiveFilters(p) {
+      const { main, sub } = getTaxonomy(p);
+      const catKey = sub || main;
+
+      if (activeCategory && catKey !== activeCategory && main !== activeCategory) return false;
+      if (filters.brand?.size && !filters.brand.has(p.brandName || "")) return false;
+      if (!matchBool(filters.hasPdf, Boolean(p.files?.pdfUrl || p.hasPdf))) return false;
+      if (!matchBool(filters.hasCad, Boolean(p.files?.cadUrl || p.hasCad))) return false;
+      const fire = (p.technical?.fireClass || "").trim();
+      if (filters.alev?.size && !filters.alev.has(fire)) return false;
+      if (filters.priceMin && p.price < filters.priceMin) return false;
+      if (filters.priceMax && p.price > filters.priceMax) return false;
+
+      if (searchQuery) {
+        const haystack = (p.name + " " + p.category + " " + (p.spec || "") + " " + (p.brandName || "") + " " + JSON.stringify(p.technical || {})).toLowerCase();
+        const words = searchQuery.toLowerCase().trim().split(/\s+/);
+        if (!words.every(w => haystack.includes(w))) return false;
+      }
+      return true;
+    }
+
     function filtered() {
-      return allProducts.filter(p => {
-        const { main, sub } = getTaxonomy(p);
-        const catKey = sub || main;
-
-        if (activeCategory && catKey !== activeCategory && main !== activeCategory) return false;
-        if (filters.brand?.size && !filters.brand.has(p.brandName || "")) return false;
-        if (!matchBool(filters.hasPdf, Boolean(p.files?.pdfUrl || p.hasPdf))) return false;
-        if (!matchBool(filters.hasCad, Boolean(p.files?.cadUrl || p.hasCad))) return false;
-        const fire = (p.technical?.fireClass || "").trim();
-        if (filters.alev?.size && !filters.alev.has(fire)) return false;
-        if (filters.priceMin && p.price < filters.priceMin) return false;
-        if (filters.priceMax && p.price > filters.priceMax) return false;
-
-        if (searchQuery) {
-          const haystack = (p.name + " " + p.category + " " + (p.spec || "") + " " + (p.brandName || "") + " " + JSON.stringify(p.technical || {})).toLowerCase();
-          const words = searchQuery.toLowerCase().trim().split(/\s+/);
-          if (!words.every(w => haystack.includes(w))) return false;
-        }
-        return true;
-      });
+      const source =
+        compareMode && compareFavoritesGridOnly && compareFavoritesProductList !== null
+          ? compareFavoritesProductList
+          : allProducts;
+      return source.filter(productMatchesActiveFilters);
     }
 
     // ── Render products ──
@@ -1182,7 +1217,7 @@
         btn.addEventListener("click", async e => {
           e.preventDefault(); e.stopPropagation();
           const id = btn.dataset.favProduct;
-          const product = allProducts.find(x => x.id === id);
+          const product = allProducts.find((x) => x.id === id) || compareFavoritesProductList?.find((x) => x.id === id);
           if (!product) return;
           const res = await AG.toggleFavoriteProduct({
             id: product.id, name: product.name, image: product.image,
@@ -1202,7 +1237,7 @@
       grid.querySelectorAll("[data-add-board]").forEach(btn => {
         btn.addEventListener("click", e => {
           e.preventDefault(); e.stopPropagation();
-          const product = allProducts.find(x => x.id === btn.dataset.addBoard);
+          const product = allProducts.find((x) => x.id === btn.dataset.addBoard) || compareFavoritesProductList?.find((x) => x.id === btn.dataset.addBoard);
           if (!product) return;
           openBoardModal({ id: product.id, name: product.name, image: product.image });
         });
