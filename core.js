@@ -456,6 +456,7 @@
     });
 
     lsWrite(LS_BRAND_SESSION_KEY, null);
+    const sessionReady = Boolean(data.session);
     const session = {
       id: data.user.id,
       name: safeName,
@@ -463,10 +464,12 @@
       office: safeOffice,
       architectProfileType: safeProfileType,
     };
-    if (data.session) setArchitectSession(session);
+    if (sessionReady) setArchitectSession(session);
+    else setArchitectSession(null);
+
     return {
       ok: true,
-      sessionReady: Boolean(data.session),
+      sessionReady,
       architect: session,
     };
   };
@@ -490,7 +493,6 @@
     }
 
     lsWrite(LS_BRAND_SESSION_KEY, null);
-    setArchitectSession(null);
     const session = {
       id: data.user.id,
       name: profile.name || data.user.email.split("@")[0],
@@ -498,6 +500,7 @@
       office: profile.office || "",
       architectProfileType: profile.architect_profile_type || "individual",
     };
+    // Header (layout.js) ve eski akışlar localStorage'dan okuyor; Supabase oturumuyla senkron tut.
     setArchitectSession(session);
     return { ok: true, architect: session };
   };

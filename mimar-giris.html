@@ -27,10 +27,10 @@
         <p class="text-[12px] uppercase tracking-[0.14em] text-[#6e6e73]">Mimar Hesabı</p>
         <h1 class="text-[30px] font-semibold mt-3">Giriş Yap</h1>
         <p class="text-[14px] text-[#6e6e73] mt-2">Favori ürün/proje, klasör ve moodboard alanına eriş.</p>
-        <form id="login-form" class="mt-6 space-y-3">
-          <input name="email" type="email" required placeholder="E-posta" class="w-full h-11 rounded-xl border border-black/15 px-3 text-[14px]">
-          <input name="password" type="password" required placeholder="Şifre" class="w-full h-11 rounded-xl border border-black/15 px-3 text-[14px]">
-          <button class="w-full h-11 rounded-xl bg-black text-white text-[14px] font-semibold">Giriş Yap</button>
+        <form id="login-form" class="mt-6 space-y-3" autocomplete="on">
+          <input name="email" type="email" required autocomplete="username" placeholder="E-posta" class="w-full h-11 rounded-xl border border-black/15 px-3 text-[14px]">
+          <input name="password" type="password" required autocomplete="current-password" placeholder="Şifre" class="w-full h-11 rounded-xl border border-black/15 px-3 text-[14px]">
+          <button type="submit" class="w-full h-11 rounded-xl bg-black text-white text-[14px] font-semibold">Giriş Yap</button>
         </form>
       </article>
       <article class="rounded-3xl border border-black/10 bg-[#f5f5f7] p-6 lg:p-8 flex flex-col justify-between min-h-[340px]">
@@ -72,7 +72,7 @@
           <input id="office-input" name="office" type="text" placeholder="Ofis / Stüdyo (opsiyonel)" class="w-full h-11 rounded-xl border border-black/15 px-3 text-[14px]">
           <input name="email" type="email" required placeholder="E-posta" class="w-full h-11 rounded-xl border border-black/15 px-3 text-[14px]">
           <input name="password" type="password" required placeholder="Şifre" class="w-full h-11 rounded-xl border border-black/15 px-3 text-[14px]">
-          <button class="w-full h-11 rounded-xl bg-black text-white text-[14px] font-semibold">Hesap Oluştur</button>
+          <button type="submit" class="w-full h-11 rounded-xl bg-black text-white text-[14px] font-semibold">Hesap Oluştur</button>
         </form>
       </article>
     </section>
@@ -85,29 +85,34 @@
   <script>
     const msg = document.getElementById("msg");
     const setMsg = (text, ok = false) => {
+      if (!msg) return;
       msg.textContent = text || "";
       msg.className = `max-w-[1200px] mx-auto mt-4 text-[14px] ${ok ? "text-[#1f6f45]" : "text-[#6e6e73]"}`;
     };
 
     async function boot() {
+      if (typeof AG === "undefined") {
+        setMsg("Oturum altyapısı yüklenemedi. Sayfayı yenileyin veya core.js erişimini kontrol edin.");
+        return;
+      }
       await AG.ready;
       const session = await AG.getSessionArchitect();
       if (session) {
-        location.href = "/mimar-paneli.html";
+        location.replace("/mimar-paneli.html");
         return;
       }
 
       const loginScreen = document.getElementById("login-screen");
       const registerScreen = document.getElementById("register-screen");
       const showRegister = () => {
-        loginScreen.classList.add("hidden");
-        registerScreen.classList.remove("hidden");
-        msg.textContent = "";
+        if (loginScreen) loginScreen.classList.add("hidden");
+        if (registerScreen) registerScreen.classList.remove("hidden");
+        if (msg) msg.textContent = "";
       };
       const showLogin = () => {
-        registerScreen.classList.add("hidden");
-        loginScreen.classList.remove("hidden");
-        msg.textContent = "";
+        if (registerScreen) registerScreen.classList.add("hidden");
+        if (loginScreen) loginScreen.classList.remove("hidden");
+        if (msg) msg.textContent = "";
       };
       const syncScreenFromHash = () => {
         if (location.hash === "#mimar-kayit") showRegister();
@@ -132,9 +137,11 @@
       const syncArchitectType = () => {
         const selected = document.querySelector("input[name='architectProfileType']:checked")?.value || "individual";
         const isOffice = selected === "office";
-        officeNote.classList.toggle("hidden", !isOffice);
-        officeInput.required = isOffice;
-        officeInput.placeholder = isOffice ? "Ofis / Stüdyo adı *" : "Ofis / Stüdyo (opsiyonel)";
+        if (officeNote) officeNote.classList.toggle("hidden", !isOffice);
+        if (officeInput) {
+          officeInput.required = isOffice;
+          officeInput.placeholder = isOffice ? "Ofis / Stüdyo adı *" : "Ofis / Stüdyo (opsiyonel)";
+        }
         typeCards.forEach((card) => {
           const active = card.dataset.architectTypeCard === selected;
           card.classList.toggle("bg-black", active);
@@ -150,36 +157,55 @@
       });
       syncArchitectType();
 
-      document.getElementById("login-form").addEventListener("submit", async (e) => {
+      const loginForm = document.getElementById("login-form");
+      if (!loginForm) {
+        setMsg("Giriş formu bulunamadı.");
+        return;
+      }
+      loginForm.addEventListener("submit", async (e) => {
         e.preventDefault();
+        const submitBtn = loginForm.querySelector('button[type="submit"]');
+        if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = "Giriş yapılıyor…"; }
         const fd = new FormData(e.currentTarget);
-        const res = await AG.loginArchitect({
-          email: String(fd.get("email") || ""),
-          password: String(fd.get("password") || "")
-        });
-        if (!res.ok) { setMsg(res.message || "Giriş başarısız."); return; }
-        setMsg("Giriş başarılı. Panele yönlendiriliyorsun...", true);
-        setTimeout(() => { location.href = "/mimar-paneli.html"; }, 350);
+        try {
+          const res = await AG.loginArchitect({
+            email: String(fd.get("email") || ""),
+            password: String(fd.get("password") || "")
+          });
+          if (!res.ok) {
+            setMsg(res.message || "Giriş başarısız.");
+            if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = "Giriş Yap"; }
+            return;
+          }
+          setMsg("Giriş başarılı. Panele yönlendiriliyorsun...", true);
+          location.href = "/mimar-paneli.html";
+        } catch (err) {
+          setMsg("Bağlantı hatası. Ağı ve tarayıcı konsolunu kontrol edin.");
+          if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = "Giriş Yap"; }
+        }
       });
 
-      document.getElementById("register-form").addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const fd = new FormData(e.currentTarget);
-        const res = await AG.registerArchitect({
-          name: String(fd.get("name") || ""),
-          office: String(fd.get("office") || ""),
-          architectProfileType: String(fd.get("architectProfileType") || "individual"),
-          email: String(fd.get("email") || ""),
-          password: String(fd.get("password") || "")
+      const regForm = document.getElementById("register-form");
+      if (regForm) {
+        regForm.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const fd = new FormData(e.currentTarget);
+          const res = await AG.registerArchitect({
+            name: String(fd.get("name") || ""),
+            office: String(fd.get("office") || ""),
+            architectProfileType: String(fd.get("architectProfileType") || "individual"),
+            email: String(fd.get("email") || ""),
+            password: String(fd.get("password") || "")
+          });
+          if (!res.ok) { setMsg(res.message || "Kayıt oluşturulamadı."); return; }
+          if (!res.sessionReady) {
+            setMsg("Hesabın oluşturuldu. Devam etmek için e-posta kutundaki doğrulama bağlantısını açıp giriş yap.", true);
+            return;
+          }
+          setMsg("Hesap oluşturuldu. Panele yönlendiriliyorsun...", true);
+          location.href = "/mimar-paneli.html";
         });
-        if (!res.ok) { setMsg(res.message || "Kayıt oluşturulamadı."); return; }
-        if (!res.sessionReady) {
-          setMsg("Hesabın oluşturuldu. Devam etmek için e-posta kutundaki doğrulama bağlantısını açıp giriş yap.", true);
-          return;
-        }
-        setMsg("Hesap oluşturuldu. Panele yönlendiriliyorsun...", true);
-        setTimeout(() => { location.href = "/mimar-paneli.html"; }, 350);
-      });
+      }
     }
 
     boot().catch(() => setMsg("Sayfa yüklenirken bir sorun oluştu."));
