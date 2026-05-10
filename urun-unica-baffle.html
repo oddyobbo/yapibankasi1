@@ -23,35 +23,149 @@
     html.ag-dark .ag-card { background: #1a1b1e; border-color: rgba(255,255,255,0.08); }
     html.ag-dark .ag-muted { color: #98989e; }
     html.ag-dark .ag-subtle { background: #141518; }
-    /* Gövde tipi: urunler.html .cat-pill — archilink-ship.mdc “Katalog tipografi” */
+
     .ag-product-detail {
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
     }
-    .ag-pill-body {
-      font-size: 13px;
-      font-weight: 500;
-      color: #3a3a3c;
-      letter-spacing: normal;
-      line-height: 1.45;
+
+    /* ── Ürün detay tasarım sistemi (yalnızca bu sayfa) ── */
+    .ag-detail-section {
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: 16px;
+      padding: 24px 32px;
+      background: #fff;
     }
-    html.ag-dark .ag-pill-body { color: #d7dce6; }
-    .ag-pill-meta {
-      font-size: 11px;
-      font-weight: 400;
-      color: #3a3a3c;
-      opacity: 0.6;
-      letter-spacing: normal;
-      line-height: 1.4;
+    html.ag-dark .ag-detail-section {
+      background: #1a1b1e;
+      border-color: rgba(255, 255, 255, 0.08);
     }
-    html.ag-dark .ag-pill-meta { color: #c5cad3; opacity: 0.9; }
-    .ag-section-title {
+
+    .ag-detail-section-title {
       font-size: 20px;
       font-weight: 600;
       letter-spacing: -0.02em;
-      line-height: 1.2;
-      color: #111;
+      line-height: 1.25;
+      color: #0b0b0c;
+      margin: 0 0 12px 0;
     }
-    html.ag-dark .ag-section-title { color: #eceef2; }
+    html.ag-dark .ag-detail-section-title {
+      color: #f5f5f7;
+    }
+
+    .ag-detail-info-table {
+      margin: 0;
+    }
+    .ag-detail-info-row {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 4px 16px;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    }
+    html.ag-dark .ag-detail-info-row {
+      border-bottom-color: rgba(255, 255, 255, 0.08);
+    }
+    .ag-detail-info-row:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+    @media (min-width: 640px) {
+      .ag-detail-info-row {
+        grid-template-columns: minmax(180px, 240px) 1fr;
+        align-items: baseline;
+      }
+    }
+
+    /* Label: value ile aynı puntoda, daha güçlü ağırlık; soluk meta stili yok */
+    .ag-detail-label {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      line-height: 1.45;
+      color: #1d1d1f;
+    }
+    html.ag-dark .ag-detail-label {
+      color: #eceef2;
+    }
+    .ag-detail-value {
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: normal;
+      line-height: 1.45;
+      color: #3a3a3c;
+    }
+    html.ag-dark .ag-detail-value {
+      color: #c5c5c7;
+    }
+
+    .ag-detail-placeholder {
+      font-size: 13px;
+      font-weight: 500;
+      line-height: 1.45;
+      color: #6e6e73;
+      margin: 0;
+    }
+    html.ag-dark .ag-detail-placeholder {
+      color: #98989e;
+    }
+
+    .ag-detail-file-group-title {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #1d1d1f;
+      margin: 0 0 6px 0;
+    }
+    html.ag-dark .ag-detail-file-group-title {
+      color: #eceef2;
+    }
+    .ag-detail-file-group + .ag-detail-file-group {
+      margin-top: 12px;
+    }
+    .ag-detail-file-list {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    .ag-detail-file-list li {
+      margin: 0 0 4px 0;
+    }
+    .ag-detail-file-list a {
+      font-size: 13px;
+      font-weight: 500;
+      color: #0071e3;
+      text-decoration: none;
+    }
+    .ag-detail-file-list a:hover {
+      text-decoration: underline;
+    }
+    html.ag-dark .ag-detail-file-list a {
+      color: #64b5f6;
+    }
+
+    .ag-detail-usage-list {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    .ag-detail-usage-list li {
+      display: flex;
+      gap: 8px;
+      align-items: baseline;
+      margin-bottom: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      line-height: 1.45;
+      color: #3a3a3c;
+    }
+    html.ag-dark .ag-detail-usage-list li {
+      color: #c5c5c7;
+    }
+    .ag-detail-usage-list li span:first-child {
+      color: #6e6e73;
+      flex-shrink: 0;
+    }
   </style>
 </head>
 <body data-page="products" class="ag-product-detail bg-[#f5f5f7] text-[#111] font-sans min-h-screen">
@@ -59,68 +173,64 @@
     <div class="w-full min-h-screen bg-white overflow-hidden">
       <div id="site-header"></div>
 
-      <!-- Yatay boşluk: layout.js site-header iç satırı ile aynı (logo ↔ profil) — bkz. archilink-ship.mdc -->
       <main class="w-full px-4 sm:px-6 lg:px-10 py-5 md:py-6 space-y-4 md:space-y-6">
-        <!-- Başlık + galeri/marka aynı blokta; marka kartı galeri çerçevesiyle üstten hizalı -->
         <section class="space-y-4">
-        <header class="space-y-2">
-          <p id="hero-category" class="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#6e6e73] ag-muted">Kategori</p>
-          <h1 id="hero-title" class="text-[28px] sm:text-[36px] lg:text-[40px] leading-[1.12] font-semibold tracking-tight">Ürün adı</h1>
-        </header>
+          <header class="space-y-2">
+            <p id="hero-category" class="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#6e6e73] ag-muted">Kategori</p>
+            <h1 id="hero-title" class="text-[28px] sm:text-[36px] lg:text-[40px] leading-[1.12] font-semibold tracking-tight">Ürün adı</h1>
+          </header>
 
-        <div class="grid lg:grid-cols-[1fr_min(400px,100%)] gap-4 lg:gap-6 items-start">
-          <div class="rounded-2xl border border-black/[0.1] bg-[#fafafa] ag-card overflow-hidden min-w-0">
-            <div class="relative gallery-main w-full bg-[#ececee]">
-              <img id="gallery-main-img" src="" alt="" class="w-full h-full object-cover">
-              <button type="button" id="gallery-prev" aria-label="Önceki görsel" class="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 shadow-md border border-black/[0.06] flex items-center justify-center hover:bg-white transition z-10">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-              </button>
-              <button type="button" id="gallery-next" aria-label="Sonraki görsel" class="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 shadow-md border border-black/[0.06] flex items-center justify-center hover:bg-white transition z-10">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
-              </button>
-            </div>
-            <div id="gallery-thumbs" class="flex gap-2 p-2 overflow-x-auto ag-subtle border-t border-black/[0.06]"></div>
-          </div>
-
-          <aside class="rounded-2xl border border-black/[0.1] bg-[#fbfbfd] ag-card sticky top-8 p-6 lg:p-8 self-start min-w-0">
-            <div class="flex items-start gap-2">
-              <div id="brand-avatar" class="shrink-0 w-14 h-14 rounded-2xl bg-[#1d1d1f] text-white text-[20px] font-semibold flex items-center justify-center">M</div>
-              <div class="min-w-0 space-y-2">
-                <p class="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6e6e73] ag-muted">Marka / üretici</p>
-                <h2 id="brand-name" class="text-[20px] font-semibold tracking-tight truncate">—</h2>
-                <p class="ag-pill-body">Bu ürünün satıcısı. Teklif ve teknik konularda doğrudan iletişime geçebilirsiniz.</p>
+          <div class="grid lg:grid-cols-[1fr_min(400px,100%)] gap-4 lg:gap-6 items-start">
+            <div class="rounded-2xl border border-black/[0.1] bg-[#fafafa] ag-card overflow-hidden min-w-0">
+              <div class="relative gallery-main w-full bg-[#ececee]">
+                <img id="gallery-main-img" src="" alt="" class="w-full h-full object-cover">
+                <button type="button" id="gallery-prev" aria-label="Önceki görsel" class="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 shadow-md border border-black/[0.06] flex items-center justify-center hover:bg-white transition z-10">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+                </button>
+                <button type="button" id="gallery-next" aria-label="Sonraki görsel" class="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 shadow-md border border-black/[0.06] flex items-center justify-center hover:bg-white transition z-10">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                </button>
               </div>
+              <div id="gallery-thumbs" class="flex gap-2 p-2 overflow-x-auto ag-subtle border-t border-black/[0.06]"></div>
             </div>
-            <div class="mt-4 flex flex-col sm:flex-row gap-2">
-              <a id="btn-teklif" href="/iletisim-v2.html" class="inline-flex justify-center items-center h-11 px-5 rounded-full bg-[#1d1d1f] text-white text-[13px] font-semibold hover:bg-[#3a3a3c] transition">Teklif iste</a>
-              <a id="btn-iletisim" href="/iletisim-v2.html" class="inline-flex justify-center items-center h-11 px-5 rounded-full border border-black/[0.12] bg-white text-[13px] font-semibold hover:bg-black/[0.03] transition">İletişime geç</a>
+
+            <aside class="rounded-2xl border border-black/[0.1] bg-[#fbfbfd] ag-card sticky top-8 p-6 lg:p-8 self-start min-w-0">
+              <div class="flex items-start gap-2">
+                <div id="brand-avatar" class="shrink-0 w-14 h-14 rounded-2xl bg-[#1d1d1f] text-white text-[20px] font-semibold flex items-center justify-center">M</div>
+                <div class="min-w-0 space-y-2">
+                  <p class="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#6e6e73] ag-muted">Marka / üretici</p>
+                  <h2 id="brand-name" class="text-[20px] font-semibold tracking-tight truncate">—</h2>
+                  <p class="ag-detail-value">Bu ürünün satıcısı. Teklif ve teknik konularda doğrudan iletişime geçebilirsiniz.</p>
+                </div>
+              </div>
+              <div class="mt-4 flex flex-col sm:flex-row gap-2">
+                <a id="btn-teklif" href="/iletisim-v2.html" class="inline-flex justify-center items-center h-11 px-5 rounded-full bg-[#1d1d1f] text-white text-[13px] font-semibold hover:bg-[#3a3a3c] transition">Teklif iste</a>
+                <a id="btn-iletisim" href="/iletisim-v2.html" class="inline-flex justify-center items-center h-11 px-5 rounded-full border border-black/[0.12] bg-white text-[13px] font-semibold hover:bg-black/[0.03] transition">İletişime geç</a>
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        <section class="ag-detail-section ag-card space-y-2">
+          <h2 class="ag-detail-section-title">Ürün Açıklaması</h2>
+          <p id="product-description" class="ag-detail-value max-w-[820px]">—</p>
+          <p id="product-spec-snippet" class="hidden ag-detail-value max-w-[820px] border-t border-black/[0.06] pt-3 mt-3"></p>
+        </section>
+
+        <div id="inject-technical"></div>
+        <div id="inject-other"></div>
+
+        <section class="ag-detail-section ag-card">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10">
+            <div class="min-w-0">
+              <h2 class="ag-detail-section-title">Teknik Dosyalar</h2>
+              <div id="inject-files"></div>
             </div>
-          </aside>
-        </div>
-        </section>
-
-        <!-- Açıklama -->
-        <section class="rounded-2xl border border-black/[0.1] p-6 lg:p-8 ag-card space-y-2">
-          <h2 class="text-[13px] font-semibold uppercase tracking-[0.14em] text-[#6e6e73] ag-muted">Ürün açıklaması</h2>
-          <p id="product-description" class="ag-pill-body max-w-[820px]">—</p>
-          <p id="product-spec-snippet" class="hidden ag-pill-meta max-w-[820px] border-t border-black/[0.06] pt-2 mt-2"></p>
-        </section>
-
-        <!-- Teknik bloklar -->
-        <div id="technical-sections" class="space-y-4"></div>
-
-        <!-- Dosyalar -->
-        <section class="rounded-2xl border border-black/[0.1] p-6 lg:p-8 ag-card space-y-2">
-          <h2 class="ag-section-title">Teknik dosyalar</h2>
-          <p class="ag-pill-meta">PDF, 2D çizim ve 3D modeller — indirmek için tıklayın.</p>
-          <div id="files-row" class="mt-2 flex flex-wrap gap-2"></div>
-          <p id="files-empty" class="hidden ag-pill-meta mt-2">Bu ürün için yüklenmiş dosya yok. Talep için marka ile iletişime geçebilirsiniz.</p>
-        </section>
-
-        <!-- Kullanım alanları -->
-        <section class="rounded-2xl border border-black/[0.1] p-6 lg:p-8 ag-card space-y-2">
-          <h2 class="ag-section-title">Kullanım alanları</h2>
-          <ul id="usage-list" class="mt-2 grid sm:grid-cols-2 gap-2 ag-pill-body"></ul>
+            <div class="min-w-0">
+              <h2 class="ag-detail-section-title">Kullanım Alanları</h2>
+              <ul id="usage-list" class="ag-detail-usage-list"></ul>
+            </div>
+          </div>
         </section>
       </main>
       <div id="site-footer"></div>
@@ -289,27 +399,19 @@
       return keys;
     }
 
-    function sectionTitleForKind(kind) {
-      if (kind === "acoustic") return "Akustik ve yapısal özellikler";
-      if (kind === "lighting") return "Aydınlatma teknik özellikleri";
-      if (kind === "ceramic") return "Seramik / kaplama özellikleri";
-      if (kind === "facade") return "Cephe / panel özellikleri";
-      return "Teknik özellikler";
-    }
-
-    function renderDlRows(keys, technical) {
+    function renderInfoRows(keys, technical) {
       const rows = keys
         .map((k) => {
           const v = technical[k];
           if (v == null || v === "") return null;
           const label = KEY_LABELS[k] || k.replace(/([A-Z])/g, " $1").replace(/^./, (s) => s.toUpperCase());
-          return `<div class="grid grid-cols-1 sm:grid-cols-[200px_1fr] gap-2 sm:gap-4 py-2 border-b border-black/[0.06] last:border-0">
-            <dt class="ag-pill-meta">${esc(label)}</dt>
-            <dd class="ag-pill-body">${esc(String(v))}</dd>
+          return `<div class="ag-detail-info-row">
+            <div class="ag-detail-label">${esc(label)}</div>
+            <div class="ag-detail-value">${esc(String(v))}</div>
           </div>`;
         })
         .filter(Boolean);
-      return rows.length ? `<dl>${rows.join("")}</dl>` : "";
+      return rows.join("");
     }
 
     function parseOther(technical) {
@@ -327,57 +429,51 @@
       return [];
     }
 
-    function renderTechnicalSections(product) {
+    function buildTechnicalSection(product) {
       const technical = product.technical || {};
       const kind = categoryKind(product.category);
       const keys = sectionKeysForKind(kind, technical);
-      const mainDl = renderDlRows(keys, technical);
-      const other = parseOther(technical);
-      const blocks = [];
+      const body = renderInfoRows(keys, technical);
+      const inner = body
+        ? `<div class="ag-detail-info-table">${body}</div>`
+        : `<p class="ag-detail-placeholder">Bu ürün için teknik alanlar henüz girilmemiş.</p>`;
+      return `<section class="ag-detail-section ag-card">
+        <h2 class="ag-detail-section-title">Teknik Bilgiler</h2>
+        ${inner}
+      </section>`;
+    }
 
-      if (mainDl) {
-        blocks.push(`
-          <section class="rounded-2xl border border-black/[0.1] p-6 lg:p-8 ag-card space-y-2">
-            <h2 class="ag-section-title">${esc(sectionTitleForKind(kind))}</h2>
-            ${mainDl}
-          </section>`);
-      }
-
+    function buildOtherSection(product) {
+      const other = parseOther(product.technical || {});
+      let inner;
       if (other.length) {
         const rows = other.map(({ label, value }) => `
-          <div class="grid grid-cols-1 sm:grid-cols-[200px_1fr] gap-2 sm:gap-4 py-2 border-b border-black/[0.06] last:border-0">
-            <dt class="ag-pill-meta">${esc(label)}</dt>
-            <dd class="ag-pill-body">${esc(String(value))}</dd>
+          <div class="ag-detail-info-row">
+            <div class="ag-detail-label">${esc(label)}</div>
+            <div class="ag-detail-value">${esc(String(value))}</div>
           </div>`).join("");
-        blocks.push(`
-          <section class="rounded-2xl border border-black/[0.1] p-6 lg:p-8 ag-card space-y-2">
-            <h2 class="ag-section-title">Diğer özellikler</h2>
-            <p class="ag-pill-meta">Şablonda ayrı alanı olmayan ek bilgiler.</p>
-            <dl>${rows}</dl>
-          </section>`);
+        inner = `<div class="ag-detail-info-table">${rows}</div>`;
+      } else {
+        inner = `<p class="ag-detail-placeholder">Henüz bilgi eklenmedi.</p>`;
       }
-
-      if (!blocks.length) {
-        blocks.push(`
-          <section class="rounded-2xl border border-black/[0.1] p-6 lg:p-8 ag-card space-y-2">
-            <h2 class="ag-section-title">Teknik özellikler</h2>
-            <p class="ag-pill-body">Bu ürün için detaylı teknik alanlar henüz girilmemiş. Markadan talep edebilirsiniz.</p>
-          </section>`);
-      }
-
-      return blocks.join("");
+      return `<section class="ag-detail-section ag-card">
+        <h2 class="ag-detail-section-title">Diğer Özellikler</h2>
+        ${inner}
+      </section>`;
     }
 
     function fallbackDocHref() {
       return contactHref({ konu: "dokuman", kaynak: "urun-detay" });
     }
 
-    function collectFileCards(p) {
+    function collectFilesByType(p) {
       const f = p.files || {};
-      const items = [];
+      const pdf = [];
+      const dwg = [];
+      const threeD = [];
       const pushPdf = (url, label) => {
         if (!url || !String(url).trim()) return;
-        items.push({ type: "pdf", href: String(url).trim(), label: label || "PDF doküman" });
+        pdf.push({ href: String(url).trim(), label: label || "PDF" });
       };
       if (Array.isArray(f.pdfs)) {
         f.pdfs.forEach((x) => {
@@ -391,74 +487,51 @@
 
       const pushDwg = (url, label) => {
         if (!url || !String(url).trim()) return;
-        items.push({ type: "dwg2d", href: String(url).trim(), label: label || "2D çizim (DWG/DXF)" });
+        dwg.push({ href: String(url).trim(), label: label || "DWG" });
       };
-      if (f.cadUrl) pushDwg(f.cadUrl, f.cadLabel || "2D çizim (DWG)");
+      if (f.cadUrl) pushDwg(f.cadUrl, f.cadLabel || "2D çizim");
       if (Array.isArray(f.dwgs)) f.dwgs.forEach((x, i) => {
-        if (typeof x === "string") pushDwg(x, `2D çizim ${i + 1}`);
-        else pushDwg(x?.url, x?.label || `2D çizim ${i + 1}`);
+        if (typeof x === "string") pushDwg(x, `DWG ${i + 1}`);
+        else pushDwg(x?.url, x?.label || `DWG ${i + 1}`);
       });
 
       const push3d = (url, label) => {
         if (!url || !String(url).trim()) return;
-        items.push({ type: "model3d", href: String(url).trim(), label: label || "3D model / BIM" });
+        threeD.push({ href: String(url).trim(), label: label || "3D" });
       };
       if (f.bimUrl) push3d(f.bimUrl, f.bimLabel || "3D / BIM");
       if (Array.isArray(f.models3d)) f.models3d.forEach((x, i) => {
-        if (typeof x === "string") push3d(x, `3D dosya ${i + 1}`);
-        else push3d(x?.url, x?.label || `3D dosya ${i + 1}`);
+        if (typeof x === "string") push3d(x, `3D ${i + 1}`);
+        else push3d(x?.url, x?.label || `3D ${i + 1}`);
       });
 
-      if (!items.length && (p.hasPdf || p.hasCad)) {
-        if (p.hasPdf) items.push({ type: "pdf", href: fallbackDocHref(), label: "PDF (talep üzerine)" });
-        if (p.hasCad) items.push({ type: "dwg2d", href: fallbackDocHref(), label: "2D çizim (talep üzerine)" });
-      }
+      if (!pdf.length && p.hasPdf) pdf.push({ href: fallbackDocHref(), label: "PDF (talep üzerine)" });
+      if (!dwg.length && p.hasCad) dwg.push({ href: fallbackDocHref(), label: "DWG (talep üzerine)" });
 
-      return items;
+      return { pdf, dwg, threeD };
     }
 
-    function fileCardIcon(type) {
-      if (type === "pdf") {
-        return `<span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-red-500/10 text-red-600">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 15h6M9 11h6"/></svg>
-        </span>`;
-      }
-      if (type === "dwg2d") {
-        return `<span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-cyan-500/10 text-cyan-700">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
-        </span>`;
-      }
-      return `<span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-violet-500/10 text-violet-700">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l10 6v8l-10 6-10-6V8z"/><path d="M12 22V12M2 8l10 6 10-6"/></svg>
-      </span>`;
+    function renderFileGroup(title, items) {
+      const lis = items.length
+        ? items.map((it) => {
+            const href = it.href;
+            const target = href.startsWith("http") ? "_blank" : "_self";
+            return `<li><a href="${esc(href)}" target="${target}" rel="noopener noreferrer">${esc(it.label)}</a></li>`;
+          }).join("")
+        : `<li><span class="ag-detail-placeholder">Henüz dosya eklenmedi</span></li>`;
+      return `<div class="ag-detail-file-group">
+        <h3 class="ag-detail-file-group-title">${esc(title)}</h3>
+        <ul class="ag-detail-file-list">${lis}</ul>
+      </div>`;
     }
 
-    function renderFileCards(product) {
-      const items = collectFileCards(product);
-      const row = document.getElementById("files-row");
-      const empty = document.getElementById("files-empty");
-      if (!items.length) {
-        row.innerHTML = "";
-        empty.classList.remove("hidden");
-        return;
-      }
-      empty.classList.add("hidden");
-      row.innerHTML = items.map((it) => {
-        const href = it.href;
-        const target = href.startsWith("http") ? "_blank" : "_self";
-        const typeLabel = it.type === "pdf" ? "PDF" : it.type === "dwg2d" ? "2D" : "3D";
-        return `<a href="${esc(href)}" target="${target}" rel="noopener noreferrer"
-          class="group flex min-w-[200px] max-w-[260px] flex-1 flex-col rounded-2xl border border-black/[0.1] bg-[#fafafa] ag-subtle p-3 transition hover:border-black/[0.2] hover:shadow-sm">
-          <div class="flex items-start gap-2">
-            ${fileCardIcon(it.type)}
-            <div class="min-w-0 flex-1 space-y-0.5">
-              <p class="ag-pill-meta uppercase tracking-wide">${esc(typeLabel)}</p>
-              <p class="ag-pill-body line-clamp-2">${esc(it.label)}</p>
-            </div>
-          </div>
-          <span class="mt-2 text-[13px] font-medium text-[#0071e3] group-hover:underline">İndir / aç →</span>
-        </a>`;
-      }).join("");
+    function buildFilesColumn(product) {
+      const { pdf, dwg, threeD } = collectFilesByType(product);
+      return (
+        renderFileGroup("PDF Dosyaları", pdf) +
+        renderFileGroup("DWG Dosyaları", dwg) +
+        renderFileGroup("3D Dosyaları", threeD)
+      );
     }
 
     function wireGallery(images, productName) {
@@ -534,11 +607,13 @@
       const images = productGalleryUrls(product);
       wireGallery(images.length ? images : ["https://images.unsplash.com/photo-1600607686527-6fb886090705?q=80&w=1200"], product.name);
 
-      document.getElementById("technical-sections").innerHTML = renderTechnicalSections(product);
-      renderFileCards(product);
+      document.getElementById("inject-technical").innerHTML = buildTechnicalSection(product);
+      document.getElementById("inject-other").innerHTML = buildOtherSection(product);
+      document.getElementById("inject-files").innerHTML = buildFilesColumn(product);
 
       const usageEl = document.getElementById("usage-list");
-      usageEl.innerHTML = usageByCategory(product.category).map((u) => `<li class="flex gap-2 items-baseline"><span class="ag-pill-meta">•</span><span class="ag-pill-body">${esc(u)}</span></li>`).join("");
+      usageEl.innerHTML = usageByCategory(product.category).map((u) =>
+        `<li><span>•</span><span>${esc(u)}</span></li>`).join("");
     });
   </script>
 </body>
