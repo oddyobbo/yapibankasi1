@@ -39,6 +39,21 @@ create table if not exists public.products (
   created_at timestamptz default now()
 );
 
+create table if not exists public.projects (
+  id uuid default gen_random_uuid() primary key,
+  brand_id uuid references public.profiles(id) on delete cascade,
+  brand_name text not null default '',
+  title text not null default '',
+  location text not null default '',
+  architect text not null default '',
+  year text not null default '',
+  description text not null default '',
+  image text not null default '',
+  materials jsonb default '[]',
+  status text default 'published' check (status in ('draft', 'published')),
+  created_at timestamptz default now()
+);
+
 create table if not exists public.visits (
   id uuid default gen_random_uuid() primary key,
   visitor_id text,
@@ -59,6 +74,7 @@ create table if not exists public.visits (
 
 alter table public.profiles enable row level security;
 alter table public.products enable row level security;
+alter table public.projects enable row level security;
 alter table public.visits enable row level security;
 
 -- Profiles: herkese okunur, sadece sahibi yazar
@@ -77,6 +93,15 @@ create policy "products_all_read" on public.products
 
 drop policy if exists "products_own_write" on public.products;
 create policy "products_own_write" on public.products
+  for all using (auth.uid() = brand_id) with check (auth.uid() = brand_id);
+
+-- Projects: yayındaki projeler herkese okunur, marka kendi projelerini yönetir
+drop policy if exists "projects_public_read" on public.projects;
+create policy "projects_public_read" on public.projects
+  for select using (status = 'published' or auth.uid() = brand_id);
+
+drop policy if exists "projects_own_write" on public.projects;
+create policy "projects_own_write" on public.projects
   for all using (auth.uid() = brand_id) with check (auth.uid() = brand_id);
 
 -- Visits: herkes ekler, sadece admin okur
@@ -149,6 +174,23 @@ alter table public.profiles add column if not exists job_title text default '';
 alter table public.profiles add column if not exists primary_category text default '';
 alter table public.profiles add column if not exists office text default '';
 update public.profiles set account_type = coalesce(nullif(trim(account_type), ''), 'brand') where account_type is null or trim(account_type) = '';
+
+-- ── Migration: marka projeleri tablosu (bir kez çalıştır) ─────────────────
+
+alter table public.projects add column if not exists brand_id uuid references public.profiles(id) on delete cascade;
+alter table public.projects add column if not exists brand_name text not null default '';
+alter table public.projects add column if not exists title text not null default '';
+alter table public.projects add column if not exists location text not null default '';
+alter table public.projects add column if not exists architect text not null default '';
+alter table public.projects add column if not exists year text not null default '';
+alter table public.projects add column if not exists description text not null default '';
+alter table public.projects add column if not exists image text not null default '';
+alter table public.projects add column if not exists materials jsonb default '[]';
+alter table public.projects add column if not exists status text default 'published';
+alter table public.projects add column if not exists created_at timestamptz default now();
+
+create index if not exists idx_projects_brand_created on public.projects(brand_id, created_at desc);
+create index if not exists idx_projects_status_created on public.projects(status, created_at desc);
 
 -- ── Auto-profile on signup trigger ───────────────────────────────────────
 
@@ -234,6 +276,72 @@ create policy "pf_select_own_or_brand" on public.product_favorites
   for select using (
     auth.uid() = user_id
     or exists (select 1 from public.products p where p.id = product_favorites.product_id and p.brand_id = auth.uid())
+  );
+
+-- ── Storage bucket'ları ve dosya erişim kuralları ─────────────────────────
+-- Ürün görselleri/dokümanları public okunur; markalar sadece kendi klasörlerine
+-- yükleme yapar. Kod dosyaları brand_id/benzersiz-dosya-adı şeklinde kaydeder.
+
+insert into storage.buckets (id, name, public)
+values
+  ('product-images', 'product-images', true),
+  ('product-documents', 'product-documents', true)
+on conflict (id) do update set public = excluded.public;
+
+drop policy if exists "product_images_public_read" on storage.objects;
+create policy "product_images_public_read" on storage.objects
+  for select using (bucket_id = 'product-images');
+
+drop policy if exists "product_documents_public_read" on storage.objects;
+create policy "product_documents_public_read" on storage.objects
+  for select using (bucket_id = 'product-documents');
+
+drop policy if exists "product_images_brand_upload" on storage.objects;
+create policy "product_images_brand_upload" on storage.objects
+  for insert with check (
+    bucket_id = 'product-images'
+    and auth.uid()::text = (storage.foldername(name))[1]
+  );
+
+drop policy if exists "product_documents_brand_upload" on storage.objects;
+create policy "product_documents_brand_upload" on storage.objects
+  for insert with check (
+    bucket_id = 'product-documents'
+    and auth.uid()::text = (storage.foldername(name))[1]
+  );
+
+drop policy if exists "product_images_brand_update" on storage.objects;
+create policy "product_images_brand_update" on storage.objects
+  for update using (
+    bucket_id = 'product-images'
+    and auth.uid()::text = (storage.foldername(name))[1]
+  ) with check (
+    bucket_id = 'product-images'
+    and auth.uid()::text = (storage.foldername(name))[1]
+  );
+
+drop policy if exists "product_documents_brand_update" on storage.objects;
+create policy "product_documents_brand_update" on storage.objects
+  for update using (
+    bucket_id = 'product-documents'
+    and auth.uid()::text = (storage.foldername(name))[1]
+  ) with check (
+    bucket_id = 'product-documents'
+    and auth.uid()::text = (storage.foldername(name))[1]
+  );
+
+drop policy if exists "product_images_brand_delete" on storage.objects;
+create policy "product_images_brand_delete" on storage.objects
+  for delete using (
+    bucket_id = 'product-images'
+    and auth.uid()::text = (storage.foldername(name))[1]
+  );
+
+drop policy if exists "product_documents_brand_delete" on storage.objects;
+create policy "product_documents_brand_delete" on storage.objects
+  for delete using (
+    bucket_id = 'product-documents'
+    and auth.uid()::text = (storage.foldername(name))[1]
   );
 
 -- ── Admin kullanıcısı ─────────────────────────────────────────────────────

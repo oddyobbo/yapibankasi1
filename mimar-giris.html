@@ -89,6 +89,10 @@
           password: String(fd.get("password") || "")
         });
         if (!res.ok) { setMsg(res.message || "Kayıt oluşturulamadı."); return; }
+        if (!res.sessionReady) {
+          setMsg("Hesabın oluşturuldu. Devam etmek için e-posta kutundaki doğrulama bağlantısını açıp giriş yap.", true);
+          return;
+        }
         setMsg("Hesap oluşturuldu. Panele yönlendiriliyorsun...", true);
         setTimeout(() => { location.href = "/mimar-paneli.html"; }, 350);
       });

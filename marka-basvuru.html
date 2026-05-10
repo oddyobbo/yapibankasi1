@@ -154,6 +154,14 @@
         this.textContent = "Hesap Oluştur ve Başvur";
         return;
       }
+      if (!result.sessionReady) {
+        errEl.textContent = "Hesabın oluşturuldu. Devam etmek için e-posta kutundaki doğrulama bağlantısını açıp marka girişi yap.";
+        errEl.classList.remove("hidden");
+        this.disabled = false;
+        this.textContent = "Hesap Oluştur ve Başvur";
+        return;
+      }
+      try { localStorage.setItem("ag_brand_session_v1", JSON.stringify(result.brand)); } catch {}
       window.location.href = "/marka-paneli.html";
 
     });

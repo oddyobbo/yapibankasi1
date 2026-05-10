@@ -41,6 +41,14 @@
     document.head.appendChild(s);
   });
 
+  const ensureOwnProfile = async (profile) => {
+    const sb = getSB();
+    if (!sb || !profile?.id) return;
+    try {
+      await sb.from("profiles").upsert(profile, { onConflict: "id" });
+    } catch {}
+  };
+
   // ── Visitor ID ──────────────────────────────────────────────────────────
   const ensureVisitorId = () => {
     let id = getCookie("ag_visitor_id") || lsRead("ag_visitor_id_v1", null);
@@ -98,7 +106,22 @@
     });
     if (error) return { ok: false, message: error.message };
     if (!data.user) return { ok: false, message: "Kayıt başarısız. Lütfen tekrar dene." };
-    return { ok: true, brand: { id: data.user.id, email: data.user.email, name: (name || "").trim() } };
+    await ensureOwnProfile({
+      id: data.user.id,
+      name: (name || "").trim(),
+      email: data.user.email || (email || "").trim(),
+      website: (website || "").trim(),
+      account_type: "brand",
+      contact_name: (contactName || "").trim(),
+      job_title: (jobTitle || "").trim(),
+      phone: (phone || "").trim(),
+      primary_category: (primaryCategory || "").trim(),
+    });
+    return {
+      ok: true,
+      sessionReady: Boolean(data.session),
+      brand: { id: data.user.id, email: data.user.email, name: (name || "").trim() },
+    };
   };
 
   const logoutBrand = async () => {
@@ -405,11 +428,19 @@
     });
     if (error) return { ok: false, message: error.message };
     if (!data.user) return { ok: false, message: "Kayıt başarısız. Lütfen tekrar dene." };
+    await ensureOwnProfile({
+      id: data.user.id,
+      name: safeName,
+      email: data.user.email || safeEmail,
+      account_type: "architect",
+      office: (office || "").trim(),
+    });
 
     lsWrite(LS_BRAND_SESSION_KEY, null);
     setArchitectSession(null);
     return {
       ok: true,
+      sessionReady: Boolean(data.session),
       architect: {
         id: data.user.id,
         name: safeName,
