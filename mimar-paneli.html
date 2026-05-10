@@ -172,11 +172,30 @@
       updateTabVisual();
     }
 
-    function cardTemplate(item, href, withBoardAction = false) {
+    function cardTemplate(item, href, withBoardAction = false, removeFavorite = null) {
       const safeProduct = encodeURIComponent(JSON.stringify({ id: item.id, name: item.name, image: item.image || "" }));
       const nm = escHtml(item.name || "Öğe");
+      const safeRemovePayload = encodeURIComponent(
+        JSON.stringify({
+          id: item.id,
+          name: item.name || "",
+          image: item.image || "",
+          url: item.url || href,
+          location: item.location || "",
+        })
+      );
+      const removeProductBtn =
+        removeFavorite === "product"
+          ? `<button type="button" data-remove-fav-product="${safeRemovePayload}" class="absolute left-3 top-3 z-10 inline-flex h-9 items-center rounded-full border border-black/[0.08] bg-white/95 px-3 text-[12px] font-semibold text-[#6e6e73] shadow-sm backdrop-blur-sm transition hover:border-[#b00020] hover:bg-[#b00020] hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3]">Kaldır</button>`
+          : "";
+      const removeProjectBtn =
+        removeFavorite === "project"
+          ? `<button type="button" data-remove-fav-project="${safeRemovePayload}" class="absolute right-3 top-3 z-10 inline-flex h-9 items-center rounded-full border border-black/[0.08] bg-white/95 px-3 text-[12px] font-semibold text-[#b00020] shadow-sm backdrop-blur-sm transition hover:bg-[#b00020] hover:text-white hover:border-transparent focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3]">Kaldır</button>`
+          : "";
       return `
         <article class="group relative overflow-hidden rounded-xl border border-black/[0.06] bg-white shadow-[0_2px_8px_rgba(0,0,0,0.06)] transition duration-300 hover:-translate-y-0.5 hover:border-black/[0.1] hover:shadow-[0_8px_24px_rgba(0,0,0,0.1)]">
+          ${removeProductBtn}
+          ${removeProjectBtn}
           <a href="${href}" class="block outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#0071e3]/40">
             <div class="aspect-[4/3] w-full overflow-hidden bg-[#f5f5f7]">
               <img src="${item.image || "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?q=80&w=1200&auto=format&fit=crop"}" class="h-full w-full object-cover transition duration-500 group-hover:scale-[1.02]" alt="${nm}">
@@ -186,7 +205,7 @@
               <p class="mt-2 text-[12px] font-medium uppercase tracking-[0.06em] text-[#6e6e73]">${new Date(item.savedAt || Date.now()).toLocaleDateString("tr-TR", { day: "numeric", month: "short", year: "numeric" })}</p>
             </div>
           </a>
-          ${withBoardAction ? `<button type="button" data-add-board="${safeProduct}" class="absolute right-3 top-3 inline-flex h-9 items-center gap-1.5 rounded-full border border-black/[0.08] bg-white/95 px-3 text-[12px] font-semibold text-[#1d1d1f] shadow-sm backdrop-blur-sm transition hover:bg-[#0071e3] hover:text-white hover:border-transparent focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3]">
+          ${withBoardAction ? `<button type="button" data-add-board="${safeProduct}" class="absolute right-3 top-3 z-10 inline-flex h-9 items-center gap-1.5 rounded-full border border-black/[0.08] bg-white/95 px-3 text-[12px] font-semibold text-[#1d1d1f] shadow-sm backdrop-blur-sm transition hover:bg-[#0071e3] hover:text-white hover:border-transparent focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3]">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
             Panoya
           </button>` : ""}
@@ -267,7 +286,7 @@
                 Karşılaştır
               </a>
             </div>
-            <div class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">${list.map((x) => cardTemplate(x, x.url || "/urunler.html", true)).join("")}</div>`
+            <div class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">${list.map((x) => cardTemplate(x, x.url || "/urunler.html", true, "product")).join("")}</div>`
           : `<a href="/urunler.html" class="ag-arch-hit group">
               ${hitHeartIcon}
               <span class="text-[18px] font-semibold tracking-[-0.02em] text-[#1d1d1f]">Ürünlere git, favori seç</span>
@@ -284,7 +303,7 @@
           panelCache.favProjects = list;
         }
         content.innerHTML = list.length
-          ? `<div class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">${list.map((x) => cardTemplate(x, x.url || "/projeler.html")).join("")}</div>`
+          ? `<div class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">${list.map((x) => cardTemplate(x, x.url || "/projeler.html", false, "project")).join("")}</div>`
           : `<a href="/projeler.html" class="ag-arch-hit group">
               ${hitPlusIcon}
               <span class="text-[18px] font-semibold tracking-[-0.02em] text-[#1d1d1f]">Projelere git</span>
@@ -310,7 +329,7 @@
           <div class="mb-8 flex flex-col gap-4 border-b border-black/[0.06] pb-8 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
             <div class="min-w-0 flex-1">
               <h2 id="office-projects-heading" class="text-[22px] font-semibold tracking-[-0.02em] text-[#1d1d1f]">Ofis projeleri</h2>
-              <p class="mt-2 max-w-xl text-[15px] leading-relaxed text-[#6e6e73]">Yayınladığın işler <a href="/projeler.html" class="font-medium text-[#0071e3] underline decoration-[#0071e3]/30 underline-offset-2 hover:decoration-[#0071e3]">Referans Projeler</a> listesinde görünür.</p>
+              <p class="mt-2 max-w-xl text-[15px] leading-relaxed text-[#6e6e73]">Yayınladığın işler <a href="/projeler.html" class="font-medium text-[#0071e3] underline decoration-[#0071e3]/30 underline-offset-2 hover:decoration-[#0071e3]">Referans Projeler</a> listesinde görünür. Karttaki <span class="font-medium text-[#1d1d1f]">Sil</span> ile yalnızca senin eklediğin kaydı kaldırırsın.</p>
             </div>
             ${list.length ? addOfficeProjectBtn : ""}
           </div>`;
@@ -335,7 +354,7 @@
                       <p class="mt-2 text-[13px] text-[#6e6e73]">${escHtml(p.location || "—")} · ${escHtml(p.year || "—")}</p>
                     </div>
                   </a>
-                  <button type="button" data-delete-office-project="${encodeURIComponent(p.id)}" class="absolute right-3 top-3 rounded-full border border-black/[0.08] bg-white/95 px-3 py-1.5 text-[12px] font-semibold text-[#b00020] shadow-sm backdrop-blur-sm transition hover:bg-[#b00020] hover:text-white hover:border-transparent">Sil</button>
+                  <button type="button" data-delete-office-project="${encodeURIComponent(p.id)}" class="absolute right-3 top-3 z-10 rounded-full border border-black/[0.08] bg-white/95 px-3 py-1.5 text-[12px] font-semibold text-[#b00020] shadow-sm backdrop-blur-sm transition hover:bg-[#b00020] hover:text-white hover:border-transparent">Projeyi sil</button>
                 </article>`
                 )
                 .join("")}</div>`
@@ -383,10 +402,13 @@
         (list.length
           ? `<div class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
             ${list.map((m) => `
-              <a href="/tasarim-panosu.html?id=${encodeURIComponent(m.id)}" class="block rounded-xl border border-black/[0.06] bg-white p-6 shadow-[0_2px_8px_rgba(0,0,0,0.06)] transition duration-300 hover:-translate-y-0.5 hover:border-black/[0.1] hover:shadow-[0_8px_24px_rgba(0,0,0,0.1)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3]/40">
-                <p class="text-[17px] font-semibold tracking-[-0.01em] text-[#1d1d1f]">${escHtml(m.name || "Tasarım panosu")}</p>
-                <p class="mt-2 text-[13px] font-medium uppercase tracking-[0.06em] text-[#6e6e73]">${(m.items || []).length} kart</p>
-              </a>`).join("")}
+              <article class="group relative overflow-hidden rounded-xl border border-black/[0.06] bg-white shadow-[0_2px_8px_rgba(0,0,0,0.06)] transition duration-300 hover:-translate-y-0.5 hover:border-black/[0.1] hover:shadow-[0_8px_24px_rgba(0,0,0,0.1)]">
+                <a href="/tasarim-panosu.html?id=${encodeURIComponent(m.id)}" class="block p-6 pr-14 outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#0071e3]/40">
+                  <p class="text-[17px] font-semibold tracking-[-0.01em] text-[#1d1d1f]">${escHtml(m.name || "Tasarım panosu")}</p>
+                  <p class="mt-2 text-[13px] font-medium uppercase tracking-[0.06em] text-[#6e6e73]">${(m.items || []).length} kart</p>
+                </a>
+                <button type="button" data-delete-moodboard="${encodeURIComponent(m.id)}" class="absolute right-3 top-4 z-10 inline-flex h-9 items-center rounded-full border border-black/[0.08] bg-white/95 px-3 text-[12px] font-semibold text-[#b00020] shadow-sm backdrop-blur-sm transition hover:bg-[#b00020] hover:text-white hover:border-transparent focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0071e3]">Kaldır</button>
+              </article>`).join("")}
           </div>`
           : moodEmptyHit);
     }
@@ -466,10 +488,65 @@
       });
 
       document.getElementById("architect-dashboard").addEventListener("click", async (e) => {
+        const delMb = e.target.closest("[data-delete-moodboard]");
+        if (delMb) {
+          const mid = decodeURIComponent(delMb.getAttribute("data-delete-moodboard") || "");
+          if (!mid || !confirm("Bu tasarım panosunu kaldırmak istediğine emin misin?")) return;
+          const res = await AG.deleteMoodboard(mid);
+          if (!res.ok) {
+            showToast(res.message || "Kaldırılamadı");
+            return;
+          }
+          moodboards = await AG.getMoodboards();
+          showToast("Pano kaldırıldı");
+          await renderContent();
+          return;
+        }
+
+        const rp = e.target.closest("[data-remove-fav-product]");
+        if (rp) {
+          let payload;
+          try {
+            payload = JSON.parse(decodeURIComponent(rp.getAttribute("data-remove-fav-product") || "{}"));
+          } catch {
+            return;
+          }
+          if (!payload.id || !confirm("Bu ürünü favorilerden kaldırmak istediğine emin misin?")) return;
+          const res = await AG.toggleFavoriteProduct(payload);
+          if (!res.ok) {
+            showToast(res.message || "Kaldırılamadı");
+            return;
+          }
+          panelCache.favProducts = null;
+          showToast("Favoriden kaldırıldı");
+          await renderContent();
+          return;
+        }
+
+        const rproj = e.target.closest("[data-remove-fav-project]");
+        if (rproj) {
+          let payload;
+          try {
+            payload = JSON.parse(decodeURIComponent(rproj.getAttribute("data-remove-fav-project") || "{}"));
+          } catch {
+            return;
+          }
+          if (!payload.id || !confirm("Bu projeyi favorilerden kaldırmak istediğine emin misin?")) return;
+          const res = await AG.toggleFavoriteProject(payload);
+          if (!res.ok) {
+            showToast(res.message || "Kaldırılamadı");
+            return;
+          }
+          panelCache.favProjects = null;
+          showToast("Favoriden kaldırıldı");
+          await renderContent();
+          return;
+        }
+
         const btn = e.target.closest("[data-delete-office-project]");
         if (!btn) return;
         const id = decodeURIComponent(btn.getAttribute("data-delete-office-project") || "");
-        if (!id || !confirm("Bu projeyi silmek istediğine emin misin?")) return;
+        if (!id || !confirm("Bu ofis projesini silmek istediğine emin misin? (Referans listeden de kalkar.)")) return;
         const res = await AG.deleteArchitectOfficeProject(id);
         if (!res.ok) {
           showToast(res.message || "Silinemedi");

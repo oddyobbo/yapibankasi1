@@ -779,6 +779,17 @@
     return list.find((x) => x.id === id) || null;
   };
 
+  const deleteMoodboard = async (id) => {
+    const session = await getSessionArchitect();
+    if (!session) return { ok: false, message: "Giriş yapın." };
+    if (!id) return { ok: false, message: "Pano bulunamadı." };
+    const list = getArchitectArray("moodboards", session.id, []);
+    const next = list.filter((x) => x.id !== id);
+    if (next.length === list.length) return { ok: false, message: "Pano bulunamadı." };
+    setArchitectArray("moodboards", session.id, next);
+    return { ok: true };
+  };
+
   const updateMoodboard = async (id, patch) => {
     const session = await getSessionArchitect();
     if (!session) return { ok: false, message: "Giriş yapın." };
@@ -944,6 +955,7 @@
     createMoodboard,
     getMoodboards,
     getMoodboard,
+    deleteMoodboard,
     updateMoodboard,
     addProductToMoodboard,
     getArchitectOfficeProjects,
