@@ -49,6 +49,15 @@
     } catch {}
   };
 
+  const authRedirectUrl = (path) => {
+    try {
+      if (window.location.origin && window.location.origin !== "null") {
+        return `${window.location.origin}${path}`;
+      }
+    } catch {}
+    return path;
+  };
+
   // ── Visitor ID ──────────────────────────────────────────────────────────
   const ensureVisitorId = () => {
     let id = getCookie("ag_visitor_id") || lsRead("ag_visitor_id_v1", null);
@@ -93,6 +102,7 @@
       email: (email || "").trim(),
       password,
       options: {
+        emailRedirectTo: authRedirectUrl("/marka-giris.html"),
         data: {
           name: (name || "").trim(),
           website: (website || "").trim(),
@@ -419,6 +429,7 @@
       email: safeEmail,
       password,
       options: {
+        emailRedirectTo: authRedirectUrl("/mimar-giris.html"),
         data: {
           name: safeName,
           account_type: "architect",
