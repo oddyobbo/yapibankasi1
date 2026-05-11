@@ -31,12 +31,13 @@
 
       <main class="w-full">
         <div class="product-detail-layout-shell">
+          <div class="product-detail-heading">
+            <p id="hero-category" class="product-detail-hero-kicker ag-muted">Kategori</p>
+            <h1 id="hero-title" class="product-detail-hero-title">Ürün adı</h1>
+          </div>
           <div class="product-detail-layout">
             <section class="product-detail-main">
               <article class="product-detail-section product-detail-hero-panel ag-card">
-                <p id="hero-category" class="product-detail-hero-kicker ag-muted">Kategori</p>
-                <h1 id="hero-title" class="product-detail-hero-title">Ürün adı</h1>
-
                 <div class="product-detail-gallery min-w-0">
                   <div id="gallery-thumbs" class="product-detail-gallery-thumbs" aria-label="Galeri küçük görselleri"></div>
                   <div class="product-detail-gallery-main">
@@ -100,9 +101,12 @@
                 </div>
 
                 <div class="product-detail-brand-more-block">
-                  <p class="product-detail-brand-more">
-                    <a id="brand-more-products" href="/urunler.html">Bu markanın diğer ürünlerini gör</a>
-                  </p>
+                  <div class="product-detail-brand-more-head">
+                    <a id="brand-more-products" href="/urunler.html">Markanın Diğer Ürünlerini Gör</a>
+                    <button type="button" id="brand-preview-next" class="product-detail-brand-preview-next" aria-label="Diğer ürünleri kaydır">
+                      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                    </button>
+                  </div>
                   <div id="brand-preview-strip" class="product-detail-brand-preview" aria-label="Markanın diğer ürünleri"></div>
                 </div>
               </div>
@@ -590,6 +594,11 @@
     </a>`;
         })
         .join("");
+      const nextBtn = document.getElementById("brand-preview-next");
+      if (nextBtn) {
+        nextBtn.hidden = others.length < 4;
+        nextBtn.onclick = () => el.scrollBy({ left: 224, behavior: "smooth" });
+      }
       el.querySelectorAll(".product-detail-brand-preview-thumb img").forEach((img) => {
         img.addEventListener(
           "error",

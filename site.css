@@ -143,7 +143,12 @@ html.ag-dark .hover\:bg-black\/\[0\.06\]:hover {
 .product-detail-layout-shell {
   max-width: 1680px;
   margin: 0 auto;
-  padding: 28px 36px 68px;
+  padding: 24px 36px 68px;
+}
+
+.product-detail-heading {
+  margin: 0 0 18px;
+  max-width: 920px;
 }
 
 .product-detail-layout {
@@ -168,7 +173,10 @@ html.ag-dark .hover\:bg-black\/\[0\.06\]:hover {
 }
 
 .product-detail-section.product-detail-hero-panel {
-  padding: 28px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 .product-detail-section-title {
@@ -203,11 +211,12 @@ html.ag-dark .hover\:bg-black\/\[0\.06\]:hover {
 }
 
 .product-detail-hero-title {
-  font-size: clamp(28px, 2.6vw, 36px);
-  line-height: 1.13;
-  letter-spacing: -0.026em;
+  font-size: clamp(24px, 2.15vw, 30px);
+  line-height: 1.16;
+  letter-spacing: -0.018em;
+  font-weight: 500;
   color: #0d0d0f;
-  margin: 0 0 24px;
+  margin: 0;
 }
 
 .product-detail-hero-kicker {
@@ -238,7 +247,7 @@ html.ag-dark .hover\:bg-black\/\[0\.06\]:hover {
   display: grid;
   grid-template-columns: 82px minmax(0, 1fr);
   gap: 30px;
-  align-items: start;
+  align-items: stretch;
 }
 
 .product-detail-gallery-thumbs {
@@ -285,7 +294,7 @@ html.ag-dark .hover\:bg-black\/\[0\.06\]:hover {
   position: relative;
   min-width: 0;
   min-height: 610px;
-  border-radius: 42px;
+  border-radius: 28px;
   background: #f6f6f7;
   overflow: visible;
   border: 0;
@@ -297,7 +306,7 @@ html.ag-dark .hover\:bg-black\/\[0\.06\]:hover {
   inset: 0;
   width: 100%;
   height: 100%;
-  padding: clamp(34px, 5vw, 72px);
+  padding: clamp(18px, 2.4vw, 34px);
   object-fit: contain;
   object-position: center;
   display: block;
@@ -441,6 +450,7 @@ html.ag-dark .hover\:bg-black\/\[0\.06\]:hover {
   max-height: calc(100vh - 112px);
   overflow: auto;
   min-width: 0;
+  align-self: start;
 }
 
 .product-detail-brand-panel {
@@ -645,28 +655,57 @@ html.ag-dark .hover\:bg-black\/\[0\.06\]:hover {
   font-size: 13px;
 }
 
-.product-detail-brand-more a {
+.product-detail-brand-more-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.product-detail-brand-more-head a {
   color: #1d1d1f;
   text-decoration: none;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.18);
-  padding-bottom: 1px;
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+.product-detail-brand-preview-next {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: #fff;
+  color: #111;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
 }
 
 .product-detail-brand-preview {
   display: flex;
   flex-wrap: nowrap;
-  gap: 12px;
-  margin-top: 14px;
-  padding: 2px 2px 6px;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 2px 2px 8px;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  scroll-snap-type: x proximity;
+}
+
+.product-detail-brand-preview::-webkit-scrollbar {
+  display: none;
 }
 
 .product-detail-brand-preview-item {
-  flex: 0 0 auto;
-  width: 100px;
+  flex: 0 0 74px;
+  width: 74px;
   text-decoration: none;
   color: inherit;
+  scroll-snap-align: start;
 }
 
 .product-detail-brand-preview-thumb {
@@ -1030,4 +1069,15 @@ html.ag-dark .product-detail-file-item-chevron {
 html.ag-dark .product-detail-usage-list li {
   color: #c5c9d0;
   border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+
+.product-detail-btn-primary,
+.product-detail-btn-secondary,
+.product-detail-brand-role-pill,
+.product-detail-brand-chip,
+.product-detail-save-btn,
+.product-detail-brand-more-head a,
+.product-detail-brand-preview-next {
+  font-weight: 400 !important;
 }
