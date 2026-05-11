@@ -1089,7 +1089,6 @@ html.ag-dark .product-detail-usage-list li {
 .product-detail-layout-shell {
   max-width: none;
   padding: 0 0 68px;
-  overflow-x: clip;
 }
 
 .product-detail-heading {
@@ -1147,7 +1146,6 @@ html.ag-dark .product-detail-usage-list li {
   position: relative;
   min-height: clamp(440px, 42vw, 610px);
   width: 100%;
-  max-width: 100%;
   border-radius: 0 0 28px 28px;
   background: #f4f4f5;
   overflow: hidden;
@@ -1156,8 +1154,6 @@ html.ag-dark .product-detail-usage-list li {
 
 .product-detail-gallery-track {
   height: clamp(440px, 42vw, 610px);
-  width: 100%;
-  max-width: 100%;
   display: flex;
   gap: 0;
   overflow-x: auto;

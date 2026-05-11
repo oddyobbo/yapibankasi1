@@ -699,13 +699,7 @@
         });
         const active = track.querySelector(`.product-detail-gallery-slide[data-i="${idx}"]`);
         if (active) {
-          const targetLeft = active.offsetLeft - (track.clientWidth - active.clientWidth) / 2;
-          requestAnimationFrame(() => {
-            track.scrollTo({
-              left: Math.max(0, targetLeft),
-              behavior: "smooth",
-            });
-          });
+          requestAnimationFrame(() => active.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" }));
         }
         prev.style.display = n <= 1 ? "none" : "";
         next.style.display = n <= 1 ? "none" : "";
