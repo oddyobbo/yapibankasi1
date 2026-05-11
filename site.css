@@ -1092,10 +1092,11 @@ html.ag-dark .product-detail-usage-list li {
 }
 
 .product-detail-heading {
-  display: none;
+  display: block;
   max-width: none;
-  margin: 0;
-  padding: 24px 36px 18px;
+  width: min(calc(100% - 520px), 1120px);
+  margin: 18px 0 0 36px;
+  padding: 0;
 }
 
 .product-detail-layout {
@@ -1179,17 +1180,7 @@ html.ag-dark .product-detail-usage-list li {
 }
 
 .product-detail-hero-overlay {
-  position: absolute;
-  left: 132px;
-  right: 520px;
-  bottom: 32px;
-  z-index: 5;
-  max-width: 760px;
-  padding: 18px 22px;
-  border-radius: 22px;
-  background: rgba(255, 255, 255, 0.76);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
+  display: none;
 }
 
 .product-detail-hero-overlay .product-detail-hero-kicker {
@@ -1239,7 +1230,9 @@ html.ag-dark .product-detail-usage-list li {
 @media (max-width: 1099px) {
   .product-detail-heading {
     display: block;
-    padding: 18px 18px 14px;
+    width: auto;
+    margin: 18px;
+    padding: 0;
   }
 
   .product-detail-layout {
