@@ -689,9 +689,6 @@
       document.getElementById("hero-title").textContent = product.name || "Ürün";
       document.getElementById("hero-title-visual").textContent = product.name || "Ürün";
 
-      const descEl = document.getElementById("product-description");
-      descEl.textContent = product.description || "Bu ürün için açıklama henüz eklenmedi.";
-
       const sideTitle = document.getElementById("brand-card-product-title");
       if (sideTitle) sideTitle.textContent = product.name || "Ürün";
       const sideSummary = document.getElementById("brand-card-summary");
@@ -737,6 +734,8 @@
       wireGallery(images.length ? images : ["https://images.unsplash.com/photo-1600607686527-6fb886090705?q=80&w=1200"], product.name);
 
       document.getElementById("inject-technical").innerHTML = buildTechnicalSection(product);
+      const descEl = document.getElementById("product-description");
+      if (descEl) descEl.textContent = product.description || "Bu ürün için açıklama henüz eklenmedi.";
       document.getElementById("inject-variants").innerHTML = buildVariantsSection(product);
       renderBrandVariants(product);
       document.getElementById("inject-other").innerHTML = buildOtherSection(product);
