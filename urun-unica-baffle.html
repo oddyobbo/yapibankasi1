@@ -37,7 +37,7 @@
                 <div class="product-detail-gallery min-w-0">
                   <div id="gallery-thumbs" class="product-detail-gallery-thumbs" aria-label="Galeri küçük görselleri"></div>
                   <div class="product-detail-gallery-main">
-                    <div id="gallery-track" class="product-detail-gallery-track" aria-label="Ürün görsel galerisi"></div>
+                    <img id="gallery-main-img" src="" alt="">
                     <div class="product-detail-hero-overlay">
                       <p id="hero-category-visual" class="product-detail-hero-kicker ag-muted">Kategori</p>
                       <h1 id="hero-title-visual" class="product-detail-hero-title">Ürün adı</h1>
@@ -55,7 +55,7 @@
 
               <div class="product-detail-heading">
                 <p id="hero-category" class="product-detail-hero-kicker ag-muted">Kategori</p>
-                <h1 id="hero-title" class="product-detail-hero-title" hidden>Ürün adı</h1>
+                <h1 id="hero-title" class="product-detail-hero-title">Ürün adı</h1>
               </div>
 
               <div id="inject-technical"></div>
@@ -617,51 +617,12 @@
     }
 
     function wireGallery(images, productName) {
-      const track = document.getElementById("gallery-track");
+      const main = document.getElementById("gallery-main-img");
       const thumbs = document.getElementById("gallery-thumbs");
       const prev = document.getElementById("gallery-prev");
       const next = document.getElementById("gallery-next");
       let idx = 0;
       const n = images.length;
-
-      function imageRatioName(img) {
-        const ratio = img.naturalWidth && img.naturalHeight ? img.naturalWidth / img.naturalHeight : 1.35;
-        if (ratio < 0.78) return "portrait";
-        if (ratio < 1.18) return "square";
-        if (ratio > 1.78) return "wide";
-        return "landscape";
-      }
-
-      function renderTrack() {
-        track.innerHTML = images
-          .map((src, i) => `
-          <figure data-i="${i}" data-ratio="landscape" class="product-detail-gallery-slide${i === idx ? " is-active" : ""}">
-            <img src="${esc(src)}" alt="${esc(productName || "Ürün görseli")}" loading="${i > 1 ? "lazy" : "eager"}" decoding="async">
-          </figure>`)
-          .join("");
-        track.querySelectorAll(".product-detail-gallery-slide").forEach((slide) => {
-          slide.addEventListener("click", () => {
-            idx = +slide.getAttribute("data-i");
-            update();
-          });
-        });
-        track.querySelectorAll(".product-detail-gallery-slide img").forEach((img) => {
-          const classify = () => {
-            const slide = img.closest(".product-detail-gallery-slide");
-            if (slide) slide.dataset.ratio = imageRatioName(img);
-          };
-          img.addEventListener("load", classify, { once: true });
-          img.addEventListener(
-            "error",
-            function onMainErr() {
-              img.removeEventListener("error", onMainErr);
-              img.src = GALLERY_IMG_FALLBACK;
-            },
-            { once: true }
-          );
-          if (img.complete) classify();
-        });
-      }
 
       function renderThumbs() {
         thumbs.innerHTML = images
@@ -691,14 +652,12 @@
       }
 
       function update() {
-        const slides = track.querySelectorAll(".product-detail-gallery-slide");
-        slides.forEach((slide) => {
-          slide.classList.toggle("is-active", +slide.getAttribute("data-i") === idx);
-        });
-        const active = track.querySelector(`.product-detail-gallery-slide[data-i="${idx}"]`);
-        if (active) {
-          requestAnimationFrame(() => active.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" }));
-        }
+        main.onerror = function () {
+          main.onerror = null;
+          main.src = GALLERY_IMG_FALLBACK;
+        };
+        main.src = images[idx];
+        main.alt = productName || "Ürün görseli";
         prev.style.display = n <= 1 ? "none" : "";
         next.style.display = n <= 1 ? "none" : "";
         renderThumbs();
@@ -712,7 +671,6 @@
         idx = (idx + 1) % n;
         update();
       });
-      renderTrack();
       update();
     }
 
@@ -727,7 +685,7 @@
 
       document.title = `${product.name || "Ürün Detayı"} | Archilink`;
 
-      renderProductBreadcrumb(document.getElementById("hero-category"), product.category, "");
+      renderProductBreadcrumb(document.getElementById("hero-category"), product.category, product.name);
       renderProductBreadcrumb(document.getElementById("hero-category-visual"), product.category, product.name);
       document.getElementById("hero-title").textContent = product.name || "Ürün";
       document.getElementById("hero-title-visual").textContent = product.name || "Ürün";
