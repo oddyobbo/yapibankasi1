@@ -37,7 +37,17 @@
                 <div class="product-detail-gallery min-w-0">
                   <div id="gallery-thumbs" class="product-detail-gallery-thumbs" aria-label="Galeri küçük görselleri"></div>
                   <div class="product-detail-gallery-main">
-                    <img id="gallery-main-img" src="" alt="">
+                    <div class="product-detail-gallery-stage" aria-label="Ürün görsel galerisi">
+                      <figure class="product-detail-gallery-frame product-detail-gallery-frame--side">
+                        <img id="gallery-prev-img" src="" alt="">
+                      </figure>
+                      <figure class="product-detail-gallery-frame product-detail-gallery-frame--active">
+                        <img id="gallery-main-img" src="" alt="">
+                      </figure>
+                      <figure class="product-detail-gallery-frame product-detail-gallery-frame--side">
+                        <img id="gallery-next-img" src="" alt="">
+                      </figure>
+                    </div>
                     <div class="product-detail-hero-overlay">
                       <p id="hero-category-visual" class="product-detail-hero-kicker ag-muted">Kategori</p>
                       <h1 id="hero-title-visual" class="product-detail-hero-title">Ürün adı</h1>
@@ -55,7 +65,7 @@
 
               <div class="product-detail-heading">
                 <p id="hero-category" class="product-detail-hero-kicker ag-muted">Kategori</p>
-                <h1 id="hero-title" class="product-detail-hero-title">Ürün adı</h1>
+                <h1 id="hero-title" class="product-detail-hero-title" hidden>Ürün adı</h1>
               </div>
 
               <div id="inject-technical"></div>
@@ -618,11 +628,23 @@
 
     function wireGallery(images, productName) {
       const main = document.getElementById("gallery-main-img");
+      const prevImg = document.getElementById("gallery-prev-img");
+      const nextImg = document.getElementById("gallery-next-img");
       const thumbs = document.getElementById("gallery-thumbs");
       const prev = document.getElementById("gallery-prev");
       const next = document.getElementById("gallery-next");
       let idx = 0;
       const n = images.length;
+
+      function setGalleryImage(img, src, alt) {
+        if (!img) return;
+        img.onerror = function () {
+          img.onerror = null;
+          img.src = GALLERY_IMG_FALLBACK;
+        };
+        img.src = src;
+        img.alt = alt || "";
+      }
 
       function renderThumbs() {
         thumbs.innerHTML = images
@@ -652,12 +674,13 @@
       }
 
       function update() {
-        main.onerror = function () {
-          main.onerror = null;
-          main.src = GALLERY_IMG_FALLBACK;
-        };
-        main.src = images[idx];
-        main.alt = productName || "Ürün görseli";
+        const prevIndex = (idx - 1 + n) % n;
+        const nextIndex = (idx + 1) % n;
+        setGalleryImage(main, images[idx], productName || "Ürün görseli");
+        setGalleryImage(prevImg, images[prevIndex], "");
+        setGalleryImage(nextImg, images[nextIndex], "");
+        if (prevImg) prevImg.closest(".product-detail-gallery-frame").hidden = n <= 1;
+        if (nextImg) nextImg.closest(".product-detail-gallery-frame").hidden = n <= 1;
         prev.style.display = n <= 1 ? "none" : "";
         next.style.display = n <= 1 ? "none" : "";
         renderThumbs();
@@ -685,7 +708,7 @@
 
       document.title = `${product.name || "Ürün Detayı"} | Archilink`;
 
-      renderProductBreadcrumb(document.getElementById("hero-category"), product.category, product.name);
+      renderProductBreadcrumb(document.getElementById("hero-category"), product.category, "");
       renderProductBreadcrumb(document.getElementById("hero-category-visual"), product.category, product.name);
       document.getElementById("hero-title").textContent = product.name || "Ürün";
       document.getElementById("hero-title-visual").textContent = product.name || "Ürün";
