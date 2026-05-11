@@ -18,6 +18,7 @@
   </script>
   <title>Ürün Detayı | Archilink</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="site.css" data-ag-css="site">
   <style>
     html.ag-dark .ag-card { background: #1a1b1e; border-color: rgba(255,255,255,0.08); }
     html.ag-dark .ag-muted { color: #98989e; }
@@ -28,48 +29,76 @@
     <div class="w-full min-h-screen overflow-hidden">
       <div id="site-header"></div>
 
-      <main class="w-full px-4 sm:px-6 lg:px-10 py-6 md:py-10 space-y-5 md:space-y-7">
-        <article class="product-detail-section product-detail-hero-panel ag-card">
-          <header class="mb-6 md:mb-8">
-            <p id="hero-category" class="product-detail-hero-kicker ag-muted">Kategori</p>
-            <h1 id="hero-title" class="product-detail-hero-title">Ürün adı</h1>
-          </header>
+      <main class="w-full">
+        <div class="product-detail-layout-shell">
+          <div class="product-detail-layout">
+            <section class="product-detail-main">
+              <article class="product-detail-section product-detail-hero-panel ag-card">
+                <p id="hero-category" class="product-detail-hero-kicker ag-muted">Kategori</p>
+                <h1 id="hero-title" class="product-detail-hero-title">Ürün adı</h1>
 
-          <div class="product-detail-hero-grid">
-            <div class="product-detail-hero-left">
-              <div class="product-detail-gallery min-w-0">
-                <div id="gallery-thumbs" class="product-detail-gallery-thumbs" aria-label="Galeri küçük görselleri"></div>
-                <div class="product-detail-gallery-main">
-                  <img id="gallery-main-img" src="" alt="">
-                  <button type="button" id="gallery-prev" aria-label="Önceki görsel" class="product-detail-gallery-nav product-detail-gallery-nav--prev">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-                  </button>
-                  <button type="button" id="gallery-next" aria-label="Sonraki görsel" class="product-detail-gallery-nav product-detail-gallery-nav--next">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
-                  </button>
-                </div>
-              </div>
-              <div class="product-detail-hero-description">
-                <h2 class="product-detail-section-title">Ürün Açıklaması</h2>
-                <p id="product-description" class="product-detail-lead">—</p>
-              </div>
-            </div>
-
-            <aside class="product-detail-hero-brand">
-              <div class="product-detail-brand-panel">
-                <div class="product-detail-brand-row">
-                  <img id="brand-logo" class="product-detail-brand-logo is-hidden" src="" alt="">
-                  <div id="brand-avatar" class="product-detail-brand-avatar" aria-hidden="true">M</div>
-                  <div class="product-detail-brand-meta">
-                    <p class="product-detail-brand-label">Marka / üretici</p>
-                    <p id="brand-name" class="product-detail-brand-name">—</p>
-                    <p class="product-detail-brand-copy">Bu ürünün satıcısıdır. Teklif, teknik doküman ve numune taleplerinde doğrudan iletişime geçebilirsiniz.</p>
+                <div class="product-detail-gallery min-w-0">
+                  <div id="gallery-thumbs" class="product-detail-gallery-thumbs" aria-label="Galeri küçük görselleri"></div>
+                  <div class="product-detail-gallery-main">
+                    <img id="gallery-main-img" src="" alt="">
+                    <button type="button" id="gallery-prev" aria-label="Önceki görsel" class="product-detail-gallery-nav product-detail-gallery-nav--prev">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+                    </button>
+                    <button type="button" id="gallery-next" aria-label="Sonraki görsel" class="product-detail-gallery-nav product-detail-gallery-nav--next">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                    </button>
                   </div>
                 </div>
-                <div class="product-detail-brand-actions">
-                  <a id="btn-teklif" href="/iletisim-v2.html" class="product-detail-btn-primary">Teklif iste</a>
-                  <a id="btn-iletisim" href="/iletisim-v2.html" class="product-detail-btn-secondary">İletişime geç</a>
+
+                <div class="product-detail-hero-description">
+                  <h2 class="product-detail-section-title">Ürün Açıklaması</h2>
+                  <p id="product-description" class="product-detail-lead">—</p>
                 </div>
+              </article>
+
+              <div id="inject-technical"></div>
+              <div id="inject-variants"></div>
+              <div id="inject-other"></div>
+
+              <section class="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-5">
+                <article class="product-detail-section ag-card">
+                  <h2 class="product-detail-section-title">Teknik Dosyalar</h2>
+                  <div id="inject-files"></div>
+                </article>
+                <article class="product-detail-section ag-card">
+                  <h2 class="product-detail-section-title">Kullanım Alanları</h2>
+                  <ul id="usage-list" class="product-detail-usage-list"></ul>
+                </article>
+              </section>
+            </section>
+
+            <aside class="product-detail-sticky-aside">
+              <div class="product-detail-brand-card product-detail-brand-panel">
+                <div class="product-detail-brand-topline">
+                  <div class="product-detail-brand-identity">
+                    <div class="product-detail-brand-logo-slot">
+                      <img id="brand-logo" class="product-detail-brand-logo is-hidden" src="" alt="">
+                      <div id="brand-avatar" class="product-detail-brand-avatar" aria-hidden="true">M</div>
+                    </div>
+                    <div>
+                      <p class="product-detail-brand-eyebrow">Marka</p>
+                      <h3 id="brand-name" class="product-detail-brand-headline">—</h3>
+                    </div>
+                  </div>
+                  <button type="button" id="btn-save-product" class="product-detail-save-btn" aria-label="Ürünü kaydet">Kaydet</button>
+                </div>
+
+                <h2 id="brand-card-product-title" class="product-detail-sticky-title">Ürün adı</h2>
+                <p id="brand-card-summary" class="product-detail-brand-lede">Teklif ve teknik konularda bu marka ile doğrudan iletişime geçebilirsiniz.</p>
+                <div id="brand-card-variants" class="product-detail-brand-variants" aria-label="Varyantlar"></div>
+                <div id="brand-category-chips" class="product-detail-brand-chip-row" aria-label="Marka kategorileri"></div>
+                <div id="brand-role-tags" class="product-detail-brand-tag-row" aria-label="Marka rolü"></div>
+
+                <div class="product-detail-brand-actions">
+                  <a id="btn-teklif" href="/iletisim-v2.html" class="product-detail-btn-primary product-detail-brand-btn">Fiyat teklifi al</a>
+                  <a id="btn-iletisim" href="/iletisim-v2.html" class="product-detail-btn-secondary product-detail-brand-btn">Markayla iletişime geç</a>
+                </div>
+
                 <div class="product-detail-brand-more-block">
                   <p class="product-detail-brand-more">
                     <a id="brand-more-products" href="/urunler.html">Bu markanın diğer ürünlerini gör</a>
@@ -79,27 +108,13 @@
               </div>
             </aside>
           </div>
-        </article>
-
-        <div id="inject-technical"></div>
-        <div id="inject-other"></div>
-
-        <section class="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-5">
-          <article class="product-detail-section ag-card">
-            <h2 class="product-detail-section-title">Teknik Dosyalar</h2>
-            <div id="inject-files"></div>
-          </article>
-          <article class="product-detail-section ag-card">
-            <h2 class="product-detail-section-title">Kullanım Alanları</h2>
-            <ul id="usage-list" class="product-detail-usage-list"></ul>
-          </article>
-        </section>
+        </div>
       </main>
       <div id="site-footer"></div>
     </div>
   </div>
-  <script src="/core.js"></script>
-  <script src="/layout.js"></script>
+  <script src="core.js"></script>
+  <script src="layout.js"></script>
   <script>
     function esc(s) {
       return String(s ?? "")
@@ -114,11 +129,89 @@
       return String(v);
     }
 
+    function renderProductBreadcrumb(el, category, productName) {
+      const parts = String(category || "Kategori")
+        .split(">")
+        .map((x) => x.trim())
+        .filter(Boolean);
+      if (productName) parts.push(String(productName).trim());
+      el.innerHTML = parts
+        .filter(Boolean)
+        .map((part, index) => {
+          const current = index === parts.length - 1 ? " is-current" : "";
+          return `<span class="product-detail-breadcrumb-item${current}">${esc(part)}</span>`;
+        })
+        .join('<span class="product-detail-breadcrumb-separator">•</span>');
+    }
+
+    const COMPANY_ROLE_LABELS = {
+      manufacturer: "Üretici",
+      applicator: "Uygulama & montaj",
+      integrator: "Sistem entegratörü",
+      distributor: "Distribütör",
+    };
+
+    function parseBrandCategoriesFromCatalog(catalog, brandName) {
+      const b = String(brandName || "").trim();
+      if (!b) return [];
+      const set = new Set();
+      for (const p of catalog) {
+        if (String(p.brandName || "").trim() !== b) continue;
+        const from =
+          Array.isArray(p.brandCategories) && p.brandCategories.length
+            ? p.brandCategories
+            : String(p.category || "")
+                .split(">")
+                .map((s) => s.trim())
+                .filter(Boolean);
+        from.forEach((x) => set.add(String(x)));
+      }
+      return [...set];
+    }
+
+    function resolveBrandCategoryChips(product, catalog) {
+      const direct = Array.isArray(product.brandCategories) ? product.brandCategories.filter(Boolean) : [];
+      if (direct.length) return direct.map(String);
+      return parseBrandCategoriesFromCatalog(catalog, product.brandName);
+    }
+
+    function resolveBrandRoleKeys(product) {
+      const r = Array.isArray(product.brandCompanyRoles) ? product.brandCompanyRoles : [];
+      return r.map((k) => String(k).toLowerCase().trim()).filter(Boolean);
+    }
+
+    function renderBrandCategoryChips(el, labels) {
+      if (!labels.length) {
+        el.innerHTML = "";
+        el.setAttribute("hidden", "");
+        return;
+      }
+      el.removeAttribute("hidden");
+      el.innerHTML = labels.map((t) => `<span class="product-detail-brand-chip">${esc(t)}</span>`).join("");
+    }
+
+    function renderBrandRoleTags(el, keys) {
+      if (!keys.length) {
+        el.innerHTML = "";
+        el.setAttribute("hidden", "");
+        return;
+      }
+      el.removeAttribute("hidden");
+      el.innerHTML = keys
+        .map((k) => {
+          const label = COMPANY_ROLE_LABELS[k] || k.charAt(0).toUpperCase() + k.slice(1);
+          return `<span class="product-detail-brand-role-pill">${esc(label)}</span>`;
+        })
+        .join("");
+    }
+
     const STATIC = [
       {
         id: "s1",
         name: "Unica Baffle Tavan Paneli",
         brandName: "Unica Acoustic",
+        brandCompanyRoles: ["manufacturer"],
+        brandCategories: ["Mobilya ve Donatı", "Akustik"],
         category: "Mobilya ve Donatı > Akustik",
         description: "Ofis, eğitim ve konferans alanları için yüksek ses yutumu sağlayan lineer akustik panel sistemi. T24 taşıyıcı ile uyumlu modüler montaj.",
         image: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=1200&auto=format&fit=crop",
@@ -139,6 +232,11 @@
             { label: "Renk varyantları", value: "12 melamin seçeneği" },
           ],
         },
+        variants: [
+          { name: "Beyaz keçeli", code: "UB-BY", finish: "Mat beyaz", size: "120 x 30 cm", image: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=300&auto=format&fit=crop" },
+          { name: "Antrasit keçeli", code: "UB-AN", finish: "Antrasit", size: "120 x 30 cm", image: "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=300&auto=format&fit=crop" },
+          { name: "Ahşap dokulu", code: "UB-AH", finish: "Meşe melamin", size: "180 x 30 cm", image: "https://images.unsplash.com/photo-1615874959474-d609969a20ed?q=80&w=300&auto=format&fit=crop" },
+        ],
         files: {
           pdfs: [
             { url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf", label: "Ürün kataloğu (PDF)" },
@@ -154,6 +252,8 @@
         id: "s2",
         name: "Akustik Keçe Duvar Paneli",
         brandName: "Unica Acoustic",
+        brandCompanyRoles: ["manufacturer"],
+        brandCategories: ["Malzemeler", "Duvar Kaplama"],
         category: "Malzemeler > Duvar Kaplama",
         description: "Duvar yüzeylerinde ses emilimi ve estetik çözüm sağlar.",
         image: "https://images.unsplash.com/photo-1616594039964-3f7f89d7a5d8?q=80&w=1200&auto=format&fit=crop",
@@ -168,6 +268,8 @@
         id: "s3",
         name: "Lineer LED Profil Armatür",
         brandName: "Lumen Studio",
+        brandCompanyRoles: ["manufacturer", "applicator"],
+        brandCategories: ["Mobilya ve Donatı", "Aydınlatma"],
         category: "Mobilya ve Donatı > Aydınlatma",
         description: "Asma tavan ve yüzey montajına uygun, UGR düşük lineer LED profil. Ofis ve perakende için homojen ışık bandı.",
         image: "https://images.unsplash.com/photo-1565814329452-e1efa1c31789?q=80&w=1200&auto=format&fit=crop",
@@ -281,6 +383,75 @@
         <h2 class="product-detail-section-title">Diğer Özellikler</h2>
         ${inner}
       </article>`;
+    }
+
+
+    function resolveVariants(product) {
+      const direct = Array.isArray(product.variants) ? product.variants : [];
+      if (direct.length) return direct;
+      const t = product.technical || {};
+      const raw = t.variants || t.variantlar || t.colorVariants || t.renkVaryantlari || t.renkVaryantları;
+      if (Array.isArray(raw)) {
+        return raw.map((x) => typeof x === "string" ? { name: x } : x).filter(Boolean);
+      }
+      const colorHint = parseOther(t).find((x) => String(x.label || "").toLowerCase().includes("renk"));
+      if (colorHint?.value && String(colorHint.value).trim() !== "Belirtilmedi") {
+        return [{ name: String(colorHint.value), code: "Varyant bilgisi" }];
+      }
+      return [];
+    }
+
+    function buildVariantsSection(product) {
+      const variants = resolveVariants(product);
+      if (!variants.length) {
+        return `<article class="product-detail-section ag-card">
+          <div class="product-detail-section-title-row">
+            <h2 class="product-detail-section-title">Varyantlar</h2>
+            <span class="product-detail-count-pill">0</span>
+          </div>
+          <p class="product-detail-muted">Bu ürün için varyant bilgisi henüz eklenmedi.</p>
+        </article>`;
+      }
+      const cards = variants.map((v, i) => {
+        const image = v.image || v.imageUrl || product.image || PREVIEW_IMG_FALLBACK;
+        const name = v.name || v.title || `Varyant ${i + 1}`;
+        const code = v.code || v.sku || v.model || "";
+        const finish = v.finish || v.color || v.renk || v.surface || "";
+        const size = v.size || v.dimensions || v.olcu || v["ölçü"] || "";
+        return `<div class="product-detail-variant-card">
+          <span class="product-detail-variant-thumb"><img src="${esc(image)}" alt="" loading="lazy" decoding="async"></span>
+          <span class="product-detail-variant-copy">
+            <span class="product-detail-variant-name">${esc(name)}</span>
+            ${code ? `<span class="product-detail-variant-meta">${esc(code)}</span>` : ""}
+            ${finish ? `<span class="product-detail-variant-meta">${esc(finish)}</span>` : ""}
+            ${size ? `<span class="product-detail-variant-meta">${esc(size)}</span>` : ""}
+          </span>
+        </div>`;
+      }).join("");
+      return `<article class="product-detail-section ag-card">
+        <div class="product-detail-section-title-row">
+          <h2 class="product-detail-section-title">Varyantlar</h2>
+          <span class="product-detail-count-pill">${variants.length}</span>
+        </div>
+        <div class="product-detail-variant-grid">${cards}</div>
+      </article>`;
+    }
+
+    function renderBrandVariants(product) {
+      const el = document.getElementById("brand-card-variants");
+      const variants = resolveVariants(product).slice(0, 5);
+      if (!el || !variants.length) {
+        if (el) {
+          el.innerHTML = "";
+          el.setAttribute("hidden", "");
+        }
+        return;
+      }
+      el.removeAttribute("hidden");
+      el.innerHTML = `<p>Varyantlar</p><div>${variants.map((v, i) => {
+        const image = v.image || v.imageUrl || product.image || PREVIEW_IMG_FALLBACK;
+        return `<span class="product-detail-brand-variant-dot" title="${esc(v.name || `Varyant ${i + 1}`)}"><img src="${esc(image)}" alt=""></span>`;
+      }).join("")}</div>`;
     }
 
     function fallbackDocHref() {
@@ -500,14 +671,25 @@
 
       document.title = `${product.name || "Ürün Detayı"} | Archilink`;
 
-      document.getElementById("hero-category").textContent = product.category || "Kategori";
+      renderProductBreadcrumb(document.getElementById("hero-category"), product.category, product.name);
       document.getElementById("hero-title").textContent = product.name || "Ürün";
 
       const descEl = document.getElementById("product-description");
       descEl.textContent = product.description || "Bu ürün için açıklama henüz eklenmedi.";
 
+      const sideTitle = document.getElementById("brand-card-product-title");
+      if (sideTitle) sideTitle.textContent = product.name || "Ürün";
+      const sideSummary = document.getElementById("brand-card-summary");
+      if (sideSummary) sideSummary.textContent = product.description || "Teklif ve teknik konularda bu marka ile doğrudan iletişime geçebilirsiniz.";
+
       const brand = product.brandName || "—";
       document.getElementById("brand-name").textContent = brand;
+      renderBrandCategoryChips(
+        document.getElementById("brand-category-chips"),
+        resolveBrandCategoryChips(product, catalog)
+      );
+      renderBrandRoleTags(document.getElementById("brand-role-tags"), resolveBrandRoleKeys(product));
+
       const av = document.getElementById("brand-avatar");
       const logoEl = document.getElementById("brand-logo");
       const logoUrl = String(product.brandLogo || product.logoUrl || product.logo || "").trim();
@@ -540,6 +722,8 @@
       wireGallery(images.length ? images : ["https://images.unsplash.com/photo-1600607686527-6fb886090705?q=80&w=1200"], product.name);
 
       document.getElementById("inject-technical").innerHTML = buildTechnicalSection(product);
+      document.getElementById("inject-variants").innerHTML = buildVariantsSection(product);
+      renderBrandVariants(product);
       document.getElementById("inject-other").innerHTML = buildOtherSection(product);
       document.getElementById("inject-files").innerHTML = buildFilesColumn(product);
 
