@@ -42,6 +42,10 @@
                   <div id="gallery-thumbs" class="product-detail-gallery-thumbs" aria-label="Galeri küçük görselleri"></div>
                   <div class="product-detail-gallery-main">
                     <img id="gallery-main-img" src="" alt="">
+                    <div class="product-detail-hero-overlay">
+                      <p id="hero-category-visual" class="product-detail-hero-kicker ag-muted">Kategori</p>
+                      <h1 id="hero-title-visual" class="product-detail-hero-title">Ürün adı</h1>
+                    </div>
                     <button type="button" id="gallery-prev" aria-label="Önceki görsel" class="product-detail-gallery-nav product-detail-gallery-nav--prev">
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
                     </button>
@@ -51,10 +55,6 @@
                   </div>
                 </div>
 
-                <div class="product-detail-hero-description">
-                  <h2 class="product-detail-section-title">Ürün Açıklaması</h2>
-                  <p id="product-description" class="product-detail-lead">—</p>
-                </div>
               </article>
 
               <div id="inject-technical"></div>
@@ -344,6 +344,10 @@
       const dimensions = valOrBelirtilmedi(t.dimensions);
       const certificates = valOrBelirtilmedi(t.certificates);
       return `<article class="product-detail-section ag-card">
+        <div class="product-detail-description-block">
+          <h2 class="product-detail-section-title">Ürün Açıklaması</h2>
+          <p id="product-description" class="product-detail-lead">—</p>
+        </div>
         <h2 class="product-detail-section-title">Teknik Bilgiler</h2>
         <div class="product-detail-info-table">
           <div class="product-detail-info-row">
@@ -681,7 +685,9 @@
       document.title = `${product.name || "Ürün Detayı"} | Archilink`;
 
       renderProductBreadcrumb(document.getElementById("hero-category"), product.category, product.name);
+      renderProductBreadcrumb(document.getElementById("hero-category-visual"), product.category, product.name);
       document.getElementById("hero-title").textContent = product.name || "Ürün";
+      document.getElementById("hero-title-visual").textContent = product.name || "Ürün";
 
       const descEl = document.getElementById("product-description");
       descEl.textContent = product.description || "Bu ürün için açıklama henüz eklenmedi.";
