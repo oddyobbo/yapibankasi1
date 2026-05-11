@@ -1185,11 +1185,15 @@ html.ag-dark .product-detail-usage-list li {
   width: 100%;
   height: 100%;
   padding: 0;
-  object-fit: cover;
   object-position: center;
 }
 
+.product-detail-gallery-frame--active img {
+  object-fit: contain;
+}
+
 .product-detail-gallery-frame--side img {
+  object-fit: cover;
   opacity: 0.82;
 }
 
