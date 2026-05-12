@@ -140,6 +140,29 @@ create table if not exists public.products (
   updated_at timestamptz default now()
 );
 
+alter table public.products add column if not exists brand_record_id uuid references public.brands(id) on delete set null;
+alter table public.products add column if not exists brand_logo text default '';
+alter table public.products add column if not exists slug text unique;
+alter table public.products add column if not exists category_id uuid references public.product_categories(id) on delete set null;
+alter table public.products add column if not exists subcategory_id uuid references public.product_subcategories(id) on delete set null;
+alter table public.products add column if not exists summary text default '';
+alter table public.products add column if not exists material text default '';
+alter table public.products add column if not exists material_family text default '';
+alter table public.products add column if not exists thickness_mm numeric;
+alter table public.products add column if not exists fire_class text default '';
+alter table public.products add column if not exists color_family text default '';
+alter table public.products add column if not exists usage_area text default '';
+alter table public.products add column if not exists indoor_outdoor text default '';
+alter table public.products add column if not exists acoustic_rating text default '';
+alter table public.products add column if not exists acoustic_nrc numeric;
+alter table public.products add column if not exists dimensions text default '';
+alter table public.products add column if not exists certificates text[] default '{}';
+alter table public.products add column if not exists country text default '';
+alter table public.products add column if not exists city text default '';
+alter table public.products add column if not exists company_roles text[] default '{}';
+alter table public.products add column if not exists has_bim boolean default false;
+alter table public.products add column if not exists updated_at timestamptz default now();
+
 create index if not exists idx_products_brand_id on public.products(brand_id);
 create index if not exists idx_products_slug on public.products(slug);
 create index if not exists idx_products_status on public.products(status);
@@ -227,6 +250,14 @@ create table if not exists public.projects (
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );
+
+alter table public.projects add column if not exists architect_id uuid references public.profiles(id) on delete set null;
+alter table public.projects add column if not exists slug text unique;
+alter table public.projects add column if not exists city text default '';
+alter table public.projects add column if not exists country text default '';
+alter table public.projects add column if not exists office_name text default '';
+alter table public.projects add column if not exists updated_at timestamptz default now();
+
 create index if not exists idx_projects_brand on public.projects(brand_id);
 create index if not exists idx_projects_architect on public.projects(architect_id);
 create index if not exists idx_projects_status on public.projects(status);
