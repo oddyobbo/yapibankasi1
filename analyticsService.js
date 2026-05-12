@@ -1,34 +1,99 @@
 import { getSB, ready } from "./supabaseClient.js";
 import { ensureVisitorId } from "./uiHelpers.js";
 
+const emptyAnalytics = (products = []) => ({
+  viewsByProduct: {},
+  favByProduct: {},
+  totals: { views: 0, favorites: 0, uniqueVisitors: 0 },
+  products,
+});
+
 export const createAnalyticsService = ({ getProducts }) => {
-  const getBrandProductAnalytics = async (brandId, rangeDays = null, productsIn = null) => {
+  const trackEvent = async (event) => {
     await ready;
     const sb = getSB();
-    const empty = {
-      viewsByProduct: {},
-      favByProduct: {},
-      totals: { views: 0, favorites: 0, uniqueVisitors: 0 },
+    if (!sb || !event) return null;
+
+    const eventType = event.eventType || event.event_type;
+    if (!eventType) return null;
+    const sessionId = event.sessionId || ensureVisitorId();
+
+    if (eventType === "product_view" && event.productId) {
+      const sinceIso = new Date(Date.now() - 30 * 60 * 1000).toISOString();
+      const { data: existing } = await sb
+        .from("analytics_events")
+        .select("id")
+        .eq("event_type", eventType)
+        .eq("product_id", event.productId)
+        .eq("session_id", sessionId)
+        .gte("created_at", sinceIso)
+        .limit(1);
+      if (existing && existing.length) return existing[0];
+    }
+
+    const payload = {
+      event_type: eventType,
+      product_id: event.productId || null,
+      brand_id: event.brandId || null,
+      architect_id: event.architectId || null,
+      session_id: sessionId,
+      metadata: event.metadata || {},
     };
-    if (!sb || !brandId) return empty;
 
-    const products = productsIn || await getProducts({ brandId });
-    const ids = products.map((p) => p.id).filter(Boolean);
-    if (!ids.length) return { ...empty, products };
+    const { data, error } = await sb.from("analytics_events").insert(payload).select("*").single();
+    if (error) throw error;
+    return data;
+  };
 
-    const sinceIso = rangeDays != null && rangeDays > 0
-      ? new Date(Date.now() - rangeDays * 86400000).toISOString()
-      : null;
+  const getAnalyticsFromEvents = async (sb, products, ids, brandId, sinceIso) => {
+    let q = sb
+      .from("analytics_events")
+      .select("event_type, product_id, architect_id, session_id, created_at")
+      .in("product_id", ids);
+    if (sinceIso) q = q.gte("created_at", sinceIso);
+    if (brandId) q = q.eq("brand_id", brandId);
 
+    const { data, error } = await q;
+    if (error || !data) return null;
+
+    const viewsByProduct = {};
+    const favByProduct = {};
+    const uniq = new Set();
+
+    data.forEach((row) => {
+      if (row.event_type === "product_view") {
+        viewsByProduct[row.product_id] = (viewsByProduct[row.product_id] || 0) + 1;
+        uniq.add(row.architect_id ? `u:${row.architect_id}` : `s:${row.session_id || "?"}`);
+      }
+      if (row.event_type === "save_to_favorites" || row.event_type === "add_to_moodboard") {
+        favByProduct[row.product_id] = (favByProduct[row.product_id] || 0) + 1;
+      }
+    });
+
+    return {
+      viewsByProduct,
+      favByProduct,
+      totals: {
+        views: data.filter((row) => row.event_type === "product_view").length,
+        favorites: data.filter((row) => (
+          row.event_type === "save_to_favorites" || row.event_type === "add_to_moodboard"
+        )).length,
+        uniqueVisitors: uniq.size,
+      },
+      products,
+    };
+  };
+
+  const getAnalyticsFromLegacyTables = async (sb, products, ids, sinceIso) => {
     let vq = sb.from("product_view_log").select("product_id, visitor_id, user_id, created_at").in("product_id", ids);
     if (sinceIso) vq = vq.gte("created_at", sinceIso);
     const { data: vrows, error: ve } = await vq;
-    if (ve) return { ...empty, products };
+    if (ve) return emptyAnalytics(products);
 
     let fq = sb.from("product_favorites").select("product_id, user_id, created_at").in("product_id", ids);
     if (sinceIso) fq = fq.gte("created_at", sinceIso);
     const { data: frows, error: fe } = await fq;
-    if (fe) return { ...empty, products };
+    if (fe) return emptyAnalytics(products);
 
     const viewsByProduct = {};
     const favByProduct = {};
@@ -52,6 +117,24 @@ export const createAnalyticsService = ({ getProducts }) => {
       },
       products,
     };
+  };
+
+  const getBrandProductAnalytics = async (brandId, rangeDays = null, productsIn = null) => {
+    await ready;
+    const sb = getSB();
+    if (!sb || !brandId) return emptyAnalytics();
+
+    const products = productsIn || await getProducts({ brandId });
+    const ids = products.map((p) => p.id).filter(Boolean);
+    if (!ids.length) return emptyAnalytics(products);
+
+    const sinceIso = rangeDays != null && rangeDays > 0
+      ? new Date(Date.now() - rangeDays * 86400000).toISOString()
+      : null;
+
+    const eventsAnalytics = await getAnalyticsFromEvents(sb, products, ids, brandId, sinceIso);
+    if (eventsAnalytics) return eventsAnalytics;
+    return getAnalyticsFromLegacyTables(sb, products, ids, sinceIso);
   };
 
   const getVisits = async () => {
@@ -91,5 +174,6 @@ export const createAnalyticsService = ({ getProducts }) => {
     getBrandProductAnalytics,
     getVisits,
     trackVisit,
+    trackEvent,
   };
 };
