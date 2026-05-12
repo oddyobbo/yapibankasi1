@@ -17,6 +17,11 @@
     })();
   </script>
   <title>Archilink | Proje Detayı</title>
+  <meta name="description" content="Archilink proje detay sayfası">
+  <meta property="og:title" content="Proje Detayı | Archilink">
+  <meta property="og:description" content="Archilink proje detay sayfası">
+  <meta property="og:image" content="">
+  <link rel="canonical" href="">
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body data-page="projects" class="bg-white text-[#111] font-sans min-h-screen">
@@ -33,6 +38,7 @@
 
   <script src="/core.js"></script>
   <script src="/layout.js"></script>
+  <script src="/seoHelpers.js"></script>
   <script>
     const SAMPLE_PROJECTS = [
       { id: "sample-istanbul-hq", title: "Ortak Alan Dönüşümü", location: "Maslak, İstanbul", architect: "Nokta İç Mimarlık", description: "Açık ofis katında yankıyı azaltan, markanın sade dilini koruyan akustik bir tavan ve duvar kurgusu uygulandı.", image: "https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=1974&auto=format&fit=crop", materials: [{ id: "unica-baffle-01", name: "Unica Baffle Tavan Paneli", image: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=500&auto=format&fit=crop" }, { id: "akustik-kece-duvar-02", name: "Akustik Kece Duvar Paneli", image: "https://images.unsplash.com/photo-1616594039964-3f7f89d7a5d8?q=80&w=500&auto=format&fit=crop" }] },
@@ -72,6 +78,9 @@
 
     function renderProject(p) {
       const materials = p.materials || [];
+      if (window.AG_SEO?.renderProjectSeo) {
+        window.AG_SEO.renderProjectSeo(p, `/proje-detay.html?id=${encodeURIComponent(p.id || "")}`);
+      }
       document.getElementById("project-wrap").innerHTML = `
         <img src="${p.image || FALLBACK_IMAGE}" class="w-full h-[320px] object-cover" alt="${p.title}">
         <div class="p-6">

@@ -101,30 +101,11 @@
   }
 
   function setMeta(product) {
-    const title = `${product.name || "Ürün Detayı"} | ${product.brandName || "Archilink"} | Archilink`;
-    const description = product.summary || product.description || `${product.name || "Ürün"} teknik bilgileri ve marka detayları.`;
-    const canonical = `${location.origin}${productHref(product)}`;
-    const metaImage = product.galleryImageUrl || product.cardImageUrl || product.thumbnailUrl || product.image || "";
-    document.title = title;
-    document.querySelector('meta[name="description"]')?.setAttribute("content", description);
-    document.querySelector('meta[property="og:title"]')?.setAttribute("content", title);
-    document.querySelector('meta[property="og:description"]')?.setAttribute("content", description);
-    document.querySelector('meta[property="og:image"]')?.setAttribute("content", metaImage);
-    document.querySelector('link[rel="canonical"]')?.setAttribute("href", canonical);
-
-    const jsonLd = {
-      "@context": "https://schema.org",
-      "@type": "Product",
-      name: product.name || "",
-      image: metaImage ? [metaImage] : undefined,
-      description,
-      brand: product.brandName ? { "@type": "Brand", name: product.brandName } : undefined,
-      sku: product.sku || undefined,
-    };
-    const tag = document.createElement("script");
-    tag.type = "application/ld+json";
-    tag.textContent = JSON.stringify(jsonLd);
-    document.head.appendChild(tag);
+    if (window.AG_SEO?.renderProductSeo) {
+      window.AG_SEO.renderProductSeo(product, productHref(product));
+      return;
+    }
+    document.title = `${product.name || "Ürün Detayı"} | ${product.brandName || "Archilink"} | Archilink`;
   }
 
   function renderBreadcrumb(el, category) {

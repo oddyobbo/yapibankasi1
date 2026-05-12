@@ -27,6 +27,8 @@
 
 **Analytics durumu:** `analytics_events` event sistemi, `product_view` duplicate azaltma, dosya indirme/teklif/moodboard/favori eventleri ve marka dashboard için günlük/özet agregasyon viewleri eklendi.
 
+**SEO durumu:** Ürün ve proje detay için title, meta description, canonical, Open Graph ve JSON-LD helper altyapısı eklendi. Marka detay sayfası açıldığında aynı helper ile Organization JSON-LD kullanılacak.
+
 ---
 
 ## 3. Görsel Performans Sistemi
