@@ -9,6 +9,22 @@
 
   const $ = (id) => document.getElementById(id);
 
+  function slugify(value) {
+    return String(value || "")
+      .trim()
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/ı/g, "i")
+      .replace(/ğ/g, "g")
+      .replace(/ü/g, "u")
+      .replace(/ş/g, "s")
+      .replace(/ö/g, "o")
+      .replace(/ç/g, "c")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+  }
+
   const STATIC_COMPAT_PRODUCTS = [
     { id: "s1", name: "Unica Baffle Tavan Paneli", brandName: "Unica Acoustic", category: "Mobilya ve Donatı > Akustik", spec: "NRC 0.85 · B-s1,d0", image: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=800&auto=format&fit=crop", hasPdf: true, hasCad: true, status: "published", views: 142 },
     { id: "s2", name: "Akustik Keçe Duvar Paneli", brandName: "Unica Acoustic", category: "Malzemeler > Duvar Kaplama", spec: "NRC 0.75 · A2-s1,d0", image: "https://images.unsplash.com/photo-1616594039964-3f7f89d7a5d8?q=80&w=800&auto=format&fit=crop", hasPdf: true, hasCad: false, status: "published", views: 98 },
@@ -21,6 +37,7 @@
     { id: "s9", name: "Seramik Zemin Karosu 60x60", brandName: "CeraStone", category: "Malzemeler > Zemin", spec: "R11 · A1 · CE", image: "https://images.unsplash.com/photo-1507089947368-19c1da9775ae?q=80&w=800&auto=format&fit=crop", hasPdf: false, hasCad: false, status: "published", views: 45 },
   ].map((product) => ({
     ...product,
+    slug: slugify(product.name),
     summary: product.spec,
     description: "",
     relatedProducts: [],
@@ -50,8 +67,29 @@
   }
 
   function productHref(product) {
-    if (product?.slug) return `/product-detail.html?slug=${encodeURIComponent(product.slug)}`;
-    return `/product-detail.html?id=${encodeURIComponent(product?.id || "")}`;
+    const brandSlug = slugify(product?.brandName || "brand");
+    const productSlug = slugify(product?.slug || product?.name || product?.id || "product");
+    const productId = String(product?.id || productSlug);
+    return `/tr/p/${encodeURIComponent(brandSlug)}/${encodeURIComponent(`${productSlug}-${productId}`)}`;
+  }
+
+  function routeProductParams() {
+    const params = new URLSearchParams(location.search);
+    const id = params.get("id");
+    const slug = params.get("slug");
+    if (id || slug) return { id, slug };
+
+    const parts = location.pathname.split("/").filter(Boolean);
+    const pIndex = parts.indexOf("p");
+    if (pIndex >= 0 && parts[pIndex + 2]) {
+      const productPart = decodeURIComponent(parts[pIndex + 2]);
+      const uuidMatch = productPart.match(/^(.+)-([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i);
+      if (uuidMatch) return { id: uuidMatch[2], slug: uuidMatch[1] };
+      const shortIdMatch = productPart.match(/^(.+)-([a-z]+\d+|\d+)$/i);
+      if (shortIdMatch) return { id: shortIdMatch[2], slug: shortIdMatch[1] };
+      return { id: "", slug: productPart };
+    }
+    return { id: "", slug: "" };
   }
 
   function contactHref(extra) {
@@ -424,9 +462,7 @@
   }
 
   async function init() {
-    const params = new URLSearchParams(location.search);
-    const id = params.get("id");
-    const slug = params.get("slug");
+    const { id, slug } = routeProductParams();
     await AG.ready;
 
     if (!id && !slug) {

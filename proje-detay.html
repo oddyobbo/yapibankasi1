@@ -41,6 +41,26 @@
     ];
 
     const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?q=80&w=1974&auto=format&fit=crop";
+    function slugify(value) {
+      return String(value || "")
+        .trim()
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/ı/g, "i")
+        .replace(/ğ/g, "g")
+        .replace(/ü/g, "u")
+        .replace(/ş/g, "s")
+        .replace(/ö/g, "o")
+        .replace(/ç/g, "c")
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+    }
+    function productHref(product) {
+      const brandSlug = slugify(product.brandName || "brand");
+      const productSlug = slugify(product.slug || product.name || product.id || "product");
+      return `/tr/p/${encodeURIComponent(brandSlug)}/${encodeURIComponent(`${productSlug}-${product.id || productSlug}`)}`;
+    }
 
     function renderMissing() {
       document.getElementById("project-wrap").innerHTML = `
@@ -62,7 +82,7 @@
             <p class="text-[13px] font-semibold text-[#4a4a4f] mb-3">Bu projede kullanılan malzemeler</p>
             <div class="flex flex-wrap gap-2">
               ${materials.length ? materials.map((m) => `
-                <a href="/product-detail.html?id=${encodeURIComponent(m.id)}" class="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-black/10 hover:border-black/25">
+                <a href="${productHref(m)}" class="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-black/10 hover:border-black/25">
                   <img src="${m.image || FALLBACK_IMAGE}" class="w-7 h-7 rounded object-cover" alt="${m.name}">
                   <span class="text-[12px]">${m.name}</span>
                 </a>

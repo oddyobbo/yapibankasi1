@@ -4,6 +4,26 @@ import { dbToProject, projectToDB } from "./projectService.js";
 
 const ARCH_SESSION_CACHE_MS = 90_000;
 
+const slugify = (value) => String(value || "")
+  .trim()
+  .toLowerCase()
+  .normalize("NFD")
+  .replace(/[\u0300-\u036f]/g, "")
+  .replace(/ı/g, "i")
+  .replace(/ğ/g, "g")
+  .replace(/ü/g, "u")
+  .replace(/ş/g, "s")
+  .replace(/ö/g, "o")
+  .replace(/ç/g, "c")
+  .replace(/[^a-z0-9]+/g, "-")
+  .replace(/^-+|-+$/g, "");
+
+const productDetailHref = (item) => {
+  const brandSlug = slugify(item.brandName || "brand");
+  const productSlug = slugify(item.slug || item.name || item.id || "product");
+  return `/tr/p/${encodeURIComponent(brandSlug)}/${encodeURIComponent(`${productSlug}-${item.id || productSlug}`)}`;
+};
+
 export const createArchitectService = ({
   ensureOwnProfile,
   syncArchitectProfileFromMetadata,
@@ -267,7 +287,7 @@ export const createArchitectService = ({
       name: item.name || "",
       image: item.image || "",
       category: item.category || "",
-      url: item.url || `/product-detail.html?id=${encodeURIComponent(item.id || "")}`,
+      url: item.url || productDetailHref(item),
       spec: item.spec || "",
       description: String(item.description || "").slice(0, 280),
       hasPdf: Boolean(item.hasPdf || item.files?.pdfUrl),

@@ -414,9 +414,18 @@
     // Filter state
     const filters = {
       brand: new Set(),
+      material: new Set(),
+      usageArea: new Set(),
+      colorFamily: new Set(),
+      thickness: new Set(),
       fireClass: new Set(),
+      indoorOutdoor: new Set(),
+      country: new Set(),
+      city: new Set(),
+      companyRole: new Set(),
       hasPdf: new Set(),
       hasCad: new Set(),
+      hasBim: new Set(),
       priceMin: null,
       priceMax: null,
     };
@@ -439,6 +448,132 @@
     }
     function esc(s) {
       return String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
+    }
+
+    const FILTER_QUERY_KEYS = [
+      "brand",
+      "material",
+      "usageArea",
+      "colorFamily",
+      "thickness",
+      "fireClass",
+      "indoorOutdoor",
+      "country",
+      "city",
+      "companyRole",
+      "hasPdf",
+      "hasCad",
+      "hasBim",
+    ];
+
+    const COMPANY_ROLE_LABELS = {
+      manufacturer: "Üretici",
+      distributor: "Distribütör",
+      seller: "Satıcı",
+      applicator: "Uygulama & montaj",
+      integrator: "Sistem entegratörü",
+    };
+
+    function valuesFromQuery(qp, key) {
+      const repeated = qp.getAll(key).flatMap(v => String(v).split(","));
+      return repeated.map(v => v.trim()).filter(Boolean);
+    }
+
+    function slugify(value) {
+      return String(value || "")
+        .trim()
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/ı/g, "i")
+        .replace(/ğ/g, "g")
+        .replace(/ü/g, "u")
+        .replace(/ş/g, "s")
+        .replace(/ö/g, "o")
+        .replace(/ç/g, "c")
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+    }
+
+    function productDetailHref(p) {
+      const brandSlug = slugify(p.brandName || "brand");
+      const productSlug = slugify(p.slug || p.name || p.id || "product");
+      const productId = String(p.id || productSlug);
+      return `/tr/p/${encodeURIComponent(brandSlug)}/${encodeURIComponent(`${productSlug}-${productId}`)}`;
+    }
+
+    function firstText(...values) {
+      return values.map(v => String(v ?? "").trim()).find(Boolean) || "";
+    }
+
+    function parseSpecPart(p, pattern) {
+      const match = String(p.spec || "").match(pattern);
+      return match ? match[0].trim() : "";
+    }
+
+    function getMaterial(p) {
+      const t = p.technical || {};
+      return firstText(p.material, t.material, t.materialType, t.malzemeTuru);
+    }
+
+    function getUsageArea(p) {
+      const t = p.technical || {};
+      return firstText(p.usageArea, t.usageArea, t.usageScope, p.application);
+    }
+
+    function getColorFamily(p) {
+      const t = p.technical || {};
+      return firstText(p.colorFamily, t.colorFamily, p.color);
+    }
+
+    function getThicknessLabel(p) {
+      const t = p.technical || {};
+      return firstText(
+        p.thicknessMm != null && p.thicknessMm !== "" ? `${p.thicknessMm} mm` : "",
+        t.thickness,
+        t.thickness_mm != null && t.thickness_mm !== "" ? `${t.thickness_mm} mm` : "",
+      );
+    }
+
+    function getFireClass(p) {
+      const t = p.technical || {};
+      return firstText(p.fireClass, t.fireClass, parseSpecPart(p, /[ABC][0-9]?-s\d,?\s*d\d|A1/i));
+    }
+
+    function getIndoorOutdoor(p) {
+      const raw = firstText(p.indoorOutdoor, p.technical?.indoorOutdoor);
+      const map = { indoor: "İç mekan", outdoor: "Dış mekan", both: "İç / dış mekan" };
+      return map[raw] || raw;
+    }
+
+    function getCountry(p) {
+      return firstText(p.country, p.technical?.country);
+    }
+
+    function getCity(p) {
+      return firstText(p.city, p.technical?.city);
+    }
+
+    function getCompanyRoles(p) {
+      const direct = Array.isArray(p.companyRoles) ? p.companyRoles : [];
+      const legacy = Array.isArray(p.brandCompanyRoles) ? p.brandCompanyRoles : [];
+      return [...new Set([...direct, ...legacy].map(v => String(v).trim()).filter(Boolean))];
+    }
+
+    function getCompanyRoleLabels(p) {
+      return getCompanyRoles(p).map(role => COMPANY_ROLE_LABELS[role] || role);
+    }
+
+    function hasPdfFile(p) {
+      return Boolean(p.files?.pdfUrl || p.files?.pdfs?.length || p.hasPdf);
+    }
+
+    function hasCadFile(p) {
+      return Boolean(p.files?.cadUrl || p.files?.dwgs?.length || p.hasCad);
+    }
+
+    function hasBimFile(p) {
+      return Boolean(p.files?.bimUrl || p.files?.models3d?.length || p.hasBim);
     }
 
     function sortProducts(list, mode) {
@@ -564,13 +699,16 @@
         ["Marka", (p) => p.brandName || "—"],
         ["Kategori", (p) => p.category || "—"],
         ["Özet", (p) => p.spec || "—"],
-        ["Yangın sınıfı", (p) => tech(p).fireClass || "—"],
-        ["Akustik", (p) => tech(p).acoustic || "—"],
+        ["Yangın sınıfı", (p) => getFireClass(p) || "—"],
+        ["Malzeme", (p) => getMaterial(p) || "—"],
+        ["Kullanım alanı", (p) => getUsageArea(p) || "—"],
+        ["Akustik", (p) => p.acousticRating || tech(p).acousticRating || tech(p).acoustic || "—"],
         ["Boyutlar", (p) => tech(p).dimensions || "—"],
-        ["Kalınlık", (p) => tech(p).thickness || "—"],
+        ["Kalınlık", (p) => getThicknessLabel(p) || "—"],
         ["Sertifikalar", (p) => tech(p).certificates || "—"],
-        ["PDF", (p) => (p.files?.pdfUrl || p.hasPdf) ? "Var" : "Yok"],
-        ["CAD", (p) => (p.files?.cadUrl || p.hasCad) ? "Var" : "Yok"],
+        ["PDF", (p) => hasPdfFile(p) ? "Var" : "Yok"],
+        ["CAD", (p) => hasCadFile(p) ? "Var" : "Yok"],
+        ["BIM / 3D", (p) => hasBimFile(p) ? "Var" : "Yok"],
         ["Görüntülenme", (p) => String(p.views ?? "—")],
       ];
       doc.setFontSize(8);
@@ -611,18 +749,21 @@
         { label: "Marka", get: (p) => p.brandName || "—" },
         { label: "Kategori", get: (p) => p.category || "—" },
         { label: "Özet", get: (p) => p.spec || "—" },
-        { label: "Yangın sınıfı", get: (p) => tech(p).fireClass || "—" },
-        { label: "Akustik", get: (p) => tech(p).acoustic || "—" },
+        { label: "Yangın sınıfı", get: (p) => getFireClass(p) || "—" },
+        { label: "Malzeme", get: (p) => getMaterial(p) || "—" },
+        { label: "Kullanım alanı", get: (p) => getUsageArea(p) || "—" },
+        { label: "Akustik", get: (p) => p.acousticRating || tech(p).acousticRating || tech(p).acoustic || "—" },
         { label: "Boyutlar", get: (p) => tech(p).dimensions || "—" },
-        { label: "Kalınlık", get: (p) => tech(p).thickness || "—" },
+        { label: "Kalınlık", get: (p) => getThicknessLabel(p) || "—" },
         { label: "Sertifikalar", get: (p) => tech(p).certificates || "—" },
-        { label: "PDF", get: (p) => (p.files?.pdfUrl || p.hasPdf) ? "Var" : "Yok" },
-        { label: "CAD", get: (p) => (p.files?.cadUrl || p.hasCad) ? "Var" : "Yok" },
+        { label: "PDF", get: (p) => hasPdfFile(p) ? "Var" : "Yok" },
+        { label: "CAD", get: (p) => hasCadFile(p) ? "Var" : "Yok" },
+        { label: "BIM / 3D", get: (p) => hasBimFile(p) ? "Var" : "Yok" },
         { label: "Görüntülenme", get: (p) => String(p.views ?? "—") },
       ];
       let thead = "<tr><th class=\"text-left text-[11px] font-semibold text-[#6e6e73] uppercase tracking-wide p-2 w-36 min-w-[8rem]\">Özellik</th>";
       prods.forEach(p => {
-        thead += `<th class=\"p-2 align-bottom min-w-[140px] max-w-[220px]\"><div class=\"aspect-[4/3] rounded-xl overflow-hidden bg-[#f5f5f7] mb-2\"><img src=\"${esc(productImageUrl(p))}\" alt=\"\" class=\"w-full h-full object-cover\"></div><a href=\"/product-detail.html?id=${encodeURIComponent(p.id)}\" class=\"text-[13px] font-semibold leading-tight text-[#1d1d1f] hover:underline\">${esc(p.name)}</a><p class=\"text-[11px] text-[#6e6e73] mt-1\">${esc(p.brandName || "")}</p></th>`;
+        thead += `<th class=\"p-2 align-bottom min-w-[140px] max-w-[220px]\"><div class=\"aspect-[4/3] rounded-xl overflow-hidden bg-[#f5f5f7] mb-2\"><img src=\"${esc(productImageUrl(p))}\" alt=\"\" class=\"w-full h-full object-cover\"></div><a href=\"${productDetailHref(p)}\" class=\"text-[13px] font-semibold leading-tight text-[#1d1d1f] hover:underline\">${esc(p.name)}</a><p class=\"text-[11px] text-[#6e6e73] mt-1\">${esc(p.brandName || "")}</p></th>`;
       });
       thead += "</tr>";
       let tbody = "";
@@ -649,13 +790,16 @@
       ]);
       moodboards = architectSession ? await AG.getMoodboards() : [];
       favoriteProductIds = new Set((favs || []).map(x => x.id));
-      allProducts = [...STATIC, ...dbProds];
+      allProducts = dbProds && dbProds.length ? dbProds : [...STATIC];
 
       const qp = new URLSearchParams(location.search);
       const qpCategory = (qp.get("category") || "").trim();
       const qpSub = (qp.get("sub") || "").trim();
       const qpQ = (qp.get("q") || "").trim();
       activeCategory = qpSub || qpCategory || "";
+      FILTER_QUERY_KEYS.forEach((key) => {
+        valuesFromQuery(qp, key).forEach((value) => filters[key]?.add(value));
+      });
       if (qpQ) {
         searchQuery = qpQ;
         const si = document.getElementById("search-input");
@@ -733,7 +877,7 @@
           ${compareOverlay}
           ${compareBadge}
           <div class="relative h-48 bg-[#f5f5f7] overflow-hidden">
-          <a href="/product-detail.html?id=${encodeURIComponent(p.id)}" data-view="${p.id}" class="block h-full w-full">
+          <a href="${productDetailHref(p)}" data-view="${p.id}" class="block h-full w-full">
             <img src="${imgSrc}"
               onerror="const fb=['https://images.unsplash.com/photo-1600607686527-6fb886090705?q=80&w=800','https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?q=80&w=800','https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=800','https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=800','https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=800','https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?q=80&w=800'];this.onerror=null;this.src=fb[Math.abs((this.alt||'').split('').reduce((a,c)=>a+c.charCodeAt(0),0))%fb.length];"
               alt="${esc(p.name)}" class="w-full h-full object-cover ${imgHover} transition-transform duration-500 ease-out">
@@ -742,7 +886,7 @@
           <div class="p-4 flex flex-col flex-1">
             <h3 class="text-[14px] font-semibold leading-snug">${p.name}</h3>
             <p class="text-[12px] text-[#6e6e73] mt-1">${p.brandName || ""}</p>
-            <a href="/product-detail.html?id=${encodeURIComponent(p.id)}" class="product-detail-link mt-3 w-full h-8 flex items-center justify-center bg-[#1d1d1f] text-white text-[12px] font-medium rounded-lg hover:bg-[#3a3a3c] transition relative z-[1]">Ürün Detayı</a>
+            <a href="${productDetailHref(p)}" class="product-detail-link mt-3 w-full h-8 flex items-center justify-center bg-[#1d1d1f] text-white text-[12px] font-medium rounded-lg hover:bg-[#3a3a3c] transition relative z-[1]">Ürün Detayı</a>
           </div>
           ${
             architectSession && !compareMode
@@ -841,6 +985,7 @@
         btn.addEventListener("click", () => {
           activeCategory = btn.dataset.cat;
           renderCategoryPills();
+          renderActiveChips();
           render();
         });
       });
@@ -849,43 +994,30 @@
     // ── Accordion groups builder ──
     function buildAccordionGroups() {
       const brands = distinct(allProducts.map(p => p.brandName || ""));
-      const fires  = distinct(allProducts.map(p => p.technical?.fireClass || "").filter(Boolean));
-      const patterns = distinct(allProducts.map(p => p.pattern || "").filter(Boolean));
-      const applications = distinct(allProducts.map(p => p.application || "").filter(Boolean));
-      const contents = distinct(allProducts.map(p => p.content || "").filter(Boolean));
-
-      const COLORS = [
-        { label: "Beyaz",     hex: "#F5F5F0" },
-        { label: "Krem",      hex: "#EDE8DC" },
-        { label: "Bej",       hex: "#C9B89A" },
-        { label: "Kahverengi",hex: "#8B6355" },
-        { label: "Antrasit",  hex: "#3C3C3C" },
-        { label: "Siyah",     hex: "#1A1A1A" },
-        { label: "Gri",       hex: "#9E9E9E" },
-        { label: "Yeşil",     hex: "#7CB87A" },
-        { label: "Mavi",      hex: "#5B89B4" },
-        { label: "Kırmızı",   hex: "#C94040" },
-        { label: "Sarı",      hex: "#D4B84A" },
-        { label: "Ahşap",     hex: "#A0704A" },
-      ];
-
-      const SURFACE_FINISHES = ["Mat", "Parlak", "Saten", "Dokulu", "Ahşap Görünüm", "Metal Görünüm", "Taş Görünüm", "Beton Görünüm", "Çimento Görünüm"];
-      const FEATURES = ["Akustik", "Yangın Dirençli", "Su Geçirmez", "UV Dirençli", "Isı Yalıtımı", "Geri Dönüştürülmüş", "Anti-Bakteriyel", "Nefes Alabilir", "Koku Giderici"];
-      const CERTS = ["LEED Uyumlu", "BREEAM Uyumlu", "Cradle to Cradle", "EPD Belgeli", "Greenguard Gold", "FSC Sertifikalı", "ISO 14001", "Düşük VOC"];
-      const APPLICATIONS_DEFAULT = ["İç Mekan Duvar", "İç Mekan Tavan", "Dış Cephe", "Zemin", "Ofis", "Konut", "Eğitim", "Sağlık", "Otelcilik", "Perakende"];
+      const materials = distinct(allProducts.map(getMaterial));
+      const usageAreas = distinct(allProducts.flatMap(p => String(getUsageArea(p)).split(/[,/|]/).map(x => x.trim())));
+      const colors = distinct(allProducts.map(getColorFamily));
+      const thicknesses = distinct(allProducts.map(getThicknessLabel));
+      const fires  = distinct(allProducts.map(getFireClass));
+      const indoorOutdoor = distinct(allProducts.map(getIndoorOutdoor));
+      const countries = distinct(allProducts.map(getCountry));
+      const cities = distinct(allProducts.map(getCity));
+      const roles = distinct(allProducts.flatMap(getCompanyRoleLabels));
 
       const groups = [
-        { id: "brand",    label: "Marka",           type: "checkboxes", values: brands },
-        { id: "renk",     label: "Renk",            type: "colors",     values: COLORS },
-        { id: "desen",    label: "Desen",           type: "checkboxes", values: patterns.length ? patterns : [] },
-        { id: "yuzey",    label: "Yüzey Bitişi",    type: "checkboxes", values: SURFACE_FINISHES },
-        { id: "ozellik",  label: "Özellikler",      type: "checkboxes", values: FEATURES },
-        { id: "uygulama", label: "Uygulama Alanı",  type: "checkboxes", values: applications.length ? applications : APPLICATIONS_DEFAULT },
-        { id: "icerik",   label: "İçerik",          type: "checkboxes", values: contents },
-        { id: "alev",     label: "Yangın Sınıfı",   type: "checkboxes", values: fires.length ? fires : ["A1", "A2-s1,d0", "B-s1,d0", "C-s2,d0", "D-s3,d0"] },
-        { id: "sertifika",label: "Sertifikalar",    type: "checkboxes", values: CERTS },
-        { id: "hasPdf",   label: "PDF",             type: "checkboxes", values: ["Var", "Yok"] },
-        { id: "hasCad",   label: "CAD",             type: "checkboxes", values: ["Var", "Yok"] },
+        { id: "brand",         label: "Marka",                  type: "checkboxes", values: brands },
+        { id: "material",      label: "Malzeme",                type: "checkboxes", values: materials },
+        { id: "usageArea",     label: "Kullanım Alanı",         type: "checkboxes", values: usageAreas },
+        { id: "colorFamily",   label: "Renk Ailesi",            type: "checkboxes", values: colors },
+        { id: "thickness",     label: "Kalınlık",               type: "checkboxes", values: thicknesses },
+        { id: "fireClass",     label: "Yangın Sınıfı",          type: "checkboxes", values: fires },
+        { id: "indoorOutdoor", label: "İç / Dış Mekan",         type: "checkboxes", values: indoorOutdoor },
+        { id: "country",       label: "Ülke",                   type: "checkboxes", values: countries },
+        { id: "city",          label: "Şehir",                  type: "checkboxes", values: cities },
+        { id: "companyRole",   label: "Üretici / Satıcı Tipi",  type: "checkboxes", values: roles },
+        { id: "hasPdf",        label: "PDF",                    type: "checkboxes", values: ["Var", "Yok"] },
+        { id: "hasCad",        label: "CAD",                    type: "checkboxes", values: ["Var", "Yok"] },
+        { id: "hasBim",        label: "BIM / 3D",               type: "checkboxes", values: ["Var", "Yok"] },
       ];
 
       const container = document.getElementById("acc-groups");
@@ -899,6 +1031,7 @@
 
       // Checkbox listeners
       container.querySelectorAll("input[data-filter-key]").forEach(cb => {
+        cb.checked = Boolean(filters[cb.dataset.filterKey]?.has(cb.value));
         cb.addEventListener("change", () => {
           const key = cb.dataset.filterKey;
           if (!filters[key]) filters[key] = new Set();
@@ -929,8 +1062,8 @@
         } else {
           bodyContent = g.values.map(v => `
             <label class="flex items-center gap-2 cursor-pointer py-0.5 group/cb">
-              <input type="checkbox" class="cb" data-filter-key="${g.id}" value="${v}">
-              <span class="text-[12.5px] text-[#3a3a3c] group-hover/cb:text-black transition">${v}</span>
+              <input type="checkbox" class="cb" data-filter-key="${esc(g.id)}" value="${esc(v)}">
+              <span class="text-[12.5px] text-[#3a3a3c] group-hover/cb:text-black transition">${esc(v)}</span>
             </label>
           `).join("");
         }
@@ -1118,8 +1251,23 @@
     // ── Active chips ──
     function renderActiveChips() {
       const chips = [];
-      const LABELS = { brand: "Marka", renk: "Renk", desen: "Desen", yuzey: "Yüzey", ozellik: "Özellik", uygulama: "Uygulama", icerik: "İçerik", alev: "Yangın", sertifika: "Sertifika", hasPdf: "PDF", hasCad: "CAD" };
-      ["brand","renk","desen","yuzey","ozellik","uygulama","icerik","alev","sertifika","hasPdf","hasCad"].forEach(key => {
+      const LABELS = {
+        brand: "Marka",
+        material: "Malzeme",
+        usageArea: "Kullanım",
+        colorFamily: "Renk",
+        thickness: "Kalınlık",
+        fireClass: "Yangın",
+        indoorOutdoor: "Mekan",
+        country: "Ülke",
+        city: "Şehir",
+        companyRole: "Tip",
+        hasPdf: "PDF",
+        hasCad: "CAD",
+        hasBim: "BIM / 3D",
+      };
+      if (activeCategory) chips.push({ key: "category", value: activeCategory, label: `Kategori: ${activeCategory}` });
+      FILTER_QUERY_KEYS.forEach(key => {
         filters[key]?.forEach(v => chips.push({ key, value: v, label: `${LABELS[key]}: ${v}` }));
       });
 
@@ -1142,7 +1290,10 @@
         btn.addEventListener("click", () => {
           const key = btn.dataset.removeKey;
           const val = btn.dataset.removeVal;
-          if (filters[key]) filters[key].delete(val);
+          if (key === "category") {
+            activeCategory = "";
+            renderCategoryPills();
+          } else if (filters[key]) filters[key].delete(val);
           // Uncheck the corresponding checkbox
           document.querySelectorAll(`input[data-filter-key="${key}"][value="${val}"]`).forEach(cb => cb.checked = false);
           renderActiveChips();
@@ -1170,21 +1321,54 @@
       return set.has(boolVal ? "Var" : "Yok");
     }
 
+    function matchSet(set, value) {
+      if (!set || !set.size) return true;
+      return set.has(String(value || "").trim());
+    }
+
+    function matchAny(set, values) {
+      if (!set || !set.size) return true;
+      return values.some(value => set.has(String(value || "").trim()));
+    }
+
     function productMatchesActiveFilters(p) {
       const { main, sub } = getTaxonomy(p);
       const catKey = sub || main;
 
       if (activeCategory && catKey !== activeCategory && main !== activeCategory) return false;
-      if (filters.brand?.size && !filters.brand.has(p.brandName || "")) return false;
-      if (!matchBool(filters.hasPdf, Boolean(p.files?.pdfUrl || p.hasPdf))) return false;
-      if (!matchBool(filters.hasCad, Boolean(p.files?.cadUrl || p.hasCad))) return false;
-      const fire = (p.technical?.fireClass || "").trim();
-      if (filters.alev?.size && !filters.alev.has(fire)) return false;
+      if (!matchSet(filters.brand, p.brandName || "")) return false;
+      if (!matchSet(filters.material, getMaterial(p))) return false;
+      if (!matchAny(filters.usageArea, String(getUsageArea(p)).split(/[,/|]/).map(x => x.trim()))) return false;
+      if (!matchSet(filters.colorFamily, getColorFamily(p))) return false;
+      if (!matchSet(filters.thickness, getThicknessLabel(p))) return false;
+      if (!matchSet(filters.fireClass, getFireClass(p))) return false;
+      if (!matchSet(filters.indoorOutdoor, getIndoorOutdoor(p))) return false;
+      if (!matchSet(filters.country, getCountry(p))) return false;
+      if (!matchSet(filters.city, getCity(p))) return false;
+      if (!matchAny(filters.companyRole, getCompanyRoleLabels(p))) return false;
+      if (!matchBool(filters.hasPdf, hasPdfFile(p))) return false;
+      if (!matchBool(filters.hasCad, hasCadFile(p))) return false;
+      if (!matchBool(filters.hasBim, hasBimFile(p))) return false;
       if (filters.priceMin && p.price < filters.priceMin) return false;
       if (filters.priceMax && p.price > filters.priceMax) return false;
 
       if (searchQuery) {
-        const haystack = (p.name + " " + p.category + " " + (p.spec || "") + " " + (p.brandName || "") + " " + JSON.stringify(p.technical || {})).toLowerCase();
+        const haystack = [
+          p.name,
+          p.category,
+          p.spec,
+          p.brandName,
+          getMaterial(p),
+          getUsageArea(p),
+          getColorFamily(p),
+          getThicknessLabel(p),
+          getFireClass(p),
+          getIndoorOutdoor(p),
+          getCountry(p),
+          getCity(p),
+          getCompanyRoleLabels(p).join(" "),
+          JSON.stringify(p.technical || {}),
+        ].join(" ").toLowerCase();
         const words = searchQuery.toLowerCase().trim().split(/\s+/);
         if (!words.every(w => haystack.includes(w))) return false;
       }
@@ -1199,8 +1383,22 @@
       return source.filter(productMatchesActiveFilters);
     }
 
+    function syncUrlState() {
+      const params = new URLSearchParams();
+      if (activeCategory) params.set("category", activeCategory);
+      if (searchQuery) params.set("q", searchQuery);
+      FILTER_QUERY_KEYS.forEach((key) => {
+        if (filters[key]?.size) params.set(key, [...filters[key]].join(","));
+      });
+      const next = `${location.pathname}${params.toString() ? `?${params.toString()}` : ""}`;
+      if (next !== `${location.pathname}${location.search}`) {
+        history.replaceState(null, "", next);
+      }
+    }
+
     // ── Render products ──
     function render() {
+      syncUrlState();
       const list = getSortedFilteredList();
       const grid = document.getElementById("products-grid");
       const empty = document.getElementById("empty-msg");
@@ -1222,7 +1420,7 @@
           const res = await AG.toggleFavoriteProduct({
             id: product.id, name: product.name, image: product.image,
             category: product.category,
-            url: `/product-detail.html?id=${encodeURIComponent(product.id)}`
+            url: productDetailHref(product)
           });
           if (!res?.ok) { showToast(res?.message || "Favorilere eklemek için giriş yapın."); return; }
           if (res.active) { favoriteProductIds.add(id); showToast("Favorilere eklendi ♥"); }
