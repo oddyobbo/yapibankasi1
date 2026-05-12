@@ -336,6 +336,9 @@
         <p id="result-count" class="text-[13px] text-[#6e6e73] mb-4"></p>
         <div id="products-grid" class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-5"></div>
         <p id="empty-msg" class="hidden text-center text-[#6e6e73] py-20 text-[15px]">Arama kriterlerine uygun ürün bulunamadı.</p>
+        <div class="mt-8 flex justify-center">
+          <button id="load-more-products" type="button" class="hidden h-11 rounded-full border border-black/15 bg-white px-6 text-[13px] font-medium text-[#1d1d1f] hover:bg-black/[0.04]">Daha fazla ürün yükle</button>
+        </div>
       </div>
     </div>
   </div>
@@ -404,6 +407,12 @@
     ];
 
     let allProducts = [...STATIC];
+    let facetProducts = [...STATIC];
+    let catalogPage = 1;
+    let catalogTotal = 0;
+    let catalogHasMore = false;
+    let catalogLoading = false;
+    const PAGE_SIZE = 24;
     let architectSession = null;
     let favoriteProductIds = new Set();
     let moodboards = [];
@@ -576,6 +585,68 @@
       return Boolean(p.files?.bimUrl || p.files?.models3d?.length || p.hasBim);
     }
 
+    function boolFilterValue(set) {
+      if (!set || !set.size || set.size > 1) return undefined;
+      return set.has("Var");
+    }
+
+    function rawIndoorOutdoor(value) {
+      const map = { "İç mekan": "indoor", "Dış mekan": "outdoor", "İç / dış mekan": "both" };
+      return map[value] || value;
+    }
+
+    function rawCompanyRole(value) {
+      const found = Object.entries(COMPANY_ROLE_LABELS).find(([, label]) => label === value);
+      return found ? found[0] : value;
+    }
+
+    function selectedValues(key) {
+      return [...(filters[key] || [])].filter(Boolean);
+    }
+
+    function queryOptions(page = 1) {
+      return {
+        page,
+        pageSize: PAGE_SIZE,
+        sortBy,
+        category: activeCategory || "",
+        search: searchQuery || "",
+        brandName: selectedValues("brand"),
+        material: selectedValues("material"),
+        usageArea: selectedValues("usageArea"),
+        colorFamily: selectedValues("colorFamily"),
+        thicknessMm: selectedValues("thickness").map((value) => Number(String(value).replace(",", ".").match(/-?\d+(\.\d+)?/)?.[0])).filter(Number.isFinite),
+        fireClass: selectedValues("fireClass"),
+        indoorOutdoor: selectedValues("indoorOutdoor").map(rawIndoorOutdoor),
+        country: selectedValues("country"),
+        city: selectedValues("city"),
+        companyRole: selectedValues("companyRole").map(rawCompanyRole),
+        hasPdf: boolFilterValue(filters.hasPdf),
+        hasCad: boolFilterValue(filters.hasCad),
+        hasBim: boolFilterValue(filters.hasBim),
+      };
+    }
+
+    function normalizeFacetRow(row) {
+      return {
+        brandName: row.brandName || row.brand_name || "",
+        category: row.category || "",
+        material: row.material || "",
+        thicknessMm: row.thicknessMm ?? row.thickness_mm,
+        fireClass: row.fireClass || row.fire_class || "",
+        colorFamily: row.colorFamily || row.color_family || "",
+        usageArea: row.usageArea || row.usage_area || "",
+        indoorOutdoor: row.indoorOutdoor || row.indoor_outdoor || "",
+        country: row.country || "",
+        city: row.city || "",
+        companyRoles: row.companyRoles || row.company_roles || [],
+        hasPdf: Boolean(row.hasPdf ?? row.has_pdf),
+        hasCad: Boolean(row.hasCad ?? row.has_cad),
+        hasBim: Boolean(row.hasBim ?? row.has_bim),
+        technical: {},
+      };
+    }
+
     function sortProducts(list, mode) {
       const arr = [...list];
       const coll = new Intl.Collator("tr", { sensitivity: "base" });
@@ -591,6 +662,46 @@
     }
     function getSortedFilteredList() {
       return sortProducts(filtered(), sortBy);
+    }
+
+    async function loadCatalogPage({ reset = true } = {}) {
+      if (catalogLoading) return;
+      catalogLoading = true;
+      const loadMoreBtn = document.getElementById("load-more-products");
+      if (loadMoreBtn) {
+        loadMoreBtn.disabled = true;
+        loadMoreBtn.textContent = "Yükleniyor...";
+      }
+      if (reset) catalogPage = 1;
+      try {
+        const res = await AG.getProductList(queryOptions(catalogPage));
+        const items = res?.items || [];
+        if (reset) allProducts = items.length ? items : [...STATIC];
+        else allProducts = [...allProducts, ...items];
+        catalogTotal = res?.total || allProducts.length;
+        catalogHasMore = Boolean(res?.hasMore);
+      } catch (_) {
+        if (reset) {
+          allProducts = [...STATIC];
+          catalogTotal = allProducts.length;
+          catalogHasMore = false;
+        }
+      } finally {
+        catalogLoading = false;
+        render();
+        if (loadMoreBtn) {
+          loadMoreBtn.disabled = false;
+          loadMoreBtn.textContent = "Daha fazla ürün yükle";
+        }
+      }
+    }
+
+    function refreshResults() {
+      if (compareMode && compareFavoritesGridOnly) {
+        render();
+        return;
+      }
+      loadCatalogPage({ reset: true });
     }
 
     function closeCompareResult() {
@@ -784,13 +895,13 @@
 
     AG.ready.then(async () => {
       architectSession = await AG.getSessionArchitect();
-      const [dbProds, favs] = await Promise.all([
-        AG.getProducts(),
+      const [filterRows, favs] = await Promise.all([
+        AG.getProductFilterOptions(),
         architectSession ? AG.getFavoriteProducts() : Promise.resolve([])
       ]);
       moodboards = architectSession ? await AG.getMoodboards() : [];
       favoriteProductIds = new Set((favs || []).map(x => x.id));
-      allProducts = dbProds && dbProds.length ? dbProds : [...STATIC];
+      facetProducts = filterRows && filterRows.length ? filterRows.map(normalizeFacetRow) : [...STATIC];
 
       const qp = new URLSearchParams(location.search);
       const qpCategory = (qp.get("category") || "").trim();
@@ -841,6 +952,7 @@
         updateCompareBar();
         renderCategoryPills();
         buildAccordionGroups();
+        renderActiveChips();
         render();
         if (comparePickOrder.length >= 2) setTimeout(() => openCompareResult(), 200);
         else if (merged.length) showToast("En az 2 favori ürün seç veya listeden işaretle.");
@@ -850,11 +962,12 @@
 
       renderCategoryPills();
       buildAccordionGroups();
-      render();
+      renderActiveChips();
+      await loadCatalogPage({ reset: true });
     });
 
     // ── renderCard ──
-    function renderCard(p) {
+    function renderCard(p, index = 0) {
       const isFav = favoriteProductIds.has(p.id);
       const fb = FB_IMAGES[Math.abs(String(p.id || "").split("").reduce((a, c) => a + c.charCodeAt(0), 0) || 0) % FB_IMAGES.length];
       const imgSrc = esc(p.image || fb);
@@ -878,7 +991,7 @@
           ${compareBadge}
           <div class="relative h-48 bg-[#f5f5f7] overflow-hidden">
           <a href="${productDetailHref(p)}" data-view="${p.id}" class="block h-full w-full">
-            <img src="${imgSrc}"
+            <img src="${imgSrc}" width="640" height="480" loading="${index < 8 ? "eager" : "lazy"}" decoding="async"
               onerror="const fb=['https://images.unsplash.com/photo-1600607686527-6fb886090705?q=80&w=800','https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?q=80&w=800','https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=800','https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=800','https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=800','https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?q=80&w=800'];this.onerror=null;this.src=fb[Math.abs((this.alt||'').split('').reduce((a,c)=>a+c.charCodeAt(0),0))%fb.length];"
               alt="${esc(p.name)}" class="w-full h-full object-cover ${imgHover} transition-transform duration-500 ease-out">
           </a>
@@ -964,13 +1077,13 @@
     function renderCategoryPills() {
       const pills = document.getElementById("category-pills");
       const subCounts = {};
-      allProducts.forEach(p => {
+      facetProducts.forEach(p => {
         const { sub, main } = getTaxonomy(p);
         const key = sub || main;
         subCounts[key] = (subCounts[key] || 0) + 1;
       });
       const cats = Object.keys(subCounts).sort((a, b) => a.localeCompare(b, "tr"));
-      const total = allProducts.length;
+      const total = facetProducts.length || catalogTotal || allProducts.length;
       pills.innerHTML = `
         <button class="cat-pill ${!activeCategory ? "active" : ""}" data-cat="">
           Tümü <span class="pill-count">${total}</span>
@@ -986,23 +1099,24 @@
           activeCategory = btn.dataset.cat;
           renderCategoryPills();
           renderActiveChips();
-          render();
+          refreshResults();
         });
       });
     }
 
     // ── Accordion groups builder ──
     function buildAccordionGroups() {
-      const brands = distinct(allProducts.map(p => p.brandName || ""));
-      const materials = distinct(allProducts.map(getMaterial));
-      const usageAreas = distinct(allProducts.flatMap(p => String(getUsageArea(p)).split(/[,/|]/).map(x => x.trim())));
-      const colors = distinct(allProducts.map(getColorFamily));
-      const thicknesses = distinct(allProducts.map(getThicknessLabel));
-      const fires  = distinct(allProducts.map(getFireClass));
-      const indoorOutdoor = distinct(allProducts.map(getIndoorOutdoor));
-      const countries = distinct(allProducts.map(getCountry));
-      const cities = distinct(allProducts.map(getCity));
-      const roles = distinct(allProducts.flatMap(getCompanyRoleLabels));
+      const source = facetProducts.length ? facetProducts : allProducts;
+      const brands = distinct(source.map(p => p.brandName || ""));
+      const materials = distinct(source.map(getMaterial));
+      const usageAreas = distinct(source.flatMap(p => String(getUsageArea(p)).split(/[,/|]/).map(x => x.trim())));
+      const colors = distinct(source.map(getColorFamily));
+      const thicknesses = distinct(source.map(getThicknessLabel));
+      const fires  = distinct(source.map(getFireClass));
+      const indoorOutdoor = distinct(source.map(getIndoorOutdoor));
+      const countries = distinct(source.map(getCountry));
+      const cities = distinct(source.map(getCity));
+      const roles = distinct(source.flatMap(getCompanyRoleLabels));
 
       const groups = [
         { id: "brand",         label: "Marka",                  type: "checkboxes", values: brands },
@@ -1037,7 +1151,7 @@
           if (!filters[key]) filters[key] = new Set();
           cb.checked ? filters[key].add(cb.value) : filters[key].delete(cb.value);
           renderActiveChips();
-          render();
+          refreshResults();
         });
       });
 
@@ -1047,7 +1161,7 @@
         if (el) el.addEventListener("input", () => {
           filters.priceMin = document.getElementById("price-min").value ? Number(document.getElementById("price-min").value) : null;
           filters.priceMax = document.getElementById("price-max").value ? Number(document.getElementById("price-max").value) : null;
-          render();
+          refreshResults();
         });
       });
 
@@ -1162,7 +1276,7 @@
     // ── Search input ──
     document.getElementById("search-input").addEventListener("input", e => {
       searchQuery = e.target.value.trim();
-      render();
+      refreshResults();
     });
 
     // ── Sırala dropdown ──
@@ -1174,7 +1288,7 @@
       btn.addEventListener("click", () => {
         sortBy = btn.getAttribute("data-sort") || "name_asc";
         document.getElementById("sort-dropdown").classList.add("hidden");
-        render();
+        refreshResults();
       });
     });
     document.addEventListener("click", e => {
@@ -1297,7 +1411,7 @@
           // Uncheck the corresponding checkbox
           document.querySelectorAll(`input[data-filter-key="${key}"][value="${val}"]`).forEach(cb => cb.checked = false);
           renderActiveChips();
-          render();
+          refreshResults();
         });
       });
     }
@@ -1312,7 +1426,13 @@
       document.querySelectorAll("[data-tog]").forEach(t => { t.checked = false; toggles[t.dataset.tog] = false; });
       document.querySelectorAll(".price-inp").forEach(inp => inp.value = "");
       renderActiveChips();
-      render();
+      refreshResults();
+    });
+
+    document.getElementById("load-more-products").addEventListener("click", () => {
+      if (!catalogHasMore || catalogLoading) return;
+      catalogPage += 1;
+      loadCatalogPage({ reset: false });
     });
 
     // ── Filter logic ──
@@ -1399,14 +1519,20 @@
     // ── Render products ──
     function render() {
       syncUrlState();
-      const list = getSortedFilteredList();
+      const list =
+        compareMode && compareFavoritesGridOnly && compareFavoritesProductList !== null
+          ? getSortedFilteredList()
+          : allProducts;
       const grid = document.getElementById("products-grid");
       const empty = document.getElementById("empty-msg");
       const count = document.getElementById("result-count");
-      count.textContent = `${list.length} ürün listeleniyor`;
+      const loadMoreBtn = document.getElementById("load-more-products");
+      const total = compareMode && compareFavoritesGridOnly ? list.length : catalogTotal || list.length;
+      count.textContent = `${total} ürün listeleniyor${total > list.length ? ` · ${list.length} gösteriliyor` : ""}`;
+      if (loadMoreBtn) loadMoreBtn.classList.toggle("hidden", compareMode || !catalogHasMore);
       if (!list.length) { grid.innerHTML = ""; empty.classList.remove("hidden"); return; }
       empty.classList.add("hidden");
-      grid.innerHTML = list.map(renderCard).join("");
+      grid.innerHTML = list.map((product, index) => renderCard(product, index)).join("");
 
       grid.querySelectorAll("[data-view]").forEach(a =>
         a.addEventListener("click", () => AG.incrementView(a.dataset.view).catch(() => {}))

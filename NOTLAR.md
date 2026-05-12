@@ -23,7 +23,7 @@
 - Skeleton loader ve temiz boş durumlar kullanılacak.
 - Büyük değişikliklerden sonra Lighthouse ölçümü yapılacak: Performance 85+, LCP 2.5s altı, CLS sıfıra yakın.
 
-**Durum:** Kısmen yapıldı. Dinamik ürün detay sayfası seçili ürünü çekiyor ve analytics non-blocking başladı. Listeleme sayfası hâlâ tamamen performans kurallarına uygun değil; sıradaki işlerden biri query tabanlı 24'lü listeleme/filtreleme.
+**Durum:** Kısmen yapıldı. Dinamik ürün detay sayfası seçili ürünü çekiyor ve analytics non-blocking başladı. Ürün listeleme tarafında 24'lü query/pagination mantığı başladı; tam facet/RPC ve görsel türev üretimi henüz tamamlanmadı.
 
 ---
 

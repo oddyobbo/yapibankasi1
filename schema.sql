@@ -166,6 +166,8 @@ alter table public.products add column if not exists updated_at timestamptz defa
 create index if not exists idx_products_brand_id on public.products(brand_id);
 create index if not exists idx_products_slug on public.products(slug);
 create index if not exists idx_products_status on public.products(status);
+create index if not exists idx_products_created_at on public.products(created_at desc);
+create index if not exists idx_products_published_created_at on public.products(status, created_at desc);
 create index if not exists idx_products_category on public.products(category_id, subcategory_id);
 create index if not exists idx_products_filter_material on public.products(material);
 create index if not exists idx_products_filter_usage on public.products(usage_area);

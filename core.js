@@ -78,6 +78,8 @@
       deleteArchitectOfficeProject: architectService.deleteArchitectOfficeProject,
       uploadArchitectProjectImage: architectService.uploadArchitectProjectImage,
       // products
+      getProductList: productService.getProductList,
+      getProductFilterOptions: productService.getProductFilterOptions,
       getProducts: productService.getProducts,
       getProductDetail: productService.getProductDetail,
       getAllProducts: productService.getAllProducts,
@@ -134,6 +136,8 @@
     "addArchitectOfficeProject",
     "deleteArchitectOfficeProject",
     "uploadArchitectProjectImage",
+    "getProductList",
+    "getProductFilterOptions",
     "getProducts",
     "getProductDetail",
     "getAllProducts",

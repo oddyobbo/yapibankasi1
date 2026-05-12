@@ -23,6 +23,57 @@ const numberOrNull = (value) => {
   return Number.isFinite(parsed) ? parsed : null;
 };
 
+const PRODUCT_LIST_FIELDS = [
+  "id",
+  "brand_id",
+  "brand_name",
+  "brand_logo",
+  "name",
+  "slug",
+  "sku",
+  "category",
+  "category_id",
+  "subcategory_id",
+  "summary",
+  "material",
+  "material_family",
+  "thickness_mm",
+  "fire_class",
+  "color_family",
+  "usage_area",
+  "indoor_outdoor",
+  "acoustic_rating",
+  "acoustic_nrc",
+  "dimensions",
+  "country",
+  "city",
+  "company_roles",
+  "image",
+  "has_pdf",
+  "has_cad",
+  "has_bim",
+  "status",
+  "views",
+  "created_at",
+].join(",");
+
+const PRODUCT_FILTER_FIELDS = [
+  "brand_name",
+  "category",
+  "material",
+  "thickness_mm",
+  "fire_class",
+  "color_family",
+  "usage_area",
+  "indoor_outdoor",
+  "country",
+  "city",
+  "company_roles",
+  "has_pdf",
+  "has_cad",
+  "has_bim",
+].join(",");
+
 const toCamelTechnical = (row, technical) => ({
   ...technical,
   material: firstValue(row.material, technical.material),
@@ -155,20 +206,34 @@ const applyProductFilters = (query, opts = {}) => {
   let q = query;
   if (opts.brandId) q = q.eq("brand_id", opts.brandId);
   else q = q.eq("status", opts.status || "published");
-  if (opts.category) q = q.eq("category", opts.category);
+  const applyValues = (column, value) => {
+    const values = Array.isArray(value) ? value.filter(Boolean) : [value].filter(Boolean);
+    if (!values.length) return;
+    q = values.length === 1 ? q.eq(column, values[0]) : q.in(column, values);
+  };
+  if (opts.category) q = q.ilike("category", `%${opts.category}%`);
   if (opts.categoryId) q = q.eq("category_id", opts.categoryId);
   if (opts.subcategoryId) q = q.eq("subcategory_id", opts.subcategoryId);
-  if (opts.material) q = q.eq("material", opts.material);
-  if (opts.usageArea) q = q.eq("usage_area", opts.usageArea);
-  if (opts.colorFamily) q = q.eq("color_family", opts.colorFamily);
-  if (opts.fireClass) q = q.eq("fire_class", opts.fireClass);
-  if (opts.indoorOutdoor) q = q.eq("indoor_outdoor", opts.indoorOutdoor);
-  if (opts.country) q = q.eq("country", opts.country);
-  if (opts.city) q = q.eq("city", opts.city);
-  if (opts.hasPdf) q = q.eq("has_pdf", true);
-  if (opts.hasCad) q = q.eq("has_cad", true);
-  if (opts.hasBim) q = q.eq("has_bim", true);
-  if (opts.companyRole) q = q.contains("company_roles", [opts.companyRole]);
+  applyValues("brand_name", opts.brandName);
+  applyValues("material", opts.material);
+  applyValues("usage_area", opts.usageArea);
+  applyValues("color_family", opts.colorFamily);
+  applyValues("thickness_mm", opts.thicknessMm);
+  applyValues("fire_class", opts.fireClass);
+  applyValues("indoor_outdoor", opts.indoorOutdoor);
+  applyValues("country", opts.country);
+  applyValues("city", opts.city);
+  if (typeof opts.hasPdf === "boolean") q = q.eq("has_pdf", opts.hasPdf);
+  if (typeof opts.hasCad === "boolean") q = q.eq("has_cad", opts.hasCad);
+  if (typeof opts.hasBim === "boolean") q = q.eq("has_bim", opts.hasBim);
+  const companyRoles = Array.isArray(opts.companyRole) ? opts.companyRole.filter(Boolean) : [opts.companyRole].filter(Boolean);
+  companyRoles.forEach((role) => {
+    q = q.contains("company_roles", [role]);
+  });
+  if (opts.search) {
+    const term = String(opts.search).trim();
+    q = q.or(`name.ilike.%${term}%,brand_name.ilike.%${term}%,category.ilike.%${term}%,material.ilike.%${term}%,usage_area.ilike.%${term}%`);
+  }
   return q;
 };
 
@@ -295,6 +360,55 @@ const applyDetailRows = (product, detail) => {
 };
 
 export const createProductService = () => {
+  const getProductList = async (opts = {}) => {
+    await ready;
+    const sb = getSB();
+    if (!sb) return { items: [], total: 0, page: 1, pageSize: 24, hasMore: false };
+    const pageSize = Math.min(Math.max(Number(opts.pageSize) || 24, 1), 60);
+    const page = Math.max(Number(opts.page) || 1, 1);
+    const from = (page - 1) * pageSize;
+    const to = from + pageSize - 1;
+    const sortMap = {
+      name_asc: ["name", true],
+      name_desc: ["name", false],
+      brand_asc: ["brand_name", true],
+      views_desc: ["views", false],
+      newest: ["created_at", false],
+    };
+    const [sortColumn, ascending] = sortMap[opts.sortBy] || sortMap.name_asc;
+    const query = applyProductFilters(
+      sb
+        .from("products")
+        .select(PRODUCT_LIST_FIELDS, { count: "exact" })
+        .order(sortColumn, { ascending })
+        .range(from, to),
+      opts,
+    );
+    const { data, count, error } = await query;
+    if (error) return { items: [], total: 0, page, pageSize, hasMore: false, error };
+    const total = count || 0;
+    return {
+      items: (data || []).map(dbToProduct),
+      total,
+      page,
+      pageSize,
+      hasMore: from + (data || []).length < total,
+    };
+  };
+
+  const getProductFilterOptions = async () => {
+    await ready;
+    const sb = getSB();
+    if (!sb) return [];
+    const { data } = await sb
+      .from("products")
+      .select(PRODUCT_FILTER_FIELDS)
+      .eq("status", "published")
+      .order("created_at", { ascending: false })
+      .limit(5000);
+    return data || [];
+  };
+
   const getProducts = async (opts = {}) => {
     await ready;
     const sb = getSB();
@@ -434,6 +548,8 @@ export const createProductService = () => {
   };
 
   return {
+    getProductList,
+    getProductFilterOptions,
     getProducts,
     getProductDetail,
     getAllProducts,
