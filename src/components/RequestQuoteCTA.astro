@@ -1,0 +1,24 @@
+---
+const { product } = Astro.props;
+const params = new URLSearchParams({
+  konu: "urun",
+  talep: "teklif",
+  urun: product?.name || "",
+  marka: product?.brand_name || "",
+  urunId: product?.id || "",
+});
+---
+<div class="cta card">
+  <h2>Teklif veya numune iste</h2>
+  <p>Bu ürün için marka ile doğrudan iletişime geçebilirsin. Auth/moodboard akışı Phase 2'de Astro'ya taşınacak.</p>
+  <div class="actions">
+    <a class="button primary" href={`/iletisim-v2.html?${params.toString()}`}>Fiyat teklifi al</a>
+    <a class="button secondary" href="/mimar-giris.html">Kaydet / favori</a>
+  </div>
+</div>
+<style>
+  .cta { padding: 22px; }
+  h2 { margin: 0; font-size: 22px; line-height: 1.2; font-weight: 600; }
+  p { margin: 10px 0 18px; color: #6e6e73; font-size: 14px; line-height: 1.55; }
+  .actions { display: flex; flex-wrap: wrap; gap: 10px; }
+</style>

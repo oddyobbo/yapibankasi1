@@ -1,0 +1,39 @@
+---
+const { product } = Astro.props;
+const t = product.technical || {};
+const rows = [
+  ["Malzeme", product.material || t.material || t.materialType],
+  ["Akustik performans", product.acoustic_rating || t.acousticRating || t.acoustic],
+  ["Yangın sınıfı", product.fire_class || t.fireClass],
+  ["Kalınlık", product.thickness_mm ? `${product.thickness_mm} mm` : t.thickness],
+  ["Ölçü", product.dimensions || t.dimensions],
+  ["Renk ailesi", product.color_family || t.colorFamily],
+  ["Kullanım", product.usage_area || t.usageArea || t.usageScope],
+  ["İç/Dış mekan", product.indoor_outdoor],
+].filter(([, value]) => value);
+const structuredRows = (product.specs || []).filter((row) => row.label && (row.value_text || row.value_number));
+---
+<section class="card spec-card">
+  <h2 class="section-title">Teknik Bilgiler</h2>
+  {rows.length || structuredRows.length ? (
+    <dl>
+      {rows.map(([label, value]) => <><dt>{label}</dt><dd>{value}</dd></>)}
+      {structuredRows.map((row) => <><dt>{row.label}</dt><dd>{row.value_text || `${row.value_number}${row.unit ? ` ${row.unit}` : ""}`}</dd></>)}
+    </dl>
+  ) : (
+    <p class="empty-text">Teknik bilgi henüz eklenmedi.</p>
+  )}
+</section>
+<style>
+  .spec-card { padding: 22px; }
+  dl { display: grid; grid-template-columns: minmax(130px, 220px) 1fr; margin: 0; border-top: 1px solid rgba(0,0,0,.08); }
+  dt, dd { margin: 0; padding: 13px 0; border-bottom: 1px solid rgba(0,0,0,.08); font-size: 14px; line-height: 1.4; }
+  dt { color: #6e6e73; }
+  dd { color: #111; }
+  .empty-text { margin: 0; color: #6e6e73; font-size: 14px; }
+  @media (max-width: 640px) {
+    dl { grid-template-columns: 1fr; }
+    dt { padding-bottom: 2px; border-bottom: 0; }
+    dd { padding-top: 0; }
+  }
+</style>

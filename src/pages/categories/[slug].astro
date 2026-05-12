@@ -1,0 +1,41 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Header from "../../components/Header.astro";
+import Footer from "../../components/Footer.astro";
+import ProductCard from "../../components/ProductCard.astro";
+import CategoryGrid from "../../components/CategoryGrid.astro";
+import { getCategories, getCategoryDetail } from "../../lib/catalog.js";
+import { categoryPath } from "../../lib/slugs.js";
+
+const category = await getCategoryDetail(Astro.params.slug);
+const categories = await getCategories();
+if (!category) return Astro.redirect("/products", 302);
+---
+<BaseLayout
+  title={`${category.name} | Kategori | Archilink`}
+  description={`${category.name} kategorisindeki yayınlanmış mimari ürünleri keşfet.`}
+  canonical={categoryPath(category)}
+>
+  <Header />
+  <main>
+    <section class="page-band">
+      <div class="container">
+        <p class="eyebrow">Kategori</p>
+        <h1 class="page-title">{category.name}</h1>
+        <p class="lead">Bu kategoriye bağlı yayınlanmış ürünler. Filtreler sonraki fazda query tabanlı genişletilecek.</p>
+      </div>
+    </section>
+    <section class="page-band">
+      <div class="container">
+        {category.products?.length ? <div class="grid cards">{category.products.map((product) => <ProductCard product={product} />)}</div> : <p class="empty">Bu kategoride yayınlanmış ürün henüz yok.</p>}
+      </div>
+    </section>
+    <section class="page-band">
+      <div class="container">
+        <h2 class="section-title">Diğer kategoriler</h2>
+        <CategoryGrid categories={categories.filter((item) => item.id !== category.id).slice(0, 8)} />
+      </div>
+    </section>
+  </main>
+  <Footer />
+</BaseLayout>

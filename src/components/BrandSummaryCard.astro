@@ -1,0 +1,22 @@
+---
+import { brandPath, slugify } from "../lib/slugs.js";
+const { product, brand } = Astro.props;
+const name = brand?.name || product?.brand_name || "Marka belirtilmedi";
+const href = brand ? brandPath(brand) : `/brands/${slugify(name)}`;
+---
+<aside class="brand-summary card">
+  <div class="logo">
+    {(brand?.logo_url || product?.brand_logo) ? <img src={brand?.logo_url || product?.brand_logo} alt={name} width="160" height="90" /> : <span>{name.charAt(0)}</span>}
+  </div>
+  <h2>{name}</h2>
+  <p>{brand?.description || "Marka bilgileri ve iletişim detayları için marka sayfasına geç."}</p>
+  <a class="button secondary" href={href}>Markayı görüntüle</a>
+</aside>
+<style>
+  .brand-summary { padding: 22px; position: sticky; top: 92px; }
+  .logo { width: 130px; height: 74px; display: grid; place-items: center; border: 1px solid rgba(0,0,0,.08); border-radius: 10px; background: #fff; }
+  .logo span { font-size: 32px; font-weight: 600; }
+  img { max-width: 90%; max-height: 80%; object-fit: contain; }
+  h2 { margin: 18px 0 0; font-size: 22px; line-height: 1.2; font-weight: 600; }
+  p { margin: 10px 0 18px; color: #6e6e73; font-size: 14px; line-height: 1.5; }
+</style>

@@ -1,0 +1,10 @@
+---
+import ProductCard from "./ProductCard.astro";
+const { products = [] } = Astro.props;
+---
+<section class="page-band">
+  <div class="container">
+    <h2 class="section-title">İlgili Ürünler</h2>
+    {products.length ? <div class="grid cards">{products.map((product) => <ProductCard product={product} />)}</div> : <p class="empty">İlgili ürün henüz yok.</p>}
+  </div>
+</section>

@@ -1,0 +1,28 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Header from "../../components/Header.astro";
+import Footer from "../../components/Footer.astro";
+import CategoryGrid from "../../components/CategoryGrid.astro";
+import { getCategories } from "../../lib/catalog.js";
+
+const categories = await getCategories();
+---
+<BaseLayout
+  title="Kategoriler | Archilink"
+  description="Mimari ürün kategorilerini keşfet."
+  canonical="/categories"
+>
+  <Header />
+  <main class="page-band">
+    <div class="container">
+      <p class="eyebrow">Kategoriler</p>
+      <h1 class="page-title">Ürün kategorileri</h1>
+      <p class="lead">Kategori sayfaları SEO dostu slug URL'lerle çalışır.</p>
+      <section class="catalog">
+        <CategoryGrid categories={categories} />
+      </section>
+    </div>
+  </main>
+  <Footer />
+</BaseLayout>
+<style>.catalog { margin-top: 28px; }</style>

@@ -29,6 +29,8 @@
 
 **SEO durumu:** Ürün ve proje detay için title, meta description, canonical, Open Graph ve JSON-LD helper altyapısı eklendi. Marka detay sayfası açıldığında aynı helper ile Organization JSON-LD kullanılacak.
 
+**Astro migration:** Public SEO-sensitive katalog sayfaları için Astro + Supabase + Netlify geçişi `astro-migration` branch'inde başlatıldı. Dashboard/auth/moodboard/admin akışları Phase 2'ye kadar legacy `.html` olarak korunacak.
+
 ---
 
 ## 3. Görsel Performans Sistemi

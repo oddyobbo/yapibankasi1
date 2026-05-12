@@ -1,0 +1,32 @@
+<footer class="site-footer">
+  <div class="container footer-inner">
+    <p>Archilink</p>
+    <nav aria-label="Alt navigasyon">
+      <a href="/products">Ürünler</a>
+      <a href="/brands">Markalar</a>
+      <a href="/projects">Projeler</a>
+      <a href="/iletisim-v2.html">İletişim</a>
+    </nav>
+  </div>
+</footer>
+<style>
+  .site-footer {
+    margin-top: 56px;
+    border-top: 1px solid rgba(0,0,0,.08);
+    background: #fff;
+  }
+  .footer-inner {
+    min-height: 90px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    color: #6e6e73;
+    font-size: 13px;
+  }
+  nav { display: flex; gap: 18px; }
+  a:hover { color: #111; }
+  @media (max-width: 720px) {
+    .footer-inner { align-items: flex-start; flex-direction: column; justify-content: center; }
+  }
+</style>

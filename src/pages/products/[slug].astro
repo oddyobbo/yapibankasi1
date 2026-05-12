@@ -1,0 +1,90 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Header from "../../components/Header.astro";
+import Footer from "../../components/Footer.astro";
+import ProductGallery from "../../components/ProductGallery.astro";
+import TechnicalSpecs from "../../components/TechnicalSpecs.astro";
+import DownloadFiles from "../../components/DownloadFiles.astro";
+import RelatedProducts from "../../components/RelatedProducts.astro";
+import RelatedProjects from "../../components/RelatedProjects.astro";
+import RequestQuoteCTA from "../../components/RequestQuoteCTA.astro";
+import BrandSummaryCard from "../../components/BrandSummaryCard.astro";
+import { getBrandDetail, getProductDetail, imageForProduct } from "../../lib/catalog.js";
+import { brandPath, productPath } from "../../lib/slugs.js";
+
+const product = await getProductDetail(Astro.params.slug);
+if (!product) return Astro.redirect("/products", 302);
+const brand = product.brand_name ? await getBrandDetail(product.brand_name.toLowerCase().replace(/[^a-z0-9]+/g, "-")) : null;
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Product",
+  name: product.name,
+  image: imageForProduct(product) ? [imageForProduct(product)] : undefined,
+  description: product.summary || product.description,
+  brand: product.brand_name ? { "@type": "Brand", name: product.brand_name } : undefined,
+  sku: product.sku || undefined,
+  category: product.category || undefined,
+};
+---
+<BaseLayout
+  title={`${product.name} | ${product.brand_name || "Archilink"} | Archilink`}
+  description={product.summary || product.description || `${product.name} teknik bilgileri, dosyaları ve marka detayları.`}
+  canonical={productPath(product)}
+  image={imageForProduct(product)}
+  type="product"
+  jsonLd={jsonLd}
+>
+  <Header />
+  <main>
+    <section class="page-band product-hero">
+      <div class="container detail-grid">
+        <div>
+          <p class="eyebrow">{product.category || "Kategori belirtilmedi"}</p>
+          <h1 class="page-title">{product.name}</h1>
+          <p class="lead">{product.summary || product.description || "Bu ürün için kısa açıklama henüz eklenmedi."}</p>
+          <ProductGallery product={product} />
+        </div>
+        <div class="side">
+          <BrandSummaryCard product={product} brand={brand} />
+          <RequestQuoteCTA product={product} />
+        </div>
+      </div>
+    </section>
+
+    <section class="page-band">
+      <div class="container two-col">
+        <TechnicalSpecs product={product} />
+        <DownloadFiles product={product} />
+      </div>
+    </section>
+
+    <section class="page-band">
+      <div class="container">
+        <h2 class="section-title">Varyantlar</h2>
+        {product.variants?.length ? (
+          <div class="variant-grid">
+            {product.variants.map((variant) => <article class="card variant"><strong>{variant.name}</strong><span>{[variant.finish, variant.size, variant.material].filter(Boolean).join(" · ")}</span></article>)}
+          </div>
+        ) : <p class="empty">Bu ürün için varyant bilgisi henüz eklenmedi.</p>}
+      </div>
+    </section>
+
+    <RelatedProjects projects={product.relatedProjects || []} />
+    <RelatedProducts products={product.relatedProducts || []} />
+  </main>
+  <Footer />
+</BaseLayout>
+<style>
+  .product-hero { background: #fff; }
+  .detail-grid { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 26px; align-items: start; }
+  .lead { margin-bottom: 24px; }
+  .side { display: grid; gap: 14px; }
+  .two-col { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(280px, .85fr); gap: 18px; align-items: start; }
+  .variant-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px; }
+  .variant { padding: 16px; display: grid; gap: 8px; }
+  .variant strong { font-weight: 600; }
+  .variant span { color: #6e6e73; font-size: 13px; }
+  @media (max-width: 940px) {
+    .detail-grid, .two-col { grid-template-columns: 1fr; }
+  }
+</style>

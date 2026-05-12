@@ -1,0 +1,72 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import ProductCard from "../components/ProductCard.astro";
+import BrandCard from "../components/BrandCard.astro";
+import ProjectCard from "../components/ProjectCard.astro";
+import CategoryGrid from "../components/CategoryGrid.astro";
+import { getBrands, getCategories, getProducts, getProjects } from "../lib/catalog.js";
+
+const [products, brands, projects, categories] = await Promise.all([
+  getProducts({ limit: 6 }),
+  getBrands(),
+  getProjects({ limit: 3 }),
+  getCategories(),
+]);
+---
+<BaseLayout
+  title="Archilink | Mimari Ürün Kataloğu"
+  description="Türkiye için mimari ürün, marka ve proje kataloğu. Teknik dosyalar, ürün detayları ve mimari referansları keşfet."
+  canonical="/"
+>
+  <Header />
+  <main>
+    <section class="page-band hero">
+      <div class="container">
+        <p class="eyebrow">Mimari ürün keşfi</p>
+        <h1 class="page-title">Türkiye için ciddi, aranabilir ve SEO güçlü mimari ürün kataloğu.</h1>
+        <p class="lead">Archilink, mimarların ürünleri teknik verileriyle karşılaştırması, markalara ulaşması ve projelerde kullanılan malzemeleri incelemesi için kuruluyor.</p>
+        <div class="hero-actions">
+          <a class="button primary" href="/products">Ürünleri keşfet</a>
+          <a class="button secondary" href="/brands">Markaları gör</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="page-band">
+      <div class="container">
+        <h2 class="section-title">Öne çıkan ürünler</h2>
+        {products.length ? <div class="grid cards">{products.map((product) => <ProductCard product={product} />)}</div> : <p class="empty">Henüz yayınlanmış ürün yok.</p>}
+      </div>
+    </section>
+
+    <section class="page-band">
+      <div class="container">
+        <h2 class="section-title">Kategoriler</h2>
+        <CategoryGrid categories={categories.slice(0, 8)} />
+      </div>
+    </section>
+
+    <section class="page-band">
+      <div class="container split">
+        <div>
+          <h2 class="section-title">Markalar</h2>
+          {brands.length ? <div class="grid">{brands.slice(0, 3).map((brand) => <BrandCard brand={brand} />)}</div> : <p class="empty">Henüz onaylı marka yok.</p>}
+        </div>
+        <div>
+          <h2 class="section-title">Projeler</h2>
+          {projects.length ? <div class="grid">{projects.map((project) => <ProjectCard project={project} />)}</div> : <p class="empty">Henüz yayınlanmış proje yok.</p>}
+        </div>
+      </div>
+    </section>
+  </main>
+  <Footer />
+</BaseLayout>
+<style>
+  .hero { background: #fff; border-bottom: 1px solid rgba(0,0,0,.08); }
+  .hero .page-title { max-width: 900px; }
+  .hero-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 26px; }
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; align-items: start; }
+  @media (max-width: 860px) { .split { grid-template-columns: 1fr; } }
+</style>

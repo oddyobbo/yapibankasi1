@@ -1,0 +1,28 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Header from "../../components/Header.astro";
+import Footer from "../../components/Footer.astro";
+import ProjectCard from "../../components/ProjectCard.astro";
+import { getProjects } from "../../lib/catalog.js";
+
+const projects = await getProjects({ limit: 24 });
+---
+<BaseLayout
+  title="Projeler | Archilink"
+  description="Mimari ürünlerin gerçek proje bağlamında nasıl kullanıldığını keşfet."
+  canonical="/projects"
+>
+  <Header />
+  <main class="page-band">
+    <div class="container">
+      <p class="eyebrow">Referanslar</p>
+      <h1 class="page-title">Projeler</h1>
+      <p class="lead">Yayınlanmış projeler ve projelerde kullanılan ürün bağlantıları.</p>
+      <section class="catalog">
+        {projects.length ? <div class="grid cards">{projects.map((project) => <ProjectCard project={project} />)}</div> : <p class="empty">Henüz yayınlanmış proje yok.</p>}
+      </section>
+    </div>
+  </main>
+  <Footer />
+</BaseLayout>
+<style>.catalog { margin-top: 28px; }</style>

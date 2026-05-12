@@ -1,0 +1,26 @@
+---
+import { imageForProduct } from "../lib/catalog.js";
+import { productPath } from "../lib/slugs.js";
+const { product } = Astro.props;
+const image = imageForProduct(product);
+---
+<a class="product-card card" href={productPath(product)}>
+  <div class="media">
+    {image ? <img src={image} alt={product.name} loading="lazy" width="640" height="480" /> : <span>Görsel yok</span>}
+  </div>
+  <div class="copy">
+    <p class="meta">{product.brand_name || "Marka belirtilmedi"}</p>
+    <h2>{product.name}</h2>
+    <p>{product.summary || product.description || product.category || "Açıklama henüz eklenmedi."}</p>
+  </div>
+</a>
+<style>
+  .product-card { display: block; transition: border-color .2s ease, transform .2s ease; }
+  .product-card:hover { border-color: rgba(0,0,0,.24); transform: translateY(-2px); }
+  .media { aspect-ratio: 4 / 3; display: grid; place-items: center; background: #f5f5f7; color: #8e8e93; font-size: 13px; }
+  img { width: 100%; height: 100%; object-fit: cover; }
+  .copy { padding: 16px; }
+  .meta { margin: 0 0 8px; color: #6e6e73; font-size: 12px; }
+  h2 { margin: 0; font-size: 17px; line-height: 1.25; font-weight: 600; }
+  .copy > p:last-child { margin: 10px 0 0; color: #6e6e73; font-size: 13px; line-height: 1.45; }
+</style>

@@ -1,0 +1,71 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Header from "../../components/Header.astro";
+import Footer from "../../components/Footer.astro";
+import ProductCard from "../../components/ProductCard.astro";
+import { getProjectBySlug } from "../../lib/catalog.js";
+import { publishedProductsQuery, safeData, supabase } from "../../lib/supabase.js";
+import { projectPath } from "../../lib/slugs.js";
+
+const project = await getProjectBySlug(Astro.params.slug);
+if (!project) return Astro.redirect("/projects", 302);
+const [imagesRes, productLinksRes] = await Promise.all([
+  supabase.from("project_images").select("*").eq("project_id", project.id).order("sort_order", { ascending: true }),
+  supabase.from("project_products").select("product_id").eq("project_id", project.id),
+]);
+const images = safeData(imagesRes);
+const linkedIds = safeData(productLinksRes).map((row) => row.product_id).filter(Boolean);
+const products = linkedIds.length ? safeData(await publishedProductsQuery().in("id", linkedIds)) : [];
+const heroImage = images[0]?.url || project.image || "";
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "CreativeWork",
+  name: project.title,
+  description: project.description || undefined,
+  image: heroImage || undefined,
+  creator: (project.architect || project.office_name || project.brand_name) ? { "@type": "Organization", name: project.architect || project.office_name || project.brand_name } : undefined,
+  contentLocation: (project.location || project.city || project.country) ? { "@type": "Place", name: project.location || [project.city, project.country].filter(Boolean).join(", ") } : undefined,
+};
+---
+<BaseLayout
+  title={`${project.title} | ${project.architect || project.office_name || project.brand_name || "Proje"} | Archilink`}
+  description={project.description || `${project.title} proje detayları ve kullanılan ürünler.`}
+  canonical={projectPath(project)}
+  image={heroImage}
+  type="article"
+  jsonLd={jsonLd}
+>
+  <Header />
+  <main>
+    <section class="project-hero">
+      {heroImage ? <img src={heroImage} alt={project.title} width="1600" height="850" /> : <div class="empty">Proje görseli henüz eklenmedi.</div>}
+    </section>
+    <section class="page-band">
+      <div class="container project-copy">
+        <p class="eyebrow">{[project.location, project.architect || project.office_name || project.brand_name].filter(Boolean).join(" · ")}</p>
+        <h1 class="page-title">{project.title}</h1>
+        <p class="lead">{project.description || "Bu proje için açıklama henüz eklenmedi."}</p>
+      </div>
+    </section>
+    <section class="page-band">
+      <div class="container">
+        <h2 class="section-title">Galeri</h2>
+        {images.length > 1 ? <div class="gallery-grid">{images.map((image) => <img src={image.url} alt={image.alt || project.title} loading="lazy" width="640" height="420" />)}</div> : <p class="empty">Ek proje görseli henüz yok.</p>}
+      </div>
+    </section>
+    <section class="page-band">
+      <div class="container">
+        <h2 class="section-title">Kullanılan ürünler</h2>
+        {products.length ? <div class="grid cards">{products.map((product) => <ProductCard product={product} />)}</div> : <p class="empty">Bu projeye bağlı ürün henüz eklenmedi.</p>}
+      </div>
+    </section>
+  </main>
+  <Footer />
+</BaseLayout>
+<style>
+  .project-hero { background: #fff; }
+  .project-hero img { width: 100%; max-height: 620px; object-fit: cover; }
+  .project-copy { max-width: 860px; }
+  .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+  .gallery-grid img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 12px; background: #f5f5f7; }
+</style>

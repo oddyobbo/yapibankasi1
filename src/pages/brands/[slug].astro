@@ -1,0 +1,76 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Header from "../../components/Header.astro";
+import Footer from "../../components/Footer.astro";
+import ProductCard from "../../components/ProductCard.astro";
+import ProjectCard from "../../components/ProjectCard.astro";
+import { getBrandDetail } from "../../lib/catalog.js";
+import { brandPath } from "../../lib/slugs.js";
+
+const brand = await getBrandDetail(Astro.params.slug);
+if (!brand) return Astro.redirect("/brands", 302);
+const roles = Array.isArray(brand.company_roles) ? brand.company_roles : [];
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: brand.name,
+  description: brand.description || undefined,
+  url: brand.website || undefined,
+  logo: brand.logo_url || undefined,
+  address: [brand.city, brand.country].filter(Boolean).join(", ") || undefined,
+};
+---
+<BaseLayout
+  title={`${brand.name} | Marka | Archilink`}
+  description={brand.description || `${brand.name} ürünleri, iletişim bilgileri ve referans projeleri Archilink'te.`}
+  canonical={brandPath(brand)}
+  image={brand.logo_url}
+  type="profile"
+  jsonLd={jsonLd}
+>
+  <Header />
+  <main>
+    <section class="page-band brand-hero">
+      <div class="container brand-grid">
+        <div>
+          <p class="eyebrow">{roles.length ? roles.join(" · ") : "Marka"}</p>
+          <h1 class="page-title">{brand.name}</h1>
+          <p class="lead">{brand.description || "Bu marka için açıklama henüz eklenmedi."}</p>
+          <div class="meta">
+            {[brand.city, brand.country].filter(Boolean).length ? <span>{[brand.city, brand.country].filter(Boolean).join(", ")}</span> : null}
+            {brand.website ? <a href={brand.website} target="_blank" rel="noopener noreferrer">Web sitesi</a> : null}
+            {brand.email ? <a href={`mailto:${brand.email}`}>E-posta</a> : null}
+          </div>
+        </div>
+        <div class="logo card">
+          {brand.logo_url ? <img src={brand.logo_url} alt={brand.name} width="240" height="140" /> : <span>{brand.name.charAt(0)}</span>}
+        </div>
+      </div>
+    </section>
+
+    <section class="page-band">
+      <div class="container">
+        <h2 class="section-title">Marka ürünleri</h2>
+        {brand.products?.length ? <div class="grid cards">{brand.products.map((product) => <ProductCard product={product} />)}</div> : <p class="empty">Bu markaya ait yayınlanmış ürün henüz yok.</p>}
+      </div>
+    </section>
+
+    <section class="page-band">
+      <div class="container">
+        <h2 class="section-title">Marka projeleri</h2>
+        {brand.projects?.length ? <div class="grid cards">{brand.projects.map((project) => <ProjectCard project={project} />)}</div> : <p class="empty">Bu markaya ait yayınlanmış proje henüz yok.</p>}
+      </div>
+    </section>
+  </main>
+  <Footer />
+</BaseLayout>
+<style>
+  .brand-hero { background: #fff; border-bottom: 1px solid rgba(0,0,0,.08); }
+  .brand-grid { display: grid; grid-template-columns: 1fr 280px; gap: 30px; align-items: center; }
+  .meta { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 20px; color: #6e6e73; font-size: 14px; }
+  .meta a { text-decoration: underline; text-underline-offset: 3px; }
+  .logo { min-height: 180px; display: grid; place-items: center; padding: 20px; }
+  .logo span { font-size: 48px; font-weight: 600; }
+  .logo img { max-width: 90%; max-height: 140px; object-fit: contain; }
+  @media (max-width: 760px) { .brand-grid { grid-template-columns: 1fr; } }
+</style>

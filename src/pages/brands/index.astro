@@ -1,0 +1,28 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Header from "../../components/Header.astro";
+import Footer from "../../components/Footer.astro";
+import BrandCard from "../../components/BrandCard.astro";
+import { getBrands } from "../../lib/catalog.js";
+
+const brands = await getBrands();
+---
+<BaseLayout
+  title="Markalar | Archilink"
+  description="Archilink'te onaylı mimari ürün markalarını, üreticileri, distribütörleri ve satıcıları keşfet."
+  canonical="/brands"
+>
+  <Header />
+  <main class="page-band">
+    <div class="container">
+      <p class="eyebrow">Marka dizini</p>
+      <h1 class="page-title">Markalar</h1>
+      <p class="lead">Onaylı marka profilleri, ürünleri ve referans projeleri tek çatı altında.</p>
+      <section class="catalog">
+        {brands.length ? <div class="grid cards">{brands.map((brand) => <BrandCard brand={brand} />)}</div> : <p class="empty">Henüz onaylı marka yok.</p>}
+      </section>
+    </div>
+  </main>
+  <Footer />
+</BaseLayout>
+<style>.catalog { margin-top: 28px; }</style>

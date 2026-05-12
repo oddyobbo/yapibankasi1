@@ -1,0 +1,30 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Header from "../../components/Header.astro";
+import Footer from "../../components/Footer.astro";
+import ProductCard from "../../components/ProductCard.astro";
+import { getProducts } from "../../lib/catalog.js";
+
+const products = await getProducts({ limit: 24 });
+---
+<BaseLayout
+  title="Ürünler | Archilink"
+  description="Mimari ürünleri marka, kategori, malzeme ve teknik özelliklerine göre keşfet."
+  canonical="/products"
+>
+  <Header />
+  <main class="page-band">
+    <div class="container">
+      <p class="eyebrow">Katalog</p>
+      <h1 class="page-title">Ürünler</h1>
+      <p class="lead">Liste sayfaları şimdilik hafif ürün alanlarını çeker. Filtre sistemi sonraki adımda query tabanlı genişletilecek.</p>
+      <section class="catalog">
+        {products.length ? <div class="grid cards">{products.map((product) => <ProductCard product={product} />)}</div> : <p class="empty">Henüz yayınlanmış ürün yok.</p>}
+      </section>
+    </div>
+  </main>
+  <Footer />
+</BaseLayout>
+<style>
+  .catalog { margin-top: 28px; }
+</style>

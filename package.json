@@ -1,0 +1,20 @@
+{
+  "name": "katalog-projesi",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "ASTRO_TELEMETRY_DISABLED=1 astro dev",
+    "build": "ASTRO_TELEMETRY_DISABLED=1 astro build && node scripts/copy-legacy-static.mjs",
+    "preview": "ASTRO_TELEMETRY_DISABLED=1 astro preview",
+    "serve": "node serve.mjs",
+    "screenshot": "node screenshot.mjs"
+  },
+  "devDependencies": {
+    "puppeteer": "^24.2.0"
+  },
+  "dependencies": {
+    "@astrojs/netlify": "^7.0.8",
+    "@supabase/supabase-js": "^2.105.4",
+    "astro": "^6.3.1"
+  }
+}

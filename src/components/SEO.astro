@@ -1,0 +1,25 @@
+---
+const {
+  title = "Archilink",
+  description = "Türkiye için mimari ürün, marka ve proje kataloğu.",
+  canonical = Astro.url.pathname,
+  image = "",
+  type = "website",
+  jsonLd,
+} = Astro.props;
+const canonicalUrl = new URL(canonical, Astro.site || Astro.url.origin).href;
+const imageUrl = image ? new URL(image, Astro.site || Astro.url.origin).href : "";
+---
+<title>{title}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonicalUrl} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:type" content={type} />
+<meta property="og:url" content={canonicalUrl} />
+{imageUrl && <meta property="og:image" content={imageUrl} />}
+<meta name="twitter:card" content={imageUrl ? "summary_large_image" : "summary"} />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+{imageUrl && <meta name="twitter:image" content={imageUrl} />}
+{jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}

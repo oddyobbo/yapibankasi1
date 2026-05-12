@@ -1,0 +1,50 @@
+<header class="site-header">
+  <div class="container site-header-inner">
+    <a class="brand" href="/" aria-label="Archilink ana sayfa">ARCHILINK</a>
+    <nav aria-label="Ana navigasyon">
+      <a href="/products">Ürünler</a>
+      <a href="/brands">Markalar</a>
+      <a href="/projects">Projeler</a>
+      <a href="/categories">Kategoriler</a>
+    </nav>
+    <a class="panel-link" href="/marka-giris.html">Marka girişi</a>
+  </div>
+</header>
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    border-bottom: 1px solid rgba(0,0,0,.08);
+    background: rgba(255,255,255,.88);
+    backdrop-filter: blur(18px);
+  }
+  .site-header-inner {
+    min-height: 68px;
+    display: flex;
+    align-items: center;
+    gap: 28px;
+  }
+  .brand {
+    font-size: 14px;
+    letter-spacing: .08em;
+    font-weight: 600;
+  }
+  nav {
+    display: flex;
+    gap: 20px;
+    color: #424245;
+    font-size: 14px;
+  }
+  nav a:hover, .panel-link:hover { color: #111; }
+  .panel-link {
+    margin-left: auto;
+    font-size: 13px;
+    color: #424245;
+  }
+  @media (max-width: 720px) {
+    .site-header-inner { gap: 14px; overflow-x: auto; }
+    nav { gap: 14px; }
+    .panel-link { margin-left: 0; white-space: nowrap; }
+  }
+</style>

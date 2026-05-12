@@ -1,2 +1,12 @@
 # Local Netlify folder
 .netlify
+
+# Frontend toolchain
+node_modules/
+dist/
+.astro/
+
+# Puppeteer screenshots (auto-increment; klasör .gitkeep ile kalır)
+temporary screenshots/*.png
+temporary screenshots/*.jpg
+temporary screenshots/*.webp

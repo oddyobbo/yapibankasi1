@@ -1,0 +1,20 @@
+---
+import { categoryPath } from "../lib/slugs.js";
+const { categories = [] } = Astro.props;
+---
+{categories.length ? (
+  <div class="category-grid">
+    {categories.map((category) => (
+      <a class="card category-card" href={categoryPath(category)}>
+        <span>{category.name}</span>
+      </a>
+    ))}
+  </div>
+) : (
+  <p class="empty">Kategori henüz eklenmedi.</p>
+)}
+<style>
+  .category-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 14px; }
+  .category-card { min-height: 92px; display: flex; align-items: flex-end; padding: 18px; background: #fff; }
+  span { font-size: 18px; line-height: 1.2; font-weight: 600; }
+</style>
