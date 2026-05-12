@@ -622,7 +622,7 @@
       ];
       let thead = "<tr><th class=\"text-left text-[11px] font-semibold text-[#6e6e73] uppercase tracking-wide p-2 w-36 min-w-[8rem]\">Özellik</th>";
       prods.forEach(p => {
-        thead += `<th class=\"p-2 align-bottom min-w-[140px] max-w-[220px]\"><div class=\"aspect-[4/3] rounded-xl overflow-hidden bg-[#f5f5f7] mb-2\"><img src=\"${esc(productImageUrl(p))}\" alt=\"\" class=\"w-full h-full object-cover\"></div><a href=\"/urun-unica-baffle.html?id=${encodeURIComponent(p.id)}\" class=\"text-[13px] font-semibold leading-tight text-[#1d1d1f] hover:underline\">${esc(p.name)}</a><p class=\"text-[11px] text-[#6e6e73] mt-1\">${esc(p.brandName || "")}</p></th>`;
+        thead += `<th class=\"p-2 align-bottom min-w-[140px] max-w-[220px]\"><div class=\"aspect-[4/3] rounded-xl overflow-hidden bg-[#f5f5f7] mb-2\"><img src=\"${esc(productImageUrl(p))}\" alt=\"\" class=\"w-full h-full object-cover\"></div><a href=\"/product-detail.html?id=${encodeURIComponent(p.id)}\" class=\"text-[13px] font-semibold leading-tight text-[#1d1d1f] hover:underline\">${esc(p.name)}</a><p class=\"text-[11px] text-[#6e6e73] mt-1\">${esc(p.brandName || "")}</p></th>`;
       });
       thead += "</tr>";
       let tbody = "";
@@ -733,7 +733,7 @@
           ${compareOverlay}
           ${compareBadge}
           <div class="relative h-48 bg-[#f5f5f7] overflow-hidden">
-          <a href="/urun-unica-baffle.html?id=${encodeURIComponent(p.id)}" data-view="${p.id}" class="block h-full w-full">
+          <a href="/product-detail.html?id=${encodeURIComponent(p.id)}" data-view="${p.id}" class="block h-full w-full">
             <img src="${imgSrc}"
               onerror="const fb=['https://images.unsplash.com/photo-1600607686527-6fb886090705?q=80&w=800','https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?q=80&w=800','https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=800','https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=800','https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=800','https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?q=80&w=800'];this.onerror=null;this.src=fb[Math.abs((this.alt||'').split('').reduce((a,c)=>a+c.charCodeAt(0),0))%fb.length];"
               alt="${esc(p.name)}" class="w-full h-full object-cover ${imgHover} transition-transform duration-500 ease-out">
@@ -742,7 +742,7 @@
           <div class="p-4 flex flex-col flex-1">
             <h3 class="text-[14px] font-semibold leading-snug">${p.name}</h3>
             <p class="text-[12px] text-[#6e6e73] mt-1">${p.brandName || ""}</p>
-            <a href="/urun-unica-baffle.html?id=${encodeURIComponent(p.id)}" class="product-detail-link mt-3 w-full h-8 flex items-center justify-center bg-[#1d1d1f] text-white text-[12px] font-medium rounded-lg hover:bg-[#3a3a3c] transition relative z-[1]">Ürün Detayı</a>
+            <a href="/product-detail.html?id=${encodeURIComponent(p.id)}" class="product-detail-link mt-3 w-full h-8 flex items-center justify-center bg-[#1d1d1f] text-white text-[12px] font-medium rounded-lg hover:bg-[#3a3a3c] transition relative z-[1]">Ürün Detayı</a>
           </div>
           ${
             architectSession && !compareMode
@@ -1222,7 +1222,7 @@
           const res = await AG.toggleFavoriteProduct({
             id: product.id, name: product.name, image: product.image,
             category: product.category,
-            url: `/urun-unica-baffle.html?id=${encodeURIComponent(product.id)}`
+            url: `/product-detail.html?id=${encodeURIComponent(product.id)}`
           });
           if (!res?.ok) { showToast(res?.message || "Favorilere eklemek için giriş yapın."); return; }
           if (res.active) { favoriteProductIds.add(id); showToast("Favorilere eklendi ♥"); }

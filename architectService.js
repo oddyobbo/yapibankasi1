@@ -267,7 +267,7 @@ export const createArchitectService = ({
       name: item.name || "",
       image: item.image || "",
       category: item.category || "",
-      url: item.url || `/urun-unica-baffle.html?id=${encodeURIComponent(item.id || "")}`,
+      url: item.url || `/product-detail.html?id=${encodeURIComponent(item.id || "")}`,
       spec: item.spec || "",
       description: String(item.description || "").slice(0, 280),
       hasPdf: Boolean(item.hasPdf || item.files?.pdfUrl),

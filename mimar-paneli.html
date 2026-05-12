@@ -251,7 +251,7 @@
       ];
       let thead = `<tr><th class="text-left text-[11px] font-semibold uppercase tracking-wide text-[#6e6e73] p-2 w-36 min-w-[8rem]">Özellik</th>`;
       prods.forEach((p) => {
-        thead += `<th class="p-2 align-bottom min-w-[140px] max-w-[220px]"><div class="mb-2 aspect-[4/3] overflow-hidden rounded-xl bg-[#f5f5f7]"><img src="${escHtml(panelProductImageUrl(p))}" alt="" class="h-full w-full object-cover"></div><a href="/urun-unica-baffle.html?id=${encodeURIComponent(p.id)}" class="text-[13px] font-semibold leading-tight text-[#1d1d1f] hover:underline">${escHtml(p.name)}</a><p class="mt-1 text-[11px] text-[#6e6e73]">${escHtml(p.brandName || "")}</p></th>`;
+        thead += `<th class="p-2 align-bottom min-w-[140px] max-w-[220px]"><div class="mb-2 aspect-[4/3] overflow-hidden rounded-xl bg-[#f5f5f7]"><img src="${escHtml(panelProductImageUrl(p))}" alt="" class="h-full w-full object-cover"></div><a href="/product-detail.html?id=${encodeURIComponent(p.id)}" class="text-[13px] font-semibold leading-tight text-[#1d1d1f] hover:underline">${escHtml(p.name)}</a><p class="mt-1 text-[11px] text-[#6e6e73]">${escHtml(p.brandName || "")}</p></th>`;
       });
       thead += "</tr>";
       let tbody = "";

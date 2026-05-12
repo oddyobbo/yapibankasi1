@@ -217,6 +217,83 @@ const buildProductPatch = (patch) => {
   return dbPatch;
 };
 
+const mapProductFiles = (rows = [], legacyFiles = {}) => {
+  const files = { ...legacyFiles };
+  rows.forEach((row) => {
+    const item = {
+      url: row.url,
+      label: row.label || row.file_type || "Dosya",
+      size: row.file_size_bytes || null,
+    };
+    if (row.file_type === "pdf" || row.file_type === "catalog" || row.file_type === "datasheet") {
+      files.pdfs = [...(files.pdfs || []), item];
+    } else if (row.file_type === "cad") {
+      files.dwgs = [...(files.dwgs || []), item];
+    } else if (row.file_type === "bim" || row.file_type === "3d") {
+      files.models3d = [...(files.models3d || []), item];
+    } else {
+      files.other = [...(files.other || []), item];
+    }
+  });
+  return files;
+};
+
+const mapProductVariant = (row) => ({
+  id: row.id,
+  name: row.name || "",
+  code: row.sku || "",
+  image: row.image_url || "",
+  colorFamily: row.color_family || "",
+  finish: row.finish || "",
+  size: row.size || "",
+  material: row.material || "",
+  metadata: row.metadata || {},
+});
+
+const mapProjectSummary = (row) => ({
+  id: row.id,
+  title: row.title || "",
+  slug: row.slug || "",
+  brandId: row.brand_id,
+  architectId: row.architect_id,
+  architect: row.architect || row.office_name || "",
+  location: row.location || [row.city, row.country].filter(Boolean).join(", "),
+  city: row.city || "",
+  country: row.country || "",
+  image: row.image || "",
+  description: row.description || "",
+  year: row.year || "",
+});
+
+const applyDetailRows = (product, detail) => {
+  const images = detail.images || [];
+  if (images.length) {
+    product.gallery = images.map((img) => img.url).filter(Boolean);
+    product.image = images.find((img) => img.is_primary)?.url || product.gallery[0] || product.image;
+  }
+  if (detail.files) product.files = mapProductFiles(detail.files, product.files || {});
+  if (detail.specs) {
+    product.specRows = detail.specs.map((row) => ({
+      key: row.spec_key,
+      label: row.label || row.spec_key,
+      value: row.value_text || row.value_number || "",
+      unit: row.unit || "",
+      filterable: Boolean(row.filterable),
+    }));
+    product.technical = {
+      ...(product.technical || {}),
+      other: product.specRows.map((row) => ({
+        label: row.label,
+        value: [row.value, row.unit].filter(Boolean).join(" "),
+      })),
+    };
+  }
+  if (detail.variants) product.variants = detail.variants.map(mapProductVariant);
+  product.relatedProducts = (detail.relatedProducts || []).map(dbToProduct);
+  product.relatedProjects = (detail.relatedProjects || []).map(mapProjectSummary);
+  return product;
+};
+
 export const createProductService = () => {
   const getProducts = async (opts = {}) => {
     await ready;
@@ -236,6 +313,54 @@ export const createProductService = () => {
     if (!sb) return [];
     const { data } = await sb.from("products").select("*").order("created_at", { ascending: false });
     return (data || []).map(dbToProduct);
+  };
+
+  const getProductDetail = async ({ id, slug } = {}) => {
+    await ready;
+    const sb = getSB();
+    if (!sb) return null;
+    let q = sb.from("products").select("*").limit(1);
+    if (id) q = q.eq("id", id);
+    else if (slug) q = q.eq("slug", slug);
+    else return null;
+
+    const { data: rows, error } = await q;
+    if (error || !rows?.length) return null;
+
+    const base = dbToProduct(rows[0]);
+    const productId = base.id;
+    const [imagesRes, filesRes, specsRes, variantsRes, projectLinksRes, relatedRes] = await Promise.all([
+      sb.from("product_images").select("*").eq("product_id", productId).order("sort_order", { ascending: true }),
+      sb.from("product_files").select("*").eq("product_id", productId).order("sort_order", { ascending: true }),
+      sb.from("product_specs").select("*").eq("product_id", productId).order("sort_order", { ascending: true }),
+      sb.from("product_variants").select("*").eq("product_id", productId).order("sort_order", { ascending: true }),
+      sb.from("project_products").select("project_id").eq("product_id", productId),
+      base.brandId
+        ? sb
+          .from("products")
+          .select("*")
+          .eq("status", "published")
+          .eq("brand_id", base.brandId)
+          .neq("id", productId)
+          .limit(8)
+        : Promise.resolve({ data: [] }),
+    ]);
+
+    let relatedProjects = [];
+    const projectIds = (projectLinksRes.data || []).map((row) => row.project_id).filter(Boolean);
+    if (projectIds.length) {
+      const { data } = await sb.from("projects").select("*").in("id", projectIds).eq("status", "published");
+      relatedProjects = data || [];
+    }
+
+    return applyDetailRows(base, {
+      images: imagesRes.data || [],
+      files: filesRes.data || [],
+      specs: specsRes.data || [],
+      variants: variantsRes.data || [],
+      relatedProducts: relatedRes.data || [],
+      relatedProjects,
+    });
   };
 
   const addProduct = async (product) => {
@@ -310,6 +435,7 @@ export const createProductService = () => {
 
   return {
     getProducts,
+    getProductDetail,
     getAllProducts,
     addProduct,
     updateProduct,

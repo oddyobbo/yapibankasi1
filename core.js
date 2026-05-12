@@ -79,6 +79,7 @@
       uploadArchitectProjectImage: architectService.uploadArchitectProjectImage,
       // products
       getProducts: productService.getProducts,
+      getProductDetail: productService.getProductDetail,
       getAllProducts: productService.getAllProducts,
       addProduct: productService.addProduct,
       updateProduct: productService.updateProduct,
@@ -134,6 +135,7 @@
     "deleteArchitectOfficeProject",
     "uploadArchitectProjectImage",
     "getProducts",
+    "getProductDetail",
     "getAllProducts",
     "addProduct",
     "updateProduct",

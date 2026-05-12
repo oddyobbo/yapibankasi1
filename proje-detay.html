@@ -62,7 +62,7 @@
             <p class="text-[13px] font-semibold text-[#4a4a4f] mb-3">Bu projede kullanılan malzemeler</p>
             <div class="flex flex-wrap gap-2">
               ${materials.length ? materials.map((m) => `
-                <a href="/urun-unica-baffle.html?id=${encodeURIComponent(m.id)}" class="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-black/10 hover:border-black/25">
+                <a href="/product-detail.html?id=${encodeURIComponent(m.id)}" class="inline-flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-black/10 hover:border-black/25">
                   <img src="${m.image || FALLBACK_IMAGE}" class="w-7 h-7 rounded object-cover" alt="${m.name}">
                   <span class="text-[12px]">${m.name}</span>
                 </a>
