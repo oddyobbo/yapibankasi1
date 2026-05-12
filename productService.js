@@ -49,6 +49,10 @@ const PRODUCT_LIST_FIELDS = [
   "city",
   "company_roles",
   "image",
+  "thumbnail_url",
+  "card_image_url",
+  "gallery_image_url",
+  "original_image_url",
   "has_pdf",
   "has_cad",
   "has_bim",
@@ -121,6 +125,10 @@ export const dbToProduct = (row) => {
     technical,
     spec: row.spec,
     image: row.image,
+    thumbnailUrl: row.thumbnail_url || "",
+    cardImageUrl: row.card_image_url || "",
+    galleryImageUrl: row.gallery_image_url || "",
+    originalImageUrl: row.original_image_url || "",
     gallery: Array.isArray(gallery) ? gallery : undefined,
     files,
     material: row.material || "",
@@ -191,6 +199,10 @@ export const productToDB = (product) => {
     technical,
     spec: product.spec || "",
     image: product.image || "",
+    thumbnail_url: product.thumbnailUrl || product.thumbnail_url || product.image || "",
+    card_image_url: product.cardImageUrl || product.card_image_url || product.image || "",
+    gallery_image_url: product.galleryImageUrl || product.gallery_image_url || product.image || "",
+    original_image_url: product.originalImageUrl || product.original_image_url || product.image || "",
     files,
     has_pdf: hasPdf,
     has_cad: hasCad,
@@ -247,6 +259,10 @@ const buildProductPatch = (patch) => {
     views: "views",
     technical: "technical",
     image: "image",
+    thumbnailUrl: "thumbnail_url",
+    cardImageUrl: "card_image_url",
+    galleryImageUrl: "gallery_image_url",
+    originalImageUrl: "original_image_url",
     spec: "spec",
     description: "description",
     summary: "summary",
@@ -315,6 +331,20 @@ const mapProductVariant = (row) => ({
   metadata: row.metadata || {},
 });
 
+const mapProductImage = (row) => ({
+  id: row.id,
+  url: row.url,
+  thumbnailUrl: row.thumbnail_url || row.url,
+  cardImageUrl: row.card_url || row.thumbnail_url || row.url,
+  galleryImageUrl: row.gallery_url || row.url,
+  originalImageUrl: row.original_url || row.url,
+  alt: row.alt || "",
+  width: row.width || null,
+  height: row.height || null,
+  isPrimary: Boolean(row.is_primary),
+  sortOrder: row.sort_order || 0,
+});
+
 const mapProjectSummary = (row) => ({
   id: row.id,
   title: row.title || "",
@@ -333,8 +363,14 @@ const mapProjectSummary = (row) => ({
 const applyDetailRows = (product, detail) => {
   const images = detail.images || [];
   if (images.length) {
-    product.gallery = images.map((img) => img.url).filter(Boolean);
-    product.image = images.find((img) => img.is_primary)?.url || product.gallery[0] || product.image;
+    product.images = images.map(mapProductImage);
+    product.gallery = product.images.map((img) => img.galleryImageUrl).filter(Boolean);
+    const primary = product.images.find((img) => img.isPrimary) || product.images[0];
+    product.image = primary?.galleryImageUrl || product.gallery[0] || product.image;
+    product.thumbnailUrl = primary?.thumbnailUrl || product.thumbnailUrl;
+    product.cardImageUrl = primary?.cardImageUrl || product.cardImageUrl;
+    product.galleryImageUrl = primary?.galleryImageUrl || product.galleryImageUrl;
+    product.originalImageUrl = primary?.originalImageUrl || product.originalImageUrl;
   }
   if (detail.files) product.files = mapProductFiles(detail.files, product.files || {});
   if (detail.specs) {

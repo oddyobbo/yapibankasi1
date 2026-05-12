@@ -40,7 +40,7 @@
 - Kritik olmayan görsellerde `loading="lazy"`.
 - Görsellerde `width` ve `height` değerleriyle layout shift azaltılacak.
 
-**Durum:** Yapılmadı. Bazı görsellerde lazy loading var ama upload sonrası otomatik thumbnail/medium/original üretim sistemi yok.
+**Durum:** Kısmen yapıldı. `products` ve `product_images` tarafında thumbnail/card/gallery/original URL alanları eklendi; ürün listesi kart görseli için card/thumbnail alanlarını, ürün detay galerisi gallery alanlarını tercih ediyor. Upload tarafı şimdilik aynı URL'yi tüm boyut alanlarına yazıyor. Gerçek thumbnail/medium/WebP üretimi için sonraki adımda Supabase Storage/Edge Function veya CDN dönüşüm sistemi kurulmalı.
 
 ---
 

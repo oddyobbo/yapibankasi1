@@ -451,6 +451,10 @@
 
     const FB_IMAGES = ['https://images.unsplash.com/photo-1600607686527-6fb886090705?q=80&w=800','https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?q=80&w=800','https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=800','https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=800','https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=800','https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?q=80&w=800'];
     function productImageUrl(p) {
+      if (p.cardImageUrl) return p.cardImageUrl;
+      if (p.card_image_url) return p.card_image_url;
+      if (p.thumbnailUrl) return p.thumbnailUrl;
+      if (p.thumbnail_url) return p.thumbnail_url;
       if (p.image) return p.image;
       const i = Math.abs(String(p.id || "").split("").reduce((a, c) => a + c.charCodeAt(0), 0) || 0) % FB_IMAGES.length;
       return FB_IMAGES[i];
@@ -970,7 +974,7 @@
     function renderCard(p, index = 0) {
       const isFav = favoriteProductIds.has(p.id);
       const fb = FB_IMAGES[Math.abs(String(p.id || "").split("").reduce((a, c) => a + c.charCodeAt(0), 0) || 0) % FB_IMAGES.length];
-      const imgSrc = esc(p.image || fb);
+      const imgSrc = esc(productImageUrl(p) || fb);
       const inCompare = comparePickOrder.includes(p.id);
       const ringShell = compareMode ? `outline outline-2 ${inCompare ? "outline-black" : "outline-black/[0.08]"}` : "";
       /* Karşılaştır modu: sağ üst checkmark badge + tüm kart overlay */

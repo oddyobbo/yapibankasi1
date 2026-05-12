@@ -168,6 +168,7 @@ const PAGE = window.__MARKA_PANEL_PAGE__ || "overview";
         materialType: fd.get("materialType")?.trim() || "",
         ...customTechnical,
       };
+      const imageUrl = fd.get("image")?.trim() || "";
       return {
         brandId:     session.id,
         brandName:   session.name || session.email,
@@ -177,7 +178,11 @@ const PAGE = window.__MARKA_PANEL_PAGE__ || "overview";
         description: fd.get("description")?.trim(),
         technical,
         spec:  buildSpec(technical),
-        image: fd.get("image")?.trim(),
+        image: imageUrl,
+        thumbnailUrl: imageUrl,
+        cardImageUrl: imageUrl,
+        galleryImageUrl: imageUrl,
+        originalImageUrl: imageUrl,
         files: {
           pdfUrl: fd.get("pdfUrl")?.trim() || "",
           cadUrl: fd.get("cadUrl")?.trim() || "",
@@ -552,13 +557,18 @@ const PAGE = window.__MARKA_PANEL_PAGE__ || "overview";
           usageScope:   get("usageScope").trim(),
           materialType: get("materialType").trim(),
         };
+        const imageUrl = get("image").trim();
         products.push({
           brandId:     session.id,
           brandName:   session.name || session.email,
           name, sku, category: subcategory ? `${category} > ${subcategory}` : category, description,
           technical,
           spec:  buildSpec(technical),
-          image: get("image").trim(),
+          image: imageUrl,
+          thumbnailUrl: imageUrl,
+          cardImageUrl: imageUrl,
+          galleryImageUrl: imageUrl,
+          originalImageUrl: imageUrl,
           files: { pdfUrl: get("pdfUrl").trim(), cadUrl: get("cadUrl").trim(), bimUrl: get("bimUrl").trim() },
           hasPdf: Boolean(get("pdfUrl").trim()),
           hasCad: Boolean(get("cadUrl").trim()),
@@ -816,6 +826,7 @@ const PAGE = window.__MARKA_PANEL_PAGE__ || "overview";
           thickness:    document.getElementById("prev-thickness").value.trim(),
           certificates: document.getElementById("prev-certs").value.trim(),
         };
+        const imageUrl = document.getElementById("prev-image").value.trim();
         await AG.addProduct({
           brandId:     session.id,
           brandName:   session.name || session.email,
@@ -825,7 +836,11 @@ const PAGE = window.__MARKA_PANEL_PAGE__ || "overview";
           description,
           technical,
           spec:  buildSpec(technical),
-          image: document.getElementById("prev-image").value.trim(),
+          image: imageUrl,
+          thumbnailUrl: imageUrl,
+          cardImageUrl: imageUrl,
+          galleryImageUrl: imageUrl,
+          originalImageUrl: imageUrl,
           files: { pdfUrl: document.getElementById("prev-source-url").value.trim(), cadUrl: "", bimUrl: "" },
           hasPdf: Boolean(document.getElementById("prev-source-url").value.trim()),
           hasCad: false,

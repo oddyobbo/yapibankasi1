@@ -104,18 +104,19 @@
     const title = `${product.name || "Ürün Detayı"} | ${product.brandName || "Archilink"} | Archilink`;
     const description = product.summary || product.description || `${product.name || "Ürün"} teknik bilgileri ve marka detayları.`;
     const canonical = `${location.origin}${productHref(product)}`;
+    const metaImage = product.galleryImageUrl || product.cardImageUrl || product.thumbnailUrl || product.image || "";
     document.title = title;
     document.querySelector('meta[name="description"]')?.setAttribute("content", description);
     document.querySelector('meta[property="og:title"]')?.setAttribute("content", title);
     document.querySelector('meta[property="og:description"]')?.setAttribute("content", description);
-    document.querySelector('meta[property="og:image"]')?.setAttribute("content", product.image || "");
+    document.querySelector('meta[property="og:image"]')?.setAttribute("content", metaImage);
     document.querySelector('link[rel="canonical"]')?.setAttribute("href", canonical);
 
     const jsonLd = {
       "@context": "https://schema.org",
       "@type": "Product",
       name: product.name || "",
-      image: product.image ? [product.image] : undefined,
+      image: metaImage ? [metaImage] : undefined,
       description,
       brand: product.brandName ? { "@type": "Brand", name: product.brandName } : undefined,
       sku: product.sku || undefined,
@@ -140,10 +141,19 @@
   }
 
   function productGalleryUrls(product) {
+    if (Array.isArray(product.images) && product.images.length) {
+      return product.images
+        .map((img) => img.galleryImageUrl || img.gallery_url || img.url)
+        .filter(Boolean);
+    }
     const t = product.technical || {};
     const gallery = product.gallery || t.gallery || t.galleryUrls;
     if (Array.isArray(gallery) && gallery.length) return gallery.map(String).filter(Boolean);
-    return [product.image].filter(Boolean);
+    return [product.galleryImageUrl || product.gallery_image_url || product.image].filter(Boolean);
+  }
+
+  function productCardImage(product) {
+    return product.cardImageUrl || product.card_image_url || product.thumbnailUrl || product.thumbnail_url || product.image || "";
   }
 
   function wireGallery(images, productName) {
@@ -383,7 +393,7 @@
     el.innerHTML = products.map((item) => {
       const img = productGalleryUrls(item)[0] || "";
       return `<a class="product-detail-brand-preview-item" href="${productHref(item)}">
-        <span class="product-detail-brand-preview-thumb">${img ? `<img src="${esc(img)}" alt="" loading="lazy" decoding="async">` : ""}</span>
+        <span class="product-detail-brand-preview-thumb">${img ? `<img src="${esc(productCardImage(item) || img)}" alt="" width="160" height="120" loading="lazy" decoding="async">` : ""}</span>
         <span class="product-detail-brand-preview-name">${esc(item.name || "")}</span>
       </a>`;
     }).join("");
@@ -401,7 +411,7 @@
     }
     el.innerHTML = `<div class="product-detail-related-grid">${projects.map((project) => `
       <a class="product-detail-related-card" href="/proje-detay.html?id=${encodeURIComponent(project.id)}">
-        ${project.image ? `<img src="${esc(project.image)}" alt="">` : ""}
+        ${project.image ? `<img src="${esc(project.image)}" alt="" width="360" height="220" loading="lazy" decoding="async">` : ""}
         <span>${esc(project.title || "Proje")}</span>
       </a>
     `).join("")}</div>`;

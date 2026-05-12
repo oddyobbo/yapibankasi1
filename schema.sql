@@ -129,6 +129,10 @@ create table if not exists public.products (
   technical jsonb default '{}',
   spec text default '',
   image text default '',
+  thumbnail_url text default '',
+  card_image_url text default '',
+  gallery_image_url text default '',
+  original_image_url text default '',
   files jsonb default '{}',
   has_pdf boolean default false,
   has_cad boolean default false,
@@ -162,6 +166,10 @@ alter table public.products add column if not exists city text default '';
 alter table public.products add column if not exists company_roles text[] default '{}';
 alter table public.products add column if not exists has_bim boolean default false;
 alter table public.products add column if not exists updated_at timestamptz default now();
+alter table public.products add column if not exists thumbnail_url text default '';
+alter table public.products add column if not exists card_image_url text default '';
+alter table public.products add column if not exists gallery_image_url text default '';
+alter table public.products add column if not exists original_image_url text default '';
 
 create index if not exists idx_products_brand_id on public.products(brand_id);
 create index if not exists idx_products_slug on public.products(slug);
@@ -178,6 +186,10 @@ create table if not exists public.product_images (
   id uuid default gen_random_uuid() primary key,
   product_id uuid not null references public.products(id) on delete cascade,
   url text not null,
+  thumbnail_url text default '',
+  card_url text default '',
+  gallery_url text default '',
+  original_url text default '',
   alt text default '',
   sort_order integer default 0,
   is_primary boolean default false,
@@ -186,6 +198,10 @@ create table if not exists public.product_images (
   created_at timestamptz default now()
 );
 create index if not exists idx_product_images_product on public.product_images(product_id, sort_order);
+alter table public.product_images add column if not exists thumbnail_url text default '';
+alter table public.product_images add column if not exists card_url text default '';
+alter table public.product_images add column if not exists gallery_url text default '';
+alter table public.product_images add column if not exists original_url text default '';
 
 create table if not exists public.product_files (
   id uuid default gen_random_uuid() primary key,
