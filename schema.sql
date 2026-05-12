@@ -475,6 +475,36 @@ alter table public.projects add column if not exists country text default '';
 alter table public.projects add column if not exists office_name text default '';
 alter table public.projects add column if not exists updated_at timestamptz default now();
 
+do $$
+begin
+  alter table public.profiles drop constraint if exists profiles_account_type_check;
+  alter table public.profiles
+    add constraint profiles_account_type_check
+    check (account_type in ('brand', 'architect', 'admin'));
+
+  alter table public.profiles drop constraint if exists profiles_architect_profile_type_check;
+  alter table public.profiles
+    add constraint profiles_architect_profile_type_check
+    check (architect_profile_type in ('individual', 'office'));
+
+  alter table public.products drop constraint if exists products_status_check;
+  alter table public.products
+    add constraint products_status_check
+    check (status in ('draft', 'pending_review', 'published', 'rejected', 'archived'));
+
+  alter table public.products drop constraint if exists products_indoor_outdoor_check;
+  alter table public.products
+    add constraint products_indoor_outdoor_check
+    check (indoor_outdoor in ('', 'indoor', 'outdoor', 'both'));
+
+  alter table public.projects drop constraint if exists projects_status_check;
+  alter table public.projects
+    add constraint projects_status_check
+    check (status in ('draft', 'pending_review', 'published', 'rejected', 'archived'));
+exception
+  when duplicate_object then null;
+end $$;
+
 -- ── Auto-profile on signup trigger ───────────────────────────────────────
 
 create or replace function public.handle_new_user()
@@ -560,9 +590,9 @@ returns void as $$
   update public.products set views = views + 1 where id = product_id;
 $$ language sql security definer;
 
--- ── RLS baseline ─────────────────────────────────────────────────────────
--- Detaylı policy audit bir sonraki adımda yapılacak; burada yeni tablolar
--- RLS açık ve temel sahiplik kurallarıyla gelir.
+-- ── RLS policies ─────────────────────────────────────────────────────────
+-- Public katalog verisi okunur. Yazma işlemleri authenticated sahipler veya
+-- admin ile sınırlıdır. Frontend tarafında gizli sunucu anahtarı kullanılmaz.
 
 alter table public.profiles enable row level security;
 alter table public.brands enable row level security;
@@ -637,6 +667,10 @@ drop policy if exists "products_own_write" on public.products;
 create policy "products_own_write" on public.products for all using (auth.uid() = brand_id or public.is_admin()) with check (auth.uid() = brand_id or public.is_admin());
 drop policy if exists "projects_owner_write" on public.projects;
 create policy "projects_owner_write" on public.projects for all using (auth.uid() = brand_id or auth.uid() = architect_id or public.is_admin()) with check (auth.uid() = brand_id or auth.uid() = architect_id or public.is_admin());
+drop policy if exists "product_categories_admin_write" on public.product_categories;
+create policy "product_categories_admin_write" on public.product_categories for all using (public.is_admin()) with check (public.is_admin());
+drop policy if exists "product_subcategories_admin_write" on public.product_subcategories;
+create policy "product_subcategories_admin_write" on public.product_subcategories for all using (public.is_admin()) with check (public.is_admin());
 
 -- Child writes follow parent ownership.
 drop policy if exists "product_images_owner_write" on public.product_images;
@@ -722,6 +756,8 @@ create policy "pf_select_own_or_brand" on public.product_favorites for select us
 -- Admin review.
 drop policy if exists "admin_reviews_admin_all" on public.admin_reviews;
 create policy "admin_reviews_admin_all" on public.admin_reviews for all using (public.is_admin()) with check (public.is_admin());
+drop policy if exists "admin_reviews_submitter_insert" on public.admin_reviews;
+create policy "admin_reviews_submitter_insert" on public.admin_reviews for insert with check (auth.uid() = submitted_by or public.is_admin());
 drop policy if exists "admin_reviews_submitter_read" on public.admin_reviews;
 create policy "admin_reviews_submitter_read" on public.admin_reviews for select using (submitted_by = auth.uid() or public.is_admin());
 
