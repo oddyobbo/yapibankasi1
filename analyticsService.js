@@ -8,6 +8,32 @@ const emptyAnalytics = (products = []) => ({
   products,
 });
 
+const ALLOWED_EVENTS = new Set([
+  "product_view",
+  "brand_view",
+  "save_to_favorites",
+  "add_to_moodboard",
+  "download_file",
+  "request_quote",
+  "request_sample",
+  "contact_brand",
+]);
+
+const PRODUCT_VIEW_DEDUPE_MS = 30 * 60 * 1000;
+
+const productViewCacheKey = (productId, sessionId) => `ag:pv:${sessionId}:${productId}`;
+
+const recentlyTrackedProductView = (productId, sessionId) => {
+  if (!productId || !sessionId || typeof localStorage === "undefined") return false;
+  try {
+    const key = productViewCacheKey(productId, sessionId);
+    const last = Number(localStorage.getItem(key) || 0);
+    if (last && Date.now() - last < PRODUCT_VIEW_DEDUPE_MS) return true;
+    localStorage.setItem(key, String(Date.now()));
+  } catch (_) {}
+  return false;
+};
+
 export const createAnalyticsService = ({ getProducts }) => {
   const trackEvent = async (event) => {
     await ready;
@@ -15,11 +41,12 @@ export const createAnalyticsService = ({ getProducts }) => {
     if (!sb || !event) return null;
 
     const eventType = event.eventType || event.event_type;
-    if (!eventType) return null;
+    if (!eventType || !ALLOWED_EVENTS.has(eventType)) return null;
     const sessionId = event.sessionId || ensureVisitorId();
 
     if (eventType === "product_view" && event.productId) {
-      const sinceIso = new Date(Date.now() - 30 * 60 * 1000).toISOString();
+      if (recentlyTrackedProductView(event.productId, sessionId)) return null;
+      const sinceIso = new Date(Date.now() - PRODUCT_VIEW_DEDUPE_MS).toISOString();
       const { data: existing } = await sb
         .from("analytics_events")
         .select("id")

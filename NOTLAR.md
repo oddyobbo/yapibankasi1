@@ -25,6 +25,8 @@
 
 **Durum:** Kısmen yapıldı. Dinamik ürün detay sayfası seçili ürünü çekiyor ve analytics non-blocking başladı. Ürün listeleme tarafında 24'lü query/pagination mantığı başladı; tam facet/RPC ve görsel türev üretimi henüz tamamlanmadı.
 
+**Analytics durumu:** `analytics_events` event sistemi, `product_view` duplicate azaltma, dosya indirme/teklif/moodboard/favori eventleri ve marka dashboard için günlük/özet agregasyon viewleri eklendi.
+
 ---
 
 ## 3. Görsel Performans Sistemi

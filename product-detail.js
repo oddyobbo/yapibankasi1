@@ -315,8 +315,9 @@
   function fileItemHref(file, eventType, product) {
     const href = typeof file === "string" ? file : file.url || file.href || "";
     const label = typeof file === "string" ? "Dosya" : file.label || file.name || "Dosya";
+    const fileKind = typeof file === "string" ? "" : file.fileType || file.type || "";
     if (!href) return "";
-    return `<li><a data-file-event="${eventType}" class="product-detail-file-item" href="${esc(href)}" target="_blank" rel="noopener noreferrer"><span>${esc(label)}</span><span class="product-detail-file-item-chevron" aria-hidden="true">›</span></a></li>`;
+    return `<li><a data-file-event="${eventType}" data-file-type="${esc(fileKind)}" class="product-detail-file-item" href="${esc(href)}" target="_blank" rel="noopener noreferrer"><span>${esc(label)}</span><span class="product-detail-file-item-chevron" aria-hidden="true">›</span></a></li>`;
   }
 
   function renderFileGroup(title, rows, eventType, product) {
@@ -452,12 +453,15 @@
     });
 
     document.querySelectorAll("[data-file-event]").forEach((link) => {
-      link.addEventListener("click", () => track("download_file", product, { href: link.href }));
+      link.addEventListener("click", () => track("download_file", product, {
+        href: link.href,
+        fileType: link.dataset.fileType || "",
+      }));
     });
 
     $("quote-form").addEventListener("submit", async (event) => {
       event.preventDefault();
-      await track("request_quote", product);
+      track("request_quote", product);
       location.href = contactHref({
         konu: "urun",
         talep: "teklif",

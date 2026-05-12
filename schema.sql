@@ -421,6 +421,7 @@ create table if not exists public.analytics_events (
 create index if not exists idx_analytics_events_type_created on public.analytics_events(event_type, created_at desc);
 create index if not exists idx_analytics_events_product on public.analytics_events(product_id, created_at desc);
 create index if not exists idx_analytics_events_brand on public.analytics_events(brand_id, created_at desc);
+create index if not exists idx_analytics_events_architect on public.analytics_events(architect_id, created_at desc);
 create index if not exists idx_analytics_product_view_session
   on public.analytics_events(event_type, product_id, session_id, created_at desc)
   where event_type = 'product_view' and product_id is not null and session_id <> '';
@@ -464,6 +465,23 @@ select
 from public.analytics_events e
 left join public.products p on p.id = e.product_id
 group by p.brand_id, e.product_id, date_trunc('day', e.created_at)::date;
+
+create or replace view public.brand_product_analytics_summary as
+select
+  p.brand_id,
+  e.product_id,
+  count(*) filter (where e.event_type = 'product_view') as product_views,
+  count(distinct coalesce(e.architect_id::text, nullif(e.session_id, ''))) filter (where e.event_type = 'product_view') as unique_viewers,
+  count(*) filter (where e.event_type = 'save_to_favorites') as saves,
+  count(*) filter (where e.event_type = 'add_to_moodboard') as moodboard_adds,
+  count(*) filter (where e.event_type = 'download_file') as downloads,
+  count(*) filter (where e.event_type = 'request_quote') as quote_requests,
+  count(*) filter (where e.event_type = 'request_sample') as sample_requests,
+  count(*) filter (where e.event_type = 'contact_brand') as contact_requests,
+  max(e.created_at) as last_event_at
+from public.analytics_events e
+left join public.products p on p.id = e.product_id
+group by p.brand_id, e.product_id;
 
 -- ── Admin review queue ───────────────────────────────────────────────────
 
