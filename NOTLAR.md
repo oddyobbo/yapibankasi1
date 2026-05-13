@@ -41,6 +41,8 @@
 
 **Astro görsel kimlik:** Header, footer, temel tipografi ve ürün kartları mevcut Archilink MVP çizgisine yaklaştırıldı. Bu adım mimariyi değiştiriyor ama dashboard/auth akışlarına dokunmuyor.
 
+**Astro anasayfa UI:** Eski `mvp-taslak-v1.html` anasayfa yapısı Astro `/` route'una taşındı. Hero animasyonu, hızlı keşif bloğu, kategori şeridi, mimar/marka değer bölümleri, katalog alanları ve kapanış CTA korunarak Astro/Supabase altyapısına bağlandı.
+
 ---
 
 ## 3. Görsel Performans Sistemi
