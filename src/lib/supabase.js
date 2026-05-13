@@ -48,9 +48,26 @@ export const PUBLIC_PRODUCT_FIELDS = [
   "created_at",
 ].join(",");
 
-export const publishedProductsQuery = () => supabase
+export const PRODUCT_FILTER_FIELDS = [
+  "brand_name",
+  "category",
+  "material",
+  "thickness_mm",
+  "fire_class",
+  "color_family",
+  "usage_area",
+  "indoor_outdoor",
+  "country",
+  "city",
+  "company_roles",
+  "has_pdf",
+  "has_cad",
+  "has_bim",
+].join(",");
+
+export const publishedProductsQuery = (options = {}) => supabase
   .from("products")
-  .select(PUBLIC_PRODUCT_FIELDS)
+  .select(PUBLIC_PRODUCT_FIELDS, options)
   .eq("status", "published");
 
 export const publishedProjectsQuery = () => supabase

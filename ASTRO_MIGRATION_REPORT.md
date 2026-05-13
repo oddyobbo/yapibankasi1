@@ -22,6 +22,13 @@ Branch: `astro-migration`
 - `/categories`
 - `/categories/[slug]`
 
+## Current completed migration steps
+
+- Astro public shell and SEO-first routing are in place.
+- `/products` now uses Supabase query-based filtering and URL state.
+- `/products` pagination uses a default page size of 24.
+- Product cards still fetch only lightweight public listing fields.
+
 ## What remains legacy for Phase 2
 
 - Brand dashboard pages: `marka-paneli*.html`
@@ -91,7 +98,7 @@ Tradeoff:
 ## Next recommended phase
 
 1. Backfill slugs for products, brands, projects and categories.
-2. Add query-based filters to `/products`.
-3. Add pagination/infinite loading to Astro listing pages.
-4. Improve product detail data joins for brand/project/category relationships.
+2. Improve product detail data joins for brand/project/category relationships.
+3. Add more precise facet counts or RPC-based filter options when catalog volume grows.
+4. Move existing visual UI language into Astro components.
 5. Move dashboard/auth flows only after public catalog SEO layer is stable.

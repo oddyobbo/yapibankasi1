@@ -3,9 +3,38 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import Header from "../../components/Header.astro";
 import Footer from "../../components/Footer.astro";
 import ProductCard from "../../components/ProductCard.astro";
-import { getProducts } from "../../lib/catalog.js";
+import { getProductFilterOptions, getProductListPage } from "../../lib/catalog.js";
 
-const products = await getProducts({ limit: 24 });
+const params = Astro.url.searchParams;
+const filters = {
+  search: params.get("q") || "",
+  brand: params.get("brand") || "",
+  category: params.get("category") || "",
+  material: params.get("material") || "",
+  usageArea: params.get("usageArea") || "",
+  colorFamily: params.get("colorFamily") || "",
+  fireClass: params.get("fireClass") || "",
+  indoorOutdoor: params.get("indoorOutdoor") || "",
+  country: params.get("country") || "",
+  city: params.get("city") || "",
+  role: params.get("role") || "",
+  hasPdf: params.get("hasPdf") === "1",
+  hasCad: params.get("hasCad") === "1",
+  hasBim: params.get("hasBim") === "1",
+};
+const page = Number(params.get("page") || 1);
+const [result, options] = await Promise.all([
+  getProductListPage({ filters, page }),
+  getProductFilterOptions(),
+]);
+const { products, count, hasPrevious, hasNext } = result;
+const pageHref = (targetPage) => {
+  const next = new URLSearchParams(params);
+  if (targetPage <= 1) next.delete("page");
+  else next.set("page", String(targetPage));
+  const query = next.toString();
+  return query ? `/products?${query}` : "/products";
+};
 ---
 <BaseLayout
   title="Ürünler | Archilink"
@@ -17,14 +46,172 @@ const products = await getProducts({ limit: 24 });
     <div class="container">
       <p class="eyebrow">Katalog</p>
       <h1 class="page-title">Ürünler</h1>
-      <p class="lead">Liste sayfaları şimdilik hafif ürün alanlarını çeker. Filtre sistemi sonraki adımda query tabanlı genişletilecek.</p>
+      <p class="lead">Ürünleri marka, kategori, malzeme ve teknik dosya durumuna göre filtrele. Filtreler URL’de tutulur ve Supabase query ile çalışır.</p>
+
+      <form class="filters card" method="get" action="/products">
+        <label class="search">
+          <span>Arama</span>
+          <input name="q" value={filters.search} placeholder="Ürün adı veya açıklama" />
+        </label>
+        <label>
+          <span>Marka</span>
+          <select name="brand">
+            <option value="">Tümü</option>
+            {options.brands.map((value) => <option value={value} selected={filters.brand === value}>{value}</option>)}
+          </select>
+        </label>
+        <label>
+          <span>Kategori</span>
+          <select name="category">
+            <option value="">Tümü</option>
+            {options.categories.map((value) => <option value={value} selected={filters.category === value}>{value}</option>)}
+          </select>
+        </label>
+        <label>
+          <span>Malzeme</span>
+          <select name="material">
+            <option value="">Tümü</option>
+            {options.materials.map((value) => <option value={value} selected={filters.material === value}>{value}</option>)}
+          </select>
+        </label>
+        <label>
+          <span>Kullanım alanı</span>
+          <select name="usageArea">
+            <option value="">Tümü</option>
+            {options.usageAreas.map((value) => <option value={value} selected={filters.usageArea === value}>{value}</option>)}
+          </select>
+        </label>
+        <label>
+          <span>Renk ailesi</span>
+          <select name="colorFamily">
+            <option value="">Tümü</option>
+            {options.colorFamilies.map((value) => <option value={value} selected={filters.colorFamily === value}>{value}</option>)}
+          </select>
+        </label>
+        <label>
+          <span>Yangın sınıfı</span>
+          <select name="fireClass">
+            <option value="">Tümü</option>
+            {options.fireClasses.map((value) => <option value={value} selected={filters.fireClass === value}>{value}</option>)}
+          </select>
+        </label>
+        <label>
+          <span>İç / dış mekan</span>
+          <select name="indoorOutdoor">
+            <option value="">Tümü</option>
+            <option value="indoor" selected={filters.indoorOutdoor === "indoor"}>İç mekan</option>
+            <option value="outdoor" selected={filters.indoorOutdoor === "outdoor"}>Dış mekan</option>
+            <option value="both" selected={filters.indoorOutdoor === "both"}>İç + dış</option>
+          </select>
+        </label>
+        <label>
+          <span>Şehir</span>
+          <select name="city">
+            <option value="">Tümü</option>
+            {options.cities.map((value) => <option value={value} selected={filters.city === value}>{value}</option>)}
+          </select>
+        </label>
+        <label>
+          <span>Rol</span>
+          <select name="role">
+            <option value="">Tümü</option>
+            {options.roles.map((value) => <option value={value} selected={filters.role === value}>{value}</option>)}
+          </select>
+        </label>
+        <div class="checks">
+          <label><input type="checkbox" name="hasPdf" value="1" checked={filters.hasPdf} /> PDF var</label>
+          <label><input type="checkbox" name="hasCad" value="1" checked={filters.hasCad} /> CAD var</label>
+          <label><input type="checkbox" name="hasBim" value="1" checked={filters.hasBim} /> BIM var</label>
+        </div>
+        <div class="filter-actions">
+          <button class="button primary" type="submit">Filtrele</button>
+          <a class="button secondary" href="/products">Temizle</a>
+        </div>
+      </form>
+
       <section class="catalog">
+        <div class="catalog-head">
+          <p>{count} ürün bulundu</p>
+          {count > 0 && <p>Sayfa {result.page}</p>}
+        </div>
         {products.length ? <div class="grid cards">{products.map((product) => <ProductCard product={product} />)}</div> : <p class="empty">Henüz yayınlanmış ürün yok.</p>}
+        {(hasPrevious || hasNext) && (
+          <nav class="pagination" aria-label="Ürün sayfaları">
+            {hasPrevious ? <a class="button secondary" href={pageHref(result.page - 1)}>Önceki</a> : <span></span>}
+            {hasNext ? <a class="button primary" href={pageHref(result.page + 1)}>Sonraki</a> : <span></span>}
+          </nav>
+        )}
       </section>
     </div>
   </main>
   <Footer />
 </BaseLayout>
 <style>
+  .filters {
+    margin-top: 28px;
+    padding: 18px;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+  }
+  label { display: grid; gap: 6px; color: #6e6e73; font-size: 12px; }
+  input, select {
+    width: 100%;
+    height: 42px;
+    border: 1px solid rgba(0,0,0,.12);
+    border-radius: 10px;
+    background: #fff;
+    padding: 0 12px;
+    color: #111;
+    font: inherit;
+    font-size: 14px;
+  }
+  .search { grid-column: span 2; }
+  .checks {
+    grid-column: span 2;
+    display: flex;
+    align-items: end;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .checks label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 42px;
+    color: #111;
+    font-size: 13px;
+  }
+  .checks input { width: auto; height: auto; }
+  .filter-actions {
+    grid-column: span 2;
+    display: flex;
+    justify-content: flex-end;
+    align-items: end;
+    gap: 10px;
+  }
   .catalog { margin-top: 28px; }
+  .catalog-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 14px;
+    color: #6e6e73;
+    font-size: 13px;
+  }
+  .catalog-head p { margin: 0; }
+  .pagination {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 26px;
+  }
+  @media (max-width: 980px) {
+    .filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 640px) {
+    .filters, .search, .checks, .filter-actions { grid-template-columns: 1fr; grid-column: span 1; }
+    .filter-actions { justify-content: stretch; }
+    .filter-actions .button { width: 100%; }
+  }
 </style>

@@ -1,5 +1,7 @@
-import { approvedBrandsQuery, publishedProductsQuery, publishedProjectsQuery, safeData, supabase } from "./supabase.js";
+import { PRODUCT_FILTER_FIELDS, approvedBrandsQuery, publishedProductsQuery, publishedProjectsQuery, safeData, supabase } from "./supabase.js";
 import { slugify } from "./slugs.js";
+
+export const PRODUCT_PAGE_SIZE = 24;
 
 export const imageForProduct = (product) => (
   product?.card_image_url ||
@@ -17,11 +19,94 @@ export const galleryForProduct = (product, images = []) => {
   return structured.length ? structured : legacy;
 };
 
-export const getProducts = async ({ limit = 24, categorySlug, brandSlug } = {}) => {
+const compact = (value) => String(value || "").trim();
+
+const uniqueSorted = (values) => [...new Set(values.map(compact).filter(Boolean))]
+  .sort((a, b) => a.localeCompare(b, "tr"));
+
+const applyProductFilters = (query, filters = {}) => {
+  const search = compact(filters.search);
+  const brand = compact(filters.brand);
+  const category = compact(filters.category);
+  const material = compact(filters.material);
+  const usageArea = compact(filters.usageArea);
+  const colorFamily = compact(filters.colorFamily);
+  const fireClass = compact(filters.fireClass);
+  const indoorOutdoor = compact(filters.indoorOutdoor);
+  const country = compact(filters.country);
+  const city = compact(filters.city);
+  const role = compact(filters.role);
+
+  let next = query;
+  if (search) next = next.or(`name.ilike.%${search}%,summary.ilike.%${search}%,description.ilike.%${search}%`);
+  if (brand) next = next.ilike("brand_name", `%${brand}%`);
+  if (category) next = next.ilike("category", `%${category.replace(/-/g, " ")}%`);
+  if (material) next = next.eq("material", material);
+  if (usageArea) next = next.ilike("usage_area", `%${usageArea}%`);
+  if (colorFamily) next = next.eq("color_family", colorFamily);
+  if (fireClass) next = next.eq("fire_class", fireClass);
+  if (indoorOutdoor) next = next.eq("indoor_outdoor", indoorOutdoor);
+  if (country) next = next.eq("country", country);
+  if (city) next = next.eq("city", city);
+  if (role) next = next.contains("company_roles", [role]);
+  if (filters.hasPdf) next = next.eq("has_pdf", true);
+  if (filters.hasCad) next = next.eq("has_cad", true);
+  if (filters.hasBim) next = next.eq("has_bim", true);
+  return next;
+};
+
+export const getProducts = async ({ limit = PRODUCT_PAGE_SIZE, categorySlug, brandSlug } = {}) => {
   let query = publishedProductsQuery().order("created_at", { ascending: false }).limit(limit);
   if (categorySlug) query = query.ilike("category", `%${categorySlug.replace(/-/g, "%")}%`);
   if (brandSlug) query = query.ilike("brand_name", `%${brandSlug.replace(/-/g, "%")}%`);
   return safeData(await query);
+};
+
+export const getProductListPage = async ({ filters = {}, page = 1, pageSize = PRODUCT_PAGE_SIZE } = {}) => {
+  const currentPage = Math.max(1, Number(page) || 1);
+  const from = (currentPage - 1) * pageSize;
+  const to = from + pageSize - 1;
+  const query = applyProductFilters(
+    publishedProductsQuery({ count: "exact" }).order("created_at", { ascending: false }),
+    filters,
+  ).range(from, to);
+  const result = await query;
+  return {
+    products: safeData(result),
+    count: result.count || 0,
+    page: currentPage,
+    pageSize,
+    hasPrevious: currentPage > 1,
+    hasNext: (result.count || 0) > currentPage * pageSize,
+  };
+};
+
+export const getProductFilterOptions = async () => {
+  const [facets, brands, categories] = await Promise.all([
+    supabase.from("products").select(PRODUCT_FILTER_FIELDS).eq("status", "published").limit(1000),
+    approvedBrandsQuery().order("name", { ascending: true }),
+    getCategories(),
+  ]);
+  const rows = safeData(facets);
+  const brandRows = safeData(brands);
+  const roles = rows.flatMap((row) => Array.isArray(row.company_roles) ? row.company_roles : []);
+  return {
+    brands: uniqueSorted([
+      ...brandRows.map((brand) => brand.name),
+      ...rows.map((row) => row.brand_name),
+    ]),
+    categories: uniqueSorted([
+      ...categories.map((category) => category.name),
+      ...rows.map((row) => String(row.category || "").split(">")[0]),
+    ]),
+    materials: uniqueSorted(rows.map((row) => row.material)),
+    usageAreas: uniqueSorted(rows.map((row) => row.usage_area)),
+    colorFamilies: uniqueSorted(rows.map((row) => row.color_family)),
+    fireClasses: uniqueSorted(rows.map((row) => row.fire_class)),
+    countries: uniqueSorted(rows.map((row) => row.country)),
+    cities: uniqueSorted(rows.map((row) => row.city)),
+    roles: uniqueSorted(roles),
+  };
 };
 
 export const getProductBySlug = async (slug) => {

@@ -31,6 +31,8 @@
 
 **Astro migration:** Public SEO-sensitive katalog sayfaları için Astro + Supabase + Netlify geçişi `astro-migration` branch'inde başlatıldı. Dashboard/auth/moodboard/admin akışları Phase 2'ye kadar legacy `.html` olarak korunacak.
 
+**Astro ürün listeleme:** `/products` sayfasında query tabanlı filtreler, URL state'i ve 24'lü server-side pagination eklendi. Tarayıcıya tüm ürünleri yükleyip filtreleme yapılmıyor.
+
 ---
 
 ## 3. Görsel Performans Sistemi
