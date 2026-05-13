@@ -30,6 +30,7 @@ Branch: `astro-migration`
 - Product cards still fetch only lightweight public listing fields.
 - `/products/[slug]` now enriches product detail data with brand, category/subcategory, files, specs, variants, related products and related projects.
 - `sql/astro_slug_backfill.sql` prepares clean slug backfill and future automatic slug generation for products, brands, projects and categories.
+- `/robots.txt` and `/sitemap.xml` endpoints now expose the public Astro catalog URLs for search engines and exclude legacy dashboard/panel routes from indexing.
 
 ## What remains legacy for Phase 2
 
@@ -56,6 +57,7 @@ These are copied into `dist` during `npm run build` by `scripts/copy-legacy-stat
 ## SEO handling
 
 - SEO is handled by `src/components/SEO.astro`.
+- Discovery is handled by `src/pages/sitemap.xml.js` and `src/pages/robots.txt.js`.
 - Metadata is rendered in the initial HTML for Astro pages.
 - Supported fields:
   - title

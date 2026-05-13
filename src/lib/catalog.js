@@ -274,3 +274,13 @@ export const getCategoryDetail = async (slug) => {
   const products = safeData(await publishedProductsQuery().or(`category_id.eq.${category.id},category.ilike.%${category.name}%`).limit(24));
   return { ...category, products };
 };
+
+export const getSitemapCatalogEntries = async () => {
+  const [products, brands, projects, categories] = await Promise.all([
+    safeData(await publishedProductsQuery().select("slug,name,updated_at,created_at").limit(5000)),
+    safeData(await approvedBrandsQuery().select("slug,name,updated_at,created_at").limit(2000)),
+    safeData(await publishedProjectsQuery().select("slug,title,updated_at,created_at").limit(3000)),
+    getCategories(),
+  ]);
+  return { products, brands, projects, categories };
+};

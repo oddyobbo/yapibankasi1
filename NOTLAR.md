@@ -37,6 +37,8 @@
 
 **Astro slug altyapısı:** `sql/astro_slug_backfill.sql` eklendi. Supabase'de çalıştırılınca ürün, marka, proje ve kategori slug alanlarını doldurur; yeni kayıtlar için otomatik slug trigger'ları kurar.
 
+**Astro SEO discovery:** `/robots.txt` ve `/sitemap.xml` endpointleri eklendi. Sitemap public katalog URL'lerini Supabase'den üretir; robots dashboard/panel sayfalarını index dışı bırakır.
+
 ---
 
 ## 3. Görsel Performans Sistemi
