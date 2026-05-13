@@ -28,6 +28,7 @@ Branch: `astro-migration`
 - `/products` now uses Supabase query-based filtering and URL state.
 - `/products` pagination uses a default page size of 24.
 - Product cards still fetch only lightweight public listing fields.
+- `/products/[slug]` now enriches product detail data with brand, category/subcategory, files, specs, variants, related products and related projects.
 
 ## What remains legacy for Phase 2
 
@@ -98,7 +99,7 @@ Tradeoff:
 ## Next recommended phase
 
 1. Backfill slugs for products, brands, projects and categories.
-2. Improve product detail data joins for brand/project/category relationships.
-3. Add more precise facet counts or RPC-based filter options when catalog volume grows.
-4. Move existing visual UI language into Astro components.
+2. Add more precise facet counts or RPC-based filter options when catalog volume grows.
+3. Move existing visual UI language into Astro components.
+4. Backfill missing brand/category/project relations in Supabase.
 5. Move dashboard/auth flows only after public catalog SEO layer is stable.

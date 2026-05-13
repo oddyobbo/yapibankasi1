@@ -20,6 +20,7 @@ export const galleryForProduct = (product, images = []) => {
 };
 
 const compact = (value) => String(value || "").trim();
+const isMissingRow = (error) => !error || error.code === "PGRST116";
 
 const uniqueSorted = (values) => [...new Set(values.map(compact).filter(Boolean))]
   .sort((a, b) => a.localeCompare(b, "tr"));
@@ -118,26 +119,105 @@ export const getProductBySlug = async (slug) => {
   return (data || []).find((product) => slugify(product.slug || product.name) === cleanSlug) || null;
 };
 
+const getBrandForProduct = async (product) => {
+  if (!product) return null;
+  if (product.brand_record_id) {
+    const byId = await approvedBrandsQuery().eq("id", product.brand_record_id).maybeSingle();
+    if (byId.data || !isMissingRow(byId.error)) return byId.data || null;
+  }
+  const brandSlug = slugify(product.brand_name);
+  if (brandSlug) {
+    const bySlug = await approvedBrandsQuery().eq("slug", brandSlug).maybeSingle();
+    if (bySlug.data || !isMissingRow(bySlug.error)) return bySlug.data || null;
+  }
+  if (product.brand_name) {
+    const byName = await approvedBrandsQuery().eq("name", product.brand_name).maybeSingle();
+    if (byName.data || !isMissingRow(byName.error)) return byName.data || null;
+  }
+  return null;
+};
+
+const getCategoryForProduct = async (product) => {
+  if (!product?.category_id) return { category: null, subcategory: null };
+  const [category, subcategory] = await Promise.all([
+    supabase.from("product_categories").select("*").eq("id", product.category_id).maybeSingle(),
+    product.subcategory_id
+      ? supabase.from("product_subcategories").select("*").eq("id", product.subcategory_id).maybeSingle()
+      : Promise.resolve({ data: null }),
+  ]);
+  return {
+    category: category.data || null,
+    subcategory: subcategory.data || null,
+  };
+};
+
+const getRelatedProductsForProduct = async (product) => {
+  if (!product?.id) return [];
+  const base = publishedProductsQuery().neq("id", product.id).limit(8);
+  if (product.brand_record_id) {
+    const byBrandRecord = await base.eq("brand_record_id", product.brand_record_id);
+    if (!byBrandRecord.error && byBrandRecord.data?.length) return byBrandRecord.data;
+  }
+  if (product.brand_name) {
+    const byBrandName = await publishedProductsQuery()
+      .neq("id", product.id)
+      .eq("brand_name", product.brand_name)
+      .limit(8);
+    if (!byBrandName.error && byBrandName.data?.length) return byBrandName.data;
+  }
+  if (product.category_id) {
+    const byCategory = await publishedProductsQuery()
+      .neq("id", product.id)
+      .eq("category_id", product.category_id)
+      .limit(8);
+    return safeData(byCategory);
+  }
+  return [];
+};
+
+const getRelatedProjectsForProduct = async (product) => {
+  if (!product?.id) return [];
+  const linkRows = safeData(await supabase
+    .from("project_products")
+    .select("project_id")
+    .eq("product_id", product.id)
+    .limit(12));
+  const linkedIds = linkRows.map((row) => row.project_id).filter(Boolean);
+  if (linkedIds.length) {
+    return safeData(await publishedProjectsQuery().in("id", linkedIds).limit(8));
+  }
+
+  const productName = compact(product.name);
+  if (!productName) return [];
+  const materialMatches = safeData(await publishedProjectsQuery().contains("materials", [productName]).limit(8));
+  return materialMatches;
+};
+
 export const getProductDetail = async (slug) => {
   const product = await getProductBySlug(slug);
   if (!product) return null;
-  const [images, files, specs, variants, relatedProducts, relatedProjects] = await Promise.all([
+  const [images, files, specs, variants, brand, categoryInfo, relatedProducts, relatedProjects] = await Promise.all([
     supabase.from("product_images").select("*").eq("product_id", product.id).order("sort_order", { ascending: true }),
     supabase.from("product_files").select("*").eq("product_id", product.id).order("sort_order", { ascending: true }),
     supabase.from("product_specs").select("*").eq("product_id", product.id).order("sort_order", { ascending: true }),
     supabase.from("product_variants").select("*").eq("product_id", product.id).order("sort_order", { ascending: true }),
-    publishedProductsQuery().eq("brand_name", product.brand_name || "").neq("id", product.id).limit(8),
-    supabase.from("project_products").select("project_id, projects(*)").eq("product_id", product.id).limit(6),
+    getBrandForProduct(product),
+    getCategoryForProduct(product),
+    getRelatedProductsForProduct(product),
+    getRelatedProjectsForProduct(product),
   ]);
 
   return {
     ...product,
+    brand,
+    categoryRecord: categoryInfo.category,
+    subcategoryRecord: categoryInfo.subcategory,
     images: safeData(images),
     files: safeData(files),
     specs: safeData(specs),
     variants: safeData(variants),
-    relatedProducts: safeData(relatedProducts),
-    relatedProjects: safeData(relatedProjects).map((row) => row.projects).filter(Boolean),
+    relatedProducts,
+    relatedProjects,
   };
 };
 

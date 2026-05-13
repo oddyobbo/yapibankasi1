@@ -9,25 +9,29 @@ import RelatedProducts from "../../components/RelatedProducts.astro";
 import RelatedProjects from "../../components/RelatedProjects.astro";
 import RequestQuoteCTA from "../../components/RequestQuoteCTA.astro";
 import BrandSummaryCard from "../../components/BrandSummaryCard.astro";
-import { getBrandDetail, getProductDetail, imageForProduct } from "../../lib/catalog.js";
-import { brandPath, productPath } from "../../lib/slugs.js";
+import { getProductDetail, imageForProduct } from "../../lib/catalog.js";
+import { productPath } from "../../lib/slugs.js";
 
 const product = await getProductDetail(Astro.params.slug);
 if (!product) return Astro.redirect("/products", 302);
-const brand = product.brand_name ? await getBrandDetail(product.brand_name.toLowerCase().replace(/[^a-z0-9]+/g, "-")) : null;
+const brand = product.brand || null;
+const categoryLabel = [
+  product.categoryRecord?.name || "",
+  product.subcategoryRecord?.name || "",
+].filter(Boolean).join(" / ") || product.category || "Kategori belirtilmedi";
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "Product",
   name: product.name,
   image: imageForProduct(product) ? [imageForProduct(product)] : undefined,
   description: product.summary || product.description,
-  brand: product.brand_name ? { "@type": "Brand", name: product.brand_name } : undefined,
+  brand: (brand?.name || product.brand_name) ? { "@type": "Brand", name: brand?.name || product.brand_name } : undefined,
   sku: product.sku || undefined,
-  category: product.category || undefined,
+  category: categoryLabel || undefined,
 };
 ---
 <BaseLayout
-  title={`${product.name} | ${product.brand_name || "Archilink"} | Archilink`}
+  title={`${product.name} | ${brand?.name || product.brand_name || "Archilink"} | Archilink`}
   description={product.summary || product.description || `${product.name} teknik bilgileri, dosyaları ve marka detayları.`}
   canonical={productPath(product)}
   image={imageForProduct(product)}
@@ -39,7 +43,7 @@ const jsonLd = {
     <section class="page-band product-hero">
       <div class="container detail-grid">
         <div>
-          <p class="eyebrow">{product.category || "Kategori belirtilmedi"}</p>
+          <p class="eyebrow">{categoryLabel}</p>
           <h1 class="page-title">{product.name}</h1>
           <p class="lead">{product.summary || product.description || "Bu ürün için kısa açıklama henüz eklenmedi."}</p>
           <ProductGallery product={product} />

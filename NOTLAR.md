@@ -33,6 +33,8 @@
 
 **Astro ürün listeleme:** `/products` sayfasında query tabanlı filtreler, URL state'i ve 24'lü server-side pagination eklendi. Tarayıcıya tüm ürünleri yükleyip filtreleme yapılmıyor.
 
+**Astro ürün detay:** `/products/[slug]` ürün detay datası marka, kategori/subkategori, teknik bilgiler, dosyalar, varyantlar, ilgili ürünler ve ilgili projelerle zenginleştirildi.
+
 ---
 
 ## 3. Görsel Performans Sistemi
