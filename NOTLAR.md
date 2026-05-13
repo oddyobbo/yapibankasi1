@@ -51,6 +51,8 @@
 
 **Astro proje UI:** Eski referans proje mantığı Astro `/projects` ve `/projects/[slug]` route'larına taşındı. Liste sayfası proje kartlarıyla; detay sayfası büyük hero, proje bilgileri, galeri, kullanılan ürünler ve CreativeWork JSON-LD ile çalışıyor.
 
+**Astro kategori UI:** Kategori keşif mantığı Astro `/categories` ve `/categories/[slug]` route'larına taşındı. Kategori listesi kartlarla; kategori detay sayfası kategori hero, ürün grid'i ve diğer kategori önerileriyle çalışıyor.
+
 ---
 
 ## 3. Görsel Performans Sistemi

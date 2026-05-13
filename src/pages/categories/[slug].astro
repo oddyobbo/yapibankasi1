@@ -10,32 +10,126 @@ import { categoryPath } from "../../lib/slugs.js";
 const category = await getCategoryDetail(Astro.params.slug);
 const categories = await getCategories();
 if (!category) return Astro.redirect("/products", 302);
+const products = category.products || [];
+const otherCategories = categories.filter((item) => item.id !== category.id).slice(0, 8);
 ---
 <BaseLayout
   title={`${category.name} | Kategori | Archilink`}
-  description={`${category.name} kategorisindeki yayınlanmış mimari ürünleri keşfet.`}
+  description={category.description || `${category.name} kategorisindeki yayınlanmış mimari ürünleri keşfet.`}
   canonical={categoryPath(category)}
 >
   <Header />
   <main>
-    <section class="page-band">
-      <div class="container">
-        <p class="eyebrow">Kategori</p>
-        <h1 class="page-title">{category.name}</h1>
-        <p class="lead">Bu kategoriye bağlı yayınlanmış ürünler. Filtreler sonraki fazda query tabanlı genişletilecek.</p>
+    <section class="category-detail-hero page-band">
+      <div class="container hero-grid">
+        <div>
+          <a href="/categories" class="back-link">Kategoriler</a>
+          <p class="eyebrow">Kategori</p>
+          <h1 class="page-title">{category.name}</h1>
+          <p class="lead">{category.description || "Bu kategoriye bağlı yayınlanmış ürünler ve ilgili katalog sınıfları."}</p>
+        </div>
+        <aside class="hero-panel">
+          <strong>{products.length}</strong>
+          <span>yayınlanmış ürün</span>
+          <a href={`/products?category=${encodeURIComponent(category.name)}`} class="button secondary">Filtreli ürünlere git</a>
+        </aside>
       </div>
     </section>
-    <section class="page-band">
+
+    <section class="page-band products-band">
       <div class="container">
-        {category.products?.length ? <div class="grid cards">{category.products.map((product) => <ProductCard product={product} />)}</div> : <p class="empty">Bu kategoride yayınlanmış ürün henüz yok.</p>}
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Ürünler</p>
+            <h2 class="section-title">{category.name} ürünleri</h2>
+          </div>
+          <p>Liste kartları hafif ürün alanlarıyla render edilir; ürün detayına gidildiğinde tam veri çekilir.</p>
+        </div>
+        {products.length ? <div class="grid cards product-grid">{products.map((product) => <ProductCard product={product} />)}</div> : <p class="empty">Bu kategoride yayınlanmış ürün henüz yok.</p>}
       </div>
     </section>
-    <section class="page-band">
+
+    <section class="page-band other-band">
       <div class="container">
-        <h2 class="section-title">Diğer kategoriler</h2>
-        <CategoryGrid categories={categories.filter((item) => item.id !== category.id).slice(0, 8)} />
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Keşfe devam</p>
+            <h2 class="section-title">Diğer kategoriler</h2>
+          </div>
+        </div>
+        <CategoryGrid categories={otherCategories} />
       </div>
     </section>
   </main>
   <Footer />
 </BaseLayout>
+<style>
+  .category-detail-hero {
+    background:
+      radial-gradient(circle at 76% 12%, rgba(0,0,0,.06), transparent 28%),
+      linear-gradient(180deg, #fff 0%, #f5f5f7 100%);
+    border-bottom: 1px solid rgba(0,0,0,.08);
+  }
+  .hero-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 320px;
+    gap: 34px;
+    align-items: end;
+  }
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 34px;
+    border: 1px solid rgba(0,0,0,.1);
+    border-radius: 999px;
+    padding: 0 13px;
+    background: #fff;
+    color: #4a4a4f;
+    font-size: 13px;
+    margin-bottom: 18px;
+  }
+  .hero-panel {
+    border: 1px solid rgba(0,0,0,.1);
+    border-radius: 22px;
+    background: rgba(255,255,255,.75);
+    padding: 20px;
+    backdrop-filter: blur(18px);
+  }
+  .hero-panel strong {
+    display: block;
+    font-size: 46px;
+    line-height: 1;
+    font-weight: 500;
+  }
+  .hero-panel span {
+    display: block;
+    margin: 8px 0 18px;
+    color: #6e6e73;
+    font-size: 14px;
+  }
+  .products-band,
+  .other-band { background: #fff; }
+  .section-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 28px;
+    align-items: end;
+    margin-bottom: 22px;
+  }
+  .section-head p:last-child {
+    max-width: 440px;
+    margin: 0;
+    color: #6e6e73;
+    font-size: 14px;
+    line-height: 1.55;
+  }
+  .product-grid { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+  @media (max-width: 860px) {
+    .hero-grid,
+    .section-head {
+      display: grid;
+      grid-template-columns: 1fr;
+    }
+    .hero-panel { max-width: 420px; }
+  }
+</style>
