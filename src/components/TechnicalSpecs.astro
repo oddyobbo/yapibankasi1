@@ -14,7 +14,7 @@ const rows = [
 const structuredRows = (product.specs || []).filter((row) => row.label && (row.value_text || row.value_number));
 ---
 <section class="card spec-card">
-  <h2 class="section-title">Teknik Bilgiler</h2>
+  <h2>Teknik Bilgiler</h2>
   {rows.length || structuredRows.length ? (
     <dl>
       {rows.map(([label, value]) => <><dt>{label}</dt><dd>{value}</dd></>)}
@@ -25,7 +25,8 @@ const structuredRows = (product.specs || []).filter((row) => row.label && (row.v
   )}
 </section>
 <style>
-  .spec-card { padding: 22px; }
+  .spec-card { padding: 28px; border-radius: 22px; }
+  h2 { margin: 0 0 18px; color: #1d1d1f; font-size: 20px; line-height: 1.22; font-weight: 600; letter-spacing: 0; }
   dl { display: grid; grid-template-columns: minmax(130px, 220px) 1fr; margin: 0; border-top: 1px solid rgba(0,0,0,.08); }
   dt, dd { margin: 0; padding: 13px 0; border-bottom: 1px solid rgba(0,0,0,.08); font-size: 14px; line-height: 1.4; }
   dt { color: #6e6e73; }

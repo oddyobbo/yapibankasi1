@@ -2,21 +2,180 @@
 import { galleryForProduct } from "../lib/catalog.js";
 const { product } = Astro.props;
 const images = galleryForProduct(product, product.images || []);
+const visibleImages = images.length ? images : [];
+const prevImage = visibleImages[1] || visibleImages[0];
+const activeImage = visibleImages[0];
+const nextImage = visibleImages[2] || visibleImages[1] || visibleImages[0];
 ---
-<section class="gallery" aria-label="Ürün galerisi">
-  {images.length ? (
+<section class="product-detail-gallery" aria-label="Ürün galerisi">
+  {visibleImages.length ? (
     <>
-      <figure class="main"><img src={images[0]} alt={product.name} width="1100" height="820" /></figure>
-      {images.length > 1 && <div class="thumbs">{images.slice(1, 5).map((src) => <img src={src} alt="" loading="lazy" width="180" height="135" />)}</div>}
+      <div class="product-detail-gallery-thumbs" aria-label="Galeri küçük görselleri">
+        {visibleImages.slice(0, 5).map((src, index) => (
+          <a class:list={["product-detail-gallery-thumb", index === 0 && "is-active"]} href={src} target="_blank" rel="noopener noreferrer" aria-label={`${index + 1}. görseli aç`}>
+            <img src={src} alt="" loading={index === 0 ? "eager" : "lazy"} width="180" height="135" />
+          </a>
+        ))}
+      </div>
+      <div class="product-detail-gallery-main">
+        <div class="product-detail-gallery-stage">
+          <figure class="product-detail-gallery-frame product-detail-gallery-frame--side">
+            <img src={prevImage} alt="" loading="lazy" width="900" height="900" />
+          </figure>
+          <figure class="product-detail-gallery-frame product-detail-gallery-frame--active">
+            <img src={activeImage} alt={product.name} loading="eager" width="1100" height="1100" />
+          </figure>
+          <figure class="product-detail-gallery-frame product-detail-gallery-frame--side">
+            <img src={nextImage} alt="" loading="lazy" width="900" height="900" />
+          </figure>
+        </div>
+        {visibleImages.length > 1 && (
+          <>
+            <a class="product-detail-gallery-nav product-detail-gallery-nav--prev" href={prevImage} target="_blank" rel="noopener noreferrer" aria-label="Önceki görsel">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg>
+            </a>
+            <a class="product-detail-gallery-nav product-detail-gallery-nav--next" href={nextImage} target="_blank" rel="noopener noreferrer" aria-label="Sonraki görsel">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18l6-6-6-6" /></svg>
+            </a>
+          </>
+        )}
+      </div>
     </>
   ) : (
     <div class="empty">Bu ürün için görsel henüz eklenmedi.</div>
   )}
 </section>
 <style>
-  .gallery { display: grid; gap: 12px; }
-  .main { margin: 0; aspect-ratio: 4 / 3; border-radius: 16px; overflow: hidden; background: #f5f5f7; }
-  .main img { width: 100%; height: 100%; object-fit: contain; }
-  .thumbs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-  .thumbs img { aspect-ratio: 4 / 3; width: 100%; height: 100%; object-fit: cover; border-radius: 10px; background: #f5f5f7; }
+  .product-detail-gallery {
+    position: relative;
+    display: block;
+    min-height: clamp(440px, 42vw, 610px);
+    background: #f4f4f5;
+  }
+  .product-detail-gallery-thumbs {
+    position: absolute;
+    left: 36px;
+    top: 32px;
+    z-index: 6;
+    display: grid;
+    width: 74px;
+    gap: 12px;
+  }
+  .product-detail-gallery-thumb {
+    aspect-ratio: 1 / 1;
+    display: block;
+    overflow: hidden;
+    border: 1px solid rgba(0,0,0,.08);
+    border-radius: 16px;
+    background: rgba(255,255,255,.78);
+    box-shadow: 0 10px 28px rgba(0,0,0,.08);
+  }
+  .product-detail-gallery-thumb.is-active {
+    border-color: rgba(0,0,0,.28);
+  }
+  .product-detail-gallery-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .product-detail-gallery-main {
+    --gallery-height: clamp(440px, 42vw, 610px);
+    position: relative;
+    width: 100%;
+    height: var(--gallery-height);
+    min-height: var(--gallery-height);
+    overflow: hidden;
+    border-radius: 0 0 28px 28px;
+    background: #f4f4f5;
+  }
+  .product-detail-gallery-stage {
+    height: 100%;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(320px, var(--gallery-height)) minmax(0, 1fr);
+    align-items: stretch;
+  }
+  .product-detail-gallery-frame {
+    height: 100%;
+    min-width: 0;
+    margin: 0;
+    overflow: hidden;
+    background: #f4f4f5;
+  }
+  .product-detail-gallery-frame--active {
+    aspect-ratio: 1 / 1;
+    width: var(--gallery-height);
+    max-width: 100%;
+    justify-self: center;
+  }
+  .product-detail-gallery-frame img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-position: center;
+  }
+  .product-detail-gallery-frame--active img {
+    object-fit: contain;
+  }
+  .product-detail-gallery-frame--side img {
+    object-fit: cover;
+    opacity: .82;
+  }
+  .product-detail-gallery-nav {
+    position: absolute;
+    top: 50%;
+    z-index: 7;
+    display: grid;
+    width: 44px;
+    height: 44px;
+    place-items: center;
+    border: 1px solid rgba(0,0,0,.08);
+    border-radius: 999px;
+    background: rgba(255,255,255,.9);
+    color: #1d1d1f;
+    box-shadow: 0 8px 22px rgba(0,0,0,.08);
+    transform: translateY(-50%);
+  }
+  .product-detail-gallery-nav svg {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .product-detail-gallery-nav--prev { left: 28px; }
+  .product-detail-gallery-nav--next { right: 28px; }
+  @media (max-width: 1099px) {
+    .product-detail-gallery,
+    .product-detail-gallery-main {
+      min-height: 360px;
+    }
+    .product-detail-gallery-main {
+      --gallery-height: min(360px, calc(100vw - 36px));
+      height: var(--gallery-height);
+    }
+    .product-detail-gallery-stage {
+      grid-template-columns: minmax(0, .35fr) minmax(260px, var(--gallery-height)) minmax(0, .35fr);
+    }
+    .product-detail-gallery-thumbs {
+      position: static;
+      width: auto;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      padding: 12px 18px 0;
+    }
+    .product-detail-gallery-main {
+      border-radius: 0 0 22px 22px;
+    }
+  }
+  @media (max-width: 620px) {
+    .product-detail-gallery-stage {
+      grid-template-columns: 0 minmax(240px, var(--gallery-height)) 0;
+    }
+    .product-detail-gallery-frame--side {
+      display: none;
+    }
+    .product-detail-gallery-nav--prev { left: 14px; }
+    .product-detail-gallery-nav--next { right: 14px; }
+  }
 </style>

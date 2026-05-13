@@ -45,6 +45,8 @@
 
 **Astro ürün listeleme UI:** Eski `urunler.html` katalog yapısı Astro `/products` route'una taşındı. Üst arama, kategori pill'leri, aktif filtre chip'leri, sticky filtre sidebar'ı, yoğun ürün grid'i ve sayfalama query tabanlı Supabase sistemiyle çalışıyor.
 
+**Astro ürün detay UI:** Eski ürün detay tasarım yönü Astro `/products/[slug]` template'ine taşındı. Geniş Architonic-style galeri, sağda görselin üstüne binen sticky marka/ürün kartı, ürün açıklaması, teknik bilgiler, teknik dosyalar, varyantlar, ilgili projeler ve teklif CTA alanları dinamik Supabase verisiyle çalışıyor.
+
 ---
 
 ## 3. Görsel Performans Sistemi
