@@ -35,6 +35,7 @@ Branch: `astro-migration`
 - Astro homepage now carries the existing MVP homepage structure and visual language: animated hero, quick discovery block, category marquee, architect/brand value sections, catalog sections and closing CTA.
 - Astro product listing now uses the existing catalog UI pattern: top search, category pills, active filter chips, sticky filter sidebar, dense product grid and query-based pagination/sorting.
 - Astro product detail now uses the existing product detail direction: wide Architonic-style gallery, sticky translucent brand/product card, product description, technical specs, files, variants, related projects and quote CTA.
+- Astro brand listing/detail pages now use the existing approved brand directory direction with stronger brand cards, brand profile hero, product/project sections and Organization JSON-LD.
 
 ## What remains legacy for Phase 2
 
@@ -109,5 +110,5 @@ Tradeoff:
 1. Run and verify the slug backfill SQL in Supabase.
 2. Add more precise facet counts or RPC-based filter options when catalog volume grows.
 3. Backfill missing brand/category/project relations in Supabase.
-4. Continue migrating the existing public page visuals into Astro brand and project templates.
+4. Continue migrating the existing public page visuals into Astro project templates.
 5. Move dashboard/auth flows only after public catalog SEO layer is stable.

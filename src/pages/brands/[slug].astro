@@ -10,6 +10,8 @@ import { brandPath } from "../../lib/slugs.js";
 const brand = await getBrandDetail(Astro.params.slug);
 if (!brand) return Astro.redirect("/brands", 302);
 const roles = Array.isArray(brand.company_roles) ? brand.company_roles : [];
+const location = [brand.city, brand.country].filter(Boolean).join(", ");
+const categoryCoverage = [...new Set((brand.products || []).map((product) => product.category).filter(Boolean))].slice(0, 8);
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "Organization",
@@ -17,7 +19,7 @@ const jsonLd = {
   description: brand.description || undefined,
   url: brand.website || undefined,
   logo: brand.logo_url || undefined,
-  address: [brand.city, brand.country].filter(Boolean).join(", ") || undefined,
+  address: location || undefined,
 };
 ---
 <BaseLayout
@@ -29,48 +31,241 @@ const jsonLd = {
   jsonLd={jsonLd}
 >
   <Header />
-  <main>
-    <section class="page-band brand-hero">
-      <div class="container brand-grid">
+  <main class="brand-detail-page">
+    <section class="brand-profile-hero">
+      <div class="brand-copy">
+        <p class="eyebrow">{roles.length ? roles.join(" · ") : "Marka"}</p>
+        <h1>{brand.name}</h1>
+        <p>{brand.description || "Bu marka için açıklama henüz eklenmedi."}</p>
+        <div class="meta">
+          {location && <span>{location}</span>}
+          {brand.website && <a href={brand.website} target="_blank" rel="noopener noreferrer">Web sitesi</a>}
+          {brand.email && <a href={`mailto:${brand.email}`}>E-posta</a>}
+        </div>
+      </div>
+      <aside class="brand-panel">
+        <div class="logo">
+          {brand.logo_url ? <img src={brand.logo_url} alt={brand.name} width="260" height="150" /> : <span>{brand.name.charAt(0)}</span>}
+        </div>
+        <div class="stats">
+          <div><strong>{brand.products?.length || 0}</strong><span>ürün</span></div>
+          <div><strong>{brand.projects?.length || 0}</strong><span>proje</span></div>
+        </div>
+        {categoryCoverage.length > 0 && <div class="chips">{categoryCoverage.map((item) => <span>{item}</span>)}</div>}
+      </aside>
+    </section>
+
+    <section class="brand-section">
+      <div class="section-head">
         <div>
-          <p class="eyebrow">{roles.length ? roles.join(" · ") : "Marka"}</p>
-          <h1 class="page-title">{brand.name}</h1>
-          <p class="lead">{brand.description || "Bu marka için açıklama henüz eklenmedi."}</p>
-          <div class="meta">
-            {[brand.city, brand.country].filter(Boolean).length ? <span>{[brand.city, brand.country].filter(Boolean).join(", ")}</span> : null}
-            {brand.website ? <a href={brand.website} target="_blank" rel="noopener noreferrer">Web sitesi</a> : null}
-            {brand.email ? <a href={`mailto:${brand.email}`}>E-posta</a> : null}
-          </div>
+          <p class="eyebrow">Katalog</p>
+          <h2>Marka ürünleri</h2>
         </div>
-        <div class="logo card">
-          {brand.logo_url ? <img src={brand.logo_url} alt={brand.name} width="240" height="140" /> : <span>{brand.name.charAt(0)}</span>}
-        </div>
+        <p>{brand.products?.length || 0} yayınlanmış ürün</p>
       </div>
+      {brand.products?.length ? <div class="product-grid">{brand.products.map((product) => <ProductCard product={product} />)}</div> : <p class="empty">Bu markaya ait yayınlanmış ürün henüz yok.</p>}
     </section>
 
-    <section class="page-band">
-      <div class="container">
-        <h2 class="section-title">Marka ürünleri</h2>
-        {brand.products?.length ? <div class="grid cards">{brand.products.map((product) => <ProductCard product={product} />)}</div> : <p class="empty">Bu markaya ait yayınlanmış ürün henüz yok.</p>}
+    <section class="brand-section alt">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Referans</p>
+          <h2>Marka projeleri</h2>
+        </div>
+        <p>{brand.projects?.length || 0} yayınlanmış proje</p>
       </div>
-    </section>
-
-    <section class="page-band">
-      <div class="container">
-        <h2 class="section-title">Marka projeleri</h2>
-        {brand.projects?.length ? <div class="grid cards">{brand.projects.map((project) => <ProjectCard project={project} />)}</div> : <p class="empty">Bu markaya ait yayınlanmış proje henüz yok.</p>}
-      </div>
+      {brand.projects?.length ? <div class="project-grid">{brand.projects.map((project) => <ProjectCard project={project} />)}</div> : <p class="empty">Bu markaya ait yayınlanmış proje henüz yok.</p>}
     </section>
   </main>
   <Footer />
 </BaseLayout>
 <style>
-  .brand-hero { background: #fff; border-bottom: 1px solid rgba(0,0,0,.08); }
-  .brand-grid { display: grid; grid-template-columns: 1fr 280px; gap: 30px; align-items: center; }
-  .meta { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 20px; color: #6e6e73; font-size: 14px; }
-  .meta a { text-decoration: underline; text-underline-offset: 3px; }
-  .logo { min-height: 180px; display: grid; place-items: center; padding: 20px; }
-  .logo span { font-size: 48px; font-weight: 600; }
-  .logo img { max-width: 90%; max-height: 140px; object-fit: contain; }
-  @media (max-width: 760px) { .brand-grid { grid-template-columns: 1fr; } }
+  .brand-detail-page {
+    background: #fff;
+    color: #0b0b0c;
+  }
+  .brand-profile-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) minmax(300px, .75fr);
+    gap: 28px;
+    align-items: stretch;
+    border-bottom: 1px solid rgba(0,0,0,.08);
+    padding: 64px clamp(28px, 5vw, 72px);
+  }
+  .brand-copy {
+    display: grid;
+    align-content: center;
+    border-radius: 28px;
+    background: #f5f5f7;
+    padding: clamp(30px, 5vw, 56px);
+  }
+  .eyebrow {
+    margin: 0;
+    color: #6e6e73;
+    font-size: 12px;
+    line-height: 1.4;
+    font-weight: 600;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+  }
+  h1,
+  h2 {
+    margin: 14px 0 0;
+    color: #0b0b0c;
+    font-weight: 600;
+    letter-spacing: 0;
+    line-height: 1.05;
+  }
+  h1 {
+    max-width: 900px;
+    font-size: clamp(46px, 7vw, 86px);
+  }
+  h2 {
+    font-size: clamp(32px, 4vw, 44px);
+  }
+  .brand-copy > p:last-of-type {
+    max-width: 820px;
+    margin: 24px 0 0;
+    color: #6e6e73;
+    font-size: 17px;
+    line-height: 1.65;
+  }
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 28px;
+  }
+  .meta span,
+  .meta a {
+    display: inline-flex;
+    min-height: 34px;
+    align-items: center;
+    border: 1px solid rgba(0,0,0,.12);
+    border-radius: 999px;
+    background: #fff;
+    padding: 0 13px;
+    color: #1d1d1f;
+    font-size: 13px;
+    font-weight: 400;
+  }
+  .brand-panel {
+    display: grid;
+    align-content: space-between;
+    gap: 24px;
+    min-height: 420px;
+    border-radius: 28px;
+    background:
+      radial-gradient(700px 300px at 82% 0%, rgba(255,255,255,.08), transparent 65%),
+      #0b0b0c;
+    padding: 34px;
+    color: #fff;
+  }
+  .logo {
+    display: grid;
+    min-height: 150px;
+    place-items: center;
+    border: 1px solid rgba(255,255,255,.14);
+    border-radius: 20px;
+    background: rgba(255,255,255,.96);
+  }
+  .logo img {
+    max-width: 82%;
+    max-height: 110px;
+    object-fit: contain;
+  }
+  .logo span {
+    color: #111;
+    font-size: 54px;
+    font-weight: 600;
+  }
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .stats div {
+    border-top: 1px solid rgba(255,255,255,.16);
+    padding-top: 14px;
+  }
+  .stats strong {
+    display: block;
+    font-size: 44px;
+    line-height: 1;
+    font-weight: 600;
+  }
+  .stats span {
+    display: block;
+    margin-top: 8px;
+    color: rgba(255,255,255,.68);
+    font-size: 13px;
+  }
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .chips span {
+    display: inline-flex;
+    min-height: 30px;
+    align-items: center;
+    border: 1px solid rgba(255,255,255,.18);
+    border-radius: 999px;
+    padding: 0 11px;
+    color: rgba(255,255,255,.82);
+    font-size: 12px;
+  }
+  .brand-section {
+    border-bottom: 1px solid rgba(0,0,0,.08);
+    padding: 72px clamp(28px, 5vw, 72px);
+  }
+  .brand-section.alt {
+    background: #fafafa;
+  }
+  .section-head {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 30px;
+  }
+  .section-head > p {
+    margin: 0;
+    color: #6e6e73;
+    font-size: 13px;
+  }
+  .product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 18px;
+  }
+  .project-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 18px;
+  }
+  @media (max-width: 900px) {
+    .brand-profile-hero {
+      grid-template-columns: 1fr;
+    }
+    .brand-panel {
+      min-height: 320px;
+    }
+  }
+  @media (max-width: 620px) {
+    .brand-profile-hero,
+    .brand-section {
+      padding-left: 20px;
+      padding-right: 20px;
+    }
+    .brand-copy,
+    .brand-panel {
+      border-radius: 22px;
+      padding: 24px;
+    }
+    .section-head {
+      align-items: start;
+      flex-direction: column;
+    }
+  }
 </style>

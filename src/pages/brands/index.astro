@@ -6,6 +6,7 @@ import BrandCard from "../../components/BrandCard.astro";
 import { getBrands } from "../../lib/catalog.js";
 
 const brands = await getBrands();
+const roleSet = [...new Set(brands.flatMap((brand) => Array.isArray(brand.company_roles) ? brand.company_roles : []))].slice(0, 8);
 ---
 <BaseLayout
   title="Markalar | Archilink"
@@ -13,16 +14,197 @@ const brands = await getBrands();
   canonical="/brands"
 >
   <Header />
-  <main class="page-band">
-    <div class="container">
-      <p class="eyebrow">Marka dizini</p>
-      <h1 class="page-title">Markalar</h1>
-      <p class="lead">Onaylı marka profilleri, ürünleri ve referans projeleri tek çatı altında.</p>
-      <section class="catalog">
-        {brands.length ? <div class="grid cards">{brands.map((brand) => <BrandCard brand={brand} />)}</div> : <p class="empty">Henüz onaylı marka yok.</p>}
-      </section>
-    </div>
+  <main class="brands-page">
+    <section class="brand-hero">
+      <div class="hero-copy">
+        <p class="eyebrow">Marka dizini</p>
+        <h1>Onaylı Marka Dizini</h1>
+        <p>Archilink'de yer alan markalar, teknik veri kalitesi ve ürün dokümantasyonu açısından editör kontrolünden geçer. Böylece mimarlar güvenilir ve karşılaştırılabilir veriye ulaşır.</p>
+        <div class="hero-actions">
+          <a class="primary" href="/marka-basvuru.html">Marka Başvurusu</a>
+          <a href="/products">Ürünleri keşfet</a>
+        </div>
+      </div>
+      <div class="hero-panel">
+        <strong>{brands.length}</strong>
+        <span>onaylı marka</span>
+        {roleSet.length ? <div>{roleSet.map((role) => <em>{role}</em>)}</div> : <p>Marka tipleri eklendikçe burada görünecek.</p>}
+      </div>
+    </section>
+
+    <section class="brand-catalog">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Keşfet</p>
+          <h2>Markalar</h2>
+        </div>
+        <p>{brands.length ? `${brands.length} marka listeleniyor` : "Henüz onaylı marka yok"}</p>
+      </div>
+      {brands.length ? <div class="brand-grid">{brands.map((brand) => <BrandCard brand={brand} />)}</div> : <p class="empty">Henüz onaylı marka yok.</p>}
+    </section>
   </main>
   <Footer />
 </BaseLayout>
-<style>.catalog { margin-top: 28px; }</style>
+<style>
+  .brands-page {
+    background: #fff;
+    color: #0b0b0c;
+  }
+  .brand-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(300px, .65fr);
+    gap: 28px;
+    align-items: stretch;
+    border-bottom: 1px solid rgba(0,0,0,.08);
+    padding: 64px clamp(28px, 5vw, 72px);
+  }
+  .hero-copy {
+    display: grid;
+    align-content: center;
+    border-radius: 28px;
+    background: #f5f5f7;
+    padding: clamp(30px, 5vw, 56px);
+  }
+  .eyebrow {
+    margin: 0;
+    color: #6e6e73;
+    font-size: 12px;
+    line-height: 1.4;
+    font-weight: 600;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+  }
+  h1,
+  h2 {
+    margin: 14px 0 0;
+    color: #0b0b0c;
+    font-weight: 600;
+    letter-spacing: 0;
+    line-height: 1.05;
+  }
+  h1 {
+    max-width: 820px;
+    font-size: clamp(42px, 6vw, 72px);
+  }
+  h2 {
+    font-size: clamp(32px, 4vw, 44px);
+  }
+  .hero-copy > p:last-of-type {
+    max-width: 780px;
+    margin: 24px 0 0;
+    color: #6e6e73;
+    font-size: 17px;
+    line-height: 1.65;
+  }
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 32px;
+  }
+  .hero-actions a {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(0,0,0,.14);
+    border-radius: 999px;
+    padding: 0 22px;
+    color: #0b0b0c;
+    font-size: 14px;
+    font-weight: 400;
+  }
+  .hero-actions a.primary {
+    border-color: #0b0b0c;
+    background: #0b0b0c;
+    color: #fff;
+  }
+  .hero-panel {
+    display: grid;
+    align-content: end;
+    min-height: 420px;
+    border-radius: 28px;
+    background:
+      radial-gradient(700px 300px at 80% 0%, rgba(255,255,255,.08), transparent 65%),
+      #0b0b0c;
+    padding: 34px;
+    color: #fff;
+  }
+  .hero-panel strong {
+    font-size: clamp(64px, 9vw, 118px);
+    line-height: .9;
+    font-weight: 600;
+    letter-spacing: 0;
+  }
+  .hero-panel > span {
+    margin-top: 12px;
+    color: rgba(255,255,255,.72);
+    font-size: 16px;
+  }
+  .hero-panel div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 24px;
+  }
+  .hero-panel em {
+    display: inline-flex;
+    min-height: 30px;
+    align-items: center;
+    border: 1px solid rgba(255,255,255,.18);
+    border-radius: 999px;
+    padding: 0 11px;
+    color: rgba(255,255,255,.82);
+    font-size: 12px;
+    font-style: normal;
+  }
+  .hero-panel p {
+    color: rgba(255,255,255,.62);
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  .brand-catalog {
+    padding: 72px clamp(28px, 5vw, 72px);
+  }
+  .section-head {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 30px;
+  }
+  .section-head > p {
+    margin: 0;
+    color: #6e6e73;
+    font-size: 13px;
+  }
+  .brand-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 18px;
+  }
+  @media (max-width: 900px) {
+    .brand-hero {
+      grid-template-columns: 1fr;
+    }
+    .hero-panel {
+      min-height: 280px;
+    }
+  }
+  @media (max-width: 620px) {
+    .brand-hero,
+    .brand-catalog {
+      padding-left: 20px;
+      padding-right: 20px;
+    }
+    .hero-copy,
+    .hero-panel {
+      border-radius: 22px;
+      padding: 24px;
+    }
+    .section-head {
+      align-items: start;
+      flex-direction: column;
+    }
+  }
+</style>

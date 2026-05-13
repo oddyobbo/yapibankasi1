@@ -47,6 +47,8 @@
 
 **Astro ürün detay UI:** Eski ürün detay tasarım yönü Astro `/products/[slug]` template'ine taşındı. Geniş Architonic-style galeri, sağda görselin üstüne binen sticky marka/ürün kartı, ürün açıklaması, teknik bilgiler, teknik dosyalar, varyantlar, ilgili projeler ve teklif CTA alanları dinamik Supabase verisiyle çalışıyor.
 
+**Astro marka UI:** Eski onaylı marka dizini mantığı Astro `/brands` ve `/brands/[slug]` route'larına taşındı. Marka liste sayfası başvuru CTA'sı ve güven/dizin diliyle; marka detay sayfası logo, açıklama, rol/konum/iletişim, ürünler, projeler ve Organization JSON-LD ile çalışıyor.
+
 ---
 
 ## 3. Görsel Performans Sistemi
