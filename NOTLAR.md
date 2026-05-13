@@ -49,6 +49,8 @@
 
 **Astro marka UI:** Eski onaylı marka dizini mantığı Astro `/brands` ve `/brands/[slug]` route'larına taşındı. Marka liste sayfası başvuru CTA'sı ve güven/dizin diliyle; marka detay sayfası logo, açıklama, rol/konum/iletişim, ürünler, projeler ve Organization JSON-LD ile çalışıyor.
 
+**Astro proje UI:** Eski referans proje mantığı Astro `/projects` ve `/projects/[slug]` route'larına taşındı. Liste sayfası proje kartlarıyla; detay sayfası büyük hero, proje bilgileri, galeri, kullanılan ürünler ve CreativeWork JSON-LD ile çalışıyor.
+
 ---
 
 ## 3. Görsel Performans Sistemi

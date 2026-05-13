@@ -3,32 +3,37 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import Header from "../../components/Header.astro";
 import Footer from "../../components/Footer.astro";
 import ProductCard from "../../components/ProductCard.astro";
-import { getProjectBySlug } from "../../lib/catalog.js";
-import { publishedProductsQuery, safeData, supabase } from "../../lib/supabase.js";
+import { getProjectDetail } from "../../lib/catalog.js";
 import { projectPath } from "../../lib/slugs.js";
 
-const project = await getProjectBySlug(Astro.params.slug);
+const project = await getProjectDetail(Astro.params.slug);
 if (!project) return Astro.redirect("/projects", 302);
-const [imagesRes, productLinksRes] = await Promise.all([
-  supabase.from("project_images").select("*").eq("project_id", project.id).order("sort_order", { ascending: true }),
-  supabase.from("project_products").select("product_id").eq("project_id", project.id),
-]);
-const images = safeData(imagesRes);
-const linkedIds = safeData(productLinksRes).map((row) => row.product_id).filter(Boolean);
-const products = linkedIds.length ? safeData(await publishedProductsQuery().in("id", linkedIds)) : [];
-const heroImage = images[0]?.url || project.image || "";
+
+const heroImage = project.heroImage || "";
+const location = project.location || [project.city, project.country].filter(Boolean).join(", ");
+const creator = project.architect || project.office_name || project.brand_name || "";
+const gallery = project.images || [];
+const products = project.products || [];
+const materials = Array.isArray(project.materials) ? project.materials.filter(Boolean) : [];
+const metaItems = [
+  { label: "Konum", value: location },
+  { label: "Mimar / Ofis", value: creator },
+  { label: "Yıl", value: project.year },
+  { label: "Kullanılan ürün", value: products.length ? `${products.length} ürün` : "" },
+].filter((item) => item.value);
+
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "CreativeWork",
   name: project.title,
   description: project.description || undefined,
   image: heroImage || undefined,
-  creator: (project.architect || project.office_name || project.brand_name) ? { "@type": "Organization", name: project.architect || project.office_name || project.brand_name } : undefined,
-  contentLocation: (project.location || project.city || project.country) ? { "@type": "Place", name: project.location || [project.city, project.country].filter(Boolean).join(", ") } : undefined,
+  creator: creator ? { "@type": "Organization", name: creator } : undefined,
+  contentLocation: location ? { "@type": "Place", name: location } : undefined,
 };
 ---
 <BaseLayout
-  title={`${project.title} | ${project.architect || project.office_name || project.brand_name || "Proje"} | Archilink`}
+  title={`${project.title} | ${creator || "Proje"} | Archilink`}
   description={project.description || `${project.title} proje detayları ve kullanılan ürünler.`}
   canonical={projectPath(project)}
   image={heroImage}
@@ -36,36 +41,269 @@ const jsonLd = {
   jsonLd={jsonLd}
 >
   <Header />
-  <main>
+  <main class="project-detail">
     <section class="project-hero">
-      {heroImage ? <img src={heroImage} alt={project.title} width="1600" height="850" /> : <div class="empty">Proje görseli henüz eklenmedi.</div>}
-    </section>
-    <section class="page-band">
-      <div class="container project-copy">
-        <p class="eyebrow">{[project.location, project.architect || project.office_name || project.brand_name].filter(Boolean).join(" · ")}</p>
-        <h1 class="page-title">{project.title}</h1>
-        <p class="lead">{project.description || "Bu proje için açıklama henüz eklenmedi."}</p>
+      <div class="hero-media">
+        {heroImage ? <img src={heroImage} alt={project.title} width="1800" height="920" /> : <div class="empty hero-empty">Proje görseli henüz eklenmedi.</div>}
+      </div>
+      <div class="container hero-copy">
+        <a href="/projects" class="back-link">Projeler</a>
+        <div class="hero-title-card">
+          <p class="eyebrow">{[location, creator].filter(Boolean).join(" · ")}</p>
+          <h1>{project.title}</h1>
+          <p>{project.description || "Bu proje için açıklama henüz eklenmedi."}</p>
+        </div>
       </div>
     </section>
-    <section class="page-band">
-      <div class="container">
-        <h2 class="section-title">Galeri</h2>
-        {images.length > 1 ? <div class="gallery-grid">{images.map((image) => <img src={image.url} alt={image.alt || project.title} loading="lazy" width="640" height="420" />)}</div> : <p class="empty">Ek proje görseli henüz yok.</p>}
-      </div>
-    </section>
-    <section class="page-band">
-      <div class="container">
-        <h2 class="section-title">Kullanılan ürünler</h2>
-        {products.length ? <div class="grid cards">{products.map((product) => <ProductCard product={product} />)}</div> : <p class="empty">Bu projeye bağlı ürün henüz eklenmedi.</p>}
+
+    <section class="page-band project-body">
+      <div class="container detail-grid">
+        <aside class="project-facts">
+          <h2>Proje Bilgileri</h2>
+          {metaItems.length ? (
+            <dl>
+              {metaItems.map((item) => (
+                <>
+                  <dt>{item.label}</dt>
+                  <dd>{item.value}</dd>
+                </>
+              ))}
+            </dl>
+          ) : <p class="muted">Proje bilgileri henüz tamamlanmadı.</p>}
+          {materials.length ? (
+            <div class="material-list">
+              <p>Malzemeler</p>
+              <div>{materials.map((material) => <span>{material}</span>)}</div>
+            </div>
+          ) : null}
+        </aside>
+
+        <div class="project-content">
+          <section class="content-block">
+            <p class="eyebrow">Proje açıklaması</p>
+            <h2>Bağlam ve kullanım kararı</h2>
+            <p>{project.description || "Bu proje için açıklama henüz eklenmedi."}</p>
+          </section>
+
+          <section class="content-block">
+            <div class="section-line">
+              <div>
+                <p class="eyebrow">Galeri</p>
+                <h2>Proje görselleri</h2>
+              </div>
+              <span>{gallery.length ? `${gallery.length} görsel` : "Görsel yok"}</span>
+            </div>
+            {gallery.length > 1 ? (
+              <div class="gallery-grid">
+                {gallery.map((image) => <img src={image.url} alt={image.alt || project.title} loading="lazy" width="720" height="520" />)}
+              </div>
+            ) : <p class="empty">Ek proje görseli henüz yok.</p>}
+          </section>
+
+          <section class="content-block">
+            <div class="section-line">
+              <div>
+                <p class="eyebrow">Ürün bağlantıları</p>
+                <h2>Bu projede kullanılan ürünler</h2>
+              </div>
+              <span>{products.length ? `${products.length} ürün` : "Ürün yok"}</span>
+            </div>
+            {products.length ? <div class="grid cards product-grid">{products.map((product) => <ProductCard product={product} />)}</div> : <p class="empty">Bu projeye bağlı ürün henüz eklenmedi.</p>}
+          </section>
+        </div>
       </div>
     </section>
   </main>
   <Footer />
 </BaseLayout>
 <style>
-  .project-hero { background: #fff; }
-  .project-hero img { width: 100%; max-height: 620px; object-fit: cover; }
-  .project-copy { max-width: 860px; }
-  .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
-  .gallery-grid img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 12px; background: #f5f5f7; }
+  .project-detail { background: #fff; }
+  .project-hero {
+    position: relative;
+    min-height: clamp(480px, 64vw, 720px);
+    background: #f5f5f7;
+    overflow: hidden;
+  }
+  .hero-media,
+  .hero-media img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .hero-media img { object-fit: cover; }
+  .hero-media::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, rgba(0,0,0,.42) 0%, rgba(0,0,0,.12) 48%, rgba(0,0,0,.03) 100%);
+  }
+  .hero-empty {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    border: 0;
+    border-radius: 0;
+  }
+  .hero-copy {
+    position: relative;
+    z-index: 1;
+    min-height: clamp(480px, 64vw, 720px);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding-bottom: 36px;
+  }
+  .back-link {
+    align-self: flex-start;
+    margin-bottom: auto;
+    margin-top: 28px;
+    min-height: 36px;
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    background: rgba(255,255,255,.82);
+    padding: 0 14px;
+    color: #111;
+    font-size: 13px;
+    backdrop-filter: blur(18px);
+  }
+  .hero-title-card {
+    width: min(720px, 100%);
+    border: 1px solid rgba(255,255,255,.45);
+    border-radius: 24px;
+    background: rgba(255,255,255,.78);
+    padding: clamp(20px, 3vw, 34px);
+    backdrop-filter: blur(22px);
+  }
+  .hero-title-card h1 {
+    margin: 8px 0 0;
+    font-size: clamp(34px, 5vw, 58px);
+    line-height: 1.02;
+    font-weight: 500;
+    letter-spacing: 0;
+  }
+  .hero-title-card p:last-child {
+    max-width: 600px;
+    margin: 14px 0 0;
+    color: #4a4a4f;
+    font-size: 16px;
+    line-height: 1.6;
+  }
+  .project-body { background: #fff; }
+  .detail-grid {
+    display: grid;
+    grid-template-columns: 330px minmax(0, 1fr);
+    gap: clamp(26px, 4vw, 58px);
+    align-items: start;
+  }
+  .project-facts {
+    position: sticky;
+    top: 92px;
+    border: 1px solid rgba(0,0,0,.1);
+    border-radius: 22px;
+    padding: 22px;
+    background: #fafafa;
+  }
+  .project-facts h2,
+  .content-block h2 {
+    margin: 0;
+    font-size: 22px;
+    line-height: 1.18;
+    font-weight: 500;
+    letter-spacing: 0;
+  }
+  dl {
+    display: grid;
+    gap: 12px;
+    margin: 18px 0 0;
+  }
+  dt {
+    color: #8e8e93;
+    font-size: 12px;
+  }
+  dd {
+    margin: -8px 0 0;
+    color: #111;
+    font-size: 14px;
+    line-height: 1.45;
+  }
+  .muted {
+    color: #6e6e73;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .material-list {
+    margin-top: 20px;
+    padding-top: 18px;
+    border-top: 1px solid rgba(0,0,0,.08);
+  }
+  .material-list p {
+    margin: 0 0 10px;
+    color: #6e6e73;
+    font-size: 13px;
+  }
+  .material-list div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .material-list span {
+    border: 1px solid rgba(0,0,0,.1);
+    border-radius: 999px;
+    padding: 7px 10px;
+    background: #fff;
+    font-size: 12px;
+    color: #4a4a4f;
+  }
+  .project-content {
+    display: grid;
+    gap: 22px;
+  }
+  .content-block {
+    border: 1px solid rgba(0,0,0,.08);
+    border-radius: 24px;
+    background: #fff;
+    padding: clamp(20px, 3vw, 30px);
+  }
+  .content-block > p:last-child {
+    margin: 14px 0 0;
+    color: #4a4a4f;
+    font-size: 15px;
+    line-height: 1.7;
+  }
+  .section-line {
+    display: flex;
+    justify-content: space-between;
+    gap: 22px;
+    align-items: end;
+    margin-bottom: 18px;
+  }
+  .section-line span {
+    color: #8e8e93;
+    font-size: 13px;
+  }
+  .gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 12px;
+  }
+  .gallery-grid img {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    border-radius: 16px;
+    background: #f5f5f7;
+  }
+  .product-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+  @media (max-width: 920px) {
+    .detail-grid { grid-template-columns: 1fr; }
+    .project-facts { position: static; }
+  }
+  @media (max-width: 640px) {
+    .project-hero,
+    .hero-copy { min-height: 560px; }
+    .section-line { display: grid; }
+  }
 </style>

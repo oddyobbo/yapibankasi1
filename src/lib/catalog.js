@@ -271,6 +271,36 @@ export const getProjectBySlug = async (slug) => {
   return (data || []).find((project) => slugify(project.slug || project.title) === cleanSlug) || null;
 };
 
+export const imageForProject = (project, images = []) => (
+  images.find((image) => image.is_primary)?.url ||
+  images[0]?.url ||
+  project?.image ||
+  ""
+);
+
+export const getProjectDetail = async (slug) => {
+  const project = await getProjectBySlug(slug);
+  if (!project) return null;
+
+  const [imagesRes, productLinksRes] = await Promise.all([
+    supabase.from("project_images").select("*").eq("project_id", project.id).order("sort_order", { ascending: true }),
+    supabase.from("project_products").select("product_id,note").eq("project_id", project.id),
+  ]);
+
+  const images = safeData(imagesRes);
+  const productLinks = safeData(productLinksRes);
+  const linkedIds = productLinks.map((row) => row.product_id).filter(Boolean);
+  const products = linkedIds.length ? safeData(await publishedProductsQuery().in("id", linkedIds)) : [];
+
+  return {
+    ...project,
+    images,
+    products,
+    productLinks,
+    heroImage: imageForProject(project, images),
+  };
+};
+
 export const getCategories = async () => safeData(await supabase
   .from("product_categories")
   .select("*")
