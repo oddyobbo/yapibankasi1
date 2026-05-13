@@ -56,6 +56,22 @@ const applyProductFilters = (query, filters = {}) => {
   return next;
 };
 
+const applyProductSort = (query, sort = "created_desc") => {
+  switch (sort) {
+    case "name_asc":
+      return query.order("name", { ascending: true });
+    case "name_desc":
+      return query.order("name", { ascending: false });
+    case "brand_asc":
+      return query.order("brand_name", { ascending: true }).order("name", { ascending: true });
+    case "created_asc":
+      return query.order("created_at", { ascending: true });
+    case "created_desc":
+    default:
+      return query.order("created_at", { ascending: false });
+  }
+};
+
 export const getProducts = async ({ limit = PRODUCT_PAGE_SIZE, categorySlug, brandSlug } = {}) => {
   let query = publishedProductsQuery().order("created_at", { ascending: false }).limit(limit);
   if (categorySlug) query = query.ilike("category", `%${categorySlug.replace(/-/g, "%")}%`);
@@ -68,7 +84,7 @@ export const getProductListPage = async ({ filters = {}, page = 1, pageSize = PR
   const from = (currentPage - 1) * pageSize;
   const to = from + pageSize - 1;
   const query = applyProductFilters(
-    publishedProductsQuery({ count: "exact" }).order("created_at", { ascending: false }),
+    applyProductSort(publishedProductsQuery({ count: "exact" }), filters.sort),
     filters,
   ).range(from, to);
   const result = await query;

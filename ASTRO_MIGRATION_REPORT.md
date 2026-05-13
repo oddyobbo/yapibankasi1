@@ -33,6 +33,7 @@ Branch: `astro-migration`
 - `/robots.txt` and `/sitemap.xml` endpoints now expose the public Astro catalog URLs for search engines and exclude legacy dashboard/panel routes from indexing.
 - Astro header, footer, base typography and product cards now follow the existing Archilink visual identity more closely while keeping the new route/data architecture.
 - Astro homepage now carries the existing MVP homepage structure and visual language: animated hero, quick discovery block, category marquee, architect/brand value sections, catalog sections and closing CTA.
+- Astro product listing now uses the existing catalog UI pattern: top search, category pills, active filter chips, sticky filter sidebar, dense product grid and query-based pagination/sorting.
 
 ## What remains legacy for Phase 2
 
@@ -107,5 +108,5 @@ Tradeoff:
 1. Run and verify the slug backfill SQL in Supabase.
 2. Add more precise facet counts or RPC-based filter options when catalog volume grows.
 3. Backfill missing brand/category/project relations in Supabase.
-4. Continue migrating the existing public page visuals into Astro product listing, product detail, brand and project templates.
+4. Continue migrating the existing public page visuals into Astro product detail, brand and project templates.
 5. Move dashboard/auth flows only after public catalog SEO layer is stable.

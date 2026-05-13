@@ -43,6 +43,8 @@
 
 **Astro anasayfa UI:** Eski `mvp-taslak-v1.html` anasayfa yapısı Astro `/` route'una taşındı. Hero animasyonu, hızlı keşif bloğu, kategori şeridi, mimar/marka değer bölümleri, katalog alanları ve kapanış CTA korunarak Astro/Supabase altyapısına bağlandı.
 
+**Astro ürün listeleme UI:** Eski `urunler.html` katalog yapısı Astro `/products` route'una taşındı. Üst arama, kategori pill'leri, aktif filtre chip'leri, sticky filtre sidebar'ı, yoğun ürün grid'i ve sayfalama query tabanlı Supabase sistemiyle çalışıyor.
+
 ---
 
 ## 3. Görsel Performans Sistemi
