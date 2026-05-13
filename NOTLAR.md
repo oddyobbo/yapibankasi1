@@ -35,6 +35,8 @@
 
 **Astro ürün detay:** `/products/[slug]` ürün detay datası marka, kategori/subkategori, teknik bilgiler, dosyalar, varyantlar, ilgili ürünler ve ilgili projelerle zenginleştirildi.
 
+**Astro slug altyapısı:** `sql/astro_slug_backfill.sql` eklendi. Supabase'de çalıştırılınca ürün, marka, proje ve kategori slug alanlarını doldurur; yeni kayıtlar için otomatik slug trigger'ları kurar.
+
 ---
 
 ## 3. Görsel Performans Sistemi

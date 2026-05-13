@@ -29,6 +29,7 @@ Branch: `astro-migration`
 - `/products` pagination uses a default page size of 24.
 - Product cards still fetch only lightweight public listing fields.
 - `/products/[slug]` now enriches product detail data with brand, category/subcategory, files, specs, variants, related products and related projects.
+- `sql/astro_slug_backfill.sql` prepares clean slug backfill and future automatic slug generation for products, brands, projects and categories.
 
 ## What remains legacy for Phase 2
 
@@ -87,6 +88,7 @@ Tradeoff:
 
 ## Manual review needed
 
+- Run `sql/astro_slug_backfill.sql` in Supabase SQL Editor.
 - Confirm Netlify environment variables:
   - `PUBLIC_SUPABASE_URL`
   - `PUBLIC_SUPABASE_ANON_KEY`
@@ -98,7 +100,7 @@ Tradeoff:
 
 ## Next recommended phase
 
-1. Backfill slugs for products, brands, projects and categories.
+1. Run and verify the slug backfill SQL in Supabase.
 2. Add more precise facet counts or RPC-based filter options when catalog volume grows.
 3. Move existing visual UI language into Astro components.
 4. Backfill missing brand/category/project relations in Supabase.
