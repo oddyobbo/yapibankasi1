@@ -39,6 +39,8 @@
 
 **Astro SEO discovery:** `/robots.txt` ve `/sitemap.xml` endpointleri eklendi. Sitemap public katalog URL'lerini Supabase'den üretir; robots dashboard/panel sayfalarını index dışı bırakır.
 
+**Astro görsel kimlik:** Header, footer, temel tipografi ve ürün kartları mevcut Archilink MVP çizgisine yaklaştırıldı. Bu adım mimariyi değiştiriyor ama dashboard/auth akışlarına dokunmuyor.
+
 ---
 
 ## 3. Görsel Performans Sistemi

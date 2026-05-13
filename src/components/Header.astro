@@ -1,13 +1,24 @@
 <header class="site-header">
   <div class="container site-header-inner">
-    <a class="brand" href="/" aria-label="Archilink ana sayfa">ARCHILINK</a>
+    <a class="brand" href="/" aria-label="Archilink ana sayfa">
+      <span>Arch</span><span class="brand-mark">il</span><span>ink</span>
+    </a>
+    <form class="site-search" method="get" action="/products" role="search">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="m21 21-4.35-4.35M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z" />
+      </svg>
+      <input name="q" type="search" placeholder="Ürün ara..." />
+    </form>
     <nav aria-label="Ana navigasyon">
       <a href="/products">Ürünler</a>
       <a href="/brands">Markalar</a>
       <a href="/projects">Projeler</a>
       <a href="/categories">Kategoriler</a>
     </nav>
-    <a class="panel-link" href="/marka-giris.html">Marka girişi</a>
+    <div class="header-actions">
+      <a class="login-link" href="/mimar-giris.html">Giriş Yap</a>
+      <a class="panel-link" href="/marka-basvuru.html">Marka Başvur</a>
+    </div>
   </div>
 </header>
 <style>
@@ -16,35 +27,117 @@
     top: 0;
     z-index: 20;
     border-bottom: 1px solid rgba(0,0,0,.08);
-    background: rgba(255,255,255,.88);
-    backdrop-filter: blur(18px);
+    background: rgba(255,255,255,.86);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
   }
   .site-header-inner {
-    min-height: 68px;
+    min-height: 72px;
     display: flex;
     align-items: center;
-    gap: 28px;
+    gap: 22px;
   }
   .brand {
-    font-size: 14px;
-    letter-spacing: .08em;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    min-width: max-content;
+    font-size: 24px;
+    line-height: 1;
+    letter-spacing: 0;
     font-weight: 600;
+  }
+  .brand-mark {
+    position: relative;
+  }
+  .brand-mark::after {
+    content: "";
+    position: absolute;
+    left: 1px;
+    right: 1px;
+    bottom: -5px;
+    height: 2px;
+    border-radius: 999px;
+    background: #111;
+  }
+  .site-search {
+    flex: 1 1 360px;
+    min-width: 180px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid rgba(0,0,0,.1);
+    border-radius: 999px;
+    background: rgba(245,245,247,.86);
+    padding: 0 14px;
+  }
+  .site-search svg {
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: #6e6e73;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    flex: 0 0 auto;
+  }
+  .site-search input {
+    width: 100%;
+    min-width: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: #111;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 400;
+  }
+  .site-search input::placeholder {
+    color: #8e8e93;
   }
   nav {
     display: flex;
-    gap: 20px;
+    gap: 18px;
     color: #424245;
     font-size: 14px;
+    white-space: nowrap;
   }
-  nav a:hover, .panel-link:hover { color: #111; }
-  .panel-link {
+  nav a:hover, .login-link:hover { color: #111; }
+  .header-actions {
     margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    white-space: nowrap;
+  }
+  .login-link {
     font-size: 13px;
     color: #424245;
   }
+  .panel-link {
+    display: inline-flex;
+    min-height: 38px;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #111;
+    border-radius: 999px;
+    padding: 0 15px;
+    background: #111;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 400;
+  }
+  .panel-link:hover { background: #2b2b2f; border-color: #2b2b2f; }
   @media (max-width: 720px) {
-    .site-header-inner { gap: 14px; overflow-x: auto; }
+    .site-header-inner { min-height: auto; padding-top: 14px; padding-bottom: 14px; gap: 14px; flex-wrap: wrap; }
+    .brand { font-size: 22px; }
+    .site-search { order: 3; flex-basis: 100%; }
     nav { gap: 14px; }
-    .panel-link { margin-left: 0; white-space: nowrap; }
+    .header-actions { margin-left: auto; }
+  }
+  @media (max-width: 500px) {
+    nav { width: 100%; overflow-x: auto; padding-bottom: 2px; }
+    .login-link { display: none; }
   }
 </style>

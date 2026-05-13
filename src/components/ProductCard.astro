@@ -3,24 +3,143 @@ import { imageForProduct } from "../lib/catalog.js";
 import { productPath } from "../lib/slugs.js";
 const { product } = Astro.props;
 const image = imageForProduct(product);
+const chips = [
+  product.category,
+  product.material,
+  product.usage_area,
+].filter(Boolean).slice(0, 2);
+const fileBadges = [
+  product.has_pdf && "PDF",
+  product.has_cad && "CAD",
+  product.has_bim && "BIM",
+].filter(Boolean);
 ---
 <a class="product-card card" href={productPath(product)}>
   <div class="media">
     {image ? <img src={image} alt={product.name} loading="lazy" width="640" height="480" /> : <span>Görsel yok</span>}
+    {fileBadges.length > 0 && (
+      <div class="badges" aria-label="Dosya türleri">
+        {fileBadges.map((badge) => <span>{badge}</span>)}
+      </div>
+    )}
   </div>
   <div class="copy">
-    <p class="meta">{product.brand_name || "Marka belirtilmedi"}</p>
     <h2>{product.name}</h2>
-    <p>{product.summary || product.description || product.category || "Açıklama henüz eklenmedi."}</p>
+    <p class="meta">{product.brand_name || "Marka belirtilmedi"}</p>
+    {chips.length > 0 && <div class="chips">{chips.map((chip) => <span>{chip}</span>)}</div>}
+    <p class="summary">{product.summary || product.description || "Açıklama henüz eklenmedi."}</p>
+    <span class="detail">Ürün Detayı</span>
   </div>
 </a>
 <style>
-  .product-card { display: block; transition: border-color .2s ease, transform .2s ease; }
-  .product-card:hover { border-color: rgba(0,0,0,.24); transform: translateY(-2px); }
-  .media { aspect-ratio: 4 / 3; display: grid; place-items: center; background: #f5f5f7; color: #8e8e93; font-size: 13px; }
-  img { width: 100%; height: 100%; object-fit: cover; }
-  .copy { padding: 16px; }
-  .meta { margin: 0 0 8px; color: #6e6e73; font-size: 12px; }
-  h2 { margin: 0; font-size: 17px; line-height: 1.25; font-weight: 600; }
-  .copy > p:last-child { margin: 10px 0 0; color: #6e6e73; font-size: 13px; line-height: 1.45; }
+  .product-card {
+    display: flex;
+    min-height: 100%;
+    flex-direction: column;
+    border-radius: 20px;
+    background: #fff;
+    transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+  }
+  .product-card:hover {
+    border-color: rgba(0,0,0,.22);
+    box-shadow: 0 16px 42px rgba(0,0,0,.06);
+    transform: translateY(-2px);
+  }
+  .media {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    background: #f5f5f7;
+    color: #8e8e93;
+    font-size: 13px;
+  }
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform .35s ease;
+  }
+  .product-card:hover img { transform: scale(1.035); }
+  .badges {
+    position: absolute;
+    left: 12px;
+    top: 12px;
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .badges span {
+    min-height: 24px;
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    background: rgba(255,255,255,.86);
+    border: 1px solid rgba(0,0,0,.08);
+    padding: 0 8px;
+    color: #111;
+    font-size: 11px;
+    font-weight: 400;
+    backdrop-filter: blur(10px);
+  }
+  .copy {
+    display: flex;
+    min-height: 190px;
+    flex: 1;
+    flex-direction: column;
+    padding: 15px;
+  }
+  h2 {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.28;
+    letter-spacing: 0;
+    font-weight: 600;
+  }
+  .meta {
+    margin: 7px 0 0;
+    color: #6e6e73;
+    font-size: 12px;
+    line-height: 1.35;
+  }
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 12px;
+  }
+  .chips span {
+    display: inline-flex;
+    min-height: 24px;
+    align-items: center;
+    border-radius: 999px;
+    background: #f5f5f7;
+    padding: 0 9px;
+    color: #424245;
+    font-size: 11px;
+    font-weight: 400;
+  }
+  .summary {
+    margin: 12px 0 0;
+    color: #6e6e73;
+    font-size: 13px;
+    line-height: 1.45;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .detail {
+    min-height: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: auto;
+    border-radius: 999px;
+    background: #111;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 400;
+  }
 </style>

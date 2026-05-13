@@ -1,32 +1,118 @@
 <footer class="site-footer">
   <div class="container footer-inner">
-    <p>Archilink</p>
-    <nav aria-label="Alt navigasyon">
-      <a href="/products">Ürünler</a>
-      <a href="/brands">Markalar</a>
-      <a href="/projects">Projeler</a>
-      <a href="/iletisim-v2.html">İletişim</a>
+    <div class="footer-brand">
+      <a class="brand" href="/" aria-label="Archilink ana sayfa">
+        <span>Arch</span><span class="brand-mark">il</span><span>ink</span>
+      </a>
+      <p>Mimarların doğru ürünü bulduğu, markaların gerçek talebe ulaştığı Türkiye odaklı mimari malzeme platformu.</p>
+      <div class="footer-actions">
+        <a href="/marka-basvuru.html">Marka Başvur</a>
+        <a href="/products">Ürünleri Keşfet</a>
+      </div>
+    </div>
+    <nav aria-label="Alt navigasyon" class="footer-nav">
+      <div>
+        <strong>Keşfet</strong>
+        <a href="/products">Ürünler</a>
+        <a href="/brands">Markalar</a>
+        <a href="/projects">Projeler</a>
+        <a href="/categories">Kategoriler</a>
+      </div>
+      <div>
+        <strong>Hesap</strong>
+        <a href="/mimar-giris.html">Mimar girişi</a>
+        <a href="/marka-giris.html">Marka girişi</a>
+        <a href="/marka-basvuru.html">Marka başvurusu</a>
+      </div>
+      <div>
+        <strong>Archilink</strong>
+        <a href="/iletisim-v2.html">İletişim</a>
+        <a href="/hakkimizda.html">Hakkımızda</a>
+        <a href="/gizlilik-politikasi.html">Gizlilik</a>
+      </div>
     </nav>
   </div>
 </footer>
 <style>
   .site-footer {
-    margin-top: 56px;
+    margin-top: 64px;
     border-top: 1px solid rgba(0,0,0,.08);
     background: #fff;
   }
   .footer-inner {
-    min-height: 90px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 20px;
+    padding: 42px 0;
+    display: grid;
+    grid-template-columns: minmax(260px, 1fr) minmax(360px, 1.4fr);
+    gap: 44px;
     color: #6e6e73;
     font-size: 13px;
   }
-  nav { display: flex; gap: 18px; }
+  .brand {
+    position: relative;
+    display: inline-flex;
+    color: #111;
+    font-size: 25px;
+    line-height: 1;
+    letter-spacing: 0;
+    font-weight: 600;
+  }
+  .brand-mark { position: relative; }
+  .brand-mark::after {
+    content: "";
+    position: absolute;
+    left: 1px;
+    right: 1px;
+    bottom: -5px;
+    height: 2px;
+    border-radius: 999px;
+    background: #111;
+  }
+  .footer-brand p {
+    max-width: 430px;
+    margin: 22px 0 0;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  .footer-actions {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .footer-actions a {
+    display: inline-flex;
+    min-height: 38px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    border: 1px solid rgba(0,0,0,.14);
+    padding: 0 15px;
+    color: #111;
+    font-size: 13px;
+  }
+  .footer-actions a:first-child {
+    background: #111;
+    border-color: #111;
+    color: #fff;
+  }
+  .footer-nav {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
+  }
+  .footer-nav div {
+    display: grid;
+    align-content: start;
+    gap: 10px;
+  }
+  strong {
+    color: #111;
+    font-size: 13px;
+    font-weight: 600;
+  }
   a:hover { color: #111; }
   @media (max-width: 720px) {
-    .footer-inner { align-items: flex-start; flex-direction: column; justify-content: center; }
+    .footer-inner { grid-template-columns: 1fr; gap: 28px; }
+    .footer-nav { grid-template-columns: 1fr; }
   }
 </style>
