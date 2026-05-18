@@ -53,6 +53,10 @@
 
 **Astro kategori UI:** Kategori keşif mantığı Astro `/categories` ve `/categories/[slug]` route'larına taşındı. Kategori listesi kartlarla; kategori detay sayfası kategori hero, ürün grid'i ve diğer kategori önerileriyle çalışıyor.
 
+**Astro public route kontrolü:** Lokal Astro kontrolünde `/`, `/products`, `/brands`, `/projects`, `/categories` ve `/sitemap.xml` 200 dönüyor. Ürün detay sayfasında title, description, canonical, Open Graph, Twitter Card ve Product JSON-LD ilk HTML'de geliyor. Sitemap şu an base route'lar + test ürününü içeriyor; onaylı marka/kategori/proje verileri backfill edilince genişleyecek.
+
+**Catalog public backfill SQL:** `sql/catalog_public_backfill.sql` eklendi. Mevcut ürünlerden marka sahibi profili olanları `brands` tablosuna approved olarak taşır, legacy `products.category` metninden kategori/subkategori oluşturur ve ürünleri bu kayıtlara bağlar. Sahte profile/auth user üretmez.
+
 ---
 
 ## 3. Görsel Performans Sistemi

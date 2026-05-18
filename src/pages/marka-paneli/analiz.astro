@@ -1,0 +1,17 @@
+---
+import LegacyPanelShell from "../../components/LegacyPanelShell.astro";
+import { getBrandPanelFilename, getBrandPanelPageId, getLegacyPanelParts } from "../../lib/legacyPanelEmbed";
+
+const filename = getBrandPanelFilename("analiz");
+if (!filename) return Astro.redirect("/giris", 302);
+const parts = getLegacyPanelParts(filename);
+---
+<LegacyPanelShell
+  title="Analizler | Marka Paneli | Archilink"
+  canonical="/marka-paneli/analiz"
+  headFragment={parts.headFragment}
+  bodyHtml={parts.bodyHtml}
+  bodyClass={parts.bodyClass}
+  bodyDataPage={parts.bodyDataPage}
+  markaPanelPage={getBrandPanelPageId("analiz")}
+/>

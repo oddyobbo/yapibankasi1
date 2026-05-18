@@ -1,0 +1,15 @@
+---
+import LegacyPanelShell from "../components/LegacyPanelShell.astro";
+import { getLegacyPanelParts } from "../lib/legacyPanelEmbed";
+
+const parts = getLegacyPanelParts("mimar-paneli.html");
+---
+<LegacyPanelShell
+  title="Mimar Paneli | Archilink"
+  description="Favoriler, koleksiyonlar ve tasarım panolarınız."
+  canonical="/mimar-paneli"
+  headFragment={parts.headFragment}
+  bodyHtml={parts.bodyHtml}
+  bodyClass={parts.bodyClass}
+  bodyDataPage={parts.bodyDataPage}
+/>

@@ -857,8 +857,10 @@
       const hadLocalShell = tryHydratePanelFromLocalStorage();
       if (hadLocalShell) {
         TAB_IDS = tabIdsForSession(cachedArchitectSession);
+        const bootEarly = window.__ARCHITECT_PANEL_INITIAL_TAB__;
         const urlEarly = new URLSearchParams(location.search).get("tab");
-        if (urlEarly && TAB_IDS.includes(urlEarly)) activeTab = urlEarly;
+        if (bootEarly && TAB_IDS.includes(bootEarly)) activeTab = bootEarly;
+        else if (urlEarly && TAB_IDS.includes(urlEarly)) activeTab = urlEarly;
         const rl0 = cachedArchitectSession.architectProfileType === "office" ? "Mimarlık ofisi" : "Bireysel mimar";
         document.getElementById("welcome").textContent = `${cachedArchitectSession.name || "Mimar"} · ${rl0}`;
         renderTabs();
@@ -868,7 +870,7 @@
       await AG.ready;
       const session = await AG.getSessionArchitect();
       if (!session) {
-        location.href = "/mimar-giris.html";
+        location.href = "/giris";
         return;
       }
       cachedArchitectSession = session;
@@ -893,8 +895,10 @@
       }
 
       TAB_IDS = tabIdsForSession(session);
+      const bootTab = window.__ARCHITECT_PANEL_INITIAL_TAB__;
       const urlTab = new URLSearchParams(location.search).get("tab");
-      if (urlTab && TAB_IDS.includes(urlTab)) activeTab = urlTab;
+      if (bootTab && TAB_IDS.includes(bootTab)) activeTab = bootTab;
+      else if (urlTab && TAB_IDS.includes(urlTab)) activeTab = urlTab;
       const roleLabel = session.architectProfileType === "office" ? "Mimarlık ofisi" : "Bireysel mimar";
       document.getElementById("welcome").textContent = `${session.name || "Mimar"} · ${roleLabel}`;
       renderTabs();
@@ -902,7 +906,7 @@
 
       document.getElementById("logout-btn").addEventListener("click", async () => {
         await AG.logoutArchitect();
-        location.href = "/mimar-giris.html";
+        location.href = "/giris";
       });
 
       const tabContentEl = document.getElementById("tab-content");

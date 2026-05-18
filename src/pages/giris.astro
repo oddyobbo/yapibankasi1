@@ -1,0 +1,245 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+---
+<BaseLayout
+  title="Hesap Girişi | Archilink"
+  description="Archilink hesabınıza giriş yapın."
+  canonical="/giris"
+>
+  <Header />
+  <main class="login-page" data-page="login">
+    <div class="login-page__inner page-shell">
+      <div class="login-page__head">
+        <h1 class="login-page__title">Hesap Girişi</h1>
+        <p class="login-page__lead ag-pill-body">E-posta ve şifrenle panele devam et.</p>
+      </div>
+
+      <form id="login-form" class="login-form" autocomplete="on">
+        <label class="login-form__field">
+          <span class="login-form__label">E-posta</span>
+          <input name="email" type="email" required autocomplete="username" class="login-form__input" />
+        </label>
+        <label class="login-form__field">
+          <span class="login-form__label">Şifre</span>
+          <input name="password" type="password" required autocomplete="current-password" class="login-form__input" />
+        </label>
+        <p id="login-msg" class="login-form__error hidden" role="alert"></p>
+        <button type="submit" class="login-form__submit">Giriş Yap</button>
+      </form>
+
+      <div class="login-page__links">
+        <p>
+          <a href="/kayit" class="login-page__link login-page__link--strong">Ücretsiz Kaydol</a>
+        </p>
+        <p>
+          <a href="/marka-basvuru.html" class="login-page__link">Marka hesabı için başvuru yapın</a>
+        </p>
+      </div>
+    </div>
+  </main>
+  <Footer />
+</BaseLayout>
+
+<script is:inline src="/core.js"></script>
+<script is:inline>
+  (function () {
+    const form = document.getElementById("login-form");
+    const msg = document.getElementById("login-msg");
+    if (!form) return;
+
+    function showMsg(text) {
+      if (!msg) return;
+      if (!text) {
+        msg.textContent = "";
+        msg.classList.add("hidden");
+        return;
+      }
+      msg.textContent = text;
+      msg.classList.remove("hidden");
+    }
+
+    form.addEventListener("submit", async function (e) {
+      e.preventDefault();
+      showMsg("");
+      const submitBtn = form.querySelector('button[type="submit"]');
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Giriş yapılıyor…";
+      }
+      try {
+        if (typeof window.AG === "undefined") {
+          showMsg("Oturum altyapısı yüklenemedi. Sayfayı yenileyin.");
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Giriş Yap";
+          }
+          return;
+        }
+        await window.AG.ready;
+        const fd = new FormData(form);
+        const res = await window.AG.loginUnified({
+          email: String(fd.get("email") || "").trim(),
+          password: String(fd.get("password") || ""),
+        });
+        if (!res.ok) {
+          showMsg(res.message || "Giriş başarısız.");
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Giriş Yap";
+          }
+          return;
+        }
+        window.location.href = res.redirect;
+      } catch (_) {
+        showMsg("Bağlantı hatası. Lütfen tekrar deneyin.");
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = "Giriş Yap";
+        }
+      }
+    });
+  })();
+</script>
+
+<style>
+  .login-page {
+    background: var(--ag-canvas);
+    padding: 3.5rem 0 4rem;
+  }
+
+  .login-page__inner.page-shell {
+    max-width: 440px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: max(var(--page-gutter), env(safe-area-inset-left));
+    padding-right: max(var(--page-gutter), env(safe-area-inset-right));
+    box-sizing: border-box;
+  }
+
+  @media (max-width: 1023px) {
+    .login-page__inner.page-shell {
+      padding-left: max(var(--page-gutter-mobile), env(safe-area-inset-left));
+      padding-right: max(var(--page-gutter-mobile), env(safe-area-inset-right));
+    }
+  }
+
+  .login-page__head {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+
+  .login-page__title {
+    margin: 0;
+    font-size: clamp(1.75rem, 4vw, 2.25rem);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--ag-ink);
+  }
+
+  .login-page__lead {
+    margin: 0.65rem 0 0;
+    color: var(--ag-muted);
+  }
+
+  .login-form {
+    display: grid;
+    gap: 1rem;
+    padding: 1.75rem;
+    border-radius: 1.25rem;
+    border: 1px solid var(--ag-border-08);
+    background: var(--ag-surface);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+  }
+
+  .login-form__field {
+    display: block;
+  }
+
+  .login-form__label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ag-ink);
+  }
+
+  .login-form__input {
+    margin-top: 0.4rem;
+    width: 100%;
+    height: 2.75rem;
+    padding: 0 0.75rem;
+    border-radius: 0.75rem;
+    border: 1px solid var(--ag-border-10);
+    font: inherit;
+    font-size: 14px;
+    box-sizing: border-box;
+    outline: none;
+  }
+
+  .login-form__input:focus {
+    border-color: rgba(0, 0, 0, 0.25);
+  }
+
+  .login-form__error {
+    margin: 0;
+    font-size: 13px;
+    color: #b42318;
+  }
+
+  .login-form__error.hidden {
+    display: none;
+  }
+
+  .login-form__submit {
+    height: 2.75rem;
+    border: 0;
+    border-radius: 0.75rem;
+    background: #1d1d1f;
+    color: #fff;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+
+  .login-form__submit:hover:not(:disabled) {
+    background: #000;
+  }
+
+  .login-form__submit:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .login-page__links {
+    margin-top: 1.5rem;
+    text-align: center;
+    font-size: 14px;
+    color: var(--ag-muted);
+  }
+
+  .login-page__links p {
+    margin: 0.5rem 0 0;
+  }
+
+  .login-page__links p:first-child {
+    margin-top: 0;
+  }
+
+  .login-page__link {
+    color: var(--ag-muted);
+    text-decoration: none;
+  }
+
+  .login-page__link:hover {
+    color: var(--ag-ink);
+    text-decoration: underline;
+  }
+
+  .login-page__link--strong {
+    color: var(--ag-ink);
+    font-weight: 500;
+  }
+</style>

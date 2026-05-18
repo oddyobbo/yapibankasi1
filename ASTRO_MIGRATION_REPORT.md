@@ -106,11 +106,13 @@ Tradeoff:
 - Confirm all products have clean `slug` values.
 - Confirm project records have clean `slug` values.
 - Confirm category records exist in `product_categories`.
+- Route smoke check on local Astro showed public listing routes render 200 and product detail SEO is present in initial HTML. Current sitemap only includes base routes plus the existing test product until approved brands/categories/projects are backfilled.
+- Run `sql/catalog_public_backfill.sql` after slug backfill to create approved brand records from owned products and structured category/subcategory records from legacy product category text.
 
 ## Next recommended phase
 
 1. Run and verify the slug backfill SQL in Supabase.
-2. Add more precise facet counts or RPC-based filter options when catalog volume grows.
-3. Backfill missing brand/category/project relations in Supabase.
+2. Run and verify `sql/catalog_public_backfill.sql` in Supabase.
+3. Add real project records and link them through `project_products`.
 4. Review the Astro public UI against the legacy MVP screens and tighten only mismatches.
 5. Move dashboard/auth flows only after public catalog SEO layer is stable.

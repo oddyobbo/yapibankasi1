@@ -1,5 +1,6 @@
 import { getSB, ready } from "./supabaseClient.js";
 import { ensureVisitorId, normalizeStringArray } from "./uiHelpers.js";
+import { mergeTaxonomyTreeWithDatabase } from "./taxonomy-merge.js?v=category-admin-9";
 
 const slugify = (value) => String(value || "")
   .trim()
@@ -14,6 +15,32 @@ const slugify = (value) => String(value || "")
   .replace(/ç/g, "c")
   .replace(/[^a-z0-9]+/g, "-")
   .replace(/^-+|-+$/g, "");
+
+/** Admin kategori formu: & → ve, Türkçe karakter dönüşümü. */
+const slugifyAdminCategory = (value) =>
+  String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/&/g, " ve ")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/ı/g, "i")
+    .replace(/ğ/g, "g")
+    .replace(/ü/g, "u")
+    .replace(/ş/g, "s")
+    .replace(/ö/g, "o")
+    .replace(/ç/g, "c")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+const simplifyCategoryDbError = (error) => {
+  const code = String(error?.code || "");
+  const msg = String(error?.message || "");
+  if (code === "23505" || /duplicate key|unique constraint/i.test(msg)) {
+    return new Error("Bu slug zaten kullanılıyor. Farklı bir slug seçin.");
+  }
+  return new Error(msg || "Kayıt başarısız.");
+};
 
 const firstValue = (...values) => values.find((value) => value !== undefined && value !== null && value !== "");
 
@@ -175,7 +202,7 @@ export const productToDB = (product) => {
     brand_record_id: product.brandRecordId || null,
     brand_name: product.brandName || "",
     name: product.name || "",
-    slug: product.slug || slugify(product.name),
+    slug: slugify(product.name || ""),
     sku: product.sku || "",
     category: product.category || "",
     category_id: product.categoryId || null,
@@ -513,23 +540,163 @@ export const createProductService = () => {
     });
   };
 
+  const productSlugTaken = async (sb, candidate) => {
+    const { data, error } = await sb.from("products").select("id").eq("slug", candidate).limit(1).maybeSingle();
+    if (error && error.code !== "PGRST116") throw error;
+    return Boolean(data?.id);
+  };
+
+  const allocateUniqueProductSlug = async (sb, productName) => {
+    const base = slugify(productName || "") || "urun";
+    const maxAttempts = 50;
+    for (let n = 0; n < maxAttempts; n++) {
+      const candidate = n === 0 ? base : `${base}-${n + 1}`;
+      const taken = await productSlugTaken(sb, candidate);
+      if (!taken) return candidate;
+    }
+    return null;
+  };
+
+  const bumpSlugAfterRace = (slug) => {
+    const m = /^(.+)-(\d+)$/.exec(slug);
+    if (m) return `${m[1]}-${parseInt(m[2], 10) + 1}`;
+    return `${slug}-2`;
+  };
+
   const addProduct = async (product) => {
     await ready;
     const sb = getSB();
     if (!sb) throw new Error("Supabase baglantisi yok");
     const row = productToDB(product);
-    const { data, error } = await sb.from("products").insert(row).select("*").single();
-    if (error) throw error;
-    return dbToProduct(data);
+    // Marka paneli veya istemci published gönderemesin; katalog yayını ayrı onay akışıyla (TODO: admin + RLS).
+    if (row.status === "published") row.status = "pending_review";
+    let slug = await allocateUniqueProductSlug(sb, row.name || product.name || "");
+    const friendlySlugMsg = "Ürün bağlantısı oluşturulurken çakışma oluştu. Lütfen ürün adını değiştirip tekrar deneyin.";
+    if (!slug) throw new Error(friendlySlugMsg);
+
+    for (let insertAttempt = 0; insertAttempt < 3; insertAttempt++) {
+      row.slug = slug;
+      const { data, error } = await sb.from("products").insert(row).select("*").single();
+      if (!error) return dbToProduct(data);
+
+      const msg = `${error?.message || ""} ${error?.details || ""}`;
+      const isSlugUniqueViolation = error?.code === "23505" && /slug/i.test(msg);
+      if (isSlugUniqueViolation && insertAttempt < 2) {
+        slug = bumpSlugAfterRace(slug);
+        continue;
+      }
+      if (isSlugUniqueViolation) throw new Error(friendlySlugMsg);
+      throw error;
+    }
+    throw new Error(friendlySlugMsg);
   };
 
+  const brandSetProductVisibility = async (productId, nextStatus) => {
+    await ready;
+    const sb = getSB();
+    if (!sb) throw new Error("Supabase baglantisi yok");
+    const target = String(nextStatus || "").trim();
+    if (target !== "published" && target !== "unpublished") {
+      throw new Error("Gecersiz yayin durumu.");
+    }
+    const { data: row, error: fetchErr } = await sb
+      .from("products")
+      .select("status")
+      .eq("id", productId)
+      .maybeSingle();
+    if (fetchErr) throw fetchErr;
+    if (!row) throw new Error("Urun bulunamadi.");
+    const current = String(row.status || "").trim();
+    if (target === "unpublished" && current !== "published") {
+      throw new Error("Yalnizca yayindaki urunler yayından kaldirilabilir.");
+    }
+    if (target === "published" && current !== "unpublished") {
+      throw new Error("Yalnizca yayından kaldirilmis urunler tekrar yayina alinabilir.");
+    }
+    const { error } = await sb
+      .from("products")
+      .update({ status: target, updated_at: new Date().toISOString() })
+      .eq("id", productId);
+    if (error) throw error;
+  };
+
+  // Marka paneli: yayin durumu (published/unpublished) ve icerik guncellemeleri ayri akislardir.
   const updateProduct = async (id, patch) => {
     await ready;
     const sb = getSB();
     if (!sb) throw new Error("Supabase baglantisi yok");
+    const patchKeys = Object.keys(patch || {});
+    const onlyStatus = patchKeys.length === 1 && patchKeys[0] === "status";
+    const requestedStatus = String(patch?.status || "").trim();
+
+    if (onlyStatus && requestedStatus === "unpublished") {
+      await brandSetProductVisibility(id, "unpublished");
+      return;
+    }
+    if (onlyStatus && requestedStatus === "published") {
+      await brandSetProductVisibility(id, "published");
+      return;
+    }
+
     const dbPatch = buildProductPatch(patch);
+    const contentFieldCount = Object.keys(dbPatch).filter((k) => k !== "status").length;
+    if (contentFieldCount > 0) {
+      const { data: row, error: fetchErr } = await sb
+        .from("products")
+        .select("status")
+        .eq("id", id)
+        .maybeSingle();
+      if (fetchErr) throw fetchErr;
+      const current = String(row?.status || "").trim();
+      if (current === "published" || current === "unpublished") {
+        dbPatch.status = "pending_review";
+      }
+    }
+
+    if (dbPatch.status === "published") dbPatch.status = "pending_review";
+
     const { error } = await sb.from("products").update(dbPatch).eq("id", id);
     if (error) throw error;
+  };
+
+  const ADMIN_SETTABLE_STATUSES = new Set(["published", "needs_revision", "archived", "pending_review"]);
+
+  const adminSetProductStatus = async (productId, status) => {
+    await ready;
+    const sb = getSB();
+    if (!sb) throw new Error("Supabase baglantisi yok");
+    if (!productId) throw new Error("Urun ID zorunlu.");
+    const s = String(status || "").trim();
+    if (!ADMIN_SETTABLE_STATUSES.has(s)) {
+      throw new Error("Gecersiz durum. Izin verilenler: published, needs_revision, archived, pending_review");
+    }
+    const updatePayload = { status: s, updated_at: new Date().toISOString() };
+
+    if (s === "published") {
+      const { data: row, error: fetchErr } = await sb
+        .from("products")
+        .select("brand_record_id, brand_id")
+        .eq("id", productId)
+        .maybeSingle();
+      if (fetchErr) throw fetchErr;
+      if (row && !row.brand_record_id && row.brand_id) {
+        const { data: brand } = await sb
+          .from("brands")
+          .select("id")
+          .eq("profile_id", row.brand_id)
+          .maybeSingle();
+        if (brand?.id) updatePayload.brand_record_id = brand.id;
+      }
+    }
+
+    const { data, error } = await sb
+      .from("products")
+      .update(updatePayload)
+      .eq("id", productId)
+      .select("*")
+      .single();
+    if (error) throw error;
+    return dbToProduct(data);
   };
 
   const deleteProduct = async (id) => {
@@ -583,6 +750,525 @@ export const createProductService = () => {
     } catch {}
   };
 
+  const buildProductListPath = ({ group, category, subcategory }) => {
+    const base = "/urunler";
+    const g = String(group || "").trim();
+    const c = String(category || "").trim();
+    const s = String(subcategory || "").trim();
+    if (!g && !c && !s) return base;
+    if (!c) return `${base}/${g}`;
+    if (!s) return `${base}/${g}/${c}`;
+    return `${base}/${g}/${c}/${s}`;
+  };
+
+  const categorySlugAliasesForVisibility = (slug) => {
+    const clean = String(slug || "").trim();
+    const aliases = new Set([clean]);
+    const jsonSlug = "mer" + "mot" + "ion" + "-korkuluk";
+    const merdivenSlug = "mer" + "diven" + "-korkuluk";
+    if (clean === jsonSlug || clean === merdivenSlug) {
+      aliases.add(jsonSlug);
+      aliases.add(merdivenSlug);
+      aliases.add("merdiven-korkuluk");
+    }
+    if (clean === "panel-ve-levha-yuzeyler") {
+      aliases.add("panel-levha-yuzeyler");
+    }
+    return [...aliases];
+  };
+
+  const MERGED_TAXONOMY_JSON_URL = "/data/archilink-final-taxonomy-v1.json";
+
+  const TAXONOMY_CATEGORY_SELECT =
+    "id,name,slug,l1_slug,sort_order,is_active,show_in_header_dropdown,show_in_products_filter,show_in_brand_product_form,source,is_custom,archived_at";
+  const TAXONOMY_SUBCATEGORY_SELECT =
+    "id,name,slug,category_id,sort_order,is_active,show_in_products_filter,show_in_brand_product_form,source,is_custom,archived_at";
+
+  const getMergedTaxonomyTree = async (options = {}) => {
+    const surface =
+      options.surface === "admin" || options.surface === "brandForm" ? options.surface : "public";
+    await ready;
+    const sb = getSB();
+    if (!sb) throw new Error("Supabase baglantisi yok");
+
+    const taxRes = await fetch(MERGED_TAXONOMY_JSON_URL, { cache: "no-cache" });
+    if (!taxRes.ok) throw new Error("Taxonomy JSON yuklenemedi.");
+    const taxJson = await taxRes.json();
+    const rawTree = Array.isArray(taxJson?.taxonomy) ? taxJson.taxonomy : [];
+
+    const [catsRes, subsRes] = await Promise.all([
+      sb.from("product_categories").select(TAXONOMY_CATEGORY_SELECT),
+      sb.from("product_subcategories").select(TAXONOMY_SUBCATEGORY_SELECT),
+    ]);
+    if (catsRes.error) throw catsRes.error;
+    if (subsRes.error) throw subsRes.error;
+
+    return mergeTaxonomyTreeWithDatabase({
+      rawTree,
+      categoryRows: catsRes.data || [],
+      subcategoryRows: subsRes.data || [],
+      buildProductListPath,
+      categorySlugAliases: categorySlugAliasesForVisibility,
+      surface,
+    });
+  };
+
+  const CATEGORY_VISIBILITY_FIELDS =
+    "id,name,slug,sort_order,l1_slug,is_active,show_in_header_dropdown,show_in_products_filter,show_in_brand_product_form";
+  const SUBCATEGORY_VISIBILITY_FIELDS =
+    "id,name,slug,sort_order,category_id,is_active,show_in_products_filter,show_in_brand_product_form";
+
+  const listProductCategories = async () => {
+    await ready;
+    const sb = getSB();
+    if (!sb) return [];
+    const { data, error } = await sb
+      .from("product_categories")
+      .select(CATEGORY_VISIBILITY_FIELDS)
+      .order("sort_order", { ascending: true });
+    if (error) return [];
+    return data || [];
+  };
+
+  const listProductSubcategories = async (categoryId) => {
+    if (!categoryId) return [];
+    await ready;
+    const sb = getSB();
+    if (!sb) return [];
+    const { data, error } = await sb
+      .from("product_subcategories")
+      .select(SUBCATEGORY_VISIBILITY_FIELDS)
+      .eq("category_id", categoryId)
+      .order("sort_order", { ascending: true });
+    if (error) return [];
+    return data || [];
+  };
+
+  const getAdminCategoryVisibilityTree = async () => {
+    const tree = await getMergedTaxonomyTree({ surface: "admin" });
+    return { tree };
+  };
+
+  const updateProductCategoryVisibility = async (categoryId, patch) => {
+    await ready;
+    const sb = getSB();
+    if (!sb) throw new Error("Supabase baglantisi yok");
+    if (!categoryId) throw new Error("Kategori ID zorunlu.");
+    const allowed = new Set([
+      "is_active",
+      "show_in_header_dropdown",
+      "show_in_products_filter",
+      "show_in_brand_product_form",
+    ]);
+    const dbPatch = {};
+    for (const [key, value] of Object.entries(patch || {})) {
+      if (allowed.has(key)) dbPatch[key] = Boolean(value);
+    }
+    if (!Object.keys(dbPatch).length) throw new Error("Guncellenecek alan yok.");
+    const { data, error } = await sb
+      .from("product_categories")
+      .update(dbPatch)
+      .eq("id", categoryId)
+      .select(CATEGORY_VISIBILITY_FIELDS)
+      .single();
+    if (error) throw error;
+    return data;
+  };
+
+  const getCategoryVisibilityMaps = async () => {
+    await ready;
+    const sb = getSB();
+    if (!sb) return { l2BySlug: {}, l3BySlug: {} };
+    const [catsRes, subsRes] = await Promise.all([
+      sb.from("product_categories").select("slug,is_active,show_in_brand_product_form"),
+      sb.from("product_subcategories").select("slug,is_active,show_in_brand_product_form"),
+    ]);
+    const l2BySlug = {};
+    for (const row of catsRes.data || []) {
+      if (row?.slug) l2BySlug[row.slug] = row;
+    }
+    const l3BySlug = {};
+    for (const row of subsRes.data || []) {
+      if (row?.slug) l3BySlug[row.slug] = row;
+    }
+    return { l2BySlug, l3BySlug };
+  };
+
+  const CATEGORY_ADMIN_FIELDS =
+    "id,name,slug,l1_slug,source,is_custom,archived_at,is_active,show_in_header_dropdown,show_in_products_filter,show_in_brand_product_form";
+  const SUBCATEGORY_ADMIN_FIELDS =
+    "id,name,slug,category_id,source,is_custom,archived_at,is_active,show_in_products_filter,show_in_brand_product_form";
+
+  const SYSTEM_CATEGORY_PROTECT_MSG =
+    "Sistem kategorileri kalıcı olarak silinemez. Arşivleyebilirsiniz.";
+  const PRODUCT_LINKED_DELETE_MSG =
+    "Bu kategoriye bağlı ürün olduğu için kalıcı silinemez. Arşivleyebilirsiniz.";
+
+  const isAdminCustomCategoryRow = (row) =>
+    Boolean(row && (row.is_custom === true || row.source === "admin"));
+
+  const fetchCategoryAdminRow = async (sb, categoryId) => {
+    const { data, error } = await sb
+      .from("product_categories")
+      .select(CATEGORY_ADMIN_FIELDS)
+      .eq("id", categoryId)
+      .maybeSingle();
+    if (error) throw error;
+    return data;
+  };
+
+  const fetchSubcategoryAdminRow = async (sb, subcategoryId) => {
+    const { data, error } = await sb
+      .from("product_subcategories")
+      .select(SUBCATEGORY_ADMIN_FIELDS)
+      .eq("id", subcategoryId)
+      .maybeSingle();
+    if (error) throw error;
+    return data;
+  };
+
+  const assertAdminCustomCategoryRow = (row) => {
+    if (!row) throw new Error("Kategori bulunamadı.");
+    if (!isAdminCustomCategoryRow(row)) throw new Error(SYSTEM_CATEGORY_PROTECT_MSG);
+  };
+
+  const countProductsForCategory = async (categoryId) => {
+    await ready;
+    const sb = getSB();
+    if (!sb || !categoryId) return 0;
+
+    const { data: subs, error: subsErr } = await sb
+      .from("product_subcategories")
+      .select("id")
+      .eq("category_id", categoryId);
+    if (subsErr) throw subsErr;
+
+    const subIds = (subs || []).map((row) => row.id).filter(Boolean);
+    const orParts = [`category_id.eq.${categoryId}`];
+    if (subIds.length) orParts.push(`subcategory_id.in.(${subIds.join(",")})`);
+
+    const { count, error } = await sb
+      .from("products")
+      .select("id", { count: "exact", head: true })
+      .or(orParts.join(","));
+    if (error) throw error;
+    return count || 0;
+  };
+
+  const countProductsForSubcategory = async (subcategoryId) => {
+    await ready;
+    const sb = getSB();
+    if (!sb || !subcategoryId) return 0;
+    const { count, error } = await sb
+      .from("products")
+      .select("id", { count: "exact", head: true })
+      .eq("subcategory_id", subcategoryId);
+    if (error) throw error;
+    return count || 0;
+  };
+
+  const archiveProductSubcategory = async (subcategoryId) => {
+    await ready;
+    const sb = getSB();
+    if (!sb) throw new Error("Supabase baglantisi yok");
+    if (!subcategoryId) throw new Error("Alt kategori ID zorunlu.");
+
+    const row = await fetchSubcategoryAdminRow(sb, subcategoryId);
+    if (!row) throw new Error("Kategori bulunamadı.");
+
+    const now = new Date().toISOString();
+    const { data, error } = await sb
+      .from("product_subcategories")
+      .update({
+        archived_at: now,
+        is_active: false,
+        show_in_products_filter: false,
+        show_in_brand_product_form: false,
+        updated_at: now,
+      })
+      .eq("id", subcategoryId)
+      .select(SUBCATEGORY_VISIBILITY_FIELDS)
+      .single();
+    if (error) throw simplifyCategoryDbError(error);
+    return data;
+  };
+
+  const restoreProductSubcategory = async (subcategoryId) => {
+    await ready;
+    const sb = getSB();
+    if (!sb) throw new Error("Supabase baglantisi yok");
+    if (!subcategoryId) throw new Error("Alt kategori ID zorunlu.");
+
+    const row = await fetchSubcategoryAdminRow(sb, subcategoryId);
+    if (!row) throw new Error("Kategori bulunamadı.");
+
+    const now = new Date().toISOString();
+    const { data, error } = await sb
+      .from("product_subcategories")
+      .update({
+        archived_at: null,
+        is_active: true,
+        show_in_products_filter: true,
+        show_in_brand_product_form: true,
+        updated_at: now,
+      })
+      .eq("id", subcategoryId)
+      .select(SUBCATEGORY_VISIBILITY_FIELDS)
+      .single();
+    if (error) throw simplifyCategoryDbError(error);
+    return data;
+  };
+
+  const archiveProductCategory = async (categoryId) => {
+    await ready;
+    const sb = getSB();
+    if (!sb) throw new Error("Supabase baglantisi yok");
+    if (!categoryId) throw new Error("Kategori ID zorunlu.");
+
+    const row = await fetchCategoryAdminRow(sb, categoryId);
+    if (!row) throw new Error("Kategori bulunamadı.");
+
+    const now = new Date().toISOString();
+    const { data, error } = await sb
+      .from("product_categories")
+      .update({
+        archived_at: now,
+        is_active: false,
+        show_in_header_dropdown: false,
+        show_in_products_filter: false,
+        show_in_brand_product_form: false,
+        updated_at: now,
+      })
+      .eq("id", categoryId)
+      .select(CATEGORY_VISIBILITY_FIELDS)
+      .single();
+    if (error) throw simplifyCategoryDbError(error);
+    return data;
+  };
+
+  const restoreProductCategory = async (categoryId) => {
+    await ready;
+    const sb = getSB();
+    if (!sb) throw new Error("Supabase baglantisi yok");
+    if (!categoryId) throw new Error("Kategori ID zorunlu.");
+
+    const row = await fetchCategoryAdminRow(sb, categoryId);
+    if (!row) throw new Error("Kategori bulunamadı.");
+
+    const now = new Date().toISOString();
+    const { data, error } = await sb
+      .from("product_categories")
+      .update({
+        archived_at: null,
+        is_active: true,
+        show_in_header_dropdown: true,
+        show_in_products_filter: true,
+        show_in_brand_product_form: true,
+        updated_at: now,
+      })
+      .eq("id", categoryId)
+      .select(CATEGORY_VISIBILITY_FIELDS)
+      .single();
+    if (error) throw simplifyCategoryDbError(error);
+    return data;
+  };
+
+  const deleteCustomProductSubcategory = async (subcategoryId) => {
+    await ready;
+    const sb = getSB();
+    if (!sb) throw new Error("Supabase baglantisi yok");
+    if (!subcategoryId) throw new Error("Alt kategori ID zorunlu.");
+
+    const row = await fetchSubcategoryAdminRow(sb, subcategoryId);
+    assertAdminCustomCategoryRow(row);
+
+    const linked = await countProductsForSubcategory(subcategoryId);
+    if (linked > 0) throw new Error(PRODUCT_LINKED_DELETE_MSG);
+
+    const { error } = await sb.from("product_subcategories").delete().eq("id", subcategoryId);
+    if (error) throw simplifyCategoryDbError(error);
+    return { ok: true };
+  };
+
+  const deleteCustomProductCategory = async (categoryId) => {
+    await ready;
+    const sb = getSB();
+    if (!sb) throw new Error("Supabase baglantisi yok");
+    if (!categoryId) throw new Error("Kategori ID zorunlu.");
+
+    const row = await fetchCategoryAdminRow(sb, categoryId);
+    assertAdminCustomCategoryRow(row);
+
+    const linked = await countProductsForCategory(categoryId);
+    if (linked > 0) throw new Error(PRODUCT_LINKED_DELETE_MSG);
+
+    const { data: subs, error: subsErr } = await sb
+      .from("product_subcategories")
+      .select("id,source,is_custom")
+      .eq("category_id", categoryId);
+    if (subsErr) throw subsErr;
+
+    for (const sub of subs || []) {
+      if (!isAdminCustomCategoryRow(sub)) continue;
+      const subLinked = await countProductsForSubcategory(sub.id);
+      if (subLinked > 0) throw new Error(PRODUCT_LINKED_DELETE_MSG);
+      const { error: delSubErr } = await sb.from("product_subcategories").delete().eq("id", sub.id);
+      if (delSubErr) throw simplifyCategoryDbError(delSubErr);
+    }
+
+    const { error } = await sb.from("product_categories").delete().eq("id", categoryId);
+    if (error) throw simplifyCategoryDbError(error);
+    return { ok: true };
+  };
+
+  const createProductCategory = async (payload = {}) => {
+    await ready;
+    const sb = getSB();
+    if (!sb) throw new Error("Supabase baglantisi yok");
+
+    const l1_slug = String(payload.l1_slug || "").trim();
+    const l1_name = String(payload.l1_name || "").trim();
+    const name = String(payload.name || "").trim();
+    const slug = slugifyAdminCategory(payload.slug || payload.name);
+
+    if (!l1_slug || !l1_name) throw new Error("L1 seçimi zorunlu.");
+    if (!name) throw new Error("Kategori adı zorunlu.");
+    if (!slug) throw new Error("Geçerli bir slug girin.");
+
+    const tree = await getMergedTaxonomyTree({ surface: "admin" });
+    const l1Node = (tree || []).find((n) => n.slug === l1_slug);
+    if (!l1Node) throw new Error("Geçersiz L1 seçimi.");
+    const l2Exists = (l1Node.children || []).some((n) => n.level === 2 && n.slug === slug);
+    if (l2Exists) throw new Error("Bu L1 altında aynı slug'a sahip kategori var.");
+
+    const { data: slugRow } = await sb
+      .from("product_categories")
+      .select("id,slug,l1_slug")
+      .eq("slug", slug)
+      .maybeSingle();
+    if (slugRow) {
+      if (slugRow.l1_slug === l1_slug) {
+        throw new Error("Bu L1 altında aynı slug'a sahip kategori var.");
+      }
+      throw new Error("Bu slug başka bir kategoride kullanılıyor. Farklı bir slug seçin.");
+    }
+
+    const insertRow = {
+      name,
+      slug,
+      l1_slug,
+      l1_name,
+      is_active: payload.is_active !== false,
+      show_in_header_dropdown: payload.show_in_header_dropdown !== false,
+      show_in_products_filter: payload.show_in_products_filter !== false,
+      show_in_brand_product_form: payload.show_in_brand_product_form !== false,
+      sort_order: Number.isFinite(Number(payload.sort_order)) ? Number(payload.sort_order) : 9999,
+      source: "admin",
+      is_custom: true,
+      archived_at: null,
+    };
+
+    const { data, error } = await sb
+      .from("product_categories")
+      .insert(insertRow)
+      .select(CATEGORY_VISIBILITY_FIELDS)
+      .single();
+    if (error) throw simplifyCategoryDbError(error);
+    return data;
+  };
+
+  const createProductSubcategory = async (payload = {}) => {
+    await ready;
+    const sb = getSB();
+    if (!sb) throw new Error("Supabase baglantisi yok");
+
+    const category_id = String(payload.category_id || "").trim();
+    const name = String(payload.name || "").trim();
+    const slug = slugifyAdminCategory(payload.slug || payload.name);
+
+    if (!category_id) throw new Error("L2 seçimi zorunlu.");
+    if (!name) throw new Error("Kategori adı zorunlu.");
+    if (!slug) throw new Error("Geçerli bir slug girin.");
+
+    const tree = await getMergedTaxonomyTree({ surface: "admin" });
+    let parentL2 = null;
+    for (const l1 of tree || []) {
+      parentL2 = (l1.children || []).find((n) => n.level === 2 && String(n.db_id) === category_id);
+      if (parentL2) break;
+    }
+    if (!parentL2) throw new Error("Seçilen L2 bulunamadı veya DB kaydı yok.");
+    if (!parentL2.db_id) {
+      throw new Error("DB seed eksik olduğu için bu L2 altına kategori eklenemiyor.");
+    }
+
+    const l3Exists = (parentL2.children || []).some((n) => n.level === 3 && n.slug === slug);
+    if (l3Exists) throw new Error("Bu L2 altında aynı slug'a sahip alt kategori var.");
+
+    const { data: slugRow } = await sb
+      .from("product_subcategories")
+      .select("id,slug,category_id")
+      .eq("category_id", category_id)
+      .eq("slug", slug)
+      .maybeSingle();
+    if (slugRow) throw new Error("Bu L2 altında aynı slug'a sahip alt kategori var.");
+
+    const insertRow = {
+      category_id,
+      name,
+      slug,
+      is_active: payload.is_active !== false,
+      show_in_products_filter: payload.show_in_products_filter !== false,
+      show_in_brand_product_form: payload.show_in_brand_product_form !== false,
+      sort_order: Number.isFinite(Number(payload.sort_order)) ? Number(payload.sort_order) : 9999,
+      source: "admin",
+      is_custom: true,
+      archived_at: null,
+    };
+
+    const { data, error } = await sb
+      .from("product_subcategories")
+      .insert(insertRow)
+      .select(SUBCATEGORY_VISIBILITY_FIELDS)
+      .single();
+    if (error) throw simplifyCategoryDbError(error);
+    return data;
+  };
+
+  const updateProductSubcategoryVisibility = async (subcategoryId, patch) => {
+    await ready;
+    const sb = getSB();
+    if (!sb) throw new Error("Supabase baglantisi yok");
+    if (!subcategoryId) throw new Error("Alt kategori ID zorunlu.");
+    const allowed = new Set(["is_active", "show_in_products_filter", "show_in_brand_product_form"]);
+    const dbPatch = {};
+    for (const [key, value] of Object.entries(patch || {})) {
+      if (allowed.has(key)) dbPatch[key] = Boolean(value);
+    }
+    if (!Object.keys(dbPatch).length) throw new Error("Guncellenecek alan yok.");
+    const { data, error } = await sb
+      .from("product_subcategories")
+      .update(dbPatch)
+      .eq("id", subcategoryId)
+      .select(SUBCATEGORY_VISIBILITY_FIELDS)
+      .single();
+    if (error) throw error;
+    return data;
+  };
+
+  const getBrandRecordForProfile = async (profileId) => {
+    if (!profileId) return null;
+    await ready;
+    const sb = getSB();
+    if (!sb) return null;
+    const { data, error } = await sb
+      .from("brands")
+      .select("id, profile_id, name, slug, status")
+      .eq("profile_id", profileId)
+      .maybeSingle();
+    if (error || !data) return null;
+    return data;
+  };
+
   return {
     getProductList,
     getProductFilterOptions,
@@ -591,7 +1277,27 @@ export const createProductService = () => {
     getAllProducts,
     addProduct,
     updateProduct,
+    adminSetProductStatus,
     deleteProduct,
     incrementView,
+    listProductCategories,
+    listProductSubcategories,
+    getMergedTaxonomyTree,
+    getAdminCategoryVisibilityTree,
+    getCategoryVisibilityMaps,
+    updateProductCategoryVisibility,
+    updateProductSubcategoryVisibility,
+    createProductCategory,
+    createProductSubcategory,
+    slugifyAdminCategory,
+    countProductsForCategory,
+    countProductsForSubcategory,
+    archiveProductCategory,
+    archiveProductSubcategory,
+    restoreProductCategory,
+    restoreProductSubcategory,
+    deleteCustomProductCategory,
+    deleteCustomProductSubcategory,
+    getBrandRecordForProfile,
   };
 };

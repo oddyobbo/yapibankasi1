@@ -1,3 +1,8 @@
+# Local env (secrets)
+.env
+.env.local
+.env.*.local
+
 # Local Netlify folder
 .netlify
 
@@ -10,3 +15,6 @@ dist/
 temporary screenshots/*.png
 temporary screenshots/*.jpg
 temporary screenshots/*.webp
+
+.DS_Store
+.tmp-*.js

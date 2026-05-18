@@ -2,9 +2,44 @@
 import ProductCard from "./ProductCard.astro";
 const { products = [] } = Astro.props;
 ---
-<section class="page-band">
-  <div class="container">
+<section class="product-detail-related page-band">
+  <div class="page-shell product-detail-related__inner">
     <h2 class="section-title">İlgili Ürünler</h2>
-    {products.length ? <div class="grid cards">{products.map((product) => <ProductCard product={product} />)}</div> : <p class="empty">İlgili ürün henüz yok.</p>}
+    {products.length ? (
+      <div class="grid cards">
+        {products.map((product) => <ProductCard product={product} />)}
+      </div>
+    ) : (
+      <p class="empty ag-pill-body">İlgili ürün henüz yok.</p>
+    )}
   </div>
 </section>
+<style>
+  .product-detail-related__inner.page-shell {
+    max-width: 1440px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 40px;
+    padding-right: 40px;
+    box-sizing: border-box;
+  }
+
+  @media (max-width: 1024px) {
+    .product-detail-related__inner.page-shell {
+      padding-left: 24px;
+      padding-right: 24px;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .product-detail-related__inner.page-shell {
+      padding-left: 16px;
+      padding-right: 16px;
+    }
+  }
+
+  .empty {
+    margin: 0;
+    color: var(--ag-muted);
+  }
+</style>

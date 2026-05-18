@@ -207,7 +207,7 @@
     async function boot() {
       await AG.ready;
       const session = await AG.getSessionArchitect();
-      if (!session) { location.href = "/mimar-giris.html"; return; }
+      if (!session) { location.href = "/giris"; return; }
 
       if (!moodboardId) {
         const created = await AG.createMoodboard({ name: "Yeni Moodboard" });

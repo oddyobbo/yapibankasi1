@@ -2,13 +2,19 @@
 import ProjectCard from "./ProjectCard.astro";
 const { projects = [] } = Astro.props;
 ---
-<section class="related-projects card">
-  <h2>İlgili Projeler</h2>
+<section class="ag-panel-section related-projects">
+  <h2 class="ag-panel-title">İlgili Projeler</h2>
   {projects.length ? <div class="project-list">{projects.slice(0, 4).map((project) => <ProjectCard project={project} />)}</div> : <p>İlgili proje henüz yok.</p>}
 </section>
 <style>
-  .related-projects { padding: 28px; border-radius: 22px; }
-  h2 { margin: 0 0 18px; color: #1d1d1f; font-size: 20px; line-height: 1.22; font-weight: 600; letter-spacing: 0; }
+  .related-projects {
+    padding: 0;
+    border: 0;
+    box-shadow: none;
+  }
+  .related-projects .ag-panel-title {
+    margin: 0 0 1rem;
+  }
   .project-list { display: grid; gap: 12px; }
   p { margin: 0; color: #6e6e73; font-size: 14px; line-height: 1.5; }
 </style>

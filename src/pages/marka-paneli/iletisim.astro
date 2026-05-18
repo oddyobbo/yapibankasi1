@@ -1,0 +1,17 @@
+---
+import LegacyPanelShell from "../../components/LegacyPanelShell.astro";
+import { getBrandPanelFilename, getBrandPanelPageId, getLegacyPanelParts } from "../../lib/legacyPanelEmbed";
+
+const filename = getBrandPanelFilename("iletisim");
+if (!filename) return Astro.redirect("/giris", 302);
+const parts = getLegacyPanelParts(filename);
+---
+<LegacyPanelShell
+  title="İletişim | Marka Paneli | Archilink"
+  canonical="/marka-paneli/iletisim"
+  headFragment={parts.headFragment}
+  bodyHtml={parts.bodyHtml}
+  bodyClass={parts.bodyClass}
+  bodyDataPage={parts.bodyDataPage}
+  markaPanelPage={getBrandPanelPageId("iletisim")}
+/>

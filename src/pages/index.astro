@@ -5,6 +5,7 @@ import Footer from "../components/Footer.astro";
 import ProductCard from "../components/ProductCard.astro";
 import CategoryGrid from "../components/CategoryGrid.astro";
 import { getBrands, getCategories, getProducts, getProjects } from "../lib/catalog.js";
+import { PRODUCT_CATALOG_BASE } from "../lib/product-taxonomy-routes.js";
 
 const [products, brands, projects, categories] = await Promise.all([
   getProducts({ limit: 8 }),
@@ -62,7 +63,7 @@ const brandItems = [
       <div id="hero-cta" class="hero-cta">
         <p>Mimari proje için doğru malzemeyi saniyeler içinde bul.</p>
         <div>
-          <a href="/products">Ürünleri Keşfet →</a>
+          <a href={PRODUCT_CATALOG_BASE}>Ürünleri Keşfet →</a>
           <a href="/marka-basvuru.html">Marka Başvurusu</a>
         </div>
       </div>
@@ -75,7 +76,7 @@ const brandItems = [
           <h1>İhtiyacın olanı bul.<br />Projeni hızla tamamla.</h1>
           <p>Yüzlerce markanın doğrulanmış teknik verisine, dosyalarına ve projelerine tek bir arama deneyiminden ulaş. Markalar için kendi paneliyle ücretsiz başlangıç.</p>
           <div class="action-row">
-            <a class="solid" href="/products">Keşfetmeye Başla</a>
+            <a class="solid" href={PRODUCT_CATALOG_BASE}>Keşfetmeye Başla</a>
             <a href="/marka-basvuru.html">Marka Partneri Ol</a>
           </div>
         </div>
@@ -86,7 +87,7 @@ const brandItems = [
       <div class="cat-marquee" aria-label="Popüler kategoriler">
         <div class="cat-marquee-track">
           {[...marqueeCategories, ...marqueeCategories].map(([label, image]) => (
-            <a href={`/products?q=${encodeURIComponent(label)}`} class="cat-chip">
+            <a href={`${PRODUCT_CATALOG_BASE}?q=${encodeURIComponent(label)}`} class="cat-chip">
               <img src={image} alt="" loading="lazy" width="44" height="44" />
               {label}
             </a>
@@ -114,7 +115,7 @@ const brandItems = [
             <li><span>{String(index + 1).padStart(2, "0")}</span>{item}</li>
           ))}
         </ul>
-        <a class="solid" href="/products">Aramayı dene →</a>
+        <a class="solid" href={PRODUCT_CATALOG_BASE}>Aramayı dene →</a>
       </article>
       <article>
         <p class="section-kicker">Markalar için</p>
@@ -146,7 +147,7 @@ const brandItems = [
           <p class="section-kicker">Öne çıkan</p>
           <h2>Bu hafta keşfedilen ürünler</h2>
         </div>
-        <a href="/products">Tüm ürünler →</a>
+        <a href={PRODUCT_CATALOG_BASE}>Tüm ürünler →</a>
       </div>
       {products.length ? <div class="grid cards">{products.map((product) => <ProductCard product={product} />)}</div> : <p class="empty">Henüz yayınlanmış ürün yok.</p>}
     </section>
@@ -178,7 +179,7 @@ const brandItems = [
       <h2>Bugün arama yap.<br />Yarın doğru malzemeyle inşa et.</h2>
       <p>Archilink, Türkiye’nin en hızlı büyüyen mimari malzeme topluluğu. Mimarlar ve markalar için aynı doğru kaynak.</p>
       <div>
-        <a href="/products">Ürünleri Keşfet</a>
+        <a href={PRODUCT_CATALOG_BASE}>Ürünleri Keşfet</a>
         <a href="/marka-basvuru.html">Marka Başvurusu</a>
       </div>
     </section>

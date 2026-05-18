@@ -44,15 +44,26 @@
         <input name="email" type="email" class="w-full h-11 rounded-xl border border-black/10 px-4" placeholder="Kurumsal e-posta *" required>
         <input name="phone" class="w-full h-11 rounded-xl border border-black/10 px-4" placeholder="Telefon *" required>
         <input name="website" class="w-full h-11 rounded-xl border border-black/10 px-4 md:col-span-2" placeholder="Web sitesi (örn. https://markaniz.com)">
-        <select name="category" required class="w-full h-11 rounded-xl border border-black/10 px-4 bg-white md:col-span-2">
-          <option value="">Birincil ürün kategorisi seç *</option>
-          <option>Akustik</option>
-          <option>Aydınlatma</option>
-          <option>Dış Cephe</option>
-          <option>Zemin</option>
-          <option>Tavan Sistemleri</option>
-          <option>Mobilya</option>
-        </select>
+        <fieldset class="md:col-span-2 space-y-3 border-0 p-0 m-0 min-w-0">
+          <legend class="text-[13px] font-semibold text-[#1d1d1f] mb-1">Ürün kategorileriniz *</legend>
+          <p class="text-[12px] text-[#6e6e73] mb-2">Birden fazla seçebilirsiniz; katalogda doğru yerde görünmenizi sağlar.</p>
+          <div class="grid sm:grid-cols-2 gap-x-4 gap-y-2 text-[14px]">
+            <label class="flex items-center gap-2.5 cursor-pointer"><input type="checkbox" name="brandCat" value="Akustik" class="rounded border-black/20"> Akustik</label>
+            <label class="flex items-center gap-2.5 cursor-pointer"><input type="checkbox" name="brandCat" value="Aydınlatma" class="rounded border-black/20"> Aydınlatma</label>
+            <label class="flex items-center gap-2.5 cursor-pointer"><input type="checkbox" name="brandCat" value="Dış Cephe" class="rounded border-black/20"> Dış Cephe</label>
+            <label class="flex items-center gap-2.5 cursor-pointer"><input type="checkbox" name="brandCat" value="Zemin" class="rounded border-black/20"> Zemin</label>
+            <label class="flex items-center gap-2.5 cursor-pointer"><input type="checkbox" name="brandCat" value="Tavan Sistemleri" class="rounded border-black/20"> Tavan sistemleri</label>
+            <label class="flex items-center gap-2.5 cursor-pointer"><input type="checkbox" name="brandCat" value="Mobilya" class="rounded border-black/20"> Mobilya</label>
+          </div>
+        </fieldset>
+        <fieldset class="md:col-span-2 space-y-3 border-0 p-0 m-0 min-w-0">
+          <legend class="text-[13px] font-semibold text-[#1d1d1f] mb-1">Firma rolünüz *</legend>
+          <p class="text-[12px] text-[#6e6e73] mb-2">Üretici ve/veya uygulama tarafında hizmet veriyorsanız işaretleyin.</p>
+          <div class="space-y-2 text-[14px]">
+            <label class="flex items-center gap-2.5 cursor-pointer"><input type="checkbox" name="companyRole" value="manufacturer" class="rounded border-black/20"> Üretici</label>
+            <label class="flex items-center gap-2.5 cursor-pointer"><input type="checkbox" name="companyRole" value="applicator" class="rounded border-black/20"> Uygulama &amp; montaj hizmeti</label>
+          </div>
+        </fieldset>
         <input name="password" type="password" class="w-full h-11 rounded-xl border border-black/10 px-4" placeholder="Şifre * (en az 6 karakter)" required minlength="6">
         <input name="passwordConfirm" type="password" class="w-full h-11 rounded-xl border border-black/10 px-4" placeholder="Şifre tekrar *" required minlength="6">
         <p id="apply-error" class="md:col-span-2 text-[13px] text-red-600 hidden"></p>
@@ -118,13 +129,24 @@
       const contactName = fd.get("contactName")?.trim();
       const jobTitle = fd.get("title")?.trim();
       const phone = fd.get("phone")?.trim();
-      const primaryCategory = fd.get("category")?.trim();
+      const brandCategories = [...form.querySelectorAll('input[name="brandCat"]:checked')].map((el) => el.value);
+      const companyRoles = [...form.querySelectorAll('input[name="companyRole"]:checked')].map((el) => el.value);
       const errEl = document.getElementById("apply-error");
 
       errEl.classList.add("hidden");
 
       if (!brandName || !email || !password) {
         errEl.textContent = "Lütfen zorunlu alanları doldurun (*).";
+        errEl.classList.remove("hidden");
+        return;
+      }
+      if (!brandCategories.length) {
+        errEl.textContent = "En az bir ürün kategorisi seçin.";
+        errEl.classList.remove("hidden");
+        return;
+      }
+      if (!companyRoles.length) {
+        errEl.textContent = "En az bir firma rolü seçin (üretici ve/veya uygulama).";
         errEl.classList.remove("hidden");
         return;
       }
@@ -145,7 +167,8 @@
         contactName,
         jobTitle,
         phone,
-        primaryCategory,
+        brandCategories,
+        companyRoles,
       });
       if (!result.ok) {
         errEl.textContent = result.message || "Bir hata oluştu. Lütfen tekrar deneyin.";

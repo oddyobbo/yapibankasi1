@@ -49,7 +49,7 @@ create table if not exists public.brands (
   phone text default '',
   email text default '',
   verified boolean default false,
-  status text not null default 'pending' check (status in ('pending', 'approved', 'rejected')),
+  status text not null default 'pending' check (status in ('pending', 'approved', 'rejected', 'suspended')),
   created_at timestamptz default now(),
   updated_at timestamptz default now(),
   unique(profile_id)
@@ -138,7 +138,7 @@ create table if not exists public.products (
   has_cad boolean default false,
   has_bim boolean default false,
 
-  status text default 'draft' check (status in ('draft', 'pending_review', 'published', 'rejected', 'archived')),
+  status text default 'draft' check (status in ('draft', 'pending_review', 'published', 'unpublished', 'needs_revision', 'rejected', 'archived')),
   views integer default 0,
   created_at timestamptz default now(),
   updated_at timestamptz default now()
@@ -557,7 +557,7 @@ begin
   alter table public.products drop constraint if exists products_status_check;
   alter table public.products
     add constraint products_status_check
-    check (status in ('draft', 'pending_review', 'published', 'rejected', 'archived'));
+    check (status in ('draft', 'pending_review', 'published', 'unpublished', 'needs_revision', 'rejected', 'archived'));
 
   alter table public.products drop constraint if exists products_indoor_outdoor_check;
   alter table public.products

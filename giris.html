@@ -16,52 +16,91 @@
       } catch (_) {}
     })();
   </script>
-  <title>Archilink | Giriş Yap</title>
+  <title>Archilink | Hesap Girişi</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body data-page="login" class="bg-white text-[#111] min-h-screen font-sans antialiased">
   <div id="site-header"></div>
   <main class="px-5 sm:px-6 lg:px-8 py-14 lg:py-20 bg-white">
-    <div class="max-w-[920px] lg:max-w-[1040px] mx-auto">
-      <div class="text-center mb-8 lg:mb-10">
-        <h1 class="text-[32px] lg:text-[40px] font-semibold tracking-tight text-[#1d1d1f]">Giriş Yap</h1>
-        <p class="text-[15px] text-[#6e6e73] mt-2.5">Mimar veya marka hesabınla devam et.</p>
+    <div class="max-w-[440px] mx-auto">
+      <div class="text-center mb-8">
+        <h1 class="text-[32px] lg:text-[36px] font-semibold tracking-tight text-[#1d1d1f]">Hesap Girişi</h1>
+        <p class="text-[15px] text-[#6e6e73] mt-2.5">E-posta ve şifrenle panele devam et.</p>
       </div>
-      <div class="grid sm:grid-cols-2 gap-5 lg:gap-7 items-stretch w-full">
 
-        <!-- Mimar -->
-        <article class="flex flex-col h-full min-h-[280px] rounded-[20px] bg-white border border-black/[0.08] p-7 lg:p-9 shadow-[0_4px_24px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)]">
-          <div class="w-9 h-9 rounded-xl bg-[#f5f5f7] flex items-center justify-center mb-3">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          </div>
-          <p class="text-[11px] uppercase tracking-[0.16em] text-[#6e6e73] font-semibold">Mimar / Tasarımcı</p>
-          <h2 class="text-[21px] font-semibold mt-1.5 tracking-tight text-[#1d1d1f]">Mimar Hesabı</h2>
-          <p class="text-[13px] text-[#6e6e73] mt-2 leading-relaxed flex-1">Ürün ve projeleri favorile, tasarım panoları ve koleksiyonlar.</p>
-          <div class="mt-auto pt-6 space-y-2.5">
-            <a href="/mimar-giris.html" class="w-full h-10 rounded-xl bg-[#1d1d1f] text-white text-[13px] font-semibold inline-flex items-center justify-center hover:bg-black/88 transition">Mimar Girişi</a>
-            <a href="/mimar-giris.html#mimar-kayit" class="w-full h-10 rounded-xl border border-black/[0.12] text-[13px] font-semibold text-[#1d1d1f] inline-flex items-center justify-center hover:bg-black/[0.03] transition">Mimar Kaydı</a>
-          </div>
-        </article>
+      <form id="login-form" class="rounded-[20px] border border-black/[0.08] bg-white p-7 lg:p-8 shadow-[0_4px_24px_rgba(0,0,0,0.06)] space-y-4" autocomplete="on">
+        <label class="block">
+          <span class="text-[13px] font-medium text-[#1d1d1f]">E-posta</span>
+          <input name="email" type="email" required autocomplete="username" class="mt-1.5 w-full h-11 rounded-xl border border-black/[0.12] px-3 text-[14px] outline-none focus:border-black/25" />
+        </label>
+        <label class="block">
+          <span class="text-[13px] font-medium text-[#1d1d1f]">Şifre</span>
+          <input name="password" type="password" required autocomplete="current-password" class="mt-1.5 w-full h-11 rounded-xl border border-black/[0.12] px-3 text-[14px] outline-none focus:border-black/25" />
+        </label>
+        <p id="msg" class="text-[13px] text-red-600 hidden" role="alert"></p>
+        <button type="submit" class="w-full h-11 rounded-xl bg-[#1d1d1f] text-white text-[14px] font-semibold hover:bg-black transition">Giriş Yap</button>
+      </form>
 
-        <!-- Marka -->
-        <article class="flex flex-col h-full min-h-[280px] rounded-[20px] bg-white border border-black/[0.08] p-7 lg:p-9 shadow-[0_4px_24px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.04)]">
-          <div class="w-9 h-9 rounded-xl bg-[#f5f5f7] flex items-center justify-center mb-3">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
-          </div>
-          <p class="text-[11px] uppercase tracking-[0.16em] text-[#6e6e73] font-semibold">Üretici / Marka</p>
-          <h2 class="text-[21px] font-semibold mt-1.5 tracking-tight text-[#1d1d1f]">Marka Hesabı</h2>
-          <p class="text-[13px] text-[#6e6e73] mt-2 leading-relaxed flex-1">Ürün yükleme, teknik doküman ve panelden performans takibi.</p>
-          <div class="mt-auto pt-6 space-y-2.5">
-            <a href="/marka-giris.html" class="w-full h-10 rounded-xl bg-[#1d1d1f] text-white text-[13px] font-semibold inline-flex items-center justify-center hover:bg-black/88 transition">Marka Girişi</a>
-            <a href="/marka-basvuru.html" class="w-full h-10 rounded-xl border border-black/[0.12] text-[13px] font-semibold text-[#1d1d1f] inline-flex items-center justify-center hover:bg-black/[0.03] transition">Marka Başvurusu</a>
-          </div>
-        </article>
-
+      <div class="mt-6 text-center text-[14px] text-[#6e6e73] space-y-2">
+        <p>
+          <a href="/mimar-giris.html#mimar-kayit" class="text-[#1d1d1f] font-medium hover:underline">Ücretsiz Kaydol</a>
+        </p>
+        <p>
+          <a href="/marka-basvuru.html" class="hover:text-[#1d1d1f] hover:underline">Marka hesabı için başvuru yapın</a>
+        </p>
       </div>
     </div>
   </main>
-  <div id="site-footer"></div>
+  <div id="site-footer"></motion>
   <script src="/core.js"></script>
   <script src="/layout.js"></script>
+  <script>
+    const form = document.getElementById("login-form");
+    const msg = document.getElementById("msg");
+
+    function showMsg(text) {
+      if (!msg) return;
+      if (!text) {
+        msg.textContent = "";
+        msg.classList.add("hidden");
+        return;
+      }
+      msg.textContent = text;
+      msg.classList.remove("hidden");
+    }
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      showMsg("");
+      const submitBtn = form.querySelector('button[type="submit"]');
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Giriş yapılıyor…";
+      }
+      try {
+        await AG.ready;
+        const fd = new FormData(form);
+        const res = await AG.loginUnified({
+          email: String(fd.get("email") || "").trim(),
+          password: String(fd.get("password") || ""),
+        });
+        if (!res.ok) {
+          showMsg(res.message || "Giriş başarısız.");
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Giriş Yap";
+          }
+          return;
+        }
+        window.location.href = res.redirect;
+      } catch (_) {
+        showMsg("Bağlantı hatası. Lütfen tekrar deneyin.");
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = "Giriş Yap";
+        }
+      }
+    });
+  </script>
 </body>
 </html>

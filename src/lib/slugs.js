@@ -1,3 +1,5 @@
+import { PRODUCT_CATALOG_BASE } from "./product-taxonomy-routes.js";
+
 export const slugify = (value) => String(value || "")
   .trim()
   .toLowerCase()
@@ -12,7 +14,8 @@ export const slugify = (value) => String(value || "")
   .replace(/[^a-z0-9]+/g, "-")
   .replace(/^-+|-+$/g, "");
 
-export const productPath = (product) => `/products/${encodeURIComponent(product?.slug || slugify(product?.name || product?.id || "product"))}`;
+export const productPath = (product) =>
+  `${PRODUCT_CATALOG_BASE}/${encodeURIComponent(product?.slug || slugify(product?.name || product?.id || "product"))}`;
 export const brandPath = (brand) => `/brands/${encodeURIComponent(brand?.slug || slugify(brand?.name || brand?.brandName || "brand"))}`;
 export const projectPath = (project) => `/projects/${encodeURIComponent(project?.slug || slugify(project?.title || project?.id || "project"))}`;
 export const categoryPath = (category) => `/categories/${encodeURIComponent(category?.slug || slugify(category?.name || category || "category"))}`;

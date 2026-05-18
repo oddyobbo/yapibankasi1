@@ -1,118 +1,443 @@
-<footer class="site-footer">
-  <div class="container footer-inner">
-    <div class="footer-brand">
-      <a class="brand" href="/" aria-label="Archilink ana sayfa">
-        <span>Arch</span><span class="brand-mark">il</span><span>ink</span>
-      </a>
-      <p>Mimarların doğru ürünü bulduğu, markaların gerçek talebe ulaştığı Türkiye odaklı mimari malzeme platformu.</p>
-      <div class="footer-actions">
-        <a href="/marka-basvuru.html">Marka Başvur</a>
-        <a href="/products">Ürünleri Keşfet</a>
+---
+/* Public footer — header .ag-header-row ile aynı yatay padding (geniş ekranda .container merkez kayması yok) */
+import finalTaxonomy from "../../data/archilink-final-taxonomy-v1.json";
+import {
+  buildProductListPath,
+  FINAL_TAXONOMY_L1_SLUG_ORDER,
+  PRODUCT_CATALOG_BASE,
+} from "../lib/product-taxonomy-routes.js";
+
+const brandApplyHref = "/marka-basvuru.html";
+
+/** Alt şerit: yalnızca final 6 L1 — sıra sabit; etiket taxonomy JSON name_tr. */
+const taxonomyL1BySlug = new Map(
+  (finalTaxonomy.taxonomy ?? [])
+    .filter((n: { level?: number }) => n.level === 1)
+    .map((n: { slug: string; name_tr: string }) => [n.slug, n] as const),
+);
+
+const footerL1Groups = FINAL_TAXONOMY_L1_SLUG_ORDER.map((slug) => {
+  const node = taxonomyL1BySlug.get(slug);
+  const label = (node?.name_tr && String(node.name_tr).trim()) || slug;
+  return {
+    label,
+    href: buildProductListPath({ group: slug, category: "", subcategory: "" }),
+  };
+});
+---
+<footer class="ag-public-footer">
+  <div class="ag-public-footer__main">
+    <div class="ag-footer-shell ag-public-footer__main-inner">
+      <div class="ag-public-footer__brand">
+        <a href="/" data-ag-logo="1" class="ag-logo" aria-label="Archilink">
+          <span>Arch</span><span class="ag-logo-il"><span>il</span><svg class="ag-logo-curve" height="6" viewBox="0 0 20 6" preserveAspectRatio="none" aria-hidden="true"><path data-ag-logo-path="1" d="M0,1 Q10,6 20,1" stroke="#1d1d1f" stroke-width="1.8" fill="none" stroke-linecap="round"></path></svg></span><span>ink</span>
+        </a>
+        <p class="ag-public-footer__brand-desc">
+          Mimari ürünleri, markaları ve teknik dokümanları tek yerde keşfedin.
+        </p>
+      </div>
+
+      <nav class="ag-public-footer__nav" aria-label="Hakkında">
+        <p class="ag-public-footer__col-title">Hakkında</p>
+        <ul class="ag-public-footer__list">
+          <li><a class="ag-public-footer__link" href="/hakkimizda.html">Hakkımızda</a></li>
+          <li><a class="ag-public-footer__link" href="/iletisim-v2.html">İletişim</a></li>
+          <li><a class="ag-public-footer__link" href="/iletisim-v2.html">Kariyer</a></li>
+          <li><a class="ag-public-footer__link" href="/faq.html">Sıkça Sorulan Sorular</a></li>
+        </ul>
+      </nav>
+
+      <nav class="ag-public-footer__nav" aria-label="Keşfet">
+        <p class="ag-public-footer__col-title">Keşfet</p>
+        <ul class="ag-public-footer__list">
+          <li><a class="ag-public-footer__link" href={PRODUCT_CATALOG_BASE}>Ürün Kataloğu</a></li>
+          <li><a class="ag-public-footer__link" href="/brands">Markalar</a></li>
+          <li><a class="ag-public-footer__link" href="/projects">Projeler</a></li>
+          <li><a class="ag-public-footer__link" href="/projects">Hikayeler</a></li>
+        </ul>
+      </nav>
+
+      <nav class="ag-public-footer__nav" aria-label="Destek">
+        <p class="ag-public-footer__col-title">Destek</p>
+        <ul class="ag-public-footer__list">
+          <li><a class="ag-public-footer__link" href="/faq.html">Yardım Merkezi</a></li>
+          <li><a class="ag-public-footer__link" href="/hakkimizda.html">Gizlilik Politikası</a></li>
+          <li><a class="ag-public-footer__link" href="/nasil-calisir.html">Kullanım Şartları</a></li>
+          <li><a class="ag-public-footer__link" href="/faq.html">Çerez Politikası</a></li>
+        </ul>
+      </nav>
+
+      <aside class="ag-public-footer__cta" aria-labelledby="ag-footer-cta-title">
+        <p id="ag-footer-cta-title" class="ag-public-footer__cta-title">İş Birliği</p>
+        <p class="ag-public-footer__cta-text">
+          Ürünlerinizi, projeleri için aktif olarak malzeme arayan binlerce tasarım profesyonelinin karşısına çıkarın.
+        </p>
+        <a class="ag-public-footer__cta-btn" href={brandApplyHref}>Marka Başvurusu</a>
+      </aside>
+    </div>
+  </div>
+
+  <div class="ag-public-footer__cat-band">
+    <div class="ag-footer-shell">
+      <div class="ag-public-footer__cat-inner">
+      {footerL1Groups.map((g) => (
+        <a class="ag-public-footer__cat" href={g.href}>{g.label}</a>
+      ))}
       </div>
     </div>
-    <nav aria-label="Alt navigasyon" class="footer-nav">
-      <div>
-        <strong>Keşfet</strong>
-        <a href="/products">Ürünler</a>
-        <a href="/brands">Markalar</a>
-        <a href="/projects">Projeler</a>
-        <a href="/categories">Kategoriler</a>
+  </div>
+
+  <div class="ag-public-footer__legal-wrap">
+    <div class="ag-footer-shell">
+      <div class="ag-public-footer__legal">
+      <div class="ag-public-footer__legal-left">
+        <p class="ag-public-footer__copy">© 2026 Archilink. Tüm hakları saklıdır.</p>
+        <p class="ag-public-footer__lang">
+          <svg class="ag-public-footer__lang-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M2 12h20M12 2a14 14 0 0 1 0 20M12 2a14 14 0 0 0 0 20"></path>
+          </svg>
+          <span>Türkçe</span>
+        </p>
       </div>
-      <div>
-        <strong>Hesap</strong>
-        <a href="/mimar-giris.html">Mimar girişi</a>
-        <a href="/marka-giris.html">Marka girişi</a>
-        <a href="/marka-basvuru.html">Marka başvurusu</a>
+      <div class="ag-public-footer__legal-right">
+        <div class="ag-public-footer__social" aria-label="Sosyal medya">
+          <a class="ag-public-footer__social-link" href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" aria-hidden="true">
+              <rect x="3" y="3" width="18" height="18" rx="5"></rect>
+              <circle cx="12" cy="12" r="4"></circle>
+              <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"></circle>
+            </svg>
+          </a>
+          <a class="ag-public-footer__social-link" href="https://x.com/" target="_blank" rel="noopener noreferrer" aria-label="X">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" aria-hidden="true">
+              <path d="M4 4l16 16M20 4L4 20"></path>
+            </svg>
+          </a>
+          <a class="ag-public-footer__social-link" href="https://www.linkedin.com/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" aria-hidden="true">
+              <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+              <path d="M8 10v7M8 8h.01M12 17v-4"></path>
+            </svg>
+          </a>
+        </div>
+        <nav class="ag-public-footer__legal-links" aria-label="Yasal">
+          <a class="ag-public-footer__legal-link" href="/hakkimizda.html">Gizlilik Politikası</a>
+          <a class="ag-public-footer__legal-link" href="/nasil-calisir.html">Kullanım Şartları</a>
+          <a class="ag-public-footer__legal-link" href="/faq.html">Çerez Politikası</a>
+        </nav>
       </div>
-      <div>
-        <strong>Archilink</strong>
-        <a href="/iletisim-v2.html">İletişim</a>
-        <a href="/hakkimizda.html">Hakkımızda</a>
-        <a href="/gizlilik-politikasi.html">Gizlilik</a>
       </div>
-    </nav>
+    </div>
   </div>
 </footer>
+
 <style>
-  .site-footer {
-    margin-top: 64px;
-    border-top: 1px solid rgba(0,0,0,.08);
-    background: #fff;
+  .ag-public-footer {
+    width: 100%;
+    margin-top: 0;
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    background: #fafafa;
+    color: #1d1d1f;
+    box-sizing: border-box;
   }
-  .footer-inner {
-    padding: 42px 0;
+
+  .ag-footer-shell {
+    width: 100%;
+    max-width: none;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 16px;
+    padding-right: 16px;
+    box-sizing: border-box;
+  }
+
+  @media (min-width: 1024px) {
+    .ag-footer-shell {
+      padding-left: 40px;
+      padding-right: 40px;
+    }
+  }
+
+  .ag-public-footer__main-inner {
     display: grid;
-    grid-template-columns: minmax(260px, 1fr) minmax(360px, 1.4fr);
-    gap: 44px;
-    color: #6e6e73;
-    font-size: 13px;
+    grid-template-columns: 1fr;
+    gap: 40px 32px;
+    padding-top: 72px;
+    padding-bottom: 64px;
+    align-items: start;
   }
-  .brand {
-    position: relative;
-    display: inline-flex;
-    color: #111;
-    font-size: 25px;
-    line-height: 1;
-    letter-spacing: 0;
+
+  @media (min-width: 720px) and (max-width: 1099px) {
+    .ag-public-footer__main-inner {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 36px 32px;
+    }
+    .ag-public-footer__brand {
+      grid-column: 1 / -1;
+    }
+    .ag-public-footer__cta {
+      padding: 22px 22px 24px;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 10px;
+      background: #f5f5f6;
+    }
+  }
+
+  @media (min-width: 1100px) {
+    .ag-public-footer__main-inner {
+      grid-template-columns: minmax(200px, 1.15fr) repeat(3, minmax(0, 1fr)) minmax(200px, 1.28fr);
+      gap: 40px 36px;
+      align-items: start;
+    }
+    .ag-public-footer__cta {
+      grid-column: auto;
+      max-width: none;
+    }
+  }
+
+  .ag-public-footer__brand-desc {
+    margin: 14px 0 0;
+    max-width: 36ch;
+    font-size: 16px;
+    line-height: 1.55;
+    color: #666;
+    font-weight: 400;
+  }
+
+  .ag-public-footer__col-title {
+    margin: 0 0 14px;
+    font-size: 15px;
     font-weight: 600;
+    line-height: 1.25;
+    color: #1d1d1f;
+    letter-spacing: normal;
+    text-transform: none;
   }
-  .brand-mark { position: relative; }
-  .brand-mark::after {
-    content: "";
-    position: absolute;
-    left: 1px;
-    right: 1px;
-    bottom: -5px;
-    height: 2px;
-    border-radius: 999px;
-    background: #111;
-  }
-  .footer-brand p {
-    max-width: 430px;
-    margin: 22px 0 0;
-    font-size: 14px;
-    line-height: 1.6;
-  }
-  .footer-actions {
-    margin-top: 20px;
+
+  .ag-public-footer__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
     display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
+    flex-direction: column;
+    gap: 13px;
   }
-  .footer-actions a {
+
+  .ag-public-footer__link {
+    display: inline-block;
+    font-size: 15px;
+    line-height: 1.45;
+    font-weight: 400;
+    color: #666;
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+
+  @media (min-width: 1100px) {
+    .ag-public-footer__link {
+      font-size: 16px;
+    }
+  }
+
+  .ag-public-footer__link:hover {
+    color: #1d1d1f;
+  }
+
+  .ag-public-footer__cta {
+    padding: 22px 22px 24px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 10px;
+    background: #fafafa;
+    box-sizing: border-box;
+  }
+
+  @media (min-width: 1100px) {
+    .ag-public-footer__cta {
+      padding: 4px 0 0 28px;
+      border: none;
+      border-left: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 0;
+      background: transparent;
+    }
+  }
+
+  .ag-public-footer__cta-title {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    color: #1d1d1f;
+  }
+
+  @media (min-width: 1100px) {
+    .ag-public-footer__cta-title {
+      font-size: 24px;
+    }
+  }
+
+  .ag-public-footer__cta-text {
+    margin: 12px 0 0;
+    font-size: 16px;
+    line-height: 1.5;
+    color: #666;
+    font-weight: 400;
+  }
+
+  @media (min-width: 1100px) {
+    .ag-public-footer__cta-text {
+      font-size: 17px;
+    }
+  }
+
+  .ag-public-footer__cta-btn {
     display: inline-flex;
-    min-height: 38px;
     align-items: center;
     justify-content: center;
-    border-radius: 999px;
-    border: 1px solid rgba(0,0,0,.14);
-    padding: 0 15px;
-    color: #111;
-    font-size: 13px;
-  }
-  .footer-actions a:first-child {
-    background: #111;
-    border-color: #111;
+    margin-top: 18px;
+    min-height: 44px;
+    padding: 0 20px;
+    border-radius: 8px;
+    background: #1d1d1f;
     color: #fff;
-  }
-  .footer-nav {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 24px;
-  }
-  .footer-nav div {
-    display: grid;
-    align-content: start;
-    gap: 10px;
-  }
-  strong {
-    color: #111;
-    font-size: 13px;
+    font-size: 15px;
     font-weight: 600;
+    text-decoration: none;
+    transition: background-color 0.15s ease;
   }
-  a:hover { color: #111; }
-  @media (max-width: 720px) {
-    .footer-inner { grid-template-columns: 1fr; gap: 28px; }
-    .footer-nav { grid-template-columns: 1fr; }
+
+  .ag-public-footer__cta-btn:hover {
+    background: #000;
+  }
+
+  .ag-public-footer__cat-band {
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+    background: #f0f0f2;
+  }
+
+  .ag-public-footer__cat-inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 22px;
+    padding-block: 20px;
+    box-sizing: border-box;
+  }
+
+  .ag-public-footer__cat {
+    font-size: 13px;
+    line-height: 1.4;
+    font-weight: 400;
+    color: #5f5f63;
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+
+  @media (min-width: 1024px) {
+    .ag-public-footer__cat {
+      font-size: 14px;
+    }
+  }
+
+  .ag-public-footer__cat:hover {
+    color: #1d1d1f;
+  }
+
+  .ag-public-footer__legal-wrap {
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    background: #fafafa;
+  }
+
+  .ag-public-footer__legal {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px 24px;
+    padding-block: 24px;
+    box-sizing: border-box;
+    font-size: 14px;
+    color: #6f6f73;
+  }
+
+  .ag-public-footer__legal-left {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 18px 22px;
+  }
+
+  .ag-public-footer__copy {
+    margin: 0;
+  }
+
+  .ag-public-footer__lang {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    color: #6f6f73;
+    font-size: 14px;
+  }
+
+  .ag-public-footer__lang-icon {
+    flex-shrink: 0;
+    color: #6f6f73;
+  }
+
+  .ag-public-footer__legal-right {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 20px 22px;
+  }
+
+  .ag-public-footer__social {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+
+  .ag-public-footer__social-link {
+    display: flex;
+    color: #6f6f73;
+    line-height: 0;
+    transition: color 0.15s ease;
+  }
+
+  .ag-public-footer__social-link:hover {
+    color: #1d1d1f;
+  }
+
+  .ag-public-footer__legal-links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px 20px;
+  }
+
+  .ag-public-footer__legal-link {
+    color: #6f6f73;
+    text-decoration: none;
+    font-size: 14px;
+    transition: color 0.15s ease;
+    white-space: nowrap;
+  }
+
+  .ag-public-footer__legal-link:hover {
+    color: #1d1d1f;
+  }
+
+  @media (max-width: 719px) {
+    .ag-public-footer__legal {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .ag-public-footer__legal-right {
+      width: 100%;
+      flex-direction: column;
+      align-items: flex-start;
+    }
   }
 </style>

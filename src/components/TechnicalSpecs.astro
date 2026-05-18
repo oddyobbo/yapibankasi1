@@ -13,8 +13,8 @@ const rows = [
 ].filter(([, value]) => value);
 const structuredRows = (product.specs || []).filter((row) => row.label && (row.value_text || row.value_number));
 ---
-<section class="card spec-card">
-  <h2>Teknik Bilgiler</h2>
+<section class="ag-panel-section spec-card">
+  <h2 class="ag-panel-title">Teknik Bilgiler</h2>
   {rows.length || structuredRows.length ? (
     <dl>
       {rows.map(([label, value]) => <><dt>{label}</dt><dd>{value}</dd></>)}
@@ -25,12 +25,13 @@ const structuredRows = (product.specs || []).filter((row) => row.label && (row.v
   )}
 </section>
 <style>
-  .spec-card { padding: 28px; border-radius: 22px; }
-  h2 { margin: 0 0 18px; color: #1d1d1f; font-size: 20px; line-height: 1.22; font-weight: 600; letter-spacing: 0; }
+  .spec-card .ag-panel-title {
+    margin: 0 0 1rem;
+  }
   dl { display: grid; grid-template-columns: minmax(130px, 220px) 1fr; margin: 0; border-top: 1px solid rgba(0,0,0,.08); }
   dt, dd { margin: 0; padding: 13px 0; border-bottom: 1px solid rgba(0,0,0,.08); font-size: 14px; line-height: 1.4; }
   dt { color: #6e6e73; }
-  dd { color: #111; }
+  dd { color: var(--ag-text); }
   .empty-text { margin: 0; color: #6e6e73; font-size: 14px; }
   @media (max-width: 640px) {
     dl { grid-template-columns: 1fr; }

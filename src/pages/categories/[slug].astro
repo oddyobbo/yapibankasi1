@@ -1,17 +1,30 @@
 ---
+// TODO: Site geneli varsayılan og:image (sosyal paylaşım) varsa BaseLayout image prop ile eklenebilir.
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import Header from "../../components/Header.astro";
 import Footer from "../../components/Footer.astro";
 import ProductCard from "../../components/ProductCard.astro";
 import CategoryGrid from "../../components/CategoryGrid.astro";
-import { getCategories, getCategoryDetail } from "../../lib/catalog.js";
-import { categoryPath } from "../../lib/slugs.js";
+import {
+  findPathByCategorySlug,
+  getTaxonomyTree,
+  buildProductListPath,
+  PRODUCT_CATALOG_BASE,
+} from "../../lib/product-taxonomy-routes.js";
 
 const category = await getCategoryDetail(Astro.params.slug);
 const categories = await getCategories();
-if (!category) return Astro.redirect("/products", 302);
+if (!category) return Astro.redirect(PRODUCT_CATALOG_BASE, 302);
 const products = category.products || [];
 const otherCategories = categories.filter((item) => item.id !== category.id).slice(0, 8);
+/** /products filtreleri `getCategoryBySlug` ile slug bekliyor (örn. akustik, seramik-dogal-tas). */
+const productsCategoryFilterSlug =
+  (category.slug && String(category.slug).trim()) || slugify(category.name);
+const taxonomyTree = getTaxonomyTree();
+const pathHit = findPathByCategorySlug(taxonomyTree, productsCategoryFilterSlug);
+const productsFilteredHref = pathHit
+  ? buildProductListPath({ group: pathHit.group, category: pathHit.category, subcategory: "" })
+  : `${PRODUCT_CATALOG_BASE}?category=${encodeURIComponent(productsCategoryFilterSlug)}`;
 ---
 <BaseLayout
   title={`${category.name} | Kategori | Archilink`}
@@ -31,7 +44,7 @@ const otherCategories = categories.filter((item) => item.id !== category.id).sli
         <aside class="hero-panel">
           <strong>{products.length}</strong>
           <span>yayınlanmış ürün</span>
-          <a href={`/products?category=${encodeURIComponent(category.name)}`} class="button secondary">Filtreli ürünlere git</a>
+          <a href={productsFilteredHref} class="button secondary">Filtreli ürünlere git</a>
         </aside>
       </div>
     </section>

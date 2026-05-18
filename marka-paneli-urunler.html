@@ -16,9 +16,11 @@
         <nav class="flex gap-1 overflow-x-auto" style="-webkit-overflow-scrolling:touch">
           <a href="/marka-paneli.html" class="panel-nav-mobile shrink-0 px-3 py-2 rounded-lg text-[12px] font-medium text-[#424245] whitespace-nowrap" data-brand-nav-link="ozet">Özet</a>
           <a href="/marka-paneli-urunler.html" class="panel-nav-mobile shrink-0 px-3 py-2 rounded-lg text-[12px] font-medium text-[#424245] whitespace-nowrap" data-brand-nav-link="urunler">Ürünler</a>
+          <a href="/marka-paneli-talepler.html" class="panel-nav-mobile shrink-0 px-3 py-2 rounded-lg text-[12px] font-medium text-[#424245] whitespace-nowrap" data-brand-nav-link="talepler">Talepler</a>
           <a href="/marka-paneli-analiz.html" class="panel-nav-mobile shrink-0 px-3 py-2 rounded-lg text-[12px] font-medium text-[#424245] whitespace-nowrap" data-brand-nav-link="analiz">Analiz</a>
           <a href="/marka-paneli-proje.html" class="panel-nav-mobile shrink-0 px-3 py-2 rounded-lg text-[12px] font-medium text-[#424245] whitespace-nowrap" data-brand-nav-link="proje">Proje ekle</a>
           <a href="/marka-paneli-projeler.html" class="panel-nav-mobile shrink-0 px-3 py-2 rounded-lg text-[12px] font-medium text-[#424245] whitespace-nowrap" data-brand-nav-link="projeler">Projeler</a>
+          <a href="/marka-paneli-iletisim.html" class="panel-nav-mobile shrink-0 px-3 py-2 rounded-lg text-[12px] font-medium text-[#424245] whitespace-nowrap" data-brand-nav-link="iletisim">İletişim</a>
         </nav>
       </div>
       <!-- Sol menü (masaüstü) -->
@@ -27,17 +29,38 @@
         <nav class="flex flex-col gap-0.5" id="panel-nav-desktop">
           <a href="/marka-paneli.html" class="panel-nav" data-brand-nav-link="ozet"><span>Özet</span></a>
           <a href="/marka-paneli-urunler.html" class="panel-nav" data-brand-nav-link="urunler"><span>Ürünlerim</span></a>
+          <a href="/marka-paneli-talepler.html" class="panel-nav" data-brand-nav-link="talepler"><span>Talepler</span></a>
           <a href="/marka-paneli-analiz.html" class="panel-nav" data-brand-nav-link="analiz"><span>Analizler</span></a>
           <a href="/marka-paneli-proje.html" class="panel-nav" data-brand-nav-link="proje"><span>Proje paylaş</span></a>
           <a href="/marka-paneli-projeler.html" class="panel-nav" data-brand-nav-link="projeler"><span>Projelerim</span></a>
+          <a href="/marka-paneli-iletisim.html" class="panel-nav" data-brand-nav-link="iletisim"><span>İletişim bilgileri</span></a>
         </nav>
       </aside>
 
       <main class="flex-1 min-w-0 w-full px-4 py-5 sm:px-5 lg:px-8 lg:py-7 space-y-8 pb-24 lg:pb-8">
       <section id="panel-urunler" class="scroll-mt-24 lg:scroll-mt-20 rounded-2xl border border-black/[0.08] bg-white p-5 lg:p-6 space-y-8">
+        <div id="brand-products-list-section">
+        <div class="flex items-center justify-between gap-3 flex-wrap">
+          <div>
+            <h2 class="panel-section-title">Ürünlerim</h2>
+            <p class="text-[12px] text-[#6e6e73] mt-0.5">Taslak, incelemede, yayındaki ve yayından kaldırılmış ürünler</p>
+          </div>
+          <div class="flex flex-wrap gap-2 items-center">
+            <button type="button" id="open-product-add-btn" class="h-9 px-4 rounded-lg bg-[#1d1d1f] text-white text-[13px] font-semibold hover:bg-[#333]">Yeni Ürün Ekle</button>
+            <button id="toggle-select-mode" type="button" class="h-8 px-3 rounded-lg border border-black/[0.08] text-[12px] font-medium text-[#1d1d1f] hover:border-black/20 bg-white">Seç</button>
+            <button id="delete-selected-products" type="button" class="h-8 px-3 rounded-lg border border-black/[0.08] text-[12px] font-medium text-[#1d1d1f] hover:border-black/20 bg-white hidden">Seçilenleri sil</button>
+            <button id="clear-products" class="h-8 px-3 rounded-lg border border-black/[0.08] text-[12px] font-medium text-[#1d1d1f] hover:border-black/20 bg-white">Hepsini temizle</button>
+          </div>
+        </div>
+        <p id="bulk-delete-msg" class="mt-2 text-[12px] text-[#6e6e73] hidden"></p>
+        <p id="product-list-action-msg" class="mt-2 text-[12px] hidden" role="status" aria-live="polite"></p>
+        <div id="brand-products" class="mt-4 flex flex-col gap-2"></div>
+        </div>
+
+        <div id="product-form-shell" class="hidden">
         <div>
-          <h2 class="panel-section-title">Ürün ekle</h2>
-          <p class="text-[13px] text-[#6e6e73] mt-1">Manuel, CSV, API veya web adresiyle kataloga aktar.</p>
+          <h2 id="product-form-heading" class="panel-section-title">Yeni Ürün Ekle</h2>
+          <p id="product-form-subtitle" class="text-[13px] text-[#6e6e73] mt-1">Manuel, CSV, API veya web adresiyle kataloga aktar.</p>
           <div id="mode-tabs" class="flex gap-2 flex-wrap mt-4">
             <button data-mode="manual" class="mode-tab h-8 px-3 rounded-lg text-[12px] font-medium border border-black/[0.08] bg-[#1d1d1f] text-white">Manuel</button>
             <button data-mode="csv" class="mode-tab h-8 px-3 rounded-lg text-[12px] font-medium border border-black/[0.08] bg-white text-[#1d1d1f] hover:border-black/20">CSV</button>
@@ -46,35 +69,70 @@
           </div>
 
         <div id="mode-manual" class="mode-panel mt-5">
-          <form id="product-form" class="grid md:grid-cols-2 gap-3 text-[14px]">
-            <input required name="name" class="h-11 rounded-xl border border-black/10 px-4" placeholder="Ürün adı *">
-            <input required name="sku" class="h-11 rounded-xl border border-black/10 px-4" placeholder="SKU / Ürün kodu *">
-            <select required name="category" id="manual-category" class="h-11 rounded-xl border border-black/10 px-4 bg-white">
-              <option value="">Ana kategori seç *</option>
-            </select>
-            <select required name="subcategory" id="manual-subcategory" class="h-11 rounded-xl border border-black/10 px-4 bg-white">
-              <option value="">Alt kategori seç *</option>
-            </select>
-            <input required name="description" class="h-11 rounded-xl border border-black/10 px-4 md:col-span-2" placeholder="Kısa ürün açıklaması *">
-            <input name="usageScope" class="h-11 rounded-xl border border-black/10 px-4 md:col-span-2" placeholder="Kullanım alanları (isteğe bağlı, virgülle: iç mekan, zemin, cephe…)">
-            <input name="materialType" class="h-11 rounded-xl border border-black/10 px-4 md:col-span-2" placeholder="Malzeme türü (isteğe bağlı, örn: seramik, LED profil, kompozit panel)">
+          <form id="product-form" class="grid md:grid-cols-2 gap-4 text-[14px]">
+            <h3 class="brand-form-section-title md:col-span-2">1. Temel bilgiler</h3>
+            <div class="brand-form-field">
+              <label class="brand-form-label" for="product-name">Ürün adı</label>
+              <input required name="name" id="product-name" class="brand-form-input" placeholder="Örn. Akustik Panel">
+            </div>
+            <div class="brand-form-field">
+              <label class="brand-form-label" for="product-sku">SKU / Ürün kodu</label>
+              <input required name="sku" id="product-sku" class="brand-form-input" placeholder="Örn. AL-2048">
+            </div>
+            <div class="brand-form-field md:col-span-2">
+              <label class="brand-form-label" for="product-description">Kısa ürün açıklaması</label>
+              <textarea required name="description" id="product-description" class="brand-form-textarea" rows="2" placeholder="Ürünün kısa tanımı"></textarea>
+            </div>
+            <div class="brand-form-field md:col-span-2">
+              <label class="brand-form-label" for="product-usage">Kullanım alanları <span class="brand-form-label-optional">(isteğe bağlı)</span></label>
+              <input name="usageScope" id="product-usage" class="brand-form-input" placeholder="İç mekan, zemin, cephe…">
+            </div>
+            <div class="brand-form-field md:col-span-2">
+              <label class="brand-form-label" for="product-material">Malzeme türü <span class="brand-form-label-optional">(isteğe bağlı)</span></label>
+              <input name="materialType" id="product-material" class="brand-form-input" placeholder="Seramik, LED profil, kompozit panel…">
+            </div>
 
-            <h3 class="md:col-span-2 text-[15px] font-semibold mt-2">Teknik Bilgi Başlıkları</h3>
-            <label class="text-[12px] text-[#6e6e73]">Yangın Sınıfı
-              <input name="fireClass" class="mt-1 h-11 w-full rounded-xl border border-black/10 px-4" placeholder="Örn: EN 13501-1 / B-s1,d0">
-            </label>
-            <label class="text-[12px] text-[#6e6e73]">Akustik Performans
-              <input name="acoustic" class="mt-1 h-11 w-full rounded-xl border border-black/10 px-4" placeholder="Örn: NRC 0.85">
-            </label>
-            <label class="text-[12px] text-[#6e6e73]">Ölçü
-              <input name="dimensions" class="mt-1 h-11 w-full rounded-xl border border-black/10 px-4" placeholder="Örn: 60x120 cm">
-            </label>
-            <label class="text-[12px] text-[#6e6e73]">Kalınlık
-              <input name="thickness" class="mt-1 h-11 w-full rounded-xl border border-black/10 px-4" placeholder="Örn: 12 mm">
-            </label>
-            <label class="md:col-span-2 text-[12px] text-[#6e6e73]">Sertifikalar
-              <input name="certificates" class="mt-1 h-11 w-full rounded-xl border border-black/10 px-4" placeholder="Örn: EPD, CE, ISO 9001">
-            </label>
+            <h3 class="brand-form-section-title md:col-span-2">2. Kategori</h3>
+            <div class="brand-form-field">
+              <label class="brand-form-label" for="manual-l1">Ana kategori</label>
+              <select required name="taxonomy_l1" id="manual-l1" class="brand-form-select">
+                <option value="">Seçiniz</option>
+              </select>
+            </div>
+            <div class="brand-form-field">
+              <label class="brand-form-label" for="manual-category">Kategori</label>
+              <select required name="taxonomy_l2" id="manual-category" class="brand-form-select" disabled>
+                <option value="">Seçiniz</option>
+              </select>
+            </div>
+            <div class="brand-form-field md:col-span-2">
+              <label class="brand-form-label" for="manual-subcategory">Ürün ailesi</label>
+              <select required name="taxonomy_l3" id="manual-subcategory" class="brand-form-select" disabled>
+                <option value="">Seçiniz</option>
+              </select>
+            </div>
+
+            <h3 class="brand-form-section-title md:col-span-2">3. Teknik bilgiler / dosyalar</h3>
+            <div class="brand-form-field">
+              <label class="brand-form-label" for="product-fire">Yangın sınıfı</label>
+              <input name="fireClass" id="product-fire" class="brand-form-input" placeholder="EN 13501-1 / B-s1,d0">
+            </div>
+            <div class="brand-form-field">
+              <label class="brand-form-label" for="product-acoustic">Akustik performans</label>
+              <input name="acoustic" id="product-acoustic" class="brand-form-input" placeholder="NRC 0.85">
+            </div>
+            <div class="brand-form-field">
+              <label class="brand-form-label" for="product-dimensions">Ölçü</label>
+              <input name="dimensions" id="product-dimensions" class="brand-form-input" placeholder="60x120 cm">
+            </div>
+            <div class="brand-form-field">
+              <label class="brand-form-label" for="product-thickness">Kalınlık</label>
+              <input name="thickness" id="product-thickness" class="brand-form-input" placeholder="12 mm">
+            </div>
+            <div class="brand-form-field md:col-span-2">
+              <label class="brand-form-label" for="product-certs">Sertifikalar</label>
+              <input name="certificates" id="product-certs" class="brand-form-input" placeholder="EPD, CE, ISO 9001">
+            </div>
             <div class="md:col-span-2 rounded-xl border border-black/10 bg-white p-3">
               <div class="flex items-center justify-between gap-3">
                 <p class="text-[13px] font-semibold">Özel Teknik Başlıklar</p>
@@ -84,7 +142,7 @@
               <div id="custom-tech-rows" class="mt-3 space-y-2"></div>
             </div>
 
-            <h3 class="md:col-span-2 text-[15px] font-semibold mt-2">Dosya ve Medya</h3>
+            <h3 class="brand-form-section-title md:col-span-2">4. Görseller</h3>
             <input type="hidden" name="image">
             <input type="hidden" name="imageGallery">
             <input type="hidden" name="pdfUrl">
@@ -121,7 +179,13 @@
                 <p id="upload-bim-msg" class="text-[11px] text-[#6e6e73] mt-2">Maks 100 MB</p>
               </div>
             </div>
-            <button class="md:col-span-2 h-11 rounded-xl bg-black text-white font-semibold">Ürünü Kaydet (Yayında)</button>
+            <h3 class="brand-form-section-title md:col-span-2">5. Yayın durumu</h3>
+            <input type="hidden" name="productStatus" id="product-status-field" value="pending_review">
+            <div class="md:col-span-2 flex flex-wrap gap-2">
+              <button type="submit" id="product-submit-review" class="h-10 rounded-lg bg-black text-[13px] text-white font-semibold px-6">İncelemeye Gönder</button>
+              <button type="button" id="save-product-draft-btn" class="h-10 rounded-lg border text-[13px] border-black/15 font-semibold px-6">Taslak kaydet</button>
+              <button type="button" id="product-edit-cancel-btn" class="h-10 rounded-lg border text-[13px] border-black/15 font-semibold px-6 text-[#1d1d1f] hover:bg-black/[0.04]">İptal</button>
+            </div>
             <p id="manual-save-msg" class="md:col-span-2 text-[12px] text-[#6e6e73]"></p>
           </form>
         </div>
@@ -144,8 +208,8 @@
               <div class="mt-4 rounded-lg bg-[#fbfbfd] border border-black/10 p-3 text-[12px] text-[#3a3a3c]">
                 <p class="font-semibold">Not:</p>
                 <p>- İlk 4 alan (name, sku, category, description) zorunlu.</p>
-                <p>- Import edilen ürünler yayında olarak açılır.</p>
-                <p>- Panelden yayına alırsın.</p>
+                <p>- Import edilen ürünler incelemeye gönderilir (kategori metni CSV’den; ID eşlemesi yok).</p>
+                <p>- Yayın için admin onayı / panel akışı kullanılır.</p>
               </div>
             </article>
           </div>
@@ -162,7 +226,7 @@
             <pre class="mt-4 p-3 rounded-lg bg-[#0b0b0c] text-white text-[12px] overflow-x-auto">{
   "name": "Unica Baffle Tavan Paneli",
   "sku": "UNI-BAF-1200",
-  "category": "Akustik",
+  "category": "Zemin & Yüzey > Akustik Ürünler > Akustik Paneller",
   "description": "Yüksek akustik performanslı tavan paneli",
   "technical": {
     "fireClass": "B-s1,d0",
@@ -216,9 +280,21 @@
                   <input id="prev-name" class="w-full h-10 rounded-xl border border-black/10 px-3 outline-none focus:border-black/30" placeholder="Ürün adı">
                 </div>
                 <div>
+                  <label class="block text-[11px] text-[#6e6e73] mb-1">Ana kategori</label>
+                  <select id="prev-l1" class="w-full h-10 rounded-xl border border-black/10 px-3 bg-white outline-none focus:border-black/30">
+                    <option value="">Ana kategori seç</option>
+                  </select>
+                </div>
+                <div>
                   <label class="block text-[11px] text-[#6e6e73] mb-1">Kategori</label>
-                  <select id="prev-category" class="w-full h-10 rounded-xl border border-black/10 px-3 bg-white outline-none focus:border-black/30">
+                  <select id="prev-category" class="w-full h-10 rounded-xl border border-black/10 px-3 bg-white outline-none focus:border-black/30" disabled>
                     <option value="">Kategori seç</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-[11px] text-[#6e6e73] mb-1">Ürün ailesi</label>
+                  <select id="prev-subcategory" class="w-full h-10 rounded-xl border border-black/10 px-3 bg-white outline-none focus:border-black/30" disabled>
+                    <option value="">Ürün ailesi seç</option>
                   </select>
                 </div>
                 <div>
@@ -258,26 +334,13 @@
                   <input id="prev-source-url" class="w-full h-10 rounded-xl border border-black/10 px-3 text-[12px] text-[#6e6e73] bg-[#fafafa]" readonly>
                 </div>
               </div>
-              <button id="btn-save-url-product" class="mt-4 w-full h-11 rounded-xl bg-black text-white text-[13px] font-semibold hover:bg-[#222] transition-colors">Ürünü Kaydet (Yayında)</button>
+              <button id="btn-save-url-product" class="mt-4 w-full h-11 rounded-xl bg-black text-white text-[13px] font-semibold hover:bg-[#222] transition-colors">İncelemeye Gönder</button>
             </div>
           </div>
         </div>
         </div>
 
-        <div class="border-t border-black/[0.08] pt-8">
-        <div class="flex items-center justify-between gap-3 flex-wrap">
-          <div>
-            <h3 class="panel-section-title">Ürün listesi</h3>
-            <p class="text-[12px] text-[#6e6e73] mt-0.5">Yayın ve taslak ürünler</p>
-          </div>
-          <div class="flex flex-wrap gap-2">
-            <button id="toggle-select-mode" type="button" class="h-8 px-3 rounded-lg border border-black/[0.08] text-[12px] font-medium text-[#1d1d1f] hover:border-black/20 bg-white">Seç</button>
-            <button id="delete-selected-products" type="button" class="h-8 px-3 rounded-lg border border-black/[0.08] text-[12px] font-medium text-[#1d1d1f] hover:border-black/20 bg-white hidden">Seçilenleri sil</button>
-            <button id="clear-products" class="h-8 px-3 rounded-lg border border-black/[0.08] text-[12px] font-medium text-[#1d1d1f] hover:border-black/20 bg-white">Hepsini temizle</button>
-          </div>
         </div>
-        <p id="bulk-delete-msg" class="mt-2 text-[12px] text-[#6e6e73] hidden"></p>
-        <div id="brand-products" class="mt-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 md:gap-4"></div>
         </div>
       </section>
     </main>
@@ -285,8 +348,8 @@
     <div id="site-footer"></div>
   </div>
   <script>window.__MARKA_PANEL_PAGE__ = "products";</script>
-  <script src="/core.js"></script>
+  <script src="/core.js?v=brand-custom-taxonomy-2"></script>
   <script src="/layout.js"></script>
-  <script src="/marka-panel.js"></script>
+  <script src="/marka-panel.js?v=brand-products-ui-1"></script>
 </body>
 </html>

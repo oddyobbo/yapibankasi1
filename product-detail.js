@@ -417,7 +417,7 @@
         await track("save_to_favorites", product);
         $("btn-save-product").textContent = res?.active === false ? "Kaydet" : "Kaydedildi";
       } catch (_) {
-        location.href = "/mimar-giris.html";
+        location.href = "/giris";
       }
     });
 
@@ -427,9 +427,9 @@
         const res = await AG.addProductToMoodboard({ moodboardName: "Kaydedilen Ürünler", product });
         if (!res?.ok) throw new Error(res?.message || "Moodboard'a eklenemedi");
         await track("add_to_moodboard", product);
-        location.href = "/mimar-paneli.html?tab=moodboards";
+        location.href = "/mimar-paneli/boardlar";
       } catch (_) {
-        location.href = "/mimar-giris.html";
+        location.href = "/giris";
       }
     });
 

@@ -1,5 +1,9 @@
 import { ADMIN_EMAIL, getSB, ready } from "./supabaseClient.js";
-import { lsWrite } from "./uiHelpers.js";
+import {
+  LS_ARCHITECT_SESSION_KEY,
+  LS_BRAND_SESSION_KEY,
+  lsWrite,
+} from "./uiHelpers.js";
 
 export const createAuthService = () => {
   const ensureOwnProfile = async (row) => {
@@ -75,11 +79,97 @@ export const createAuthService = () => {
     return user?.email === ADMIN_EMAIL;
   };
 
+  const loginUnified = async ({ email, password }) => {
+    await ready;
+    const sb = getSB();
+    if (!sb) return { ok: false, message: "Sunucu bağlantısı kurulamadı." };
+
+    const { data, error } = await sb.auth.signInWithPassword({ email, password });
+    if (error || !data?.user) {
+      return { ok: false, message: "E-posta veya şifre hatalı." };
+    }
+
+    const user = data.user;
+    const { data: profile } = await sb
+      .from("profiles")
+      .select("*")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    const accountType =
+      user.email === ADMIN_EMAIL || profile?.account_type === "admin"
+        ? "admin"
+        : profile?.account_type || "architect";
+
+    lsWrite("ag_session_admin_v1", null);
+    lsWrite(LS_ARCHITECT_SESSION_KEY, null);
+    lsWrite(LS_BRAND_SESSION_KEY, null);
+
+    if (accountType === "admin") {
+      lsWrite("ag_session_admin_v1", true);
+      return {
+        ok: true,
+        accountType: "admin",
+        redirect: "/admin-paneli",
+      };
+    }
+
+    if (accountType === "brand") {
+      const brandSession = {
+        id: user.id,
+        email: user.email,
+        ...(profile || {}),
+        account_type: "brand",
+      };
+      lsWrite(LS_BRAND_SESSION_KEY, brandSession);
+      return {
+        ok: true,
+        accountType: "brand",
+        redirect: "/marka-paneli",
+      };
+    }
+
+    if (accountType === "architect") {
+      const baseProfile = profile || {
+        id: user.id,
+        email: user.email || "",
+        name: user.user_metadata?.name || (user.email || "").split("@")[0],
+        account_type: "architect",
+        architect_profile_type: "individual",
+      };
+
+      let architectProfile = baseProfile;
+      try {
+        architectProfile = await syncArchitectProfileFromMetadata(user, baseProfile);
+      } catch {}
+
+      const architectSession = {
+        id: user.id,
+        email: user.email,
+        ...(architectProfile || baseProfile),
+        account_type: "architect",
+      };
+      lsWrite(LS_ARCHITECT_SESSION_KEY, architectSession);
+      return {
+        ok: true,
+        accountType: "architect",
+        redirect: "/mimar-paneli",
+      };
+    }
+
+    await sb.auth.signOut();
+    return {
+      ok: false,
+      message: "Hesap türü bulunamadı. Lütfen destekle iletişime geçin.",
+    };
+  };
+
   return {
     ensureOwnProfile,
     syncArchitectProfileFromMetadata,
     loginAdmin,
     logoutAdmin,
     isAdmin,
+    loginUnified,
   };
 };

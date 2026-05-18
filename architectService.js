@@ -158,7 +158,7 @@ export const createArchitectService = ({
     if (profile?.account_type !== "architect") {
       await sb.auth.signOut();
       if (!profile || profile.account_type === "brand" || !profile.account_type) {
-        return { ok: false, message: "Bu hesap marka hesabı. Marka girişi için /marka-giris.html sayfasını kullanın." };
+        return { ok: false, message: "Bu hesap marka hesabı. Marka girişi için /giris sayfasını kullanın." };
       }
       return { ok: false, message: "Bu e-posta ile mimar hesabı bulunamadı." };
     }

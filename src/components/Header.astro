@@ -1,143 +1,1243 @@
-<header class="site-header">
-  <div class="container site-header-inner">
-    <a class="brand" href="/" aria-label="Archilink ana sayfa">
-      <span>Arch</span><span class="brand-mark">il</span><span>ink</span>
+---
+import {
+  buildProductListPath,
+  FINAL_TAXONOMY_L1_SLUG_ORDER,
+  PRODUCT_CATALOG_BASE,
+} from "../lib/product-taxonomy-routes.js";
+import { getPublicTaxonomyTree } from "../lib/catalog.js";
+
+const path = Astro.url.pathname.replace(/\/$/, "") || "/";
+
+type TaxonomyNode = {
+  name_tr: string;
+  slug: string;
+  level: number;
+  show_in_header_dropdown?: boolean;
+  is_active?: boolean;
+  children?: TaxonomyNode[];
+};
+
+type MegaMenuLink = { label: string; href: string };
+type MegaMenuGroup = { slug: string; title: string; icon: string; links: MegaMenuLink[] };
+
+function navIsActive(id: string): boolean {
+  if (id === "home") return path === "/" || path === "";
+  if (id === "products") {
+    return (
+      path === PRODUCT_CATALOG_BASE ||
+      path.startsWith(`${PRODUCT_CATALOG_BASE}/`) ||
+      path === "/categories" ||
+      path.startsWith("/categories/")
+    );
+  }
+  if (id === "brands") return path === "/brands" || path.startsWith("/brands/");
+  if (id === "projects") return path === "/projects" || path.startsWith("/projects/");
+  return false;
+}
+
+function resolveCategorySlug(slug: string) {
+  return slug;
+}
+
+function productsCategoryHref(l1Slug: string, l2Slug: string) {
+  return buildProductListPath({
+    group: l1Slug,
+    category: resolveCategorySlug(l2Slug),
+    subcategory: "",
+  });
+}
+
+const iconLayers =
+  '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2 2 7l10 5 10-5-10-5Z"/><path d="m2 12 10 5 10-5"/><path d="m2 17 10 5 10-5"/></svg>';
+const iconBuilding =
+  '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="1"/><path d="M9 21V9h6v12"/><path d="M9 13h6"/></svg>';
+const iconArmchair =
+  '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 12V7a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v5"/><path d="M4 12h16v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-5Z"/><path d="M6 19v2"/><path d="M18 19v2"/></svg>';
+const iconBath =
+  '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h16a2 2 0 0 1 2 2v2H2v-2a2 2 0 0 1 2-2Z"/><path d="M6 12V5a2 2 0 0 1 2-2h1"/><circle cx="7" cy="5" r="1"/></svg>';
+const iconCircuit =
+  '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="10" rx="2"/><path d="M6 11h.01"/><path d="M10 11h.01"/><path d="M14 11h.01"/><path d="M18 11h.01"/></svg>';
+const iconTree =
+  '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22V12"/><path d="M7 12a5 5 0 0 1 10 0c0 2.5-2 4-5 4s-5-1.5-5-4Z"/><path d="M12 7V4"/><path d="M9 4h6"/></svg>';
+const iconSun =
+  '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>';
+
+const taxonomyRoot = (await getPublicTaxonomyTree()) as TaxonomyNode[];
+
+const ICON_BY_L1: Record<string, string> = {
+  "zemin-yuzey": iconLayers,
+  "yapi-cephe": iconBuilding,
+  "ic-mekan-mobilya": iconArmchair,
+  "mutfak-banyo": iconBath,
+  "teknik-sistemler": iconCircuit,
+  "dis-mekan-peyzaj": iconTree,
+};
+
+const MEGA_MENU_L1_SLUG_ORDER = FINAL_TAXONOMY_L1_SLUG_ORDER;
+
+const groupsBySlug = Object.fromEntries(
+  taxonomyRoot.map((l1) => [
+    l1.slug,
+    {
+      slug: l1.slug,
+      title: l1.name_tr,
+      icon: ICON_BY_L1[l1.slug] || iconLayers,
+      links: (l1.children ?? [])
+        .filter(
+          (l2) =>
+            l2.level === 2 &&
+            l2.is_active !== false &&
+            l2.show_in_header_dropdown !== false,
+        )
+        .map((l2) => ({
+          label: l2.name_tr,
+          href: productsCategoryHref(l1.slug, l2.slug),
+        })),
+    } satisfies MegaMenuGroup,
+  ]),
+);
+
+const productMegaMenuGroups: MegaMenuGroup[] = MEGA_MENU_L1_SLUG_ORDER.map((slug) => groupsBySlug[slug]).filter(
+  (g): g is MegaMenuGroup => Boolean(g),
+);
+
+const profileIcon =
+  '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>';
+
+const moonIcon =
+  '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
+
+---
+<header class="ag-site-header" data-public-header>
+  <div class="ag-header-row">
+    <a href="/" data-ag-logo="1" class="ag-logo" aria-label="Archilink">
+      <span>Arch</span><span class="ag-logo-il"><span>il</span><svg class="ag-logo-curve" height="6" viewBox="0 0 20 6" preserveAspectRatio="none" aria-hidden="true"><path data-ag-logo-path="1" d="M0,1 Q10,6 20,1" stroke="#1d1d1f" stroke-width="1.8" fill="none" stroke-linecap="round"></path></svg></span><span>ink</span>
     </a>
-    <form class="site-search" method="get" action="/products" role="search">
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="m21 21-4.35-4.35M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z" />
-      </svg>
-      <input name="q" type="search" placeholder="Ürün ara..." />
-    </form>
-    <nav aria-label="Ana navigasyon">
-      <a href="/products">Ürünler</a>
-      <a href="/brands">Markalar</a>
-      <a href="/projects">Projeler</a>
-      <a href="/categories">Kategoriler</a>
+
+    <nav class="ag-nav" aria-label="Ana navigasyon">
+      <a href="/" class:list={["ag-nav-pill", { "is-active": navIsActive("home") }]}>Anasayfa</a>
+
+      <div class="ag-products-wrap">
+        <button
+          type="button"
+          id="products-mega-toggle"
+          class:list={["ag-nav-pill", "ag-products-btn", { "is-active": navIsActive("products") }]}
+          aria-expanded="false"
+          aria-controls="products-mega-panel"
+        >
+          <span>Ürünler</span>
+          <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true">
+            <path d="M4 6.5l4 4 4-4" stroke="currentColor" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+        </button>
+      </div>
+
+      <a href="/brands" class:list={["ag-nav-pill", { "is-active": navIsActive("brands") }]}>Markalar</a>
+      <a href="/projects" class:list={["ag-nav-pill", { "is-active": navIsActive("projects") }]}>Projeler</a>
     </nav>
-    <div class="header-actions">
-      <a class="login-link" href="/mimar-giris.html">Giriş Yap</a>
-      <a class="panel-link" href="/marka-basvuru.html">Marka Başvur</a>
+
+    <form id="header-search-form" class="ag-header-search" method="get" action={PRODUCT_CATALOG_BASE} role="search">
+      <svg class="ag-header-search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <input name="q" type="text" placeholder="Ürün ara..." autocomplete="off" />
+    </form>
+
+    <div class="ag-header-actions">
+      <button data-theme-toggle-public type="button" class="ag-theme-btn" title="Koyu mod aç/kapat" aria-label="Koyu mod aç/kapat" set:html={moonIcon}></button>
+      <div id="header-auth-desktop" class="ag-header-auth">
+        <a href="/giris" class="ag-login-link" id="header-login-fallback">
+          <span set:html={profileIcon}></span>
+          <span>Giriş Yap</span>
+        </a>
+      </div>
+    </div>
+
+    <button id="mobile-menu-btn" type="button" class="ag-mobile-btn" aria-label="Menü">☰</button>
+  </div>
+
+  <div id="products-mega-panel" class="ag-mega is-hidden" role="region" aria-label="Ürünler menüsü">
+    <div class="ag-mega-inner">
+      <div class="ag-mega-head">
+        <div class="ag-mega-title">Ürünler</div>
+
+        <div class="ag-mega-tabs" aria-label="Ürün sekmeleri">
+          <a href={PRODUCT_CATALOG_BASE} class="is-active">Tüm Ürünler</a>
+          <a href={`${PRODUCT_CATALOG_BASE}?sort=created_desc`}>Yeni Koleksiyonlar</a>
+        </div>
+
+        <div></div>
+      </div>
+
+      <div class="ag-mega-rule"></div>
+
+      <div class="ag-mega-body">
+        <div class="ag-mega-grid">
+          {productMegaMenuGroups.map((group) => (
+            <section class="ag-mega-group-card">
+              <div class="ag-mega-group-head">
+                <span class="ag-mega-group-icon" set:html={group.icon} />
+                <h3 class="ag-mega-group-title">{group.title}</h3>
+              </div>
+              <div class="ag-mega-group-links">
+                {group.links.map((link) => (
+                  <a href={link.href} class="ag-mega-group-link">{link.label}</a>
+                ))}
+              </div>
+            </section>
+          ))}
+        </div>
+      </div>
     </div>
   </div>
 </header>
-<style>
-  .site-header {
+
+<div id="mobile-drawer-overlay" class="ag-drawer-overlay is-hidden" aria-hidden="true"></div>
+
+<aside id="mobile-drawer" class="ag-drawer" aria-hidden="true">
+  <div class="ag-drawer-top">
+    <a href="/" data-ag-logo="1" class="ag-logo" aria-label="Archilink">
+      <span>Arch</span><span class="ag-logo-il"><span>il</span><svg class="ag-logo-curve" height="6" viewBox="0 0 20 6" preserveAspectRatio="none" aria-hidden="true"><path data-ag-logo-path="1" d="M0,1 Q10,6 20,1" stroke="#1d1d1f" stroke-width="1.8" fill="none" stroke-linecap="round"></path></svg></span><span>ink</span>
+    </a>
+    <button id="mobile-drawer-close" type="button" class="ag-drawer-close" aria-label="Menüyü kapat">×</button>
+  </div>
+
+  <div class="ag-drawer-body">
+    <nav aria-label="Mobil menü">
+      <a href="/" class:list={["ag-drawer-link", { "is-active": navIsActive("home") }]}>Anasayfa</a>
+      <details class="ag-drawer-products">
+        <summary class="ag-drawer-link ag-drawer-summary">Ürünler</summary>
+        <div class="ag-drawer-sub">
+          <a href={PRODUCT_CATALOG_BASE} class="ag-drawer-sublink">Tüm Ürünler</a>
+          <a href={`${PRODUCT_CATALOG_BASE}?sort=created_desc`} class="ag-drawer-sublink">Yeni Koleksiyonlar</a>
+          {productMegaMenuGroups.map((group) => (
+            <div class="ag-drawer-subgroup">
+              <p>{group.title}</p>
+              {group.links.map((link) => (
+                <a href={link.href} class="ag-drawer-sublink">{link.label}</a>
+              ))}
+            </div>
+          ))}
+        </div>
+      </details>
+      <a href="/brands" class:list={["ag-drawer-link", { "is-active": navIsActive("brands") }]}>Markalar</a>
+      <a href="/projects" class:list={["ag-drawer-link", { "is-active": navIsActive("projects") }]}>Projeler</a>
+      <div id="header-auth-mobile" class="ag-drawer-auth"></div>
+    </nav>
+  </div>
+</aside>
+
+<script is:inline>
+  (function () {
+    var megaToggle = document.getElementById("products-mega-toggle");
+    var megaPanel = document.getElementById("products-mega-panel");
+
+    function closeMega() {
+      if (!megaPanel || !megaToggle) return;
+      megaPanel.classList.add("is-hidden");
+      megaToggle.classList.remove("is-open");
+      megaToggle.setAttribute("aria-expanded", "false");
+    }
+
+    if (megaToggle && megaPanel) {
+      megaToggle.addEventListener("click", function (e) {
+        e.stopPropagation();
+        var willOpen = megaPanel.classList.contains("is-hidden");
+        if (willOpen) {
+          megaPanel.classList.remove("is-hidden");
+          megaToggle.classList.add("is-open");
+          megaToggle.setAttribute("aria-expanded", "true");
+        } else {
+          closeMega();
+        }
+      });
+
+      megaPanel.addEventListener("click", function (e) {
+        e.stopPropagation();
+      });
+
+      document.addEventListener("click", closeMega);
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") closeMega();
+      });
+    }
+
+    var menuBtn = document.getElementById("mobile-menu-btn");
+    var drawer = document.getElementById("mobile-drawer");
+    var overlay = document.getElementById("mobile-drawer-overlay");
+    var closeBtn = document.getElementById("mobile-drawer-close");
+
+    function openDrawer() {
+      if (!drawer || !overlay) return;
+      drawer.classList.add("is-open");
+      overlay.classList.remove("is-hidden");
+      overlay.setAttribute("aria-hidden", "false");
+      drawer.setAttribute("aria-hidden", "false");
+      document.body.style.overflow = "hidden";
+    }
+
+    function closeDrawer() {
+      if (!drawer || !overlay) return;
+      drawer.classList.remove("is-open");
+      overlay.classList.add("is-hidden");
+      overlay.setAttribute("aria-hidden", "true");
+      drawer.setAttribute("aria-hidden", "true");
+      document.body.style.overflow = "";
+    }
+
+    if (menuBtn && drawer && overlay) {
+      menuBtn.addEventListener("click", openDrawer);
+      overlay.addEventListener("click", closeDrawer);
+      if (closeBtn) closeBtn.addEventListener("click", closeDrawer);
+      drawer.querySelectorAll("a").forEach(function (a) {
+        a.addEventListener("click", closeDrawer);
+      });
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") closeDrawer();
+      });
+    }
+
+    var LS_ARCHITECT = "ag_architect_session_v1";
+    var LS_BRAND = "ag_brand_session_v1";
+    var LS_ADMIN = "ag_session_admin_v1";
+    var SUPABASE_URL = "https://dbcyoveyoqjlmybklovu.supabase.co";
+    var SUPABASE_KEY = "sb_publishable_RhoIIO1nhGpyGqgU6MD3kw_sawB4_Zk";
+
+    var profileIconSvg =
+      '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>';
+    var chevronSvg =
+      '<svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6l4 4 4-4"/></svg>';
+    var logoutIconSvg =
+      '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>';
+
+    function readLs(key) {
+      try {
+        var raw = localStorage.getItem(key);
+        if (!raw) return null;
+        return JSON.parse(raw);
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function isAdminSession() {
+      var v = readLs(LS_ADMIN);
+      return v === true || v === "true";
+    }
+
+    function displayLabel(session, fallback) {
+      if (!session) return fallback;
+      var name = String(session.name || session.display_name || "").trim();
+      if (name) return name.length > 18 ? name.slice(0, 18) + "…" : name;
+      var email = String(session.email || "").trim();
+      if (email) {
+        var local = email.split("@")[0];
+        return local.length > 18 ? local.slice(0, 18) + "…" : local;
+      }
+      return fallback;
+    }
+
+    function resolveAuthState() {
+      if (isAdminSession()) {
+        return { type: "admin", label: "Admin" };
+      }
+      var architect = readLs(LS_ARCHITECT);
+      if (architect && architect.id) {
+        return { type: "architect", label: displayLabel(architect, "Hesabım"), session: architect };
+      }
+      var brand = readLs(LS_BRAND);
+      if (brand && brand.id) {
+        return { type: "brand", label: displayLabel(brand, "Marka"), session: brand };
+      }
+      return { type: "guest" };
+    }
+
+    function loginLinkHtml() {
+      return (
+        '<a href="/giris" class="ag-login-link">' +
+        "<span>" +
+        profileIconSvg +
+        "</span><span>Giriş Yap</span></a>"
+      );
+    }
+
+    function menuLink(href, label) {
+      return (
+        '<a href="' +
+        href +
+        '" class="ag-account-menu__link">' +
+        label +
+        "</a>"
+      );
+    }
+
+    function desktopDropdownHtml(state) {
+      var links = "";
+      if (state.type === "admin") {
+        links =
+          menuLink("/admin-paneli", "Admin Paneli") +
+          '<div class="ag-account-menu__sep" role="separator"></div>' +
+          '<button type="button" class="ag-account-menu__link ag-account-menu__btn" data-header-logout>Çıkış Yap</button>';
+      } else if (state.type === "architect") {
+        links =
+          menuLink("/mimar-paneli", "Panelim") +
+          menuLink("/mimar-paneli/favoriler", "Favorilerim") +
+          menuLink("/mimar-paneli/boardlar", "Boardlarım") +
+          '<div class="ag-account-menu__sep" role="separator"></div>' +
+          '<button type="button" class="ag-account-menu__link ag-account-menu__btn" data-header-logout>Çıkış Yap</button>';
+      } else if (state.type === "brand") {
+        links =
+          menuLink("/marka-paneli", "Marka Paneli") +
+          menuLink("/marka-paneli/urunler", "Ürünlerim") +
+          menuLink("/marka-paneli/projeler", "Projeler") +
+          menuLink("/marka-paneli/analiz", "Analizler") +
+          '<div class="ag-account-menu__sep" role="separator"></div>' +
+          '<button type="button" class="ag-account-menu__link ag-account-menu__btn" data-header-logout>Çıkış Yap</button>';
+      }
+      return (
+        '<div class="ag-account-menu" data-account-menu>' +
+        '<button type="button" class="ag-login-link ag-account-menu__toggle" aria-expanded="false" aria-haspopup="true">' +
+        "<span>" +
+        profileIconSvg +
+        '</span><span class="ag-account-menu__label">' +
+        state.label +
+        "</span><span class=\"ag-account-menu__chev\">" +
+        chevronSvg +
+        "</span></button>" +
+        '<div class="ag-account-menu__panel is-hidden" role="menu">' +
+        links +
+        "</div></motion.div>"
+      );
+    }
+
+    function mobileAuthHtml(state) {
+      if (state.type === "guest") {
+        return '<a href="/giris" class="ag-drawer-link">Giriş Yap</a>';
+      }
+      var links = "";
+      if (state.type === "admin") {
+        links =
+          menuLink("/admin-paneli", "Admin Paneli") +
+          '<button type="button" class="ag-drawer-auth__logout" data-header-logout>Çıkış Yap</button>';
+      } else if (state.type === "architect") {
+        links =
+          menuLink("/mimar-paneli", "Panelim") +
+          menuLink("/mimar-paneli/favoriler", "Favorilerim") +
+          menuLink("/mimar-paneli/boardlar", "Boardlarım") +
+          '<button type="button" class="ag-drawer-auth__logout" data-header-logout>Çıkış Yap</button>';
+      } else if (state.type === "brand") {
+        links =
+          menuLink("/marka-paneli", "Marka Paneli") +
+          menuLink("/marka-paneli/urunler", "Ürünlerim") +
+          menuLink("/marka-paneli/projeler", "Projeler") +
+          menuLink("/marka-paneli/analiz", "Analizler") +
+          '<button type="button" class="ag-drawer-auth__logout" data-header-logout>Çıkış Yap</button>';
+      }
+      return (
+        '<div class="ag-drawer-auth__block">' +
+        '<p class="ag-drawer-auth__label">' +
+        state.label +
+        "</p>" +
+        '<div class="ag-drawer-auth__links">' +
+        links +
+        "</div></div>"
+      );
+    }
+
+    function wireAccountMenus(root) {
+      if (!root) return;
+      root.querySelectorAll("[data-account-menu]").forEach(function (wrap) {
+        var btn = wrap.querySelector(".ag-account-menu__toggle");
+        var panel = wrap.querySelector(".ag-account-menu__panel");
+        if (!btn || !panel) return;
+        btn.addEventListener("click", function (e) {
+          e.stopPropagation();
+          var open = panel.classList.contains("is-hidden");
+          document.querySelectorAll(".ag-account-menu__panel").forEach(function (p) {
+            p.classList.add("is-hidden");
+          });
+          document.querySelectorAll(".ag-account-menu__toggle").forEach(function (b) {
+            b.setAttribute("aria-expanded", "false");
+          });
+          if (open) {
+            panel.classList.remove("is-hidden");
+            btn.setAttribute("aria-expanded", "true");
+          }
+        });
+        panel.addEventListener("click", function (e) {
+          e.stopPropagation();
+        });
+      });
+      document.addEventListener("click", function () {
+        document.querySelectorAll(".ag-account-menu__panel").forEach(function (p) {
+          p.classList.add("is-hidden");
+        });
+        document.querySelectorAll(".ag-account-menu__toggle").forEach(function (b) {
+          b.setAttribute("aria-expanded", "false");
+        });
+      });
+      document.addEventListener("keydown", function (e) {
+        if (e.key !== "Escape") return;
+        document.querySelectorAll(".ag-account-menu__panel").forEach(function (p) {
+          p.classList.add("is-hidden");
+        });
+      });
+    }
+
+    function clearSessions() {
+      try {
+        localStorage.removeItem(LS_ARCHITECT);
+        localStorage.removeItem(LS_BRAND);
+        localStorage.removeItem(LS_ADMIN);
+      } catch (e) {}
+    }
+
+    function loadSupabase() {
+      return new Promise(function (resolve) {
+        if (window.supabase && window.supabase.createClient) {
+          resolve();
+          return;
+        }
+        var existing = document.querySelector('script[data-ag-supabase="1"]');
+        if (existing) {
+          existing.addEventListener("load", function () {
+            resolve();
+          });
+          existing.addEventListener("error", function () {
+            resolve();
+          });
+          return;
+        }
+        var script = document.createElement("script");
+        script.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+        script.setAttribute("data-ag-supabase", "1");
+        script.onload = function () {
+          resolve();
+        };
+        script.onerror = function () {
+          resolve();
+        };
+        document.head.appendChild(script);
+      });
+    }
+
+    function signOutSupabase() {
+      return loadSupabase().then(function () {
+        if (!window.supabase || !window.supabase.createClient) return;
+        var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+          auth: { persistSession: true },
+        });
+        return sb.auth.signOut().catch(function () {});
+      });
+    }
+
+    function bindLogout(root) {
+      if (!root) return;
+      root.querySelectorAll("[data-header-logout]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          Promise.resolve()
+            .then(function () {
+              if (window.AG && typeof window.AG.logoutAdmin === "function" && isAdminSession()) {
+                return window.AG.logoutAdmin();
+              }
+              if (window.AG && typeof window.AG.logoutArchitect === "function" && readLs(LS_ARCHITECT)) {
+                return window.AG.logoutArchitect();
+              }
+              if (window.AG && typeof window.AG.logoutBrand === "function" && readLs(LS_BRAND)) {
+                return window.AG.logoutBrand();
+              }
+              return signOutSupabase();
+            })
+            .finally(function () {
+              clearSessions();
+              window.location.href = "/giris";
+            });
+        });
+      });
+    }
+
+    function renderHeaderAuth() {
+      var state = resolveAuthState();
+      var desktop = document.getElementById("header-auth-desktop");
+      var mobile = document.getElementById("header-auth-mobile");
+      if (desktop) {
+        desktop.innerHTML = state.type === "guest" ? loginLinkHtml() : desktopDropdownHtml(state);
+        wireAccountMenus(desktop);
+        bindLogout(desktop);
+      }
+      if (mobile) {
+        mobile.innerHTML = mobileAuthHtml(state);
+        bindLogout(mobile);
+      }
+      if (state.type === "admin") {
+        loadSupabase().then(function () {
+          if (!window.supabase || !window.supabase.createClient) return;
+          var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+          sb.auth.getUser().then(function (res) {
+            var email = res && res.data && res.data.user && res.data.user.email;
+            if (!email) return;
+            var label = email.length > 18 ? email.slice(0, 18) + "…" : email;
+            document.querySelectorAll(".ag-account-menu__label").forEach(function (el) {
+              el.textContent = label;
+            });
+            document.querySelectorAll(".ag-drawer-auth__label").forEach(function (el) {
+              el.textContent = label;
+            });
+          });
+        });
+      }
+    }
+
+    renderHeaderAuth();
+    window.addEventListener("storage", function (e) {
+      if (
+        e.key === LS_ARCHITECT ||
+        e.key === LS_BRAND ||
+        e.key === LS_ADMIN ||
+        e.key === null
+      ) {
+        renderHeaderAuth();
+      }
+    });
+  })();
+</script>
+
+<style is:global>
+  .ag-site-header {
     position: sticky;
     top: 0;
-    z-index: 20;
-    border-bottom: 1px solid rgba(0,0,0,.08);
-    background: rgba(255,255,255,.86);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-  }
-  .site-header-inner {
-    min-height: 72px;
-    display: flex;
-    align-items: center;
-    gap: 22px;
-  }
-  .brand {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    min-width: max-content;
-    font-size: 24px;
-    line-height: 1;
-    letter-spacing: 0;
-    font-weight: 600;
-  }
-  .brand-mark {
-    position: relative;
-  }
-  .brand-mark::after {
-    content: "";
-    position: absolute;
-    left: 1px;
-    right: 1px;
-    bottom: -5px;
-    height: 2px;
-    border-radius: 999px;
-    background: #111;
-  }
-  .site-search {
-    flex: 1 1 360px;
-    min-width: 180px;
-    height: 42px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    border: 1px solid rgba(0,0,0,.1);
-    border-radius: 999px;
-    background: rgba(245,245,247,.86);
-    padding: 0 14px;
-  }
-  .site-search svg {
-    width: 18px;
-    height: 18px;
-    fill: none;
-    stroke: #6e6e73;
-    stroke-width: 1.8;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    flex: 0 0 auto;
-  }
-  .site-search input {
+    z-index: 80;
     width: 100%;
-    min-width: 0;
-    border: 0;
-    outline: 0;
-    background: transparent;
-    color: #111;
-    font: inherit;
-    font-size: 14px;
-    font-weight: 400;
+    background: rgba(255, 255, 255, 0.85);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
   }
-  .site-search input::placeholder {
-    color: #8e8e93;
-  }
-  nav {
-    display: flex;
-    gap: 18px;
-    color: #424245;
-    font-size: 14px;
-    white-space: nowrap;
-  }
-  nav a:hover, .login-link:hover { color: #111; }
-  .header-actions {
-    margin-left: auto;
+
+  .ag-header-row {
+    height: 72px;
+    width: 100%;
+    padding: 0 40px;
+    box-sizing: border-box;
     display: flex;
     align-items: center;
-    gap: 10px;
-    white-space: nowrap;
+    gap: 24px;
   }
-  .login-link {
-    font-size: 13px;
-    color: #424245;
-  }
-  .panel-link {
+
+  .ag-logo {
     display: inline-flex;
-    min-height: 38px;
+    align-items: baseline;
+    flex-shrink: 0;
+    color: #1d1d1f;
+    text-decoration: none;
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+    line-height: 1;
+    user-select: none;
+  }
+
+  .ag-logo-il {
+    position: relative;
+    display: inline-block;
+  }
+
+  .ag-logo-curve {
+    position: absolute;
+    bottom: -5px;
+    left: -1px;
+    right: -1px;
+    width: calc(100% + 2px);
+    overflow: visible;
+  }
+
+  .ag-nav {
+    display: none;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+
+  @media (min-width: 1024px) {
+    .ag-nav {
+      display: flex;
+    }
+  }
+
+  .ag-nav-pill {
+    height: 38px;
+    padding: 0 12px;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: #1f1f22;
+    font: inherit;
+    font-size: 15px;
+    font-weight: 400;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    transition: color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .ag-nav-pill:hover {
+    color: #000;
+    background: #f1f1f3;
+  }
+
+  .ag-nav-pill.is-active {
+    color: #000;
+    background: #eef0f4;
+  }
+
+  .ag-products-btn.is-open {
+    background: #fff;
+    box-shadow: inset 0 0 0 2px #1473e6;
+  }
+
+  .ag-products-btn svg {
+    transition: transform 0.15s ease;
+  }
+
+  .ag-products-btn.is-open svg {
+    transform: rotate(180deg);
+  }
+
+  .ag-header-search {
+    display: none;
+    position: relative;
+    flex: 1 1 auto;
+    max-width: 520px;
+    min-width: 260px;
+    margin-left: 0;
+  }
+
+  @media (min-width: 1024px) {
+    .ag-header-search {
+      display: block;
+    }
+  }
+
+  .ag-header-search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #8e8e93;
+    pointer-events: none;
+  }
+
+  .ag-header-search input {
+    width: 100%;
+    height: 38px;
+    box-sizing: border-box;
+    border-radius: 999px;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    background: #f5f5f7;
+    color: #1d1d1f;
+    font: inherit;
+    font-size: 16px;
+    outline: none;
+    padding: 0 16px 0 40px;
+    transition: background 0.15s ease, border-color 0.15s ease;
+  }
+
+  .ag-header-search input:focus {
+    background: #fff;
+    border-color: rgba(0, 0, 0, 0.25);
+  }
+
+  .ag-header-actions {
+    margin-left: auto;
+    display: none;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  @media (min-width: 1024px) {
+    .ag-header-actions {
+      display: flex;
+    }
+  }
+
+  .ag-theme-btn {
+    width: 40px;
+    height: 28px;
+    padding: 0;
+    border-radius: 999px;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    background: #f5f5f7;
+    color: #1d1d1f;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid #111;
+    cursor: pointer;
+  }
+
+  .ag-login-link {
+    height: 36px;
+    padding: 0 12px;
     border-radius: 999px;
-    padding: 0 15px;
-    background: #111;
-    color: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    color: #1d1d1f;
+    text-decoration: none;
     font-size: 13px;
     font-weight: 400;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+    transition: background 0.15s ease;
   }
-  .panel-link:hover { background: #2b2b2f; border-color: #2b2b2f; }
-  @media (max-width: 720px) {
-    .site-header-inner { min-height: auto; padding-top: 14px; padding-bottom: 14px; gap: 14px; flex-wrap: wrap; }
-    .brand { font-size: 22px; }
-    .site-search { order: 3; flex-basis: 100%; }
-    nav { gap: 14px; }
-    .header-actions { margin-left: auto; }
+
+  .ag-login-link:hover {
+    background: rgba(0, 0, 0, 0.04);
   }
-  @media (max-width: 500px) {
-    nav { width: 100%; overflow-x: auto; padding-bottom: 2px; }
-    .login-link { display: none; }
+
+  .ag-header-auth {
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .ag-account-menu {
+    position: relative;
+  }
+
+  .ag-account-menu__toggle {
+    cursor: pointer;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    background: transparent;
+    font: inherit;
+  }
+
+  .ag-account-menu__label {
+    max-width: 110px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .ag-account-menu__chev {
+    display: inline-flex;
+    align-items: center;
+    opacity: 0.7;
+  }
+
+  .ag-account-menu__panel {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 8px);
+    z-index: 120;
+    min-width: 208px;
+    padding: 6px 0;
+    border-radius: 16px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    background: #fff;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.14);
+  }
+
+  .ag-account-menu__panel.is-hidden {
+    display: none !important;
+  }
+
+  .ag-account-menu__link,
+  .ag-account-menu__btn {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px 16px;
+    border: 0;
+    background: transparent;
+    color: #1d1d1f;
+    font: inherit;
+    font-size: 13px;
+    line-height: 1.35;
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .ag-account-menu__link:hover,
+  .ag-account-menu__btn:hover {
+    background: #f5f5f7;
+  }
+
+  .ag-account-menu__sep {
+    height: 1px;
+    margin: 6px 0;
+    background: rgba(0, 0, 0, 0.07);
+  }
+
+  .ag-drawer-auth {
+    margin-top: 4px;
+  }
+
+  .ag-drawer-auth__block {
+    padding-top: 12px;
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+  }
+
+  .ag-drawer-auth__label {
+    margin: 0 0 8px;
+    padding: 0 4px;
+    color: #6e6e73;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .ag-drawer-auth__links {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .ag-drawer-auth__links .ag-account-menu__link {
+    display: block;
+    padding: 12px 8px;
+    border-radius: 10px;
+    color: #1f1f22;
+    font-size: 16px;
+    font-weight: 500;
+    text-decoration: none;
+  }
+
+  .ag-drawer-auth__links .ag-account-menu__link:hover {
+    background: #f5f5f7;
+  }
+
+  .ag-drawer-auth__logout {
+    display: block;
+    width: 100%;
+    margin-top: 4px;
+    padding: 12px 8px;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: #1f1f22;
+    font: inherit;
+    font-size: 16px;
+    font-weight: 500;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .ag-drawer-auth__logout:hover {
+    background: #f5f5f7;
+  }
+
+  .ag-mobile-btn {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border: 0;
+    background: transparent;
+    font-size: 32px;
+    font-weight: 600;
+    line-height: 1;
+    color: #1d1d1f;
+    cursor: pointer;
+  }
+
+  @media (min-width: 1024px) {
+    .ag-mobile-btn {
+      display: none;
+    }
+  }
+
+  .ag-mega {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 72px;
+    z-index: 70;
+  }
+
+  .ag-mega.is-hidden {
+    display: none !important;
+  }
+
+  .ag-mega-inner {
+    width: 100%;
+    overflow: hidden;
+    background: #fff;
+    border-left: 1px solid rgba(0, 0, 0, 0.08);
+    border-right: 1px solid rgba(0, 0, 0, 0.08);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 0 0 16px 16px;
+    box-shadow: 0 30px 70px rgba(0, 0, 0, 0.16);
+  }
+
+  .ag-mega-head {
+    height: 68px;
+    padding: 0 40px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    align-items: center;
+  }
+
+  .ag-mega-title {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: 0;
+    color: #1d1d1f;
+  }
+
+  .ag-mega-tabs {
+    display: inline-flex;
+    justify-self: center;
+    padding: 4px;
+    gap: 4px;
+    border-radius: 999px;
+    background: #f1f1f3;
+  }
+
+  .ag-mega-tabs a {
+    height: 40px;
+    padding: 0 20px;
+    border-radius: 999px;
+    color: #1d1d1f;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.35;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+  }
+
+  .ag-mega-tabs a.is-active {
+    background: #000;
+    color: #fff;
+  }
+
+  .ag-mega-rule {
+    width: 100%;
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+  }
+
+  .ag-mega-body {
+    padding: 20px 40px 28px;
+  }
+
+  .ag-mega-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    column-gap: 72px;
+    row-gap: 44px;
+    align-items: start;
+  }
+
+  @media (min-width: 1024px) and (max-width: 1279px) {
+    .ag-mega-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      column-gap: 48px;
+      row-gap: 36px;
+    }
+  }
+
+  .ag-mega-group-card {
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-sizing: border-box;
+  }
+
+  .ag-mega-group-head {
+    min-height: 24px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .ag-mega-group-icon {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #3a3a3c;
+  }
+
+  .ag-mega-group-icon :global(svg) {
+    display: block;
+  }
+
+  .ag-mega-group-title {
+    margin: 0;
+    color: #111;
+    font-size: 17px;
+    font-weight: 600;
+    line-height: 1.25;
+    letter-spacing: normal;
+    text-transform: none;
+  }
+
+  .ag-mega-group-links {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+
+  .ag-mega-group-link {
+    display: block;
+    padding: 6px 8px;
+    margin: 0 -8px;
+    border-radius: 8px;
+    color: #1d1d1f;
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 1.35;
+    text-decoration: none;
+    transition:
+      background-color 0.18s ease,
+      transform 0.18s ease,
+      color 0.18s ease;
+  }
+
+  .ag-mega-group-link:hover {
+    background: #f5f5f7;
+    color: #000;
+    transform: translateX(2px);
+  }
+
+  .ag-drawer-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    background: rgba(0, 0, 0, 0.4);
+  }
+
+  .ag-drawer-overlay.is-hidden {
+    display: none !important;
+  }
+
+  .ag-drawer {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    overflow-y: auto;
+    background: #fff;
+    transform: translate3d(-100%, 0, 0);
+    transition: transform 0.34s cubic-bezier(0.22, 1, 0.36, 1);
+    pointer-events: none;
+  }
+
+  .ag-drawer.is-open {
+    transform: translate3d(0, 0, 0);
+    pointer-events: auto;
+  }
+
+  .ag-drawer-top {
+    height: 72px;
+    padding: 0 20px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .ag-drawer-close {
+    width: 40px;
+    height: 40px;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    font-size: 26px;
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  .ag-drawer-body {
+    padding: 16px 20px 24px;
+  }
+
+  .ag-drawer-link {
+    display: block;
+    padding: 14px 4px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    color: #1f1f22;
+    font-size: 18px;
+    text-decoration: none;
+  }
+
+  .ag-drawer-link.is-active {
+    color: #000;
+    font-weight: 600;
+  }
+
+  .ag-drawer-summary {
+    list-style: none;
+    cursor: pointer;
+  }
+
+  .ag-drawer-summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .ag-drawer-sub {
+    padding: 0 0 12px 8px;
+  }
+
+  .ag-drawer-sublink {
+    display: block;
+    padding: 7px 8px;
+    margin: 0 -8px;
+    border-radius: 8px;
+    color: #1d1d1f;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.35;
+    text-decoration: none;
+    transition:
+      background-color 0.18s ease,
+      transform 0.18s ease;
+  }
+
+  .ag-drawer-sublink:hover {
+    background: #f5f5f7;
+    transform: translateX(2px);
+  }
+
+  .ag-drawer-subgroup {
+    margin-top: 8px;
+  }
+
+  .ag-drawer-subgroup p {
+    margin: 0 0 4px;
+    padding: 4px 8px;
+    color: #111;
+    font-size: 17px;
+    font-weight: 600;
+    line-height: 1.25;
+    letter-spacing: normal;
+    text-transform: none;
+  }
+
+  @media (max-width: 1023px) {
+    .ag-header-row {
+      height: 64px;
+      padding: 0 16px;
+      gap: 12px;
+    }
+
+    .ag-mega {
+      display: none !important;
+    }
   }
 </style>

@@ -231,12 +231,12 @@
             ${profileIcon}<span class="max-w-[100px] truncate">${archName}</span>${chevron}
           </button>
           <div id="arch-dropdown-panel" class="hidden absolute right-0 top-full mt-2 w-52 rounded-2xl border border-black/[0.08] bg-white shadow-[0_8px_40px_rgba(0,0,0,0.14)] z-50 py-1.5 overflow-hidden">
-            <a href="/mimar-paneli.html" class="flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-[#1d1d1f] hover:bg-[#f5f5f7]">${profileIcon} Panelim</a>
-            <a href="/mimar-paneli.html?tab=fav-products" class="flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-[#1d1d1f] hover:bg-[#f5f5f7]">
+            <a href="/mimar-paneli" class="flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-[#1d1d1f] hover:bg-[#f5f5f7]">${profileIcon} Panelim</a>
+            <a href="/mimar-paneli/favoriler" class="flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-[#1d1d1f] hover:bg-[#f5f5f7]">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l7.78 7.78 7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
               Favorilerim
             </a>
-            <a href="/mimar-paneli.html?tab=moodboards" class="flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-[#1d1d1f] hover:bg-[#f5f5f7]">
+            <a href="/mimar-paneli/boardlar" class="flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-[#1d1d1f] hover:bg-[#f5f5f7]">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
               Boardlarım
             </a>
@@ -250,24 +250,28 @@
             ${profileIcon}<span class="max-w-[100px] truncate">${brandName}</span>${chevron}
           </button>
           <div id="brand-dropdown-panel" class="hidden absolute right-0 top-full mt-2 w-52 rounded-2xl border border-black/[0.08] bg-white shadow-[0_8px_40px_rgba(0,0,0,0.14)] z-50 py-1.5 overflow-hidden">
-            <a href="/marka-paneli.html" class="flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-[#1d1d1f] hover:bg-[#f5f5f7]">${profileIcon} Marka Paneli</a>
-            <a href="/marka-paneli-urunler.html" class="flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-[#1d1d1f] hover:bg-[#f5f5f7]">
+            <a href="/marka-paneli" class="flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-[#1d1d1f] hover:bg-[#f5f5f7]">${profileIcon} Marka Paneli</a>
+            <a href="/marka-paneli/urunler" class="flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-[#1d1d1f] hover:bg-[#f5f5f7]">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
               Ürünlerim
             </a>
-            <a href="/marka-paneli-projeler.html" class="flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-[#1d1d1f] hover:bg-[#f5f5f7]">
+            <a href="/marka-paneli/projeler" class="flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-[#1d1d1f] hover:bg-[#f5f5f7]">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
               Projeler
             </a>
-            <a href="/marka-paneli-analiz.html" class="flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-[#1d1d1f] hover:bg-[#f5f5f7]">
+            <a href="/marka-paneli/analiz" class="flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-[#1d1d1f] hover:bg-[#f5f5f7]">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 3v18h18"/><path d="M7 16l4-4 4 4 5-7"/></svg>
               Analizler
+            </a>
+            <a href="/marka-paneli/iletisim" class="flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-[#1d1d1f] hover:bg-[#f5f5f7]">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4h16v16H4z"/><path d="M4 9h16M9 4v16"/></svg>
+              İletişim
             </a>
             <div class="border-t border-black/[0.07] my-1"></div>
             <button id="brand-logout-btn" type="button" class="w-full flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-[#1d1d1f] hover:bg-[#f5f5f7]">${logoutIcon} Çıkış Yap</button>
           </div>
         </div>`
-      : `<a href="/giris.html" class="inline-flex items-center gap-2 h-9 px-3 rounded-full border border-black/[0.12] text-[13px] hover:bg-black/[0.04] transition">
+      : `<a href="/giris" class="inline-flex items-center gap-2 h-9 px-3 rounded-full border border-black/[0.12] text-[13px] hover:bg-black/[0.04] transition">
           ${profileIcon} Giriş Yap
         </a>`;
 
@@ -288,9 +292,8 @@
             ${themeToggleBtn}
           </div>
           <div class="mt-4 space-y-2">
-            <a href="/mimar-paneli.html" class="h-11 px-4 inline-flex items-center rounded-xl border border-black/[0.10] text-[15px] font-medium w-full">Mimar Paneli</a>
-            <a href="/moodboard.html" class="h-11 px-4 inline-flex items-center rounded-xl bg-black text-white text-[15px] font-semibold w-full">Moodboard</a>
-            <a href="/marka-giris.html" class="h-11 px-4 inline-flex items-center rounded-xl border border-black/[0.10] text-[15px] font-medium w-full">Marka Girişi</a>
+            <a href="/mimar-paneli" class="h-11 px-4 inline-flex items-center rounded-xl border border-black/[0.10] text-[15px] font-medium w-full">Mimar Paneli</a>
+            <a href="/mimar-paneli/boardlar" class="h-11 px-4 inline-flex items-center rounded-xl bg-black text-white text-[15px] font-semibold w-full">Boardlarım</a>
           </div>
         </div>
       `
@@ -301,8 +304,8 @@
             ${themeToggleBtn}
           </div>
           <div class="mt-4 space-y-2">
-            <a href="/giris.html" class="h-11 px-4 inline-flex items-center rounded-xl border border-black/[0.10] text-[15px] font-medium w-full">Giriş Yap</a>
-            <a href="/marka-giris.html" class="h-11 px-4 inline-flex items-center rounded-xl border border-black/[0.10] text-[15px] font-medium w-full">Marka Girişi</a>
+            <a href="/giris" class="h-11 px-4 inline-flex items-center rounded-xl border border-black/[0.10] text-[15px] font-medium w-full">Giriş Yap</a>
+            <a href="/kayit" class="h-11 px-4 inline-flex items-center rounded-xl border border-black/[0.10] text-[15px] font-medium w-full">Ücretsiz Kaydol</a>
             <a href="/marka-basvuru.html" class="h-11 px-4 inline-flex items-center rounded-xl bg-black text-white text-[15px] font-semibold w-full">Marka Başvurusu</a>
           </div>
         </div>
@@ -469,9 +472,9 @@
           <div>
             <p class="font-semibold">Hesap</p>
             <div class="mt-3 space-y-2 text-[#6e6e73]">
-              <a href="/marka-giris.html" class="block hover:text-black">Marka Girişi</a>
+              <a href="/giris" class="block hover:text-black">Giriş Yap</a>
+              <a href="/kayit" class="block hover:text-black">Ücretsiz Kaydol</a>
               <a href="/marka-basvuru.html" class="block hover:text-black">Marka Başvuru</a>
-              <a href="/mimar-giris.html" class="block hover:text-black">Mimar Girişi</a>
             </div>
           </div>
           <div>

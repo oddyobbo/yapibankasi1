@@ -12,15 +12,8 @@ const chips = [
   product?.usage_area,
 ].filter(Boolean).slice(0, 4);
 const variants = (product?.variants || []).slice(0, 4);
-const params = new URLSearchParams({
-  konu: "urun",
-  talep: "teklif",
-  urun: product?.name || "",
-  marka: product?.brand_name || "",
-  urunId: product?.id || "",
-});
 ---
-<aside class="product-detail-brand-card">
+<aside class="ag-panel-section product-detail-brand-card">
   <div class="product-detail-brand-topline">
     <div class="product-detail-brand-identity">
       <div class="product-detail-brand-logo-slot">
@@ -31,10 +24,10 @@ const params = new URLSearchParams({
         <h2>{name}</h2>
       </div>
     </div>
-    <a class="save-btn" href="/mimar-giris.html">Kaydet</a>
+    <a class="save-btn" href="/kayit">Kaydet</a>
   </div>
 
-  <h1>{product.name}</h1>
+  <h1 class="product-detail-product-title">{product.name}</h1>
   <p class="lede">{product.summary || product.description || brand?.description || "Bu ürün için kısa açıklama henüz eklenmedi."}</p>
 
   {variants.length > 0 && (
@@ -49,10 +42,12 @@ const params = new URLSearchParams({
   {chips.length > 0 && <div class="chip-row">{chips.map((chip) => <span>{chip}</span>)}</div>}
   {roles.length > 0 && <div class="role-row">{roles.map((role) => <span>{role}</span>)}</div>}
 
+  <p class="cta-strip-label">Hızlı talep</p>
   <div class="actions">
-    <a class="primary" href={`/iletisim-v2.html?${params.toString()}`}>Fiyat teklifi al</a>
-    <a href="/mimar-paneli.html?tab=moodboards">Moodboard'a kaydet</a>
-    <a href="/iletisim-v2.html">Markayla iletişime geç</a>
+    <button type="button" class="primary js-open-contact-brand-modal" data-cb-intent-preset="fiyat">Teklif iste</button>
+    <button type="button" class="outline js-open-contact-brand-modal" data-cb-intent-preset="teknik_bilgi">Teknik bilgi al</button>
+    <button type="button" class="js-open-contact-brand-modal" data-cb-intent-preset="genel_mesaj">Markayla iletişime geç</button>
+    <a href="/mimar-paneli/boardlar">Moodboard&apos;a kaydet</a>
   </div>
 
   <div class="more-block">
@@ -76,13 +71,9 @@ const params = new URLSearchParams({
 </aside>
 <style>
   .product-detail-brand-card {
-    padding: 28px;
-    border: 1px solid rgba(255,255,255,.42);
-    border-radius: 28px;
-    background: rgba(245,245,247,.86);
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
-    box-shadow: 0 18px 48px rgba(0,0,0,.12);
+    padding: 0;
+    border: 0;
+    box-shadow: none;
   }
   .product-detail-brand-topline {
     display: flex;
@@ -134,23 +125,28 @@ const params = new URLSearchParams({
   }
   .save-btn {
     display: inline-flex;
-    min-height: 40px;
+    min-height: 38px;
     align-items: center;
     justify-content: center;
-    border: 1px solid rgba(0,0,0,.1);
+    border: 1px solid rgba(0, 0, 0, 0.08);
     border-radius: 12px;
-    background: rgba(255,255,255,.78);
-    padding: 0 15px;
-    color: #111;
-    font-size: 13px;
-    font-weight: 400;
-  }
-  h1 {
-    margin: 28px 0 0;
+    background: #fff;
+    padding: 0 14px;
     color: #0b0b0c;
-    font-size: clamp(26px, 2.15vw, 34px);
+    font-size: 13px;
+    font-weight: 500;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+  .save-btn:hover {
+    border-color: rgba(0, 0, 0, 0.16);
+    background: #fafafa;
+  }
+  .product-detail-product-title {
+    margin: 1.75rem 0 0;
+    color: var(--ag-text);
+    font-size: clamp(1.35rem, 2.1vw, 1.75rem);
     line-height: 1.14;
-    letter-spacing: 0;
+    letter-spacing: -0.02em;
     font-weight: 600;
   }
   .lede {
@@ -180,35 +176,68 @@ const params = new URLSearchParams({
     display: inline-flex;
     min-height: 30px;
     align-items: center;
-    border: 1px solid rgba(0,0,0,.08);
+    border: 1px solid rgba(0, 0, 0, 0.08);
     border-radius: 999px;
-    background: rgba(255,255,255,.72);
+    background: #fafafa;
     padding: 0 11px;
-    color: #333;
+    color: #424245;
     font-size: 12px;
     font-weight: 400;
+  }
+  .cta-strip-label {
+    margin: 24px 0 0;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #6e6e73;
   }
   .actions {
     display: grid;
     gap: 10px;
-    margin-top: 24px;
+    margin-top: 10px;
   }
-  .actions a {
+  .actions a,
+  .actions button {
     display: inline-flex;
-    min-height: 48px;
+    min-height: 46px;
     align-items: center;
     justify-content: center;
-    border: 1px solid rgba(0,0,0,.14);
-    border-radius: 14px;
-    background: rgba(255,255,255,.62);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 12px;
+    background: #fff;
     color: #0b0b0c;
     font-size: 14px;
-    font-weight: 400;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    text-decoration: none;
+    width: 100%;
+    box-sizing: border-box;
+    transition: border-color 0.15s ease, background 0.15s ease;
   }
-  .actions a.primary {
+  .actions a:hover,
+  .actions button:hover {
+    border-color: rgba(0, 0, 0, 0.16);
+    background: #fafafa;
+  }
+  .actions a.primary,
+  .actions button.primary {
     border-color: #0b0b0c;
     background: #0b0b0c;
     color: #fff;
+  }
+  .actions a.primary:hover,
+  .actions button.primary:hover {
+    background: #2b2b2f;
+    border-color: #2b2b2f;
+  }
+  .actions button.outline {
+    background: #fff;
+    border-color: rgba(0, 0, 0, 0.14);
+  }
+  .actions a:not(.primary) {
+    font-weight: 500;
   }
   .more-block {
     margin-top: 24px;
@@ -248,7 +277,8 @@ const params = new URLSearchParams({
     place-items: center;
     overflow: hidden;
     border-radius: 12px;
-    background: rgba(255,255,255,.78);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    background: #fafafa;
   }
   .preview-thumb img {
     width: 100%;

@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 
+// TODO: Production’da Netlify ortam değişkenleri (PUBLIC_SUPABASE_*) kullanılmalı; hardcoded fallback ileride kaldırılacak.
 const SUPABASE_URL = import.meta.env.PUBLIC_SUPABASE_URL || "https://dbcyoveyoqjlmybklovu.supabase.co";
 const SUPABASE_ANON_KEY = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || "sb_publishable_RhoIIO1nhGpyGqgU6MD3kw_sawB4_Zk";
 
@@ -69,6 +70,34 @@ export const publishedProductsQuery = (options = {}) => supabase
   .from("products")
   .select(PUBLIC_PRODUCT_FIELDS, options)
   .eq("status", "published");
+
+/** Public katalog: yalnızca brands.status = approved olan brand_record_id’lere bağlı published ürünler. */
+const EMPTY_CATALOG_BRAND_SENTINEL = "00000000-0000-4000-8000-000000000000";
+
+export const getApprovedBrandRecordIds = async () => {
+  const { data, error } = await supabase.from("brands").select("id").eq("status", "approved");
+  if (error) {
+    console.warn("getApprovedBrandRecordIds:", error.message);
+    return [];
+  }
+  return (data || []).map((row) => row.id).filter(Boolean);
+};
+
+/**
+ * @param {string[]} approvedBrandIds brands.id listesi (status=approved)
+ * @param {{ count?: string }} [options] PostgREST select seçenekleri
+ */
+export const publishedCatalogProductsQuery = (approvedBrandIds, options = {}) => {
+  const q = supabase
+    .from("products")
+    .select(PUBLIC_PRODUCT_FIELDS, options)
+    .eq("status", "published")
+    .not("brand_record_id", "is", null);
+  if (!approvedBrandIds?.length) {
+    return q.eq("brand_record_id", EMPTY_CATALOG_BRAND_SENTINEL);
+  }
+  return q.in("brand_record_id", approvedBrandIds);
+};
 
 export const publishedProjectsQuery = () => supabase
   .from("projects")

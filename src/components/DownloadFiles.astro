@@ -10,8 +10,8 @@ const legacyRows = [
 ].map((item) => typeof item === "string" ? { url: item, label: "Dosya" } : item);
 const files = Array.isArray(rows) ? rows : legacyRows;
 ---
-<section class="card files-card">
-  <h2>Teknik Dosyalar</h2>
+<section class="ag-panel-section files-card">
+  <h2 class="ag-panel-title">Teknik Dosyalar</h2>
   {files.length ? (
     <ul>
       {files.map((file) => (
@@ -23,10 +23,25 @@ const files = Array.isArray(rows) ? rows : legacyRows;
   )}
 </section>
 <style>
-  .files-card { padding: 28px; border-radius: 22px; }
-  h2 { margin: 0 0 18px; color: #1d1d1f; font-size: 20px; line-height: 1.22; font-weight: 600; letter-spacing: 0; }
+  .files-card {
+    padding: 0;
+    border: 0;
+    box-shadow: none;
+  }
+  .files-card .ag-panel-title {
+    margin: 0 0 1rem;
+  }
   ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
-  a { display: flex; justify-content: space-between; min-height: 44px; align-items: center; border: 1px solid rgba(0,0,0,.08); border-radius: 10px; padding: 0 14px; font-size: 14px; }
+  a {
+    display: flex;
+    justify-content: space-between;
+    min-height: 2.75rem;
+    align-items: center;
+    border: 1px solid var(--ag-border-08);
+    border-radius: var(--ag-radius-xl);
+    padding: 0 1rem;
+    font-size: 14px;
+  }
   a::after { content: "↓"; color: #6e6e73; }
   p { margin: 0; color: #6e6e73; font-size: 14px; }
 </style>

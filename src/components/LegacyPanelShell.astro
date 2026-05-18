@@ -1,0 +1,61 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Header from "./Header.astro";
+import Footer from "./Footer.astro";
+
+interface Props {
+  title: string;
+  description?: string;
+  canonical?: string;
+  headFragment?: string;
+  bodyHtml: string;
+  bodyClass?: string;
+  bodyDataPage?: string;
+  initialArchitectTab?: string;
+  /** marka-panel.js sayfa modu (ürünler, analiz, …) */
+  markaPanelPage?: string;
+}
+
+const {
+  title,
+  description,
+  canonical,
+  headFragment = "",
+  bodyHtml,
+  bodyClass = "",
+  bodyDataPage = "",
+  initialArchitectTab,
+  markaPanelPage,
+} = Astro.props;
+---
+<BaseLayout title={title} description={description} canonical={canonical}>
+  {headFragment ? <Fragment slot="extra-head" set:html={headFragment} /> : null}
+  <Header />
+  <div
+    class:list={["legacy-panel-embed", bodyClass]}
+    data-legacy-panel="1"
+    data-page={bodyDataPage || undefined}
+    set:html={bodyHtml}
+  />
+  {initialArchitectTab ? (
+    <script is:inline define:vars={{ initialArchitectTab }}>
+      window.__ARCHITECT_PANEL_INITIAL_TAB__ = initialArchitectTab;
+    </script>
+  ) : null}
+  {markaPanelPage ? (
+    <>
+      <script is:inline define:vars={{ markaPanelPage }}>
+        window.__MARKA_PANEL_PAGE__ = markaPanelPage;
+      </script>
+      <script is:inline src="/core.js?v=brand-custom-taxonomy-2"></script>
+      <script is:inline src="/marka-panel.js?v=brand-products-ui-1"></script>
+    </>
+  ) : null}
+  {bodyDataPage === "admin" ? (
+    <>
+      <script is:inline src="/core.js?v=category-admin-9"></script>
+      <script is:inline src="/admin-panel.js?v=category-admin-10"></script>
+    </>
+  ) : null}
+  <Footer />
+</BaseLayout>

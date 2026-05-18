@@ -1,0 +1,715 @@
+---
+/**
+ * Ürün detay: Markayla iletişim modalı (MVP).
+ * RPC: submit_lead_for_product, record_contact_event_for_product
+ */
+const { product, brand } = Astro.props;
+const productId = product?.id || "";
+const productSlug = String(product?.slug || "").trim();
+const productName = String(product?.name || "").trim();
+const brandName = String(brand?.name || "").trim();
+const brandPhone = String(brand?.phone || "").trim();
+const brandEmail = String(brand?.email || "").trim();
+const brandWebsite = String(brand?.website || "").trim();
+const brandWhatsapp = String(brand?.whatsapp_number || brand?.whatsapp || "").trim();
+
+let websiteHost = "";
+if (brandWebsite) {
+  try {
+    const u = new URL(/^https?:\/\//i.test(brandWebsite) ? brandWebsite : `https://${brandWebsite}`);
+    websiteHost = u.hostname.replace(/^www\./i, "");
+  } catch {
+    websiteHost = brandWebsite;
+  }
+}
+
+const hasAnyChannel = Boolean(brandPhone || brandEmail || brandWebsite || brandWhatsapp);
+---
+
+<div
+  id="contact-brand-modal"
+  class="cb-modal"
+  data-product-id={productId}
+  data-product-slug={productSlug}
+  data-product-name={productName}
+  data-brand-phone={brandPhone}
+  data-brand-email={brandEmail}
+  data-brand-website={brandWebsite}
+  data-brand-whatsapp={brandWhatsapp}
+  aria-hidden="true"
+>
+  <div class="cb-backdrop" data-cb-close type="button" tabindex="-1" aria-label="Kapat"></div>
+  <div class="cb-dialog" role="dialog" aria-modal="true" aria-labelledby="cb-title">
+    <div class="cb-head">
+      <div class="cb-head-text">
+        <p class="cb-eyebrow">Ürün talebi</p>
+        <h2 id="cb-title">Markaya talep gönderin</h2>
+        <p class="cb-sub">
+          {productName}{brandName ? ` · ${brandName}` : ""}
+        </p>
+      </div>
+      <button type="button" class="cb-x" data-cb-close aria-label="Kapat">×</button>
+    </div>
+
+    <div id="cb-form-msg" class="cb-msg hidden" role="status" aria-live="polite"></div>
+
+    <div class="cb-body">
+      <section class="cb-section">
+        <h3 class="cb-h3">Talep formu</h3>
+        <p class="cb-lead">Bilgileriniz yalnızca talep iletimi için kullanılır; marka yanıtlar.</p>
+        <form id="cb-lead-form" class="cb-form">
+          <div class="cb-form-grid">
+            <label class="cb-field">
+              <span>Ad soyad *</span>
+              <input name="name" type="text" required autocomplete="name" maxlength="200" />
+            </label>
+            <label class="cb-field">
+              <span>E-posta *</span>
+              <input name="email" type="email" required autocomplete="email" maxlength="200" />
+            </label>
+            <label class="cb-field">
+              <span>Telefon</span>
+              <input name="phone" type="tel" autocomplete="tel" maxlength="80" placeholder="Opsiyonel" />
+            </label>
+            <label class="cb-field">
+              <span>Şirket / ofis</span>
+              <input name="company" type="text" autocomplete="organization" maxlength="200" placeholder="Opsiyonel" />
+            </label>
+            <label class="cb-field cb-field-span2">
+              <span>Talep türü *</span>
+              <select name="intent" required aria-describedby="cb-intent-hint">
+                <option value="fiyat">Fiyat ve teklif</option>
+                <option value="numune">Numune / örnek</option>
+                <option value="teknik_bilgi">Teknik dokümantasyon</option>
+                <option value="katalog">Dijital katalog</option>
+                <option value="genel_mesaj" selected>Genel soru</option>
+              </select>
+            </label>
+            <p id="cb-intent-hint" class="cb-hint cb-field-span2">
+              Seçiminiz talebin nasıl yönlendirileceğini belirler; ayrıntıyı mesaj alanına yazabilirsiniz.
+            </p>
+            <label class="cb-field cb-field-span2">
+              <span>Mesaj</span>
+              <textarea name="message" rows="4" maxlength="4000" placeholder="Ölçü, proje tipi, termin veya teknik sorunuzu kısaca belirtin."></textarea>
+            </label>
+          </div>
+          <div class="cb-kvkk">
+            <label class="cb-check">
+              <input name="kvkk" type="checkbox" required />
+              <span>
+                <strong>KVKK onayı</strong>
+                Kişisel verilerimin, talebimin iletilmesi amacıyla marka ile paylaşılmasını kabul ediyorum. *
+              </span>
+            </label>
+          </div>
+          <button type="submit" class="cb-submit">Talebi gönder</button>
+        </form>
+      </section>
+
+      <section class="cb-section">
+        <h3 class="cb-h3">Doğrudan kanallar</h3>
+        {
+          hasAnyChannel ? (
+            <ul class="cb-channel-cards" id="cb-channels">
+              {brandPhone ? (
+                <li class="cb-channel-card">
+                  <span class="cb-channel-meta">Telefon</span>
+                  <a class="cb-channel-link" href={`tel:${brandPhone.replace(/\s/g, "")}`} data-cb-event="phone_click" data-cb-kind="phone">
+                    {brandPhone}
+                  </a>
+                </li>
+              ) : null}
+              {brandEmail ? (
+                <li class="cb-channel-card">
+                  <span class="cb-channel-meta">E-posta</span>
+                  <a class="cb-channel-link" href="#" data-cb-mailto data-cb-event="email_click" data-cb-kind="email">
+                    {brandEmail}
+                  </a>
+                </li>
+              ) : null}
+              {brandWebsite ? (
+                <li class="cb-channel-card">
+                  <span class="cb-channel-meta">Web sitesi</span>
+                  <a class="cb-channel-link" href="#" target="_blank" rel="noopener noreferrer" data-cb-website data-cb-event="website_click" data-cb-kind="web">
+                    {websiteHost || "Siteyi aç"}
+                  </a>
+                </li>
+              ) : null}
+              {brandWhatsapp ? (
+                <li class="cb-channel-card">
+                  <span class="cb-channel-meta">WhatsApp</span>
+                  <a class="cb-channel-link" href="#" target="_blank" rel="noopener noreferrer" data-cb-whatsapp data-cb-event="whatsapp_click" data-cb-kind="wa">
+                    Sohbet başlat
+                  </a>
+                </li>
+              ) : null}
+            </ul>
+          ) : (
+            <p class="cb-channels-empty" id="cb-channels">
+              Bu marka için doğrudan iletişim kanalı henüz listelenmiyor. Talebinizi yukarıdaki form ile iletebilirsiniz.
+            </p>
+          )
+        }
+      </section>
+    </div>
+  </div>
+</div>
+
+<script>
+  import { supabase } from "../lib/supabase.js";
+
+  const VISITOR_KEY = "archilink_visitor_id";
+  const modalOpenKey = (id) => `archilink_ce_modal_open:${id}`;
+  const VALID_INTENTS = new Set(["fiyat", "numune", "teknik_bilgi", "katalog", "genel_mesaj"]);
+
+  function getVisitorId() {
+    try {
+      let v = localStorage.getItem(VISITOR_KEY);
+      if (!v) {
+        v = crypto.randomUUID();
+        localStorage.setItem(VISITOR_KEY, v);
+      }
+      return v;
+    } catch {
+      return "session-" + String(Date.now());
+    }
+  }
+
+  function mapIntent(value) {
+    switch (value) {
+      case "fiyat":
+        return { p_lead_type: "quote", p_request_intent: "fiyat" };
+      case "numune":
+        return { p_lead_type: "sample", p_request_intent: "numune" };
+      case "teknik_bilgi":
+        return { p_lead_type: "contact", p_request_intent: "teknik_bilgi" };
+      case "katalog":
+        return { p_lead_type: "contact", p_request_intent: "katalog" };
+      case "genel_mesaj":
+      default:
+        return { p_lead_type: "contact", p_request_intent: "genel_mesaj" };
+    }
+  }
+
+  function readRoot() {
+    return document.getElementById("contact-brand-modal");
+  }
+
+  function rootDataset() {
+    const el = readRoot();
+    if (!el) return null;
+    return el.dataset;
+  }
+
+  async function recordContactEvent(eventType, metadata = {}) {
+    const ds = rootDataset();
+    if (!ds?.productId) return;
+    const visitorId = getVisitorId();
+    const { error } = await supabase.rpc("record_contact_event_for_product", {
+      p_product_id: ds.productId,
+      p_event_type: eventType,
+      p_source_page: typeof window !== "undefined" ? window.location.pathname : "",
+      p_visitor_id: visitorId,
+      p_metadata: metadata,
+    });
+    if (error) console.error("[contact_event]", eventType, error);
+  }
+
+  function mailtoHref(email, productName) {
+    const subj = encodeURIComponent(`Archilink — ${productName}`);
+    const body = encodeURIComponent(
+      `Merhaba,\n\nArchilink üzerinden ${productName} ürünü hakkında bilgi almak istiyorum.\n`,
+    );
+    return `mailto:${email}?subject=${subj}&body=${body}`;
+  }
+
+  function websiteWithUtm(raw, slug) {
+    const s = String(slug || "product").trim() || "product";
+    try {
+      const u = new URL(/^https?:\/\//i.test(raw) ? raw : `https://${raw}`);
+      u.searchParams.set("utm_source", "archilink");
+      u.searchParams.set("utm_medium", "referral");
+      u.searchParams.set("utm_campaign", "product_page");
+      u.searchParams.set("utm_content", s);
+      return u.toString();
+    } catch {
+      return raw;
+    }
+  }
+
+  function whatsappHref(raw, productName) {
+    const text = encodeURIComponent(
+      `Merhaba, Archilink üzerinden ${productName} ürünü hakkında bilgi almak istiyorum.`,
+    );
+    if (/^https?:\/\//i.test(raw)) {
+      const join = raw.includes("?") ? "&" : "?";
+      return `${raw}${join}text=${text}`;
+    }
+    const digits = raw.replace(/\D/g, "");
+    if (!digits) return null;
+    return `https://wa.me/${digits}?text=${text}`;
+  }
+
+  function showFormMsg(text, isError) {
+    const el = document.getElementById("cb-form-msg");
+    if (!el) return;
+    if (!String(text || "").trim()) {
+      el.textContent = "";
+      el.classList.add("hidden");
+      el.classList.remove("cb-ok", "cb-err");
+      return;
+    }
+    el.textContent = text;
+    el.classList.remove("hidden", "cb-ok", "cb-err");
+    el.classList.add(isError ? "cb-err" : "cb-ok");
+  }
+
+  function translateSubmitError(msg) {
+    const m = String(msg || "");
+    if (/KVKK|kvkk|veri paylaşım/i.test(m)) return m;
+    if (/E-posta|email|Geçerli/i.test(m)) return m;
+    if (/İsim|name/i.test(m)) return m;
+    if (/yayında değil|published/i.test(m)) return "Bu ürün için talep kabul edilmiyor.";
+    return "Talebiniz şu an gönderilemedi. Lütfen bilgilerinizi kontrol edip tekrar deneyin.";
+  }
+
+  function applyIntentPreset(preset) {
+    const form = document.getElementById("cb-lead-form");
+    const sel = form?.querySelector('select[name="intent"]');
+    if (!(sel instanceof HTMLSelectElement)) return;
+    const p = String(preset || "").trim();
+    if (p && VALID_INTENTS.has(p)) sel.value = p;
+  }
+
+  function openModal(intentPreset) {
+    const root = readRoot();
+    if (!root) return;
+    showFormMsg("", false);
+    root.classList.add("is-open");
+    root.setAttribute("aria-hidden", "false");
+    document.body.classList.add("cb-modal-open");
+
+    applyIntentPreset(intentPreset);
+
+    const pid = root.dataset.productId || "";
+    if (!pid) return;
+    try {
+      const k = modalOpenKey(pid);
+      if (!sessionStorage.getItem(k)) {
+        void recordContactEvent("modal_open", {});
+        sessionStorage.setItem(k, "1");
+      }
+    } catch {
+      void recordContactEvent("modal_open", {});
+    }
+
+    queueMicrotask(() => {
+      const first = root.querySelector('input[name="name"]');
+      if (first instanceof HTMLInputElement) first.focus();
+    });
+  }
+
+  function closeModal() {
+    const root = readRoot();
+    if (!root) return;
+    root.classList.remove("is-open");
+    root.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("cb-modal-open");
+  }
+
+  function wireChannels() {
+    const root = readRoot();
+    if (!root) return;
+    const ds = root.dataset;
+    const productName = ds.productName || "Ürün";
+
+    root.querySelectorAll("[data-cb-mailto]").forEach((a) => {
+      a.addEventListener("click", (e) => {
+        e.preventDefault();
+        const email = ds.brandEmail;
+        if (!email) return;
+        void recordContactEvent("email_click", { channel: "email" });
+        window.location.href = mailtoHref(email, productName);
+      });
+    });
+
+    root.querySelectorAll("[data-cb-website]").forEach((a) => {
+      a.addEventListener("click", (e) => {
+        e.preventDefault();
+        const w = ds.brandWebsite;
+        if (!w) return;
+        void recordContactEvent("website_click", { channel: "web" });
+        window.open(websiteWithUtm(w, ds.productSlug), "_blank", "noopener,noreferrer");
+      });
+    });
+
+    root.querySelectorAll("[data-cb-whatsapp]").forEach((a) => {
+      a.addEventListener("click", (e) => {
+        e.preventDefault();
+        const wa = ds.brandWhatsapp;
+        if (!wa) return;
+        const href = whatsappHref(wa, productName);
+        if (!href) return;
+        void recordContactEvent("whatsapp_click", { channel: "whatsapp" });
+        window.open(href, "_blank", "noopener,noreferrer");
+      });
+    });
+
+    root.querySelectorAll('a[data-cb-event="phone_click"]').forEach((a) => {
+      a.addEventListener("click", () => {
+        void recordContactEvent("phone_click", { channel: "phone" });
+      });
+    });
+  }
+
+  document.addEventListener("click", (e) => {
+    const t = e.target;
+    if (!(t instanceof Element)) return;
+    const opener = t.closest(".js-open-contact-brand-modal");
+    if (opener) {
+      e.preventDefault();
+      const preset = opener.getAttribute("data-cb-intent-preset");
+      openModal(preset);
+    }
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeModal();
+  });
+
+  function wireModalChrome() {
+    const root = readRoot();
+    if (!root) return;
+    root.querySelectorAll("[data-cb-close]").forEach((el) => {
+      el.addEventListener("click", () => closeModal());
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    wireModalChrome();
+    wireChannels();
+
+    const form = document.getElementById("cb-lead-form");
+    form?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const ds = rootDataset();
+      if (!ds?.productId) return;
+
+      const fd = new FormData(form);
+      const intent = String(fd.get("intent") || "genel_mesaj");
+      const mapped = mapIntent(intent);
+      const kvkk = fd.get("kvkk") === "on";
+
+      showFormMsg("", false);
+      const btn = form.querySelector(".cb-submit");
+      if (btn instanceof HTMLButtonElement) btn.disabled = true;
+
+      const { data, error } = await supabase.rpc("submit_lead_for_product", {
+        p_product_id: ds.productId,
+        p_lead_type: mapped.p_lead_type,
+        p_request_intent: mapped.p_request_intent,
+        p_name: String(fd.get("name") || "").trim(),
+        p_email: String(fd.get("email") || "").trim(),
+        p_phone: String(fd.get("phone") || "").trim(),
+        p_company: String(fd.get("company") || "").trim(),
+        p_message: String(fd.get("message") || "").trim(),
+        p_source_page: window.location.pathname,
+        p_visitor_id: getVisitorId(),
+        p_kvkk_accepted: kvkk,
+        p_metadata: {},
+      });
+
+      if (btn instanceof HTMLButtonElement) btn.disabled = false;
+
+      if (error) {
+        console.error("[submit_lead_for_product]", error);
+        showFormMsg(translateSubmitError(error.message), true);
+        return;
+      }
+
+      console.info("[submit_lead_for_product] ok", data);
+      showFormMsg("Gönderildi. Talebiniz markaya iletildi; yanıt için e-postanızı kontrol edin.", false);
+      form.reset();
+    });
+  });
+</script>
+
+<style is:global>
+  .cb-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 120;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom))
+      max(12px, env(safe-area-inset-left));
+    box-sizing: border-box;
+  }
+  .cb-modal.is-open {
+    display: flex;
+  }
+  .cb-modal-open {
+    overflow: hidden;
+  }
+  .cb-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 15, 20, 0.48);
+    cursor: pointer;
+  }
+  .cb-dialog {
+    position: relative;
+    z-index: 1;
+    width: min(560px, 100%);
+    max-height: min(90dvh, 720px);
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+    background: #fff;
+    color: #0d0d0f;
+    border-radius: 20px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 22px 56px rgba(0, 0, 0, 0.14);
+    padding: 22px 22px 20px;
+    box-sizing: border-box;
+  }
+  .cb-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+  }
+  .cb-head-text {
+    min-width: 0;
+  }
+  .cb-eyebrow {
+    margin: 0 0 6px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #6e6e73;
+  }
+  .cb-head h2 {
+    margin: 0;
+    font-size: 1.28rem;
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    line-height: 1.2;
+    color: #0b0b0c;
+  }
+  .cb-x {
+    border: 0;
+    background: transparent;
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    color: #6e6e73;
+    padding: 4px 8px;
+    border-radius: 10px;
+    flex-shrink: 0;
+  }
+  .cb-x:hover {
+    background: rgba(0, 0, 0, 0.06);
+    color: #111;
+  }
+  .cb-sub {
+    margin: 8px 0 0;
+    font-size: 0.86rem;
+    color: #515154;
+    line-height: 1.45;
+  }
+  .cb-msg {
+    margin-top: 14px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    line-height: 1.45;
+    border: 1px solid transparent;
+  }
+  .cb-msg.cb-ok {
+    background: rgba(34, 160, 80, 0.08);
+    color: #14532d;
+    border-color: rgba(34, 160, 80, 0.22);
+  }
+  .cb-msg.cb-err {
+    background: rgba(200, 60, 50, 0.07);
+    color: #7f1d1d;
+    border-color: rgba(200, 60, 50, 0.2);
+  }
+  .cb-body {
+    margin-top: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+  }
+  .cb-section {
+    border-top: 1px solid rgba(0, 0, 0, 0.07);
+    padding-top: 16px;
+  }
+  .cb-section:first-of-type {
+    border-top: 0;
+    padding-top: 0;
+  }
+  .cb-h3 {
+    margin: 0 0 6px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #424245;
+  }
+  .cb-lead {
+    margin: 0 0 14px;
+    font-size: 0.84rem;
+    color: #6e6e73;
+    line-height: 1.5;
+  }
+  .cb-form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .cb-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px 14px;
+  }
+  .cb-field-span2 {
+    grid-column: 1 / -1;
+  }
+  @media (max-width: 520px) {
+    .cb-form-grid {
+      grid-template-columns: 1fr;
+    }
+    .cb-field-span2 {
+      grid-column: 1;
+    }
+  }
+  .cb-field span {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #3a3a3c;
+    margin-bottom: 5px;
+  }
+  .cb-field input,
+  .cb-field select,
+  .cb-field textarea {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 11px;
+    padding: 11px 12px;
+    font-size: 0.92rem;
+    font-family: inherit;
+    background: #fff;
+  }
+  .cb-field input:focus,
+  .cb-field select:focus,
+  .cb-field textarea:focus {
+    outline: 2px solid rgba(0, 0, 0, 0.12);
+    outline-offset: 1px;
+  }
+  .cb-hint {
+    margin: -4px 0 0;
+    font-size: 0.78rem;
+    color: #86868b;
+    line-height: 1.45;
+  }
+  .cb-kvkk {
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: rgba(0, 0, 0, 0.02);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+  }
+  .cb-check {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    font-size: 0.82rem;
+    color: #3a3a3c;
+    line-height: 1.45;
+    margin: 0;
+    cursor: pointer;
+  }
+  .cb-check strong {
+    display: block;
+    font-weight: 600;
+    color: #1d1d1f;
+    margin-bottom: 2px;
+  }
+  .cb-check input {
+    margin-top: 4px;
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+  }
+  .cb-submit {
+    margin-top: 2px;
+    width: 100%;
+    border: 0;
+    border-radius: 14px;
+    padding: 13px 20px;
+    font-weight: 600;
+    font-size: 0.94rem;
+    cursor: pointer;
+    background: #0b0b0c;
+    color: #fff;
+  }
+  .cb-submit:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+  .cb-channel-cards {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+  @media (max-width: 480px) {
+    .cb-channel-cards {
+      grid-template-columns: 1fr;
+    }
+  }
+  .cb-channel-card {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 12px 14px;
+    border-radius: 14px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    background: rgba(250, 250, 252, 0.95);
+    min-width: 0;
+  }
+  .cb-channel-meta {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #86868b;
+  }
+  .cb-channel-link {
+    color: #0b0b0c;
+    font-weight: 600;
+    font-size: 0.88rem;
+    text-decoration: none;
+    word-break: break-word;
+    line-height: 1.35;
+  }
+  .cb-channel-link:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .cb-channels-empty {
+    margin: 0;
+    font-size: 0.86rem;
+    color: #6e6e73;
+    line-height: 1.5;
+  }
+  .hidden {
+    display: none !important;
+  }
+</style>

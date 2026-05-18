@@ -1,0 +1,2928 @@
+---
+// TODO: Site geneli varsayılan og:image (sosyal paylaşım) varsa BaseLayout image prop ile eklenebilir.
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Header from "./Header.astro";
+import Footer from "./Footer.astro";
+import ProductCard from "./ProductCard.astro";
+import {
+  getProductFilterOptions,
+  getProductListPage,
+  getPublicTaxonomyTree,
+  getVisibleProductCounts,
+  imageForProduct,
+} from "../lib/catalog.js";
+import { productPath } from "../lib/slugs.js";
+import {
+  findTaxonomyL2,
+  findTaxonomyNodeBySlug,
+  findGroupBySlug,
+  findPathByCategorySlug,
+  buildProductListPath,
+  facetParamsFromUrl,
+  FINAL_TAXONOMY_L1_SLUG_ORDER,
+  PRODUCT_CATALOG_BASE,
+} from "../lib/product-taxonomy-routes.js";
+
+export interface Props {
+  pathGroup?: string;
+  pathCategory?: string;
+  pathSubcategory?: string;
+}
+
+type TaxonomyNode = {
+  name_tr: string;
+  slug: string;
+  level: number;
+  children?: TaxonomyNode[];
+  is_active?: boolean;
+  show_in_products_filter?: boolean;
+};
+
+type VisibleProductCounts = {
+  l2: Record<string, number>;
+  l3: Record<string, number>;
+};
+
+const pathGroup = String(Astro.props.pathGroup ?? "").trim();
+const pathCategory = String(Astro.props.pathCategory ?? "").trim();
+const pathSubcategory = String(Astro.props.pathSubcategory ?? "").trim();
+
+const taxonomyTree = (await getPublicTaxonomyTree()) as TaxonomyNode[];
+
+function pathWithQuery(basePath: string, mutator?: (sp: URLSearchParams) => void) {
+  const sp = new URLSearchParams(Astro.url.searchParams);
+  sp.delete("group");
+  sp.delete("category");
+  sp.delete("subcategory");
+  if (mutator) mutator(sp);
+  const q = sp.toString();
+  return q ? `${basePath}?${q}` : basePath;
+}
+
+function humanizeSlug(slug: string) {
+  const clean = String(slug || "").trim();
+  if (!clean) return "";
+  return clean
+    .split("-")
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toLocaleUpperCase("tr-TR") + part.slice(1))
+    .join(" ");
+}
+
+const ACRONYM_TOKENS = new Set([
+  "lvt",
+  "hpl",
+  "pvc",
+  "wc",
+  "bim",
+  "cad",
+  "pdf",
+  "spi",
+  "cms",
+  "ltd",
+]);
+
+const SMALL_WORDS_TR = new Set(["ve", "ile", "veya", "ya"]);
+
+/** name_tr veya slug türevi için başlık görünümü: kısaltmalar büyük, bağlaçlar küçük. */
+function formatDisplayLabel(raw: string) {
+  const s = String(raw || "").trim();
+  if (!s) return "";
+  return s
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((word, idx) => {
+      const punct = word.match(/[,;.:]$/)?.[0] || "";
+      const core = word.replace(/[,;.:]$/, "");
+      const lower = core.toLocaleLowerCase("tr-TR");
+      if (ACRONYM_TOKENS.has(lower)) return `${lower.toUpperCase()}${punct}`;
+      if (idx > 0 && SMALL_WORDS_TR.has(lower)) return `${lower}${punct}`;
+      const titled =
+        core.charAt(0).toLocaleUpperCase("tr-TR") + core.slice(1).toLocaleLowerCase("tr-TR");
+      return `${titled}${punct}`;
+    })
+    .join(" ");
+}
+
+function findTaxonomyL1(tree: TaxonomyNode[], groupSlug: string) {
+  return findGroupBySlug(tree, groupSlug);
+}
+
+function hrefGroup(slug: string) {
+  return pathWithQuery(buildProductListPath({ group: slug, category: "", subcategory: "" }), (sp) => sp.delete("page"));
+}
+
+function hrefCategoryL2(l1Slug: string, l2Slug: string) {
+  return pathWithQuery(buildProductListPath({ group: l1Slug, category: l2Slug, subcategory: "" }), (sp) => sp.delete("page"));
+}
+
+function hrefCategorySub(l1Slug: string, categorySlug: string, subSlug: string) {
+  return pathWithQuery(
+    buildProductListPath({ group: l1Slug, category: categorySlug, subcategory: subSlug }),
+    (sp) => sp.delete("page"),
+  );
+}
+
+const params = Astro.url.searchParams;
+const filters = facetParamsFromUrl(Astro.url, {
+  group: pathGroup,
+  category: pathCategory,
+  subcategory: pathSubcategory,
+});
+
+const page = Number(params.get("page") || 1);
+
+const [result, options, visibleProductCounts] = await Promise.all([
+  getProductListPage({ filters, page }),
+  getProductFilterOptions(),
+  getVisibleProductCounts(),
+]);
+
+const productCounts = visibleProductCounts as VisibleProductCounts;
+
+function l3ProductCount(slug: string) {
+  return productCounts.l3[String(slug || "").trim()] || 0;
+}
+
+function isL2VisibleInProductsFilter(l2: TaxonomyNode) {
+  if (l2.is_active === false) return false;
+  if (l2.show_in_products_filter === false) return false;
+  return true;
+}
+
+function isL3EnabledInProductsFilter(l3: TaxonomyNode) {
+  if (l3.is_active === false) return false;
+  if (l3.show_in_products_filter === false) return false;
+  return true;
+}
+
+function isL3VisibleInPublicCatalog(l3: TaxonomyNode) {
+  if (l3.is_active === false) return false;
+  if (l3.show_in_products_filter === false) return false;
+  return l3ProductCount(l3.slug) > 0;
+}
+
+function visibleL3Nodes(nodes: TaxonomyNode[]) {
+  return (nodes ?? []).filter((n) => n.level === 3 && isL3VisibleInPublicCatalog(n));
+}
+
+const { products, count, hasPrevious, hasNext, filterResolution } = result;
+
+function subcategoryFromCategoryField(cat: string) {
+  const s = String(cat || "").trim();
+  if (!s) return "";
+  const parts = s.split(">").map((x) => x.trim()).filter(Boolean);
+  if (parts.length >= 2) return parts[parts.length - 1];
+  return "";
+}
+
+const compareCatalogPayload = products.map((p) => ({
+  id: String(p.id ?? ""),
+  slug: String(p.slug || "").trim(),
+  name: String(p.name || ""),
+  brand_name: String(p.brand_name || ""),
+  category: String(p.category || ""),
+  subcategory: subcategoryFromCategoryField(String(p.category || "")),
+  material: String(p.material || ""),
+  usage_area: String(p.usage_area || ""),
+  color_family: String(p.color_family || ""),
+  fire_class: String(p.fire_class || ""),
+  thickness_mm: p.thickness_mm != null ? String(p.thickness_mm) : "",
+  summary: String(p.summary || p.description || "").trim(),
+  acoustic_rating: String(p.acoustic_rating || ""),
+  dimensions: String(p.dimensions || ""),
+  has_pdf: Boolean(p.has_pdf),
+  has_cad: Boolean(p.has_cad),
+  has_bim: Boolean(p.has_bim),
+  image: imageForProduct(p) || "",
+  detailHref: productPath(p),
+}));
+
+const compareCatalogJson = JSON.stringify(compareCatalogPayload).replace(/</g, "\\u003c");
+
+const withParam = (key: string, value: unknown) => {
+  const isClear = value === "" || value == null || value === false;
+  let g = filters.group;
+  let c = filters.category;
+  let s = filters.subcategory;
+
+  if (key === "category") {
+    g = "";
+    if (isClear) {
+      c = "";
+      s = "";
+    } else {
+      const p = findPathByCategorySlug(taxonomyTree, String(value));
+      if (p) {
+        g = p.group;
+        c = p.category;
+      } else {
+        c = String(value);
+      }
+      s = "";
+    }
+    const base = buildProductListPath({ group: g, category: c, subcategory: s });
+    return pathWithQuery(base, (sp) => sp.delete("page"));
+  }
+
+  if (key === "group") {
+    if (isClear) {
+      g = "";
+    } else {
+      g = String(value);
+      c = "";
+      s = "";
+    }
+    const base = buildProductListPath({ group: g, category: c, subcategory: s });
+    return pathWithQuery(base, (sp) => sp.delete("page"));
+  }
+
+  if (key === "subcategory") {
+    if (isClear) {
+      s = "";
+    } else {
+      s = String(value);
+      const hit = filters.category ? findTaxonomyL2(taxonomyTree, filters.category) : null;
+      if (hit) {
+        g = hit.l1.slug;
+        c = filters.category;
+      }
+    }
+    const base = buildProductListPath({ group: g, category: c, subcategory: s });
+    return pathWithQuery(base, (sp) => sp.delete("page"));
+  }
+
+  const base = buildProductListPath({ group: filters.group, category: filters.category, subcategory: filters.subcategory });
+  return pathWithQuery(base, (sp) => {
+    sp.delete("page");
+    if (isClear) sp.delete(key);
+    else sp.set(key, String(value));
+  });
+};
+
+const pageHref = (targetPage: number) => {
+  const base = buildProductListPath({ group: filters.group, category: filters.category, subcategory: filters.subcategory });
+  return pathWithQuery(base, (sp) => {
+    if (targetPage <= 1) sp.delete("page");
+    else sp.set("page", String(targetPage));
+  });
+};
+
+const clearHref = (key: string) => withParam(key, "");
+
+const brandTax = options.brandsTaxonomy || [];
+
+/** Üst yatay chip: yalnızca final L1 (sıra sabit, etiket taxonomy JSON). */
+const L1_CHIP_SLUG_ORDER = FINAL_TAXONOMY_L1_SLUG_ORDER;
+
+const l1ChipBySlug = new Map(
+  taxonomyTree.filter((n) => n.level === 1).map((n) => [n.slug, n] as const),
+);
+
+const l1ToolbarChips = L1_CHIP_SLUG_ORDER.map((slug) => {
+  const node = l1ChipBySlug.get(slug);
+  return {
+    slug,
+    label: node?.name_tr ? formatDisplayLabel(node.name_tr) : slug,
+    href: pathWithQuery(buildProductListPath({ group: slug, category: "", subcategory: "" }), (sp) => sp.delete("page")),
+  };
+});
+
+const brandFacetOptions = brandTax.map((b) => ({ value: b.slug, label: b.name }));
+
+const groupSlugActive = String(filters.group || "").trim();
+const toolbarAllActive = !groupSlugActive;
+
+function resolveCategoryLabel(tree: TaxonomyNode[], categorySlug: string) {
+  const clean = String(categorySlug || "").trim();
+  if (!tree?.length || !clean) return "";
+  const l2 = findTaxonomyL2(tree, clean)?.l2;
+  if (l2?.name_tr) return formatDisplayLabel(l2.name_tr);
+  const node = findTaxonomyNodeBySlug(tree, clean);
+  if (node?.name_tr) return formatDisplayLabel(node.name_tr);
+  return formatDisplayLabel(humanizeSlug(clean));
+}
+
+function resolveSubcategoryLabel(tree: TaxonomyNode[], subcategorySlug: string, categorySlug: string) {
+  const cleanSub = String(subcategorySlug || "").trim();
+  if (!tree?.length || !cleanSub) return "";
+  const cleanCat = String(categorySlug || "").trim();
+  if (cleanCat) {
+    const match = findTaxonomyL2(tree, cleanCat);
+    const l3 = match?.l3Children?.find((n) => n.slug === cleanSub);
+    if (l3?.name_tr) return formatDisplayLabel(l3.name_tr);
+  }
+  const node = findTaxonomyNodeBySlug(tree, cleanSub);
+  if (node?.name_tr) return formatDisplayLabel(node.name_tr);
+  return formatDisplayLabel(humanizeSlug(cleanSub));
+}
+
+function resolveGroupLabel(tree: TaxonomyNode[], groupSlug: string) {
+  const clean = String(groupSlug || "").trim();
+  if (!tree?.length || !clean) return "";
+  const l1 = findTaxonomyL1(tree, clean);
+  if (l1?.name_tr) return formatDisplayLabel(l1.name_tr);
+  return formatDisplayLabel(humanizeSlug(clean));
+}
+
+const categoryFilterLabel = filters.category
+  ? resolveCategoryLabel(taxonomyTree, filters.category)
+  : "";
+const subcategoryFilterLabel = filters.subcategory
+  ? resolveSubcategoryLabel(taxonomyTree, filters.subcategory, filters.category)
+  : "";
+
+const groupFilterLabel = filters.group ? resolveGroupLabel(taxonomyTree, filters.group) : "";
+
+const activeChips = [
+  filters.search && ["Arama", filters.search, "q"],
+  filters.brand && ["Marka", filterResolution?.brandRow?.name || filters.brand, "brand"],
+  filters.group && ["Grup", groupFilterLabel, "group"],
+  filters.category && ["Kategori", categoryFilterLabel, "category"],
+  filters.subcategory && ["Alt Kategori", subcategoryFilterLabel, "subcategory"],
+  filters.material && ["Malzeme", filters.material, "material"],
+  filters.usageArea && ["Kullanım", filters.usageArea, "usageArea"],
+  filters.colorFamily && ["Renk", filters.colorFamily, "colorFamily"],
+  filters.fireClass && ["Özellikler", filters.fireClass, "fireClass"],
+  filters.indoorOutdoor && ["Mekan", filters.indoorOutdoor, "indoorOutdoor"],
+  filters.city && ["Şehir", filters.city, "city"],
+  filters.role && ["Rol", filters.role, "role"],
+  filters.hasPdf && ["Dosya", "PDF", "hasPdf"],
+  filters.hasCad && ["Dosya", "CAD", "hasCad"],
+  filters.hasBim && ["Dosya", "BIM", "hasBim"],
+].filter(Boolean);
+
+const materialOptions = options.materials || [];
+const usageAreaOptions = options.usageAreas || [];
+const colorFamilyOptions = options.colorFamilies || [];
+const fireClassOptions = options.fireClasses || [];
+
+const openAccordionCategories = true;
+const openAccordionBrands = Boolean(filters.brand);
+const openAccordionMaterial = Boolean(filters.material);
+const openAccordionProperties = Boolean(filters.fireClass);
+const openAccordionUsage = Boolean(filters.usageArea || filters.indoorOutdoor);
+const openAccordionColor = Boolean(filters.colorFamily);
+const openAccordionDocs = Boolean(filters.hasPdf || filters.hasCad || filters.hasBim);
+
+const categoryParam = filters.category.trim();
+const categoryLanding = categoryParam ? findTaxonomyL2(taxonomyTree, categoryParam) : null;
+const activeSubcategorySlug = filters.subcategory.trim();
+const groupParam = filters.group.trim();
+const navL1FromGroup = groupParam ? findTaxonomyL1(taxonomyTree, groupParam) : null;
+const activeL3Node =
+  categoryLanding && activeSubcategorySlug
+    ? categoryLanding.l3Children.find((n) => n.slug === activeSubcategorySlug)
+    : null;
+
+const l1NavNodes = L1_CHIP_SLUG_ORDER.map((slug) => l1ChipBySlug.get(slug)).filter(
+  (n): n is TaxonomyNode => Boolean(n),
+);
+
+const categoryLandingVisibleL3 = categoryLanding ? visibleL3Nodes(categoryLanding.l3Children) : [];
+
+const hasCategoryLanding = Boolean(categoryParam && categoryLanding);
+const hasCategoryChips = categoryLandingVisibleL3.length > 0;
+
+const emptyCatalogMessage =
+  filters.subcategory || filters.category
+    ? "Bu kategoriye ait yayınlanmış ürün bulunamadı."
+    : "Bu filtrelere uygun yayınlanmış ürün bulunmuyor. Filtreleri azaltmayı veya temizlemeyi deneyin.";
+
+const categoryLandingChipHref = (subSlug?: string) => {
+  if (!categoryLanding) return PRODUCT_CATALOG_BASE;
+  const base = buildProductListPath({
+    group: categoryLanding.l1.slug,
+    category: categoryLanding.l2.slug,
+    subcategory: subSlug || "",
+  });
+  return pathWithQuery(base, (sp) => sp.delete("page"));
+};
+
+const groupLanding = groupParam && !categoryParam ? navL1FromGroup : null;
+
+const canonicalListingPath = buildProductListPath({
+  group: filters.group,
+  category: filters.category,
+  subcategory: filters.subcategory,
+});
+
+const SORT_OPTIONS = [
+  { value: "created_desc", label: "Yeni eklenenler" },
+  { value: "name_asc", label: "Ada göre A-Z" },
+  { value: "name_desc", label: "Ada göre Z-A" },
+  { value: "brand_asc", label: "Marka A-Z" },
+  { value: "brand_desc", label: "Marka Z-A" },
+] as const;
+
+function sortHref(sortValue: string) {
+  return pathWithQuery(canonicalListingPath, (sp) => {
+    sp.delete("page");
+    if (!sortValue || sortValue === "created_desc") sp.delete("sort");
+    else sp.set("sort", sortValue);
+  });
+}
+
+const sortParamActive = String(filters.sort || "created_desc").trim();
+const currentSortLabel =
+  SORT_OPTIONS.find((o) => o.value === sortParamActive)?.label || SORT_OPTIONS[0].label;
+
+const pageTitle = categoryLanding
+  ? `${formatDisplayLabel(categoryLanding.l2.name_tr)} | Ürünler | Archilink`
+  : groupLanding
+    ? `${formatDisplayLabel(groupLanding.name_tr)} | Ürünler | Archilink`
+    : "Ürünler | Archilink";
+const pageDescription = categoryLanding
+  ? `${formatDisplayLabel(categoryLanding.l2.name_tr)} kategorisindeki mimari ürünleri keşfedin.`
+  : "Akustik, aydınlatma, dış cephe, zemin ve daha fazlası. Teknik filtrelerle doğru mimari malzemeyi saniyeler içinde bul.";
+---
+
+<BaseLayout
+  title={pageTitle}
+  description={pageDescription}
+  canonical={canonicalListingPath}
+  type="website"
+>
+  <Header />
+
+  <main
+    class:list={[
+      "products-page",
+      hasCategoryLanding && "products-page--has-category-landing",
+      hasCategoryChips && "products-page--has-category-chips",
+    ]}
+    data-products-page
+  >
+    {categoryParam && categoryLanding && (
+      <section class="category-landing page-shell" aria-labelledby="category-landing-title">
+          <nav class="category-landing__breadcrumb" aria-label="Breadcrumb">
+            <a href={PRODUCT_CATALOG_BASE}>Ürünler</a>
+            <span class="category-landing__breadcrumb-sep" aria-hidden="true">/</span>
+            <a href={hrefGroup(categoryLanding.l1.slug)}>{formatDisplayLabel(categoryLanding.l1.name_tr)}</a>
+            <span class="category-landing__breadcrumb-sep" aria-hidden="true">/</span>
+            <a href={hrefCategoryL2(categoryLanding.l1.slug, categoryLanding.l2.slug)}>{formatDisplayLabel(categoryLanding.l2.name_tr)}</a>
+            {activeL3Node && (
+              <>
+                <span class="category-landing__breadcrumb-sep" aria-hidden="true">/</span>
+                <span aria-current="page">{formatDisplayLabel(activeL3Node.name_tr)}</span>
+              </>
+            )}
+          </nav>
+
+          <h1 id="category-landing-title" class="category-landing__title">
+            {formatDisplayLabel(categoryLanding.l2.name_tr)}
+          </h1>
+
+          {categoryLandingVisibleL3.length > 0 && (
+            <div class="category-landing__chips" role="list">
+                <a
+                  class:list={["category-landing__chip", !activeSubcategorySlug && "is-active"]}
+                  href={categoryLandingChipHref()}
+                  role="listitem"
+                >
+                  Tüm {formatDisplayLabel(categoryLanding.l2.name_tr)}
+                </a>
+                {categoryLandingVisibleL3.map((l3) => (
+                  <a
+                    class:list={[
+                      "category-landing__chip",
+                      activeSubcategorySlug === l3.slug && "is-active",
+                    ]}
+                    href={categoryLandingChipHref(l3.slug)}
+                    role="listitem"
+                  >
+                    {formatDisplayLabel(l3.name_tr)}
+                  </a>
+                ))}
+            </div>
+          )}
+      </section>
+    )}
+
+    <section class="products-toolbar">
+      <div class="page-shell products-toolbar__shell">
+        <form class="products-search" method="get" action={canonicalListingPath}>
+          <label class="products-search__field">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="11" cy="11" r="8"></circle>
+              <path d="m21 21-4.35-4.35"></path>
+            </svg>
+            <input
+              name="q"
+              value={filters.search}
+              placeholder="Ürün, marka veya anahtar kelime ara..."
+              autocomplete="off"
+            />
+          </label>
+
+          <input type="hidden" name="brand" value={filters.brand} />
+          <input type="hidden" name="material" value={filters.material} />
+          <input type="hidden" name="usageArea" value={filters.usageArea} />
+          <input type="hidden" name="colorFamily" value={filters.colorFamily} />
+          <input type="hidden" name="fireClass" value={filters.fireClass} />
+          <input type="hidden" name="indoorOutdoor" value={filters.indoorOutdoor} />
+          <input type="hidden" name="city" value={filters.city} />
+          <input type="hidden" name="role" value={filters.role} />
+          <input type="hidden" name="sort" value={filters.sort} />
+          {filters.hasPdf && <input type="hidden" name="hasPdf" value="1" />}
+          {filters.hasCad && <input type="hidden" name="hasCad" value="1" />}
+          {filters.hasBim && <input type="hidden" name="hasBim" value="1" />}
+        </form>
+
+        <div class="products-tools">
+          <button class="products-filter-toggle" type="button" data-filter-toggle aria-expanded="false" aria-controls="products-filter-sidebar">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 6h16M4 12h16M4 18h16"></path>
+              <circle cx="16" cy="6" r="2.5"></circle>
+              <circle cx="8" cy="12" r="2.5"></circle>
+              <circle cx="16" cy="18" r="2.5"></circle>
+            </svg>
+            <span>Filtreler</span>
+          </button>
+
+          <nav class="products-pills" aria-label="Ana ürün grupları">
+            <a
+              class:list={["products-pill", toolbarAllActive && "is-active"]}
+              href={pathWithQuery(PRODUCT_CATALOG_BASE, (sp) => sp.delete("page"))}
+            >
+              <span>Tümü</span>
+              {toolbarAllActive ? <em>{count}</em> : null}
+            </a>
+
+            {l1ToolbarChips.map((chip) => (
+              <a
+                class:list={["products-pill", groupSlugActive === chip.slug && "is-active"]}
+                href={chip.href}
+              >
+                <span>{chip.label}</span>
+              </a>
+            ))}
+          </nav>
+
+          <div class="products-toolbar-actions">
+            <details class="products-sort-dd">
+              <summary class="products-sort-toggle" aria-label="Sıralama seçenekleri">
+                <span class="products-sort-toggle__row">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M3 6h18M7 12h10M10 18h4"></path>
+                  </svg>
+                  <span>Sırala</span>
+                  <span class="products-sort-value">{currentSortLabel}</span>
+                </span>
+              </summary>
+              <div class="products-sort-menu" role="menu">
+                {SORT_OPTIONS.map((opt) => (
+                  <a
+                    class:list={["products-sort-opt", sortParamActive === opt.value && "is-active"]}
+                    role="menuitem"
+                    href={sortHref(opt.value)}
+                  >
+                    {opt.label}
+                  </a>
+                ))}
+              </div>
+            </details>
+
+            <button type="button" class="products-compare-toggle" data-compare-open-btn aria-pressed="false">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="3" y="3" width="7" height="18" rx="1.5"></rect>
+                <rect x="14" y="3" width="7" height="18" rx="1.5"></rect>
+              </svg>
+              <span>Karşılaştır</span>
+            </button>
+          </div>
+        </div>
+
+        {activeChips.length > 0 && (
+          <div class="products-active-chips">
+            <span>Aktif filtreler</span>
+            {activeChips.map(([label, value, key]) => (
+              <a
+                class:list={[
+                  "products-active-chip",
+                  (key === "category" || key === "subcategory" || key === "group") && "is-accent",
+                ]}
+                href={clearHref(key)}
+              >
+                {label}: {value}
+                <strong aria-hidden="true">×</strong>
+              </a>
+            ))}
+            <a class="products-clear-all" href={PRODUCT_CATALOG_BASE}>Tümünü Temizle</a>
+          </div>
+        )}
+      </div>
+    </section>
+
+    <div class="products-filter-backdrop" data-filter-backdrop></div>
+
+    <section class="page-shell products-layout" data-products-layout>
+      <aside id="products-filter-sidebar" class="products-filter-sidebar" data-filter-sidebar aria-hidden="true">
+        <form method="get" action={canonicalListingPath}>
+          <div class="products-filter-sidebar-top">
+            <button type="button" class="products-filter-close" data-filter-close aria-label="Filtreleri kapat">
+              ×
+            </button>
+          </div>
+
+          <label class="products-filter-search">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="11" cy="11" r="8"></circle>
+              <path d="m21 21-4.35-4.35"></path>
+            </svg>
+            <input type="search" placeholder="Filtre ara..." aria-label="Filtre ara" />
+          </label>
+
+          <input type="hidden" name="q" value={filters.search} />
+          <input type="hidden" name="sort" value={filters.sort} />
+          {filters.country && <input type="hidden" name="country" value={filters.country} />}
+          <input type="hidden" name="city" value={filters.city} />
+          <input type="hidden" name="role" value={filters.role} />
+
+          <details class="products-filter-disclosure" open={openAccordionCategories}>
+            <summary class="products-filter-disclosure__summary">
+              <span class="products-filter-disclosure__title">Kategoriler</span>
+              <span class="products-filter-disclosure__icon" aria-hidden="true"></span>
+            </summary>
+            <div class="products-filter-disclosure__body products-filter-disclosure__body--categories">
+              <nav class="products-sidebar-category-nav" aria-label="Kategoriler" data-sidebar-category-nav>
+                <div class="products-sidebar-category-nav__accordions">
+                  {l1NavNodes.map((l1) => {
+                    const l2Children = (l1.children ?? []).filter(
+                      (n) => n.level === 2 && isL2VisibleInProductsFilter(n),
+                    );
+                    const openL1 =
+                      (categoryLanding && categoryLanding.l1.slug === l1.slug) ||
+                      (Boolean(groupParam) && !categoryParam && groupParam === l1.slug);
+                    const l1PanelId = `sidebar-l1-${l1.slug}`;
+                    return (
+                      <div class="products-sidebar-l1">
+                        <button
+                          type="button"
+                          class="products-sidebar-l1__toggle"
+                          data-sidebar-l1-toggle
+                          aria-expanded={openL1 ? "true" : "false"}
+                          aria-controls={l1PanelId}
+                        >
+                          <span class="products-sidebar-l1__chev" aria-hidden="true">
+                            <svg
+                              class="products-sidebar-chevron-svg"
+                              width="11"
+                              height="11"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                              aria-hidden="true"
+                            >
+                              <path
+                                d="M9 18L15 12L9 6"
+                                stroke="#6f6f73"
+                                stroke-width="2.2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                              />
+                            </svg>
+                          </span>
+                          <span class="products-sidebar-l1__label">{formatDisplayLabel(l1.name_tr)}</span>
+                        </button>
+                        <div class="products-sidebar-l1__panel" id={l1PanelId} hidden={!openL1}>
+                          {l2Children.map((l2) => {
+                            const l3Children = (l2.children ?? []).filter((n) => n.level === 3);
+                            const l3AccordionChildren = l3Children.filter(isL3EnabledInProductsFilter);
+                            const sidebarL3Children = l3AccordionChildren;
+                            const isActiveL2Category = categoryParam === l2.slug;
+                            const openL2 = isActiveL2Category && Boolean(activeSubcategorySlug);
+                            const l2PanelId = `sidebar-l2-${l1.slug}--${l2.slug}`;
+                            const l2Label = formatDisplayLabel(l2.name_tr);
+
+                            if (l3AccordionChildren.length > 0) {
+                              return (
+                              <div class="products-sidebar-l2">
+                                <button
+                                  type="button"
+                                  class="products-sidebar-l2__toggle"
+                                  data-sidebar-l2-toggle
+                                  aria-expanded={openL2 ? "true" : "false"}
+                                  aria-controls={l2PanelId}
+                                >
+                                  <span class="products-sidebar-l2__chev" aria-hidden="true">
+                                    <svg
+                                      class="products-sidebar-chevron-svg"
+                                      width="11"
+                                      height="11"
+                                      viewBox="0 0 24 24"
+                                      fill="none"
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      aria-hidden="true"
+                                    >
+                                      <path
+                                        d="M9 18L15 12L9 6"
+                                        stroke="#6f6f73"
+                                        stroke-width="2.2"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                      />
+                                    </svg>
+                                  </span>
+                                  <span class="products-sidebar-l2__label">{l2Label}</span>
+                                </button>
+                                <div class="products-sidebar-l2__panel" id={l2PanelId} hidden={!openL2}>
+                                  <a
+                                    class:list={[
+                                      "products-sidebar-all-link",
+                                      isActiveL2Category && !activeSubcategorySlug && "is-active",
+                                    ]}
+                                    href={hrefCategoryL2(l1.slug, l2.slug)}
+                                    aria-current={
+                                      isActiveL2Category && !activeSubcategorySlug ? "page" : undefined
+                                    }
+                                  >
+                                    Tüm {l2Label}
+                                  </a>
+                                  {sidebarL3Children.length > 0 && (
+                                    <ul class="products-sidebar-l3">
+                                      {sidebarL3Children.map((l3) => (
+                                        <li>
+                                          <a
+                                            class:list={[
+                                              "products-sidebar-l3__link",
+                                              activeSubcategorySlug === l3.slug && "is-active",
+                                            ]}
+                                            href={hrefCategorySub(l1.slug, l2.slug, l3.slug)}
+                                            aria-current={
+                                              activeSubcategorySlug === l3.slug ? "page" : undefined
+                                            }
+                                          >
+                                            {formatDisplayLabel(l3.name_tr)}
+                                          </a>
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  )}
+                                </div>
+                              </div>
+                              );
+                            }
+
+                            return (
+                              <a
+                                class:list={[
+                                  "products-sidebar-l2__solo",
+                                  isActiveL2Category && !activeSubcategorySlug && "is-active",
+                                ]}
+                                href={hrefCategoryL2(l1.slug, l2.slug)}
+                                aria-current={
+                                  isActiveL2Category && !activeSubcategorySlug ? "page" : undefined
+                                }
+                              >
+                                {l2Label}
+                              </a>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </nav>
+            </div>
+          </details>
+
+          <details class="products-filter-disclosure" open={openAccordionBrands}>
+            <summary class="products-filter-disclosure__summary">
+              <span class="products-filter-disclosure__title">Markalar</span>
+              <span class="products-filter-disclosure__icon" aria-hidden="true"></span>
+            </summary>
+            <div class="products-filter-disclosure__body">
+              <label class="products-filter-disclosure__row">
+                <input type="radio" name="brand" value="" checked={!filters.brand} /> Tümü
+              </label>
+              {brandFacetOptions.slice(0, 48).map((opt) => (
+                <label class="products-filter-disclosure__row">
+                  <input
+                    type="radio"
+                    name="brand"
+                    value={opt.value}
+                    checked={filters.brand === opt.value}
+                  />
+                  {opt.label}
+                </label>
+              ))}
+            </div>
+          </details>
+
+          <details class="products-filter-disclosure" open={openAccordionMaterial}>
+            <summary class="products-filter-disclosure__summary">
+              <span class="products-filter-disclosure__title">Malzeme</span>
+              <span class="products-filter-disclosure__icon" aria-hidden="true"></span>
+            </summary>
+            <div class="products-filter-disclosure__body">
+              {materialOptions.length ? (
+                <>
+                  <label class="products-filter-disclosure__row">
+                    <input type="radio" name="material" value="" checked={!filters.material} /> Tümü
+                  </label>
+                  {materialOptions.slice(0, 48).map((mat) => (
+                    <label class="products-filter-disclosure__row">
+                      <input
+                        type="radio"
+                        name="material"
+                        value={mat}
+                        checked={filters.material === mat}
+                      />
+                      {mat}
+                    </label>
+                  ))}
+                </>
+              ) : (
+                <p class="products-filter-empty-hint">Seçenek yok</p>
+              )}
+            </div>
+          </details>
+
+          <details class="products-filter-disclosure" open={openAccordionProperties}>
+            <summary class="products-filter-disclosure__summary">
+              <span class="products-filter-disclosure__title">Özellikler</span>
+              <span class="products-filter-disclosure__icon" aria-hidden="true"></span>
+            </summary>
+            <div class="products-filter-disclosure__body">
+              {fireClassOptions.length ? (
+                <>
+                  <label class="products-filter-disclosure__row">
+                    <input type="radio" name="fireClass" value="" checked={!filters.fireClass} /> Tümü
+                  </label>
+                  {fireClassOptions.slice(0, 32).map((fc) => (
+                    <label class="products-filter-disclosure__row">
+                      <input
+                        type="radio"
+                        name="fireClass"
+                        value={fc}
+                        checked={filters.fireClass === fc}
+                      />
+                      {fc}
+                    </label>
+                  ))}
+                </>
+              ) : (
+                <p class="products-filter-empty-hint">Seçenek yok</p>
+              )}
+            </div>
+          </details>
+
+          <details class="products-filter-disclosure" open={openAccordionUsage}>
+            <summary class="products-filter-disclosure__summary">
+              <span class="products-filter-disclosure__title">Kullanım Alanı</span>
+              <span class="products-filter-disclosure__icon" aria-hidden="true"></span>
+            </summary>
+            <div class="products-filter-disclosure__body">
+              <p class="products-filter-disclosure__subhead">Mekan</p>
+              <label class="products-filter-disclosure__row">
+                <input type="radio" name="indoorOutdoor" value="" checked={!filters.indoorOutdoor} /> Tümü
+              </label>
+              <label class="products-filter-disclosure__row">
+                <input
+                  type="radio"
+                  name="indoorOutdoor"
+                  value="indoor"
+                  checked={filters.indoorOutdoor === "indoor"}
+                />
+                İç mekan
+              </label>
+              <label class="products-filter-disclosure__row">
+                <input
+                  type="radio"
+                  name="indoorOutdoor"
+                  value="outdoor"
+                  checked={filters.indoorOutdoor === "outdoor"}
+                />
+                Dış mekan
+              </label>
+              <label class="products-filter-disclosure__row">
+                <input
+                  type="radio"
+                  name="indoorOutdoor"
+                  value="both"
+                  checked={filters.indoorOutdoor === "both"}
+                />
+                İç + dış
+              </label>
+              {usageAreaOptions.length > 0 && (
+                <>
+                  <p class="products-filter-disclosure__subhead">Kullanım türü</p>
+                  <label class="products-filter-disclosure__row">
+                    <input type="radio" name="usageArea" value="" checked={!filters.usageArea} /> Tümü
+                  </label>
+                  {usageAreaOptions.slice(0, 40).map((ua) => (
+                    <label class="products-filter-disclosure__row">
+                      <input
+                        type="radio"
+                        name="usageArea"
+                        value={ua}
+                        checked={filters.usageArea === ua}
+                      />
+                      {ua}
+                    </label>
+                  ))}
+                </>
+              )}
+            </div>
+          </details>
+
+          <details class="products-filter-disclosure" open={openAccordionColor}>
+            <summary class="products-filter-disclosure__summary">
+              <span class="products-filter-disclosure__title">Renk</span>
+              <span class="products-filter-disclosure__icon" aria-hidden="true"></span>
+            </summary>
+            <div class="products-filter-disclosure__body">
+              {colorFamilyOptions.length ? (
+                <>
+                  <label class="products-filter-disclosure__row">
+                    <input type="radio" name="colorFamily" value="" checked={!filters.colorFamily} /> Tümü
+                  </label>
+                  {colorFamilyOptions.slice(0, 40).map((cf) => (
+                    <label class="products-filter-disclosure__row">
+                      <input
+                        type="radio"
+                        name="colorFamily"
+                        value={cf}
+                        checked={filters.colorFamily === cf}
+                      />
+                      {cf}
+                    </label>
+                  ))}
+                </>
+              ) : (
+                <p class="products-filter-empty-hint">Seçenek yok</p>
+              )}
+            </div>
+          </details>
+
+          <details class="products-filter-disclosure" open={openAccordionDocs}>
+            <summary class="products-filter-disclosure__summary">
+              <span class="products-filter-disclosure__title">Dokümanlar</span>
+              <span class="products-filter-disclosure__icon" aria-hidden="true"></span>
+            </summary>
+            <div class="products-filter-disclosure__body">
+              <label class="products-filter-disclosure__row products-filter-disclosure__row--check">
+                <input type="checkbox" name="hasPdf" value="1" checked={filters.hasPdf} />
+                PDF var
+              </label>
+              <label class="products-filter-disclosure__row products-filter-disclosure__row--check">
+                <input type="checkbox" name="hasCad" value="1" checked={filters.hasCad} />
+                CAD var
+              </label>
+              <label class="products-filter-disclosure__row products-filter-disclosure__row--check">
+                <input type="checkbox" name="hasBim" value="1" checked={filters.hasBim} />
+                BIM var
+              </label>
+            </div>
+          </details>
+
+          <div class="products-filter-actions">
+            <button type="submit">Filtrele</button>
+            <a href={PRODUCT_CATALOG_BASE}>Temizle</a>
+          </div>
+        </form>
+      </aside>
+
+      <div class="products-main">
+        <div class="products-count-row">
+          <p>{count} ürün listeleniyor</p>
+        </div>
+
+        {products.length ? (
+          <div class="product-grid" data-product-grid>
+            {products.map((product) => <ProductCard product={product} />)}
+          </div>
+        ) : (
+          <p class="empty">{emptyCatalogMessage}</p>
+        )}
+
+        {(hasPrevious || hasNext) && (
+          <nav class="pagination" aria-label="Ürün sayfaları">
+            {hasPrevious ? <a href={pageHref(result.page - 1)}>Önceki</a> : <span></span>}
+            {hasNext ? <a href={pageHref(result.page + 1)}>Sonraki</a> : <span></span>}
+          </nav>
+        )}
+      </div>
+    </section>
+  </main>
+
+  <script type="application/json" id="catalog-compare-payload" set:html={compareCatalogJson} />
+
+  <div id="products-compare-bar" class="products-compare-bar hidden" role="region" aria-label="Karşılaştırma seçimi" aria-hidden="true">
+    <div class="products-compare-bar__inner page-shell">
+      <div class="products-compare-bar__top">
+        <div id="products-compare-chips" class="products-compare-chips" aria-live="polite"></div>
+        <p id="products-compare-bar-text" class="products-compare-bar__text">0/5 seçili</p>
+      </div>
+      <div class="products-compare-bar__actions">
+        <button type="button" id="products-compare-bar-cancel" class="products-compare-bar-btn products-compare-bar-btn--ghost">İptal</button>
+        <button type="button" id="products-compare-bar-show" class="products-compare-bar-btn products-compare-bar-btn--primary" disabled>
+          Karşılaştırmayı göster
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="products-compare-modal" class="products-compare-modal hidden" aria-hidden="true">
+    <div class="products-compare-modal__backdrop" data-compare-result-close="1"></div>
+    <div class="products-compare-modal__sheet" role="dialog" aria-modal="true" aria-labelledby="products-compare-modal-title">
+      <div class="products-compare-modal__head">
+        <h2 id="products-compare-modal-title" class="products-compare-modal__title">Karşılaştırma</h2>
+        <div class="products-compare-modal__head-actions">
+          <button type="button" id="products-compare-back-pick" class="products-compare-bar-btn products-compare-bar-btn--ghost">Seçimi düzenle</button>
+          <button type="button" class="products-compare-modal__close" data-compare-result-close="1" aria-label="Kapat">✕</button>
+        </div>
+      </div>
+      <div id="products-compare-result-body" class="products-compare-modal__body"></div>
+    </div>
+  </div>
+
+  <Footer />
+</BaseLayout>
+
+<script is:inline>
+  (function () {
+    var page = document.querySelector("[data-products-page]");
+    var layout = document.querySelector("[data-products-layout]");
+    var sidebar = document.querySelector("[data-filter-sidebar]");
+    var toggle = document.querySelector("[data-filter-toggle]");
+    var closeBtn = document.querySelector("[data-filter-close]");
+    var backdrop = document.querySelector("[data-filter-backdrop]");
+
+    if (!page || !layout || !sidebar || !toggle) return;
+
+    function setOpen(open) {
+      page.classList.toggle("is-filters-open", open);
+      layout.classList.toggle("is-filters-open", open);
+      sidebar.setAttribute("aria-hidden", open ? "false" : "true");
+      toggle.setAttribute("aria-expanded", open ? "true" : "false");
+
+      if (backdrop) {
+        backdrop.classList.toggle("is-visible", open);
+      }
+
+      if (window.innerWidth < 900) {
+        document.body.style.overflow = open ? "hidden" : "";
+      }
+    }
+
+    toggle.addEventListener("click", function () {
+      setOpen(!page.classList.contains("is-filters-open"));
+    });
+
+    if (closeBtn) {
+      closeBtn.addEventListener("click", function () {
+        setOpen(false);
+      });
+    }
+
+    if (backdrop) {
+      backdrop.addEventListener("click", function () {
+        setOpen(false);
+      });
+    }
+
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape") setOpen(false);
+    });
+
+    if (window.location.hash === "#filters") {
+      setOpen(true);
+    } else {
+      setOpen(false);
+    }
+  })();
+</script>
+
+<script is:inline>
+  (function () {
+    var root = document.querySelector("[data-sidebar-category-nav]");
+    if (!root) return;
+    root.addEventListener("click", function (e) {
+      var btn = e.target.closest("[data-sidebar-l1-toggle], [data-sidebar-l2-toggle]");
+      if (!btn || !root.contains(btn)) return;
+      var panelId = btn.getAttribute("aria-controls");
+      if (!panelId) return;
+      var panel = document.getElementById(panelId);
+      if (!panel) return;
+      var isOpen = btn.getAttribute("aria-expanded") === "true";
+      btn.setAttribute("aria-expanded", isOpen ? "false" : "true");
+      panel.hidden = isOpen;
+    });
+  })();
+</script>
+
+<script is:inline>
+  (function () {
+    var page = document.querySelector("[data-products-page]");
+    var grid = document.querySelector("[data-product-grid]");
+    var openBtn = document.querySelector("[data-compare-open-btn]");
+    var bar = document.getElementById("products-compare-bar");
+    var modal = document.getElementById("products-compare-modal");
+    var payloadEl = document.getElementById("catalog-compare-payload");
+    if (!page || !grid || !openBtn || !bar || !modal || !payloadEl) return;
+
+    var MAX = 5;
+    var MIN = 2;
+    var catalogById = {};
+    try {
+      JSON.parse(payloadEl.textContent || "[]").forEach(function (p) {
+        if (!p) return;
+        if (p.id != null && String(p.id) !== "") catalogById[String(p.id)] = p;
+        if (p.slug) catalogById[String(p.slug)] = p;
+      });
+    } catch (_) {}
+
+    var compareMode = false;
+    var comparePickOrder = [];
+    var lastCompareProducts = [];
+
+    function esc(s) {
+      return String(s == null ? "" : s)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function productById(id) {
+      return catalogById[String(id)] || null;
+    }
+
+    function pruneMissingPicks() {
+      comparePickOrder = comparePickOrder.filter(function (id) {
+        return Boolean(productById(id));
+      });
+    }
+
+    function syncCompareCardVisuals() {
+      grid.querySelectorAll("[data-product-id]").forEach(function (cardEl) {
+        var id = "";
+        try {
+          id = decodeURIComponent(cardEl.getAttribute("data-product-id") || "");
+        } catch (_) {}
+        var on = Boolean(id && comparePickOrder.indexOf(id) >= 0);
+        cardEl.classList.toggle("is-compare-active", compareMode);
+        cardEl.classList.toggle("is-compare-selected", compareMode && on);
+        cardEl.classList.toggle("is-compare-candidate", compareMode && !on);
+        var checkbox = cardEl.querySelector("[data-compare-checkbox]");
+        if (checkbox) {
+          checkbox.classList.toggle("compare-pick-badge--on", compareMode && on);
+          checkbox.classList.toggle("compare-pick-badge--off", compareMode && !on);
+          checkbox.setAttribute("aria-pressed", on ? "true" : "false");
+          checkbox.setAttribute("aria-label", on ? "Karşılaştırmadan çıkar" : "Karşılaştırmaya ekle");
+          checkbox.innerHTML = on
+            ? '<svg width="12" height="10" viewBox="0 0 12 10" fill="none" aria-hidden="true"><path d="M1 5l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+            : "";
+        }
+      });
+    }
+
+    function renderChips() {
+      var wrap = document.getElementById("products-compare-chips");
+      if (!wrap) return;
+      if (!compareMode || !comparePickOrder.length) {
+        wrap.innerHTML = "";
+        return;
+      }
+      wrap.innerHTML = comparePickOrder
+        .map(function (id) {
+          var p = productById(id);
+          if (!p) return "";
+          var img = p.image
+            ? '<img src="' + esc(p.image) + '" alt="" width="40" height="40" loading="lazy" />'
+            : '<span class="products-compare-chip__ph" aria-hidden="true"></span>';
+          var shortName = (p.name || "").slice(0, 32) + ((p.name || "").length > 32 ? "…" : "");
+          return (
+            '<div class="products-compare-chip" data-compare-chip-id="' +
+            esc(id) +
+            '">' +
+            img +
+            '<span class="products-compare-chip__name">' +
+            esc(shortName) +
+            '</span><button type="button" class="products-compare-chip__x" data-compare-remove="' +
+            esc(id) +
+            '" aria-label="Kaldır">×</button></div>'
+          );
+        })
+        .join("");
+    }
+
+    function updateCompareBar() {
+      pruneMissingPicks();
+      var n = comparePickOrder.length;
+      if (compareMode) {
+        bar.classList.remove("hidden");
+        bar.setAttribute("aria-hidden", "false");
+        page.classList.add("is-compare-mode");
+        document.body.classList.add("products-compare-mode-active");
+        openBtn.setAttribute("aria-pressed", "true");
+      } else {
+        bar.classList.add("hidden");
+        bar.setAttribute("aria-hidden", "true");
+        page.classList.remove("is-compare-mode");
+        document.body.classList.remove("products-compare-mode-active");
+        openBtn.setAttribute("aria-pressed", "false");
+      }
+      var t = document.getElementById("products-compare-bar-text");
+      if (t) {
+        t.textContent = n + "/" + MAX + " seçili";
+      }
+      var showBtn = document.getElementById("products-compare-bar-show");
+      if (showBtn) showBtn.disabled = n < MIN || !compareMode;
+      renderChips();
+    }
+
+    function togglePick(id) {
+      if (!id) return;
+      var ix = comparePickOrder.indexOf(id);
+      if (ix >= 0) {
+        comparePickOrder.splice(ix, 1);
+      } else {
+        if (comparePickOrder.length >= MAX) return;
+        comparePickOrder.push(id);
+      }
+      syncCompareCardVisuals();
+      updateCompareBar();
+    }
+
+    function openCompareResult() {
+      var prods = comparePickOrder.map(productById).filter(Boolean);
+      if (prods.length < MIN) return;
+      lastCompareProducts = prods;
+      var rows = [
+        { label: "Marka", get: function (p) { return p.brand_name || "—"; } },
+        { label: "Kategori", get: function (p) { return p.category || "—"; } },
+        { label: "Alt kategori", get: function (p) { return p.subcategory || "—"; } },
+        { label: "Malzeme", get: function (p) { return p.material || "—"; } },
+        { label: "Kullanım", get: function (p) { return p.usage_area || "—"; } },
+        { label: "Renk", get: function (p) { return p.color_family || "—"; } },
+        {
+          label: "Kalınlık",
+          get: function (p) {
+            return p.thickness_mm ? String(p.thickness_mm) + " mm" : "—";
+          },
+        },
+        { label: "Yangın", get: function (p) { return p.fire_class || "—"; } },
+        { label: "PDF", get: function (p) { return p.has_pdf ? "Var" : "Yok"; } },
+        { label: "CAD", get: function (p) { return p.has_cad ? "Var" : "Yok"; } },
+        { label: "BIM / 3D", get: function (p) { return p.has_bim ? "Var" : "Yok"; } },
+      ];
+      var thead = '<tr><th class="products-compare-th-spec">Özellik</th>';
+      prods.forEach(function (p) {
+        var img = p.image
+          ? '<img src="' + esc(p.image) + '" alt="" class="products-compare-col-img" />'
+          : '<div class="products-compare-col-img products-compare-col-img--empty" aria-hidden="true"></div>';
+        thead +=
+          '<th class="products-compare-th-prod"><div class="products-compare-col-head-img">' +
+          img +
+          '</div><a href="' +
+          esc(p.detailHref) +
+          '" class="products-compare-col-title">' +
+          esc(p.name) +
+          '</a><p class="products-compare-col-brand">' +
+          esc(p.brand_name || "") +
+          "</p></th>";
+      });
+      thead += "</tr>";
+      var tbody = "";
+      rows.forEach(function (r) {
+        tbody += '<tr><td class="products-compare-td-label">' + esc(r.label) + "</td>";
+        prods.forEach(function (p) {
+          tbody += '<td class="products-compare-td-val">' + esc(r.get(p)) + "</td>";
+        });
+        tbody += "</tr>";
+      });
+      var bodyEl = document.getElementById("products-compare-result-body");
+      if (bodyEl) {
+        bodyEl.innerHTML =
+          '<div class="products-compare-table-wrap"><table class="products-compare-table"><thead>' +
+          thead +
+          "</thead><tbody>" +
+          tbody +
+          "</tbody></table></div>";
+      }
+      modal.classList.remove("hidden");
+      modal.setAttribute("aria-hidden", "false");
+    }
+
+    function closeCompareResult() {
+      modal.classList.add("hidden");
+      modal.setAttribute("aria-hidden", "true");
+    }
+
+    function loadJsPdf(done) {
+      if (window.jspdf && window.jspdf.jsPDF) {
+        done();
+        return;
+      }
+      var s = document.createElement("script");
+      s.src = "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js";
+      s.async = true;
+      s.onload = function () {
+        done();
+      };
+      s.onerror = function () {};
+      document.head.appendChild(s);
+    }
+
+    function exportComparePdf() {
+      var prods = lastCompareProducts;
+      if (!prods || prods.length < MIN) return;
+      loadJsPdf(function () {
+        if (!window.jspdf || !window.jspdf.jsPDF) return;
+        var jsPDF = window.jspdf.jsPDF;
+        var doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
+        var pageH = doc.internal.pageSize.getHeight();
+        var pageW = doc.internal.pageSize.getWidth();
+        var left = 12;
+        var labelCol = 42;
+        var colW = (pageW - left - labelCol - 8) / prods.length;
+        var y = 12;
+        doc.setFontSize(13);
+        doc.setFont(undefined, "bold");
+        doc.text("Archilink — Urun karsilastirmasi", left, y);
+        doc.setFont(undefined, "normal");
+        y += 6;
+        doc.setFontSize(8);
+        doc.setTextColor(100);
+        doc.text(new Date().toLocaleString("tr-TR"), pageW - 12, y, { align: "right" });
+        doc.setTextColor(0);
+        y += 10;
+        var rowSpecs = [
+          ["Urun adi", function (p) { return p.name || "—"; }],
+          ["Marka", function (p) { return p.brand_name || "—"; }],
+          ["Kategori", function (p) { return p.category || "—"; }],
+          ["Alt kategori", function (p) { return p.subcategory || "—"; }],
+          ["Malzeme", function (p) { return p.material || "—"; }],
+          ["Kullanim alani", function (p) { return p.usage_area || "—"; }],
+          ["Renk", function (p) { return p.color_family || "—"; }],
+          ["Kalinlik", function (p) { return p.thickness_mm ? String(p.thickness_mm) + " mm" : "—"; }],
+          ["Yangin sinifi", function (p) { return p.fire_class || "—"; }],
+          ["PDF", function (p) { return p.has_pdf ? "Var" : "Yok"; }],
+          ["CAD", function (p) { return p.has_cad ? "Var" : "Yok"; }],
+          ["BIM", function (p) { return p.has_bim ? "Var" : "Yok"; }],
+        ];
+        doc.setFontSize(8);
+        rowSpecs.forEach(function (spec) {
+          var label = spec[0];
+          var get = spec[1];
+          var rowH = 5;
+          prods.forEach(function (p) {
+            var lines = doc.splitTextToSize(String(get(p) || "—"), colW - 1);
+            rowH = Math.max(rowH, lines.length * 4.2 + 2);
+          });
+          if (y + rowH > pageH - 10) {
+            doc.addPage();
+            y = 12;
+          }
+          doc.setFont(undefined, "bold");
+          doc.text(label + ":", left, y + 4);
+          doc.setFont(undefined, "normal");
+          prods.forEach(function (p, i) {
+            var x = left + labelCol + i * colW;
+            var lines = doc.splitTextToSize(String(get(p) || "—"), colW - 1);
+            doc.text(lines, x, y + 4);
+          });
+          y += rowH;
+        });
+        doc.save("archilink-karsilastirma-" + Date.now() + ".pdf");
+      });
+    }
+
+    openBtn.addEventListener("click", function () {
+      if (!compareMode) {
+        compareMode = true;
+        updateCompareBar();
+        syncCompareCardVisuals();
+        return;
+      }
+      compareMode = false;
+      comparePickOrder = [];
+      updateCompareBar();
+      syncCompareCardVisuals();
+      closeCompareResult();
+    });
+
+    var cancelBtn = document.getElementById("products-compare-bar-cancel");
+    if (cancelBtn) {
+      cancelBtn.addEventListener("click", function () {
+        compareMode = false;
+        comparePickOrder = [];
+        updateCompareBar();
+        syncCompareCardVisuals();
+        closeCompareResult();
+      });
+    }
+
+    var clearBtn = document.getElementById("products-compare-bar-clear");
+    if (clearBtn) {
+      clearBtn.addEventListener("click", function () {
+        comparePickOrder = [];
+        syncCompareCardVisuals();
+        updateCompareBar();
+      });
+    }
+
+    var showBtn = document.getElementById("products-compare-bar-show");
+    if (showBtn) {
+      showBtn.addEventListener("click", function () {
+        if (comparePickOrder.length < MIN) return;
+        openCompareResult();
+      });
+    }
+
+    grid.addEventListener(
+      "click",
+      function (e) {
+        if (!compareMode) return;
+        if (e.target.closest(".product-detail-link")) return;
+        if (e.target.closest("[data-compare-remove]")) return;
+        var card = e.target.closest("[data-product-id]");
+        if (!card || !grid.contains(card)) return;
+        var Enc = card.getAttribute("data-product-id") || "";
+        var id = Enc;
+        try {
+          id = decodeURIComponent(Enc);
+        } catch (_) {}
+        togglePick(id);
+        e.preventDefault();
+        e.stopPropagation();
+      },
+      true,
+    );
+
+    bar.addEventListener("click", function (e) {
+      var rm = e.target.closest("[data-compare-remove]");
+      if (!rm || !bar.contains(rm)) return;
+      var rid = rm.getAttribute("data-compare-remove") || "";
+      var ix = comparePickOrder.indexOf(rid);
+      if (ix >= 0) comparePickOrder.splice(ix, 1);
+      syncCompareCardVisuals();
+      updateCompareBar();
+    });
+
+    modal.addEventListener("click", function (e) {
+      if (e.target.closest("[data-compare-result-close]")) closeCompareResult();
+    });
+
+    var backPick = document.getElementById("products-compare-back-pick");
+    if (backPick) {
+      backPick.addEventListener("click", function () {
+        closeCompareResult();
+        compareMode = true;
+        updateCompareBar();
+        syncCompareCardVisuals();
+      });
+    }
+
+    var pdfBtn = document.getElementById("products-compare-pdf-btn");
+    if (pdfBtn) {
+      pdfBtn.addEventListener("click", function () {
+        exportComparePdf();
+      });
+    }
+
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && !modal.classList.contains("hidden")) closeCompareResult();
+    });
+
+    updateCompareBar();
+    syncCompareCardVisuals();
+  })();
+</script>
+
+<style>
+  .products-page {
+    --products-accent: #4f5a46;
+    --products-accent-hover: #3f4938;
+    min-height: 100vh;
+    background: #fff;
+    color: #0b0b0c;
+  }
+
+  .products-page--has-category-landing .products-toolbar__shell {
+    padding-top: 10px;
+  }
+
+  .products-page--has-category-chips .category-landing__chips {
+    margin-bottom: 8px;
+  }
+
+  .category-landing {
+    padding-top: 24px;
+    padding-bottom: 0;
+    margin-bottom: 0;
+  }
+
+  .category-landing__breadcrumb {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 8px;
+    margin: 0 0 10px;
+    font-size: 12.5px;
+    line-height: 1.35;
+    color: #86868b;
+  }
+
+  .category-landing__breadcrumb a {
+    color: #86868b;
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
+
+  .category-landing__breadcrumb a:hover {
+    color: #424245;
+  }
+
+  .category-landing__breadcrumb-sep {
+    color: #aeaeb2;
+    user-select: none;
+  }
+
+  .category-landing__breadcrumb [aria-current="page"] {
+    color: #6e6e73;
+    font-weight: 500;
+  }
+
+  .category-landing__title {
+    margin: 0 0 8px;
+    color: #111;
+    font-size: 1.5rem;
+    font-weight: 600;
+    line-height: 1.25;
+  }
+
+  .category-landing__description {
+    margin: 0;
+    color: var(--ag-subtle);
+    font-size: 15px;
+    line-height: 1.5;
+  }
+
+  .category-landing__chips {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-top: 14px;
+    margin-bottom: 20px;
+  }
+
+  .category-landing__chip {
+    display: inline-flex;
+    align-items: center;
+    min-height: 36px;
+    padding: 0 14px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 999px;
+    background: #fff;
+    color: #1d1d1f;
+    font-size: 14px;
+    line-height: 1.2;
+    text-decoration: none;
+    transition: background 0.16s ease, border-color 0.16s ease, color 0.16s ease;
+  }
+
+  .category-landing__chip:hover {
+    border-color: rgba(79, 90, 70, 0.35);
+    background: #f7f8f6;
+    color: var(--products-accent-hover);
+  }
+
+  .category-landing__chip.is-active {
+    border-color: var(--products-accent);
+    background: var(--products-accent);
+    color: #fff;
+  }
+
+  .category-landing__chip.is-active:hover {
+    border-color: var(--products-accent-hover);
+    background: var(--products-accent-hover);
+    color: #fff;
+  }
+
+  .products-toolbar {
+    position: sticky;
+    top: var(--ag-header-h);
+    z-index: 20;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+  }
+
+  .products-toolbar__shell {
+    padding-top: 14px;
+    padding-bottom: 12px;
+  }
+
+  .products-search {
+    display: flex;
+    margin-bottom: 10px;
+  }
+
+  .products-search__field {
+    position: relative;
+    display: block;
+    width: 100%;
+  }
+
+  .products-search__field svg,
+  .products-filter-search svg,
+  .products-filter-toggle svg {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .products-search__field svg {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    width: 16px;
+    height: 16px;
+    color: #9aa0aa;
+    transform: translateY(-50%);
+    pointer-events: none;
+  }
+
+  .products-search__field input {
+    width: 100%;
+    height: 44px;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 999px;
+    background: #f7f7f8;
+    padding: 0 18px 0 46px;
+    color: #1d1d1f;
+    font: inherit;
+    font-size: 16px;
+    outline: none;
+    transition: border-color 0.16s ease, background 0.16s ease;
+  }
+
+  .products-search__field input:focus {
+    background: #fff;
+    border-color: rgba(0, 0, 0, 0.24);
+  }
+
+  .products-tools {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .products-toolbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 0 0 auto;
+    margin-left: auto;
+  }
+
+  .products-sort-dd {
+    position: relative;
+    flex: 0 0 auto;
+  }
+
+  .products-sort-dd > summary {
+    list-style: none;
+  }
+
+  .products-sort-dd > summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .products-sort-toggle,
+  .products-compare-toggle {
+    height: 36px;
+    border: 1px solid rgba(0, 0, 0, 0.10);
+    border-radius: 999px;
+    background: #fff;
+    color: #1d1d1f;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+    cursor: pointer;
+    gap: 6px;
+    padding: 0 12px 0 14px;
+    transition: border-color 0.16s ease, background 0.16s ease, color 0.16s ease;
+  }
+
+  .products-sort-toggle:hover,
+  .products-compare-toggle:hover {
+    border-color: rgba(79, 90, 70, 0.35);
+    color: var(--products-accent-hover);
+  }
+
+  .products-sort-toggle__row {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+  }
+
+  .products-sort-toggle svg,
+  .products-compare-toggle svg {
+    flex-shrink: 0;
+    color: #6e6e73;
+  }
+
+  .products-sort-value {
+    max-width: 9.5rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #6e6e73;
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .products-sort-menu {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 6px);
+    min-width: 200px;
+    padding: 6px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+    z-index: 50;
+  }
+
+  .products-sort-opt {
+    display: block;
+    padding: 8px 10px;
+    border-radius: 8px;
+    color: #1d1d1f;
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background 0.12s ease;
+  }
+
+  .products-sort-opt:hover {
+    background: rgba(0, 0, 0, 0.05);
+  }
+
+  .products-sort-opt.is-active {
+    background: rgba(79, 90, 70, 0.1);
+    color: var(--products-accent-hover);
+    font-weight: 600;
+  }
+
+  .products-compare-toggle[aria-pressed="true"] {
+    border-color: #0b0b0c;
+    background: #0b0b0c;
+    color: #fff;
+  }
+
+  .products-compare-toggle[aria-pressed="true"] svg {
+    color: rgba(255, 255, 255, 0.85);
+  }
+
+  .products-filter-toggle,
+  .products-pill {
+    height: 36px;
+    border: 1px solid rgba(0, 0, 0, 0.10);
+    border-radius: 999px;
+    background: #fff;
+    color: #1d1d1f;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+  }
+
+  .products-filter-toggle {
+    gap: 8px;
+    padding: 0 16px;
+    cursor: pointer;
+    flex: 0 0 auto;
+  }
+
+  .products-filter-toggle svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .products-filter-toggle svg circle {
+    fill: currentColor;
+    stroke: none;
+  }
+
+  .products-page.is-filters-open .products-filter-toggle {
+    border-color: var(--products-accent);
+    background: var(--products-accent);
+    color: #fff;
+  }
+
+  .products-page.is-filters-open .products-filter-toggle:hover {
+    border-color: var(--products-accent-hover);
+    background: var(--products-accent-hover);
+  }
+
+  .products-filter-toggle:hover {
+    border-color: rgba(79, 90, 70, 0.35);
+    color: var(--products-accent-hover);
+  }
+
+  .products-pill.is-active {
+    border-color: #0b0b0c;
+    background: #0b0b0c;
+    color: #fff;
+  }
+
+  .products-pill:hover:not(.is-active) {
+    border-color: rgba(79, 90, 70, 0.28);
+    color: var(--products-accent-hover);
+  }
+
+  .products-pills {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    min-width: 0;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 1px 0;
+    scrollbar-width: none;
+  }
+
+  .products-pills::-webkit-scrollbar {
+    display: none;
+  }
+
+  .products-pill {
+    gap: 6px;
+    padding: 0 16px;
+    background: #f3f3f7;
+    border-color: transparent;
+    color: #424245;
+    font-weight: 500;
+  }
+
+  .products-pill em {
+    color: inherit;
+    font-style: normal;
+    opacity: 0.72;
+  }
+
+  .products-page.is-compare-mode .products-main {
+    padding-bottom: 6.5rem;
+  }
+
+  .products-compare-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 45;
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.08);
+  }
+
+  .products-compare-bar.hidden {
+    display: none;
+  }
+
+  .products-compare-bar__inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px 12px;
+    padding: 10px 0 12px;
+  }
+
+  .products-compare-bar__top {
+    flex: 1 1 200px;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .products-compare-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+    min-height: 0;
+  }
+
+  .products-compare-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    max-width: 100%;
+    padding: 3px 4px 3px 3px;
+    border-radius: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    background: #f5f5f7;
+  }
+
+  .products-compare-chip img {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    object-fit: cover;
+    flex-shrink: 0;
+  }
+
+  .products-compare-chip__ph {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    background: #e5e5ea;
+    flex-shrink: 0;
+  }
+
+  .products-compare-chip__name {
+    font-size: 12px;
+    font-weight: 500;
+    color: #1d1d1f;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 140px;
+  }
+
+  .products-compare-chip__x {
+    width: 26px;
+    height: 26px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: #6e6e73;
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .products-compare-chip__x:hover {
+    background: rgba(0, 0, 0, 0.06);
+    color: #111;
+  }
+
+  .products-compare-bar__text {
+    margin: 0;
+    font-size: 13px;
+    color: #3a3a3c;
+    line-height: 1.35;
+  }
+
+  .products-compare-bar__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: flex-end;
+    flex: 0 0 auto;
+  }
+
+  .products-compare-bar-btn {
+    height: 36px;
+    padding: 0 14px;
+    border-radius: 999px;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid rgba(0, 0, 0, 0.14);
+    background: #fff;
+    color: #1d1d1f;
+    transition: background 0.15s ease, border-color 0.15s ease, opacity 0.15s ease;
+  }
+
+  .products-compare-bar-btn--ghost:hover {
+    background: rgba(0, 0, 0, 0.04);
+  }
+
+  .products-compare-bar-btn--primary {
+    border-color: #1d1d1f;
+    background: #1d1d1f;
+    color: #fff;
+  }
+
+  .products-compare-bar-btn--primary:hover:not(:disabled) {
+    background: #3a3a3c;
+    border-color: #3a3a3c;
+  }
+
+  .products-compare-bar-btn--primary:disabled {
+    opacity: 0.35;
+    pointer-events: none;
+  }
+
+  .products-compare-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 125;
+  }
+
+  .products-compare-modal.hidden {
+    display: none;
+  }
+
+  .products-compare-modal__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+  }
+
+  .products-compare-modal__sheet {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: min(96vw, 1100px);
+    max-height: min(88vh, 900px);
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+  }
+
+  .products-compare-modal__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    flex-shrink: 0;
+  }
+
+  .products-compare-modal__title {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+
+  .products-compare-modal__head-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .products-compare-modal__close {
+    width: 36px;
+    height: 36px;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: #6e6e73;
+    font-size: 18px;
+    cursor: pointer;
+    line-height: 1;
+  }
+
+  .products-compare-modal__close:hover {
+    background: rgba(0, 0, 0, 0.06);
+    color: #111;
+  }
+
+  .products-compare-modal__body {
+    flex: 1;
+    overflow: auto;
+    padding: 12px 16px 18px;
+  }
+
+  .products-compare-table-wrap {
+    overflow-x: auto;
+    margin: 0 -4px;
+  }
+
+  .products-compare-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 640px;
+  }
+
+  .products-compare-table th,
+  .products-compare-table td {
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+    padding: 10px 8px;
+    vertical-align: top;
+    text-align: left;
+  }
+
+  .products-compare-th-spec {
+    width: 9rem;
+    min-width: 7rem;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #6e6e73;
+  }
+
+  .products-compare-th-prod {
+    min-width: 140px;
+    max-width: 220px;
+  }
+
+  .products-compare-col-head-img {
+    aspect-ratio: 4 / 3;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #f5f5f7;
+    margin-bottom: 8px;
+  }
+
+  .products-compare-col-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .products-compare-col-img--empty {
+    min-height: 100%;
+    background: #e8e8ed;
+  }
+
+  .products-compare-col-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1d1d1f;
+    text-decoration: none;
+    line-height: 1.3;
+  }
+
+  .products-compare-col-title:hover {
+    text-decoration: underline;
+  }
+
+  .products-compare-col-brand {
+    margin: 4px 0 0;
+    font-size: 11px;
+    color: #6e6e73;
+  }
+
+  .products-compare-td-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: #6e6e73;
+  }
+
+  .products-compare-td-val {
+    font-size: 13px;
+    color: #1d1d1f;
+  }
+
+  .products-compare-table thead tr:first-child th,
+  .products-compare-table thead tr:first-child td {
+    border-top: none;
+  }
+
+  .products-active-chips {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .products-active-chips > span {
+    color: var(--ag-muted);
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  .products-active-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 30px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 999px;
+    background: #f5f5f7;
+    padding: 0 6px 0 12px;
+    color: #1d1d1f;
+    font-size: 13px;
+    line-height: 1.2;
+    text-decoration: none;
+    transition: background 0.16s ease, border-color 0.16s ease;
+  }
+
+  .products-active-chip:hover {
+    background: #ebebed;
+    border-color: rgba(0, 0, 0, 0.12);
+  }
+
+  .products-active-chip.is-accent {
+    border-color: var(--products-accent);
+    background: var(--products-accent);
+    color: #fff;
+  }
+
+  .products-active-chip.is-accent:hover {
+    border-color: var(--products-accent-hover);
+    background: var(--products-accent-hover);
+  }
+
+  .products-active-chip.is-accent strong {
+    color: rgba(255, 255, 255, 0.78);
+  }
+
+  .products-active-chip.is-accent:hover strong {
+    color: #fff;
+  }
+
+  .products-active-chip strong {
+    display: inline-grid;
+    width: 18px;
+    height: 18px;
+    place-items: center;
+    border: none;
+    border-radius: 999px;
+    background: transparent;
+    color: #8e8e93;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1;
+    transition: color 0.16s ease;
+  }
+
+  .products-active-chip:hover strong {
+    color: #1d1d1f;
+  }
+
+  .products-clear-all {
+    margin-left: 2px;
+    color: #1d1d1f;
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: color 0.16s ease;
+  }
+
+  .products-clear-all:hover {
+    color: var(--products-accent-hover);
+  }
+
+  .products-page :global(.product-card .badges span) {
+    border-color: rgba(79, 90, 70, 0.24);
+    color: var(--products-accent-hover);
+  }
+
+  .products-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 0fr) minmax(0, 1fr);
+    gap: 0;
+    min-height: calc(100vh - 150px);
+    transition: grid-template-columns 0.24s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+
+  .products-layout.is-filters-open {
+    grid-template-columns: minmax(0, 320px) minmax(0, 1fr);
+  }
+
+  .products-filter-sidebar {
+    position: sticky;
+    top: calc(var(--ag-header-h) + 92px);
+    align-self: start;
+    min-width: 0;
+    width: 100%;
+    max-width: 100%;
+    height: calc(100vh - var(--ag-header-h) - 92px);
+    overflow: hidden auto;
+    opacity: 0;
+    pointer-events: none;
+    border-right: 1px solid rgba(0, 0, 0, 0.08);
+    background: #fff;
+    transform: translateX(-12px);
+    transition: opacity 0.2s ease, transform 0.24s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+
+  .products-layout.is-filters-open .products-filter-sidebar {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(0);
+  }
+
+  .products-filter-sidebar form {
+    padding: 22px 22px 26px 0;
+  }
+
+  .products-sidebar-category-nav {
+    margin-bottom: 0;
+  }
+
+  .products-sidebar-category-nav__accordions {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .products-sidebar-l1 {
+    border-radius: 6px;
+  }
+
+  .products-sidebar-l1__toggle {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    width: 100%;
+    margin: 0 -6px;
+    padding: 6px 8px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.38;
+    color: #1d1d1f;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+
+  .products-sidebar-l1__toggle:hover {
+    background: rgba(0, 0, 0, 0.04);
+  }
+
+  .products-sidebar-l1__chev {
+    display: flex;
+    flex-shrink: 0;
+    width: 11px;
+    height: 11px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .products-sidebar-chevron-svg {
+    display: block;
+    flex-shrink: 0;
+    transition: transform 0.15s ease;
+  }
+
+  .products-sidebar-l1__toggle[aria-expanded="true"] .products-sidebar-chevron-svg {
+    transform: rotate(90deg);
+  }
+
+  .products-sidebar-l1__label {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .products-sidebar-l1__panel {
+    padding: 2px 0 8px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .products-sidebar-l1__panel[hidden],
+  .products-sidebar-l2__panel[hidden] {
+    display: none !important;
+  }
+
+  .products-sidebar-l2 {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .products-sidebar-l2__toggle {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    width: 100%;
+    margin: 0 -6px;
+    padding: 5px 8px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.38;
+    color: #2d2d2f;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+
+  .products-sidebar-l2__toggle:hover {
+    color: #111;
+    background: rgba(0, 0, 0, 0.04);
+  }
+
+  .products-sidebar-l2__chev {
+    display: flex;
+    flex-shrink: 0;
+    width: 11px;
+    height: 11px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .products-sidebar-l2__toggle[aria-expanded="true"] .products-sidebar-chevron-svg {
+    transform: rotate(90deg);
+  }
+
+  .products-sidebar-l2__label {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .products-sidebar-l2__panel {
+    padding: 0 0 6px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .products-sidebar-l2__solo {
+    display: flex;
+    align-items: center;
+    padding: 5px 8px;
+    margin: 0 -6px;
+    border-radius: 6px;
+    color: #2d2d2f;
+    font-size: 14px;
+    line-height: 1.38;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+
+  .products-sidebar-l2__solo:hover {
+    color: #111;
+    background: rgba(0, 0, 0, 0.04);
+  }
+
+  .products-sidebar-l2__solo.is-active {
+    background: rgba(0, 0, 0, 0.05);
+    color: #111;
+    box-shadow: inset 3px 0 0 0 #4f5a46;
+  }
+
+  .products-sidebar-all-link {
+    display: block;
+    padding: 4px 8px;
+    margin: 0 -6px;
+    border-radius: 6px;
+    color: #3a3a3c;
+    font-size: 13px;
+    line-height: 1.38;
+    text-decoration: none;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+
+  .products-sidebar-all-link:hover {
+    color: #111;
+    background: rgba(0, 0, 0, 0.04);
+  }
+
+  .products-sidebar-all-link.is-active {
+    background: rgba(0, 0, 0, 0.05);
+    color: #111;
+    font-weight: 500;
+    box-shadow: inset 3px 0 0 0 #4f5a46;
+  }
+
+  .products-sidebar-l3 {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+
+  .products-sidebar-l3 li {
+    list-style: none;
+  }
+
+  .products-sidebar-l3 li::marker {
+    content: none;
+  }
+
+  .products-sidebar-l3__link {
+    display: block;
+    padding: 4px 8px;
+    margin: 0 -6px;
+    border-radius: 6px;
+    color: #3a3a3c;
+    font-size: 13px;
+    line-height: 1.38;
+    text-decoration: none;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+
+  .products-sidebar-l3__link:hover {
+    color: #111;
+    background: rgba(0, 0, 0, 0.04);
+  }
+
+  .products-sidebar-l3__link.is-active {
+    background: rgba(0, 0, 0, 0.05);
+    color: #111;
+    font-weight: 500;
+    box-shadow: inset 3px 0 0 0 #4f5a46;
+  }
+
+  .products-filter-sidebar-top {
+    display: none;
+    justify-content: flex-end;
+    margin-bottom: 8px;
+  }
+
+  .products-filter-close {
+    display: none;
+    width: 36px;
+    height: 36px;
+    border: 0;
+    border-radius: 999px;
+    background: #f5f5f7;
+    color: #111;
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  .products-filter-search {
+    position: relative;
+    display: block;
+    margin-bottom: 14px;
+  }
+
+  .products-filter-search svg {
+    position: absolute;
+    left: 13px;
+    top: 50%;
+    width: 14px;
+    height: 14px;
+    color: #9aa0aa;
+    transform: translateY(-50%);
+    pointer-events: none;
+  }
+
+  .products-filter-search input {
+    width: 100%;
+    height: 44px;
+    border: 1px solid rgba(0, 0, 0, 0.10);
+    border-radius: 14px;
+    background: #fff;
+    color: #1d1d1f;
+    font: inherit;
+    font-size: 14px;
+    outline: none;
+    padding: 0 12px 0 38px;
+  }
+
+  .products-filter-disclosure {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  }
+
+  .products-filter-disclosure__summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 48px;
+    padding: 4px 0;
+    list-style: none;
+    cursor: pointer;
+    color: #0b0b0c;
+    font-size: 17px;
+    font-weight: 600;
+    line-height: 1.25;
+  }
+
+  .products-filter-disclosure__summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .products-filter-disclosure__summary::marker {
+    content: "";
+  }
+
+  .products-filter-disclosure__title {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .products-filter-disclosure__icon {
+    flex-shrink: 0;
+    width: 26px;
+    height: 26px;
+    display: grid;
+    place-items: center;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 6px;
+    color: #6e6e73;
+    font-size: 17px;
+    font-weight: 500;
+    line-height: 1;
+  }
+
+  .products-filter-disclosure:not([open]) .products-filter-disclosure__icon::before {
+    content: "+";
+  }
+
+  .products-filter-disclosure[open] .products-filter-disclosure__icon::before {
+    content: "−";
+  }
+
+  .products-filter-disclosure__body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 320px;
+    overflow-y: auto;
+    padding: 0 0 16px 2px;
+  }
+
+  .products-filter-disclosure__body--categories {
+    max-height: 420px;
+    padding-top: 2px;
+  }
+
+  .products-filter-disclosure__subhead {
+    margin: 10px 0 2px;
+    color: #6e6e73;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .products-filter-disclosure__subhead:first-child {
+    margin-top: 0;
+  }
+
+  .products-filter-disclosure__row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #2d2d2f;
+    font-size: 14px;
+    line-height: 1.35;
+    cursor: pointer;
+  }
+
+  .products-filter-disclosure__row--check {
+    justify-content: flex-start;
+  }
+
+  .products-filter-disclosure__row input[type="radio"],
+  .products-filter-disclosure__row input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: #111;
+    flex-shrink: 0;
+  }
+
+  .products-filter-empty-hint {
+    margin: 0;
+    color: #8e8e93;
+    font-size: 13px;
+    line-height: 1.4;
+  }
+
+  .products-filter-actions {
+    position: sticky;
+    bottom: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.76), #fff 30%);
+    margin-top: 16px;
+    padding-top: 16px;
+  }
+
+  .products-filter-actions button,
+  .products-filter-actions a {
+    height: 40px;
+    border-radius: 12px;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .products-filter-actions button {
+    border: 1px solid #1d1d1f;
+    background: #1d1d1f;
+    color: #fff;
+    cursor: pointer;
+  }
+
+  .products-filter-actions a {
+    border: 1px solid rgba(0, 0, 0, 0.10);
+    color: #1d1d1f;
+    background: #fff;
+    text-decoration: none;
+  }
+
+  .products-main {
+    min-width: 0;
+    padding: 26px 0 56px;
+    transition: padding-left 0.24s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+
+  .products-layout.is-filters-open .products-main {
+    padding-left: 28px;
+  }
+
+  .products-count-row {
+    margin-bottom: 18px;
+  }
+
+  .products-count-row p {
+    margin: 0;
+    color: #6e6e73;
+    font-size: 14px;
+  }
+
+  .product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 18px;
+    align-items: stretch;
+  }
+
+  .pagination {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 34px;
+  }
+
+  .pagination a {
+    display: inline-flex;
+    min-height: 40px;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 12px;
+    padding: 0 20px;
+    color: #1d1d1f;
+    font-size: 13px;
+    font-weight: 600;
+    background: #fff;
+    text-decoration: none;
+  }
+
+  .pagination a:last-child {
+    margin-left: auto;
+    border-color: #1d1d1f;
+    background: #1d1d1f;
+    color: #fff;
+  }
+
+  .products-filter-backdrop {
+    display: none;
+  }
+
+  @media (max-width: 1180px) {
+    .products-layout.is-filters-open {
+      grid-template-columns: minmax(0, 300px) minmax(0, 1fr);
+    }
+
+    .products-filter-sidebar form {
+      padding-right: 18px;
+    }
+
+    .product-grid {
+      grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    }
+  }
+
+  @media (max-width: 900px) {
+    .products-toolbar {
+      top: 64px;
+    }
+
+    .products-tools {
+      flex-wrap: wrap;
+    }
+
+    .products-toolbar-actions {
+      margin-left: auto;
+      order: 2;
+    }
+
+    .products-pills {
+      order: 3;
+      flex-basis: 100%;
+    }
+
+    .products-sort-value {
+      max-width: 6.5rem;
+    }
+
+    .products-layout,
+    .products-layout.is-filters-open {
+      display: block;
+    }
+
+    .products-filter-sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 130;
+      width: min(86vw, 360px);
+      height: 100vh;
+      opacity: 1;
+      pointer-events: auto;
+      border-right: 1px solid rgba(0, 0, 0, 0.08);
+      background: #fff;
+      transform: translateX(-105%);
+      transition: transform 0.28s cubic-bezier(0.2, 0.7, 0.2, 1);
+    }
+
+    .products-layout.is-filters-open .products-filter-sidebar {
+      transform: translateX(0);
+    }
+
+    .products-filter-sidebar form {
+      padding: 22px 20px 28px;
+    }
+
+    .products-filter-sidebar-top {
+      display: flex;
+    }
+
+    .products-filter-close {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .products-filter-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 120;
+      display: none;
+      background: rgba(0, 0, 0, 0.35);
+    }
+
+    .products-filter-backdrop.is-visible {
+      display: block;
+    }
+
+    .products-main,
+    .products-layout.is-filters-open .products-main {
+      padding: 22px 0 48px;
+    }
+
+    .product-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .products-toolbar__shell {
+      padding-top: 10px;
+      padding-bottom: 10px;
+    }
+
+    .products-search__field input {
+      height: 42px;
+      font-size: 14px;
+    }
+
+    .products-filter-toggle,
+    .products-pill,
+    .products-sort-toggle,
+    .products-compare-toggle {
+      height: 34px;
+      font-size: 12px;
+    }
+
+    .products-sort-value {
+      display: none;
+    }
+
+    .product-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

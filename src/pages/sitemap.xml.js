@@ -27,7 +27,7 @@ export const GET = async ({ site, url }) => {
 
   const staticUrls = [
     { loc: "/", priority: "1.0", changefreq: "daily" },
-    { loc: "/products", priority: "0.9", changefreq: "daily" },
+    { loc: "/urunler", priority: "0.9", changefreq: "daily" },
     { loc: "/brands", priority: "0.8", changefreq: "weekly" },
     { loc: "/projects", priority: "0.8", changefreq: "weekly" },
     { loc: "/categories", priority: "0.7", changefreq: "weekly" },

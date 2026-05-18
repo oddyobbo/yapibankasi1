@@ -3,87 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Archilink | Marka Giriş</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body data-page="brand-login" class="bg-white text-[#111] font-sans min-h-screen">
-  <div id="site-header"></div>
-  <main class="px-6 lg:px-10 py-12 lg:py-16 max-w-[1100px] mx-auto space-y-10">
-    <section>
-      <p class="text-[12px] uppercase tracking-[0.18em] text-[#6e6e73] font-semibold">Marka Hesabı</p>
-      <h1 class="text-[38px] lg:text-[52px] leading-[1.06] font-semibold tracking-tight mt-3">Marka giriş ve kayıt</h1>
-      <p class="text-[16px] text-[#4f4f55] mt-4">Mevcut hesabınla giriş yapabilir veya yeni marka hesabını hemen oluşturabilirsin.</p>
-    </section>
-
-    <section class="grid lg:grid-cols-2 gap-6">
-      <section class="rounded-2xl border border-black/10 p-6 lg:p-7">
-        <h2 class="text-[24px] font-semibold tracking-tight">Giriş Yap</h2>
-        <p class="text-[14px] text-[#6e6e73] mt-2">Mevcut marka hesabınla paneline eriş.</p>
-        <form id="login-form" class="mt-5 grid md:grid-cols-2 gap-3">
-          <input required type="email" name="email" class="w-full h-11 rounded-xl border border-black/10 px-4 md:col-span-2" placeholder="Kurumsal e-posta">
-          <input required type="password" name="password" class="w-full h-11 rounded-xl border border-black/10 px-4 md:col-span-2" placeholder="Şifre">
-          <button class="md:col-span-2 h-11 rounded-xl bg-black text-white font-semibold">Marka Paneline Giriş Yap</button>
-        </form>
-        <div class="my-4 flex items-center gap-3">
-          <div class="h-px bg-black/10 flex-1"></div>
-          <span class="text-[12px] text-[#6e6e73]">veya</span>
-          <div class="h-px bg-black/10 flex-1"></div>
-        </div>
-        <button id="google-login" class="w-full h-11 rounded-xl border border-black/15 bg-white text-[14px] font-semibold hover:bg-black/[0.03]">Google ile Devam Et</button>
-        <p class="text-[12px] text-[#6e6e73] mt-2">Google giriş demo akışıdır. Canlıda resmi OAuth bağlanacaktır.</p>
-      </section>
-
-      <section class="rounded-2xl border border-black/10 bg-[#fbfbfd] p-6 lg:p-7">
-        <h2 class="text-[24px] font-semibold tracking-tight">Başvuru Yap</h2>
-        <p class="text-[14px] text-[#6e6e73] mt-2">Yeni markalar doğrudan kayıt yerine başvuru süreciyle alınır. Onay sonrası hesap açılışı yapılır.</p>
-        <div class="mt-5 rounded-xl border border-black/10 bg-white p-4">
-          <div class="grid grid-cols-[auto_1fr] gap-x-3 gap-y-3 text-[13px]">
-            <span class="w-6 h-6 rounded-full bg-black text-white flex items-center justify-center text-[11px] font-semibold">1</span>
-            <p class="self-center">Başvuru formunu tamamla</p>
-            <span class="w-6 h-6 rounded-full bg-black/80 text-white flex items-center justify-center text-[11px] font-semibold">2</span>
-            <p class="self-center">Operasyon onayı al</p>
-            <span class="w-6 h-6 rounded-full bg-black/60 text-white flex items-center justify-center text-[11px] font-semibold">3</span>
-            <p class="self-center">Hesabını aktive edip giriş yap</p>
-          </div>
-        </div>
-        <a href="/marka-basvuru.html" class="mt-5 w-full h-11 rounded-xl bg-black text-white text-[14px] font-semibold inline-flex items-center justify-center">Marka Başvurusu Yap</a>
-        <button id="google-apply" class="mt-3 w-full h-11 rounded-xl border border-black/15 bg-white text-[14px] font-semibold hover:bg-black/[0.03]">Google ile Başvuru Başlat</button>
-      </section>
-    </section>
-  </main>
-  <div id="site-footer"></div>
-
-  <script src="/core.js"></script>
-  <script src="/layout.js"></script>
+  <title>Archilink | Giriş</title>
   <script>
-    const loginForm = document.getElementById("login-form");
-    const loginBtn  = loginForm.querySelector("button");
-
-    loginForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      loginBtn.disabled = true;
-      loginBtn.textContent = "Giriş yapılıyor…";
-      const fd = new FormData(e.currentTarget);
-      const result = await AG.loginBrand({ email: fd.get("email"), password: fd.get("password") });
-      if (!result.ok) {
-        loginBtn.disabled = false;
-        loginBtn.textContent = "Marka Paneline Giriş Yap";
-        alert(result.message);
-        return;
-      }
-      try { localStorage.setItem("ag_brand_session_v1", JSON.stringify(result.brand)); } catch {}
-      window.location.href = "/marka-paneli.html";
-    });
-
-    document.getElementById("google-login").addEventListener("click", (e) => {
-      e.preventDefault();
-      alert("Google ile giriş canlı ortamda açılacak. Şimdilik e-posta ve şifre ile giriş yapabilirsin.");
-    });
-
-    document.getElementById("google-apply").addEventListener("click", (e) => {
-      e.preventDefault();
-      alert("Google ile başvuru bağlantısı canlı ortamda açılacak. Şimdilik marka başvuru formunu kullanabilirsin.");
-    });
+    window.location.replace("/giris.html");
   </script>
+</head>
+<body>
+  <p><a href="/giris.html">Giriş sayfasına git</a></p>
 </body>
 </html>

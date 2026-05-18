@@ -16,27 +16,21 @@
       } catch (_) {}
     })();
   </script>
-  <title>Archilink | Mimar Girişi</title>
+  <title>Archilink | Ücretsiz Kaydol</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body data-page="architect-login" class="bg-white text-[#111] min-h-screen">
+<body data-page="architect-register" class="bg-white text-[#111] min-h-screen">
   <div id="site-header"></div>
   <main class="px-6 lg:px-10 py-10">
-    <section class="max-w-[1200px] mx-auto grid lg:grid-cols-2 gap-6">
-      <article class="rounded-3xl border border-black/10 bg-white p-6 lg:p-8">
-        <p class="text-[12px] uppercase tracking-[0.14em] text-[#6e6e73]">Mimar Hesabı</p>
-        <h1 class="text-[30px] font-semibold mt-3">Giriş Yap</h1>
-        <p class="text-[14px] text-[#6e6e73] mt-2">Favori ürün/proje, klasör ve moodboard alanına eriş.</p>
-        <form id="login-form" class="mt-6 space-y-3" autocomplete="on">
-          <input name="email" type="email" required autocomplete="username" placeholder="E-posta" class="w-full h-11 rounded-xl border border-black/15 px-3 text-[14px]">
-          <input name="password" type="password" required autocomplete="current-password" placeholder="Şifre" class="w-full h-11 rounded-xl border border-black/15 px-3 text-[14px]">
-          <button type="submit" class="w-full h-11 rounded-xl bg-black text-white text-[14px] font-semibold">Giriş Yap</button>
-        </form>
-      </article>
+    <section class="max-w-[640px] mx-auto">
       <article id="mimar-kayit" class="rounded-3xl border border-black/10 bg-white p-6 lg:p-8 scroll-mt-24">
         <p class="text-[12px] uppercase tracking-[0.14em] text-[#6e6e73]">Yeni Üyelik</p>
-        <h2 class="text-[30px] font-semibold mt-3">Kayıt Ol</h2>
-        <p class="text-[14px] text-[#6e6e73] mt-2">Amacımız kaydetme ve bookmark akışını hızlandırmak.</p>
+        <h1 class="text-[30px] font-semibold mt-3">Ücretsiz Kaydol</h1>
+        <p class="text-[14px] text-[#6e6e73] mt-2">Favori ürünler, projeler ve moodboard için mimar hesabı oluştur.</p>
+        <p class="text-[14px] text-[#6e6e73] mt-4">
+          Zaten hesabın var mı?
+          <a href="/giris.html" class="text-[#1d1d1f] font-medium hover:underline">Giriş Yap</a>
+        </p>
         <form id="register-form" class="mt-6 space-y-3">
           <input name="name" type="text" required placeholder="Ad Soyad" class="w-full h-11 rounded-xl border border-black/15 px-3 text-[14px]">
           <input name="office" type="text" placeholder="Ofis / Stüdyo (opsiyonel)" class="w-full h-11 rounded-xl border border-black/15 px-3 text-[14px]">
@@ -46,7 +40,7 @@
         </form>
       </article>
     </section>
-    <p id="msg" class="max-w-[1200px] mx-auto mt-4 text-[14px] text-[#6e6e73]"></p>
+    <p id="msg" class="max-w-[640px] mx-auto mt-4 text-[14px] text-[#6e6e73]"></p>
   </main>
   <div id="site-footer"></div>
 
@@ -57,12 +51,12 @@
     const setMsg = (text, ok = false) => {
       if (!msg) return;
       msg.textContent = text || "";
-      msg.className = `max-w-[1200px] mx-auto mt-4 text-[14px] ${ok ? "text-[#1f6f45]" : "text-[#6e6e73]"}`;
+      msg.className = `max-w-[640px] mx-auto mt-4 text-[14px] ${ok ? "text-[#1f6f45]" : "text-[#6e6e73]"}`;
     };
 
     async function boot() {
       if (typeof AG === "undefined") {
-        setMsg("Oturum altyapısı yüklenemedi. Sayfayı yenileyin veya core.js erişimini kontrol edin.");
+        setMsg("Oturum altyapısı yüklenemedi. Sayfayı yenileyin.");
         return;
       }
       await AG.ready;
@@ -72,50 +66,27 @@
         return;
       }
 
-      const loginForm = document.getElementById("login-form");
-      if (!loginForm) {
-        setMsg("Giriş formu bulunamadı.");
+      const regForm = document.getElementById("register-form");
+      if (!regForm) {
+        setMsg("Kayıt formu bulunamadı.");
         return;
       }
-      loginForm.addEventListener("submit", async (e) => {
+      regForm.addEventListener("submit", async (e) => {
         e.preventDefault();
-        const submitBtn = loginForm.querySelector('button[type="submit"]');
-        if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = "Giriş yapılıyor…"; }
         const fd = new FormData(e.currentTarget);
-        try {
-          const res = await AG.loginArchitect({
-            email: String(fd.get("email") || ""),
-            password: String(fd.get("password") || "")
-          });
-          if (!res.ok) {
-            setMsg(res.message || "Giriş başarısız.");
-            if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = "Giriş Yap"; }
-            return;
-          }
-          setMsg("Giriş başarılı. Panele yönlendiriliyorsun...", true);
-          location.href = "/mimar-paneli.html";
-        } catch (err) {
-          setMsg("Bağlantı hatası. Ağı ve tarayıcı konsolunu kontrol edin.");
-          if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = "Giriş Yap"; }
-        }
-      });
-
-      const regForm = document.getElementById("register-form");
-      if (regForm) {
-        regForm.addEventListener("submit", async (e) => {
-          e.preventDefault();
-          const fd = new FormData(e.currentTarget);
-          const res = await AG.registerArchitect({
-            name: String(fd.get("name") || ""),
-            office: String(fd.get("office") || ""),
-            email: String(fd.get("email") || ""),
-            password: String(fd.get("password") || "")
-          });
-          if (!res.ok) { setMsg(res.message || "Kayıt oluşturulamadı."); return; }
-          setMsg("Hesap oluşturuldu. Panele yönlendiriliyorsun...", true);
-          location.href = "/mimar-paneli.html";
+        const res = await AG.registerArchitect({
+          name: String(fd.get("name") || ""),
+          office: String(fd.get("office") || ""),
+          email: String(fd.get("email") || ""),
+          password: String(fd.get("password") || ""),
         });
-      }
+        if (!res.ok) {
+          setMsg(res.message || "Kayıt oluşturulamadı.");
+          return;
+        }
+        setMsg("Hesap oluşturuldu. Panele yönlendiriliyorsun...", true);
+        location.href = "/mimar-paneli.html";
+      });
     }
 
     boot().catch(() => setMsg("Sayfa yüklenirken bir sorun oluştu."));

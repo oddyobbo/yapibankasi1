@@ -1,0 +1,54 @@
+---
+import ProductDetailPage from "../../components/ProductDetailPage.astro";
+import ProductsCatalogView from "../../components/ProductsCatalogView.astro";
+import { getProductDetail, getPublicTaxonomyTree } from "../../lib/catalog.js";
+import {
+  legacyTaxonomyQueryRedirect,
+  PRODUCT_CATALOG_BASE,
+  resolveTaxonomyPathFromSegments,
+} from "../../lib/product-taxonomy-routes.js";
+
+const param = Astro.params.segments;
+const raw = typeof param === "string" ? param : "";
+const segments = raw.split("/").map((s) => decodeURIComponent(s)).filter(Boolean);
+
+if (segments.length === 0) {
+  return Astro.redirect(PRODUCT_CATALOG_BASE, 302);
+}
+
+const pathname = Astro.url.pathname.replace(/\/$/, "") || "/";
+
+let product: Awaited<ReturnType<typeof getProductDetail>> = null;
+if (segments.length === 1) {
+  product = await getProductDetail(segments[0]);
+}
+
+let resolved: ReturnType<typeof resolveTaxonomyPathFromSegments> | null = null;
+
+if (!product) {
+  const legacy = legacyTaxonomyQueryRedirect(Astro.url);
+  if (legacy) return Astro.redirect(legacy, 302);
+
+  const tree = await getPublicTaxonomyTree();
+  resolved = resolveTaxonomyPathFromSegments(tree, segments);
+  if (!resolved.ok) {
+    return Astro.redirect(PRODUCT_CATALOG_BASE, 302);
+  }
+  const canonicalPath = resolved.canonicalPath;
+  if (pathname !== canonicalPath) {
+    const sp = new URLSearchParams(Astro.url.searchParams);
+    const qs = sp.toString();
+    return Astro.redirect(qs ? `${canonicalPath}?${qs}` : canonicalPath, 302);
+  }
+}
+---
+
+{product ? (
+  <ProductDetailPage product={product} />
+) : (
+  <ProductsCatalogView
+    pathGroup={resolved?.group ?? ""}
+    pathCategory={resolved?.category ?? ""}
+    pathSubcategory={resolved?.subcategory ?? ""}
+  />
+)}

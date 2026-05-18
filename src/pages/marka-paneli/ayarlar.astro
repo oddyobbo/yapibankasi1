@@ -1,0 +1,16 @@
+---
+import LegacyPanelShell from "../../components/LegacyPanelShell.astro";
+import { getBrandPanelFilename, getBrandPanelPageId, getLegacyPanelParts } from "../../lib/legacyPanelEmbed";
+
+const filename = getBrandPanelFilename("ayarlar");
+if (!filename) return Astro.redirect("/giris", 302);
+const parts = getLegacyPanelParts(filename);
+---
+<LegacyPanelShell
+  title="Ayarlar | Marka Paneli | Archilink"
+  canonical="/marka-paneli/ayarlar"
+  headFragment={parts.headFragment}
+  bodyHtml={parts.bodyHtml}
+  bodyClass={parts.bodyClass}
+  bodyDataPage={parts.bodyDataPage}
+/>

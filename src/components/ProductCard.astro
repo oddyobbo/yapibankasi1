@@ -13,10 +13,21 @@ const fileBadges = [
   product.has_cad && "CAD",
   product.has_bim && "BIM",
 ].filter(Boolean);
+const detailHref = productPath(product);
+const pid = String(product.id ?? product.slug ?? "").trim();
 ---
-<a class="product-card card" href={productPath(product)}>
+<article class="product-card card panel-card-lift" data-product-id={encodeURIComponent(pid)}>
+  <button
+    type="button"
+    class="compare-pick-badge compare-pick-badge--off"
+    data-compare-checkbox
+    aria-label="Karşılaştırmaya ekle"
+    tabindex="-1"
+  ></button>
   <div class="media">
-    {image ? <img src={image} alt={product.name} loading="lazy" width="640" height="480" /> : <span>Görsel yok</span>}
+    <a class="product-card__cover" href={detailHref} data-product-card-cover>
+      {image ? <img src={image} alt={product.name} loading="lazy" width="640" height="480" /> : <span>Görsel yok</span>}
+    </a>
     {fileBadges.length > 0 && (
       <div class="badges" aria-label="Dosya türleri">
         {fileBadges.map((badge) => <span>{badge}</span>)}
@@ -24,26 +35,23 @@ const fileBadges = [
     )}
   </div>
   <div class="copy">
-    <h2>{product.name}</h2>
     <p class="meta">{product.brand_name || "Marka belirtilmedi"}</p>
+    <h2>{product.name}</h2>
     {chips.length > 0 && <div class="chips">{chips.map((chip) => <span>{chip}</span>)}</div>}
     <p class="summary">{product.summary || product.description || "Açıklama henüz eklenmedi."}</p>
-    <span class="detail">Ürün Detayı</span>
+    <a class="detail product-detail-link" href={detailHref}>Ürün Detayı</a>
   </div>
-</a>
+</article>
 <style>
   .product-card {
+    position: relative;
     display: flex;
     min-height: 100%;
     flex-direction: column;
-    border-radius: 20px;
-    background: #fff;
-    transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
-  }
-  .product-card:hover {
-    border-color: rgba(0,0,0,.22);
-    box-shadow: 0 16px 42px rgba(0,0,0,.06);
-    transform: translateY(-2px);
+    border-radius: var(--ag-radius-2xl);
+    background: var(--ag-surface);
+    outline: 2px solid transparent;
+    outline-offset: 0;
   }
   .media {
     position: relative;
@@ -51,17 +59,26 @@ const fileBadges = [
     display: grid;
     place-items: center;
     overflow: hidden;
-    background: #f5f5f7;
+    background: #fafafa;
     color: #8e8e93;
     font-size: 13px;
   }
-  img {
+  .product-card__cover {
+    display: block;
+    width: 100%;
+    height: 100%;
+    color: inherit;
+    text-decoration: none;
+  }
+  .product-card__cover img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform .35s ease;
+    transition: transform 0.35s ease;
   }
-  .product-card:hover img { transform: scale(1.035); }
+  .product-card:hover .product-card__cover img {
+    transform: scale(1.02);
+  }
   .badges {
     position: absolute;
     left: 12px;
@@ -69,14 +86,15 @@ const fileBadges = [
     display: flex;
     gap: 6px;
     flex-wrap: wrap;
+    pointer-events: none;
   }
   .badges span {
     min-height: 24px;
     display: inline-flex;
     align-items: center;
     border-radius: 999px;
-    background: rgba(255,255,255,.86);
-    border: 1px solid rgba(0,0,0,.08);
+    background: rgba(255, 255, 255, 0.86);
+    border: 1px solid rgba(0, 0, 0, 0.08);
     padding: 0 8px;
     color: #111;
     font-size: 11px;
@@ -85,23 +103,27 @@ const fileBadges = [
   }
   .copy {
     display: flex;
-    min-height: 190px;
+    min-height: 188px;
     flex: 1;
     flex-direction: column;
-    padding: 15px;
+    padding: 16px;
+  }
+  .meta {
+    margin: 0 0 6px;
+    color: #6e6e73;
+    font-size: 11px;
+    line-height: 1.3;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
   }
   h2 {
     margin: 0;
     font-size: 15px;
-    line-height: 1.28;
-    letter-spacing: 0;
+    line-height: 1.3;
+    letter-spacing: -0.01em;
     font-weight: 600;
-  }
-  .meta {
-    margin: 7px 0 0;
-    color: #6e6e73;
-    font-size: 12px;
-    line-height: 1.35;
+    color: #1d1d1f;
   }
   .chips {
     display: flex;
@@ -114,32 +136,85 @@ const fileBadges = [
     min-height: 24px;
     align-items: center;
     border-radius: 999px;
-    background: #f5f5f7;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    background: #fafafa;
     padding: 0 9px;
     color: #424245;
     font-size: 11px;
-    font-weight: 400;
+    font-weight: 500;
   }
   .summary {
     margin: 12px 0 0;
     color: #6e6e73;
     font-size: 13px;
     line-height: 1.45;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+    flex: 1;
   }
   .detail {
-    min-height: 38px;
-    display: inline-flex;
+    margin-top: 12px;
+    width: 100%;
+    min-height: 32px;
+    display: flex;
     align-items: center;
     justify-content: center;
-    margin-top: auto;
-    border-radius: 999px;
-    background: #111;
+    border-radius: var(--ag-radius-lg);
+    background: #1d1d1f;
     color: #fff;
-    font-size: 13px;
-    font-weight: 400;
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.15s ease;
+    position: relative;
+    z-index: 1;
+  }
+  .detail:hover {
+    background: #3a3a3c;
+  }
+
+  .product-card.is-compare-active {
+    cursor: pointer;
+  }
+  .product-card.is-compare-active.is-compare-candidate {
+    outline: 2px solid rgba(0, 0, 0, 0.08);
+    outline-offset: 0;
+  }
+  .product-card.is-compare-active.is-compare-selected {
+    outline: 2px solid #0b0b0c;
+    outline-offset: 0;
+  }
+  .product-card.is-compare-active:hover .product-card__cover img {
+    transform: none;
+  }
+  .compare-pick-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 6;
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    background: #fff;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+    pointer-events: none;
+    cursor: pointer;
+  }
+  .product-card.is-compare-active .compare-pick-badge {
+    display: flex;
+    pointer-events: auto;
+  }
+  .compare-pick-badge--on {
+    border-color: #0b0b0c;
+    background: #0b0b0c;
+    color: #fff;
+  }
+  .compare-pick-badge--off {
+    border-color: rgba(0, 0, 0, 0.12);
+    background: #fff;
+    color: #0b0b0c;
   }
 </style>

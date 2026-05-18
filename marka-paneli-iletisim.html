@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Archilink | Marka paneli — İletişim bilgileri</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="/marka-panel-chrome.css">
+</head>
+<body data-page="brand-panel" data-brand-nav="iletisim" class="marka-panel-body bg-white text-[#0b0b0c] font-sans min-h-screen antialiased">
+  <div class="w-full min-h-screen bg-white">
+    <div id="site-header"></div>
+    <div id="brand-panel-layout" class="flex w-full min-h-0">
+      <div class="lg:hidden fixed bottom-0 left-0 right-0 z-40 border-t border-black/[0.08] bg-white/95 backdrop-blur-md px-2 py-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
+        <nav class="flex gap-1 overflow-x-auto" style="-webkit-overflow-scrolling:touch">
+          <a href="/marka-paneli.html" class="panel-nav-mobile shrink-0 px-3 py-2 rounded-lg text-[12px] font-medium text-[#424245] whitespace-nowrap" data-brand-nav-link="ozet">Özet</a>
+          <a href="/marka-paneli-urunler.html" class="panel-nav-mobile shrink-0 px-3 py-2 rounded-lg text-[12px] font-medium text-[#424245] whitespace-nowrap" data-brand-nav-link="urunler">Ürünler</a>
+          <a href="/marka-paneli-talepler.html" class="panel-nav-mobile shrink-0 px-3 py-2 rounded-lg text-[12px] font-medium text-[#424245] whitespace-nowrap" data-brand-nav-link="talepler">Talepler</a>
+          <a href="/marka-paneli-analiz.html" class="panel-nav-mobile shrink-0 px-3 py-2 rounded-lg text-[12px] font-medium text-[#424245] whitespace-nowrap" data-brand-nav-link="analiz">Analiz</a>
+          <a href="/marka-paneli-proje.html" class="panel-nav-mobile shrink-0 px-3 py-2 rounded-lg text-[12px] font-medium text-[#424245] whitespace-nowrap" data-brand-nav-link="proje">Proje ekle</a>
+          <a href="/marka-paneli-projeler.html" class="panel-nav-mobile shrink-0 px-3 py-2 rounded-lg text-[12px] font-medium text-[#424245] whitespace-nowrap" data-brand-nav-link="projeler">Projeler</a>
+          <a href="/marka-paneli-iletisim.html" class="panel-nav-mobile shrink-0 px-3 py-2 rounded-lg text-[12px] font-medium text-[#424245] whitespace-nowrap" data-brand-nav-link="iletisim">İletişim</a>
+        </nav>
+      </div>
+      <aside class="hidden lg:flex w-[220px] shrink-0 flex-col border-r border-black/[0.08] bg-[#fafafa] sticky top-0 self-start max-h-[calc(100vh-0.5rem)] overflow-y-auto py-6 px-3">
+        <p class="px-2 mb-3 text-[11px] font-semibold uppercase tracking-wide text-[#6e6e73]">Panel</p>
+        <nav class="flex flex-col gap-0.5" id="panel-nav-desktop">
+          <a href="/marka-paneli.html" class="panel-nav" data-brand-nav-link="ozet"><span>Özet</span></a>
+          <a href="/marka-paneli-urunler.html" class="panel-nav" data-brand-nav-link="urunler"><span>Ürünlerim</span></a>
+          <a href="/marka-paneli-talepler.html" class="panel-nav" data-brand-nav-link="talepler"><span>Talepler</span></a>
+          <a href="/marka-paneli-analiz.html" class="panel-nav" data-brand-nav-link="analiz"><span>Analizler</span></a>
+          <a href="/marka-paneli-proje.html" class="panel-nav" data-brand-nav-link="proje"><span>Proje paylaş</span></a>
+          <a href="/marka-paneli-projeler.html" class="panel-nav" data-brand-nav-link="projeler"><span>Projelerim</span></a>
+          <a href="/marka-paneli-iletisim.html" class="panel-nav" data-brand-nav-link="iletisim"><span>İletişim bilgileri</span></a>
+        </nav>
+      </aside>
+
+      <main class="flex-1 min-w-0 w-full px-4 py-5 sm:px-5 lg:px-8 lg:py-7 space-y-8 pb-24 lg:pb-8">
+        <section class="rounded-2xl border border-black/[0.08] bg-white p-5 lg:p-6 max-w-2xl">
+          <h1 class="panel-section-title">İletişim bilgileri</h1>
+          <p class="text-[13px] text-[#6e6e73] mt-1">Katalogda ürün detayında gösterilecek web, e-posta, telefon ve WhatsApp bilgilerini buradan yönetirsin. Tek kaynak marka kaydıdır.</p>
+
+          <form id="brand-contact-form" class="mt-6 space-y-4">
+            <label class="block">
+              <span class="text-[12px] font-medium text-[#6e6e73]">Web sitesi</span>
+              <input name="website" type="text" class="mt-1 w-full rounded-lg border border-black/[0.12] px-3 py-2 text-[14px] text-[#1d1d1f]" placeholder="https://… veya alan adı" autocomplete="url" />
+            </label>
+            <label class="block">
+              <span class="text-[12px] font-medium text-[#6e6e73]">E-posta</span>
+              <input name="email" type="text" class="mt-1 w-full rounded-lg border border-black/[0.12] px-3 py-2 text-[14px] text-[#1d1d1f]" placeholder="ornek@firma.com" autocomplete="email" />
+            </label>
+            <label class="block">
+              <span class="text-[12px] font-medium text-[#6e6e73]">Telefon</span>
+              <input name="phone" type="text" class="mt-1 w-full rounded-lg border border-black/[0.12] px-3 py-2 text-[14px] text-[#1d1d1f]" placeholder="+90 …" autocomplete="tel" />
+            </label>
+            <label class="block">
+              <span class="text-[12px] font-medium text-[#6e6e73]">WhatsApp numarası</span>
+              <input name="whatsapp_number" type="text" class="mt-1 w-full rounded-lg border border-black/[0.12] px-3 py-2 text-[14px] text-[#1d1d1f]" placeholder="+905551234567" autocomplete="tel" />
+            </label>
+            <label class="block">
+              <span class="text-[12px] font-medium text-[#6e6e73]">Adres</span>
+              <textarea name="address" rows="3" class="mt-1 w-full rounded-lg border border-black/[0.12] px-3 py-2 text-[14px] text-[#1d1d1f]" placeholder="Sokak, bina, posta kodu"></textarea>
+            </label>
+            <label class="block">
+              <span class="text-[12px] font-medium text-[#6e6e73]">Şehir</span>
+              <input name="city" type="text" class="mt-1 w-full rounded-lg border border-black/[0.12] px-3 py-2 text-[14px] text-[#1d1d1f]" autocomplete="address-level2" />
+            </label>
+            <label class="block">
+              <span class="text-[12px] font-medium text-[#6e6e73]">Ülke</span>
+              <input name="country" type="text" class="mt-1 w-full rounded-lg border border-black/[0.12] px-3 py-2 text-[14px] text-[#1d1d1f]" autocomplete="country-name" />
+            </label>
+            <div class="pt-2">
+              <button type="submit" class="inline-flex items-center justify-center rounded-lg bg-[#1d1d1f] px-5 py-2.5 text-[14px] font-semibold text-white hover:bg-[#3a3a3c]">Bilgileri Kaydet</button>
+            </div>
+          </form>
+          <p id="brand-contact-msg" class="hidden mt-3" role="status"></p>
+        </section>
+      </main>
+    </div>
+    <div id="site-footer"></div>
+  </div>
+  <script>window.__MARKA_PANEL_PAGE__ = "iletisim";</script>
+  <script src="/core.js?v=brand-leads-1"></script>
+  <script src="/layout.js"></script>
+  <script src="/marka-panel.js"></script>
+</body>
+</html>

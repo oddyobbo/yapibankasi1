@@ -239,8 +239,8 @@
           <input id="search-input" type="text" placeholder="Ürün, marka veya anahtar kelime ara..." autocomplete="off"
             class="w-full h-[40px] rounded-full border border-black/[0.14] bg-[#f5f5f7] pl-10 pr-4 outline-none focus:bg-white focus:border-black/25 transition-colors"
             style="font-size:16px;">
+          </div>
         </div>
-      </div>
 
       <!-- Pills row: Filtreler — pills — Sırala | Karşılaştır -->
       <div class="px-4 sm:px-6 lg:px-10 pb-2.5 flex items-center gap-2">
@@ -273,7 +273,7 @@
               <button type="button" data-sort="views_desc" class="sort-opt w-full text-left px-3 py-2">En çok görüntülenen</button>
               <button type="button" data-sort="price_asc" class="sort-opt w-full text-left px-3 py-2">Fiyat (düşük → yüksek)</button>
               <button type="button" data-sort="price_desc" class="sort-opt w-full text-left px-3 py-2">Fiyat (yüksek → düşük)</button>
-            </div>
+      </div>
           </div>
           <button id="compare-open-btn" type="button" class="flex items-center gap-1.5 px-3 h-[34px] rounded-full border border-black/[0.12] text-[12px] font-medium hover:bg-black/[0.04] transition">
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
@@ -329,13 +329,13 @@
 
           </div>
           </div>
-      </aside>
+        </aside>
 
       <!-- Product grid -->
       <div id="products-grid-wrapper" class="px-4 sm:px-6 lg:px-10 py-5">
         <p id="result-count" class="text-[13px] text-[#6e6e73] mb-4"></p>
         <div id="products-grid" class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-5"></div>
-        <p id="empty-msg" class="hidden text-center text-[#6e6e73] py-20 text-[15px]">Arama kriterlerine uygun ürün bulunamadı.</p>
+          <p id="empty-msg" class="hidden text-center text-[#6e6e73] py-20 text-[15px]">Arama kriterlerine uygun ürün bulunamadı.</p>
         <div class="mt-8 flex justify-center">
           <button id="load-more-products" type="button" class="hidden h-11 rounded-full border border-black/15 bg-white px-6 text-[13px] font-medium text-[#1d1d1f] hover:bg-black/[0.04]">Daha fazla ürün yükle</button>
         </div>
@@ -957,7 +957,7 @@
         renderCategoryPills();
         buildAccordionGroups();
         renderActiveChips();
-        render();
+      render();
         if (comparePickOrder.length >= 2) setTimeout(() => openCompareResult(), 200);
         else if (merged.length) showToast("En az 2 favori ürün seç veya listeden işaretle.");
         else showToast("Karşılaştırmak için önce favori ürün ekleyin.");
@@ -1004,7 +1004,7 @@
             <h3 class="text-[14px] font-semibold leading-snug">${p.name}</h3>
             <p class="text-[12px] text-[#6e6e73] mt-1">${p.brandName || ""}</p>
             <a href="${productDetailHref(p)}" class="product-detail-link mt-3 w-full h-8 flex items-center justify-center bg-[#1d1d1f] text-white text-[12px] font-medium rounded-lg hover:bg-[#3a3a3c] transition relative z-[1]">Ürün Detayı</a>
-          </div>
+            </div>
           ${
             architectSession && !compareMode
               ? `<button data-fav-product="${p.id}" title="${isFav ? "Favorilerden çıkar" : "Favorilere ekle"}" class="absolute top-3 left-3 w-8 h-8 rounded-full border border-black/15 bg-white/95 flex items-center justify-center transition-all opacity-0 group-hover:opacity-100" style="color:${isFav ? '#111' : '#bbb'}">
@@ -1317,8 +1317,8 @@
       compareFavoritesProductList = null;
       comparePickOrder = [];
       updateCompareBar();
-      render();
-    });
+          render();
+        });
 
     document.getElementById("compare-bar-cancel").addEventListener("click", () => {
       compareMode = false;

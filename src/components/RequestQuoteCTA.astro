@@ -1,24 +1,79 @@
 ---
 const { product } = Astro.props;
-const params = new URLSearchParams({
-  konu: "urun",
-  talep: "teklif",
-  urun: product?.name || "",
-  marka: product?.brand_name || "",
-  urunId: product?.id || "",
-});
+const productLabel = product?.name ? String(product.name) : "Bu ürün";
 ---
-<div class="cta card">
-  <h2>Teklif veya numune iste</h2>
-  <p>Bu ürün için marka ile doğrudan iletişime geçebilirsin. Auth/moodboard akışı Phase 2'de Astro'ya taşınacak.</p>
-  <div class="actions">
-    <a class="button primary" href={`/iletisim-v2.html?${params.toString()}`}>Fiyat teklifi al</a>
-    <a class="button secondary" href="/mimar-giris.html">Kaydet / favori</a>
+<div class="ag-panel-section cta">
+  <p class="cta-kicker">Marka ile doğrudan</p>
+  <h2 class="ag-panel-title">Teklif ve bilgi talebi</h2>
+  <p class="cta-desc ag-muted">
+    {productLabel} için fiyat, teknik dokümantasyon veya genel sorularınızı markaya iletin. Talepler güvenli kanaldan iletilir.
+  </p>
+  <div class="cta-actions">
+    <button type="button" class="button primary ag-cta-btn js-open-contact-brand-modal" data-cb-intent-preset="fiyat">
+      Teklif iste
+    </button>
+    <button type="button" class="button secondary ag-cta-btn js-open-contact-brand-modal" data-cb-intent-preset="teknik_bilgi">
+      Teknik bilgi al
+    </button>
+    <button type="button" class="button secondary ag-cta-btn js-open-contact-brand-modal" data-cb-intent-preset="genel_mesaj">
+      Markayla iletişime geç
+    </button>
+    <a class="button secondary ag-cta-btn ag-cta-ghost" href="/kayit">Kaydet / favori</a>
   </div>
 </div>
 <style>
-  .cta { padding: 28px; border-radius: 22px; }
-  h2 { margin: 0; color: #1d1d1f; font-size: 20px; line-height: 1.22; font-weight: 600; letter-spacing: 0; }
-  p { margin: 10px 0 18px; color: #6e6e73; font-size: 14px; line-height: 1.55; }
-  .actions { display: flex; flex-wrap: wrap; gap: 10px; }
+  .cta {
+    padding: 0;
+    border: 0;
+    box-shadow: none;
+  }
+  .cta-kicker {
+    margin: 0 0 0.35rem;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ag-muted);
+  }
+  .ag-panel-title {
+    margin: 0 0 0.5rem;
+  }
+  .cta-desc {
+    margin: 0 0 1.25rem;
+    line-height: 1.55;
+    max-width: 42rem;
+  }
+  .cta-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: stretch;
+  }
+  /* marka-paneli: h-8 mode-tab ≈ 32px; form alanı için h-11 */
+  .ag-cta-btn {
+    min-height: var(--ag-input-h);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 0 1rem;
+    border-radius: var(--ag-radius-xl);
+    flex: 1 1 auto;
+    min-width: min(100%, 140px);
+  }
+  .ag-cta-ghost {
+    border-style: dashed;
+    border-color: var(--ag-border-10);
+    background: transparent;
+  }
+  .ag-cta-ghost:hover {
+    background: rgba(0, 0, 0, 0.03);
+  }
+  @media (max-width: 520px) {
+    .cta-actions {
+      flex-direction: column;
+    }
+    .ag-cta-btn {
+      width: 100%;
+      min-width: 0;
+    }
+  }
 </style>
